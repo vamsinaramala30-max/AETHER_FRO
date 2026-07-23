@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <path d="M32 4 L56 56 L44 56 L32 32 L20 56 L8 56 Z" fill="currentColor" />
+  <circle cx="32" cy="20" r="4" fill="var(--aether-accent, #38BDF8)" />
+  <line x1="20" y1="44" x2="44" y2="44" stroke="var(--aether-accent, #38BDF8)" stroke-width="3" stroke-linecap="round" />
+</svg>

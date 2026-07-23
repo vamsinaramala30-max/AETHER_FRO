@@ -1,0 +1,22 @@
+.aether-glass {
+  background: var(--aether-glass-bg);
+  backdrop-filter: blur(var(--aether-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--aether-backdrop-blur));
+  border: 1px solid var(--aether-glass-border);
+}
+
+.aether-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aether-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aether-glow {
+  box-shadow: var(--aether-shadow-glow);
+}

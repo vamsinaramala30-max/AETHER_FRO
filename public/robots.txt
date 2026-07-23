@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /images/
+Allow: /icons/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /settings/
+Disallow: /private/
+
+Sitemap: https://aether.app/sitemap.xml

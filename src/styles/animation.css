@@ -1,0 +1,17 @@
+@keyframes aether-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aether-pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.aether-animate-spin {
+  animation: aether-spin 1s linear infinite;
+}
+
+.aether-pulse-glow {
+  animation: aether-pulse-glow 2s ease-in-out infinite;
+}

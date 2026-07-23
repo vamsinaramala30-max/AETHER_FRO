@@ -1,0 +1,83 @@
+:root {
+  /* Color Palette - Brand & Core */
+  --aether-brand-primary: #6366f1;
+  --aether-brand-primary-hover: #4f46e5;
+  --aether-brand-secondary: #06b6d4;
+  --aether-brand-accent: #8b5cf6;
+
+  /* Color Palette - Status & Feedback */
+  --aether-status-success: #10b981;
+  --aether-status-warning: #f59e0b;
+  --aether-status-error: #ef4444;
+  --aether-status-info: #3b82f6;
+
+  /* Typography Scale (Fluid) */
+  --aether-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --aether-font-mono: 'JetBrains Mono', monospace;
+
+  --aether-text-xs: clamp(0.7rem, 0.66rem + 0.2vw, 0.75rem);
+  --aether-text-sm: clamp(0.8rem, 0.76rem + 0.2vw, 0.875rem);
+  --aether-text-base: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);
+  --aether-text-lg: clamp(1.05rem, 0.98rem + 0.35vw, 1.125rem);
+  --aether-text-xl: clamp(1.15rem, 1.05rem + 0.5vw, 1.25rem);
+  --aether-text-2xl: clamp(1.35rem, 1.2rem + 0.75vw, 1.5rem);
+  --aether-text-3xl: clamp(1.6rem, 1.4rem + 1vw, 1.875rem);
+  --aether-text-4xl: clamp(2rem, 1.7rem + 1.5vw, 2.25rem);
+
+  /* Font Weights */
+  --aether-font-regular: 400;
+  --aether-font-medium: 500;
+  --aether-font-semibold: 600;
+  --aether-font-bold: 700;
+
+  /* Line Heights */
+  --aether-lh-tight: 1.25;
+  --aether-lh-snug: 1.375;
+  --aether-lh-normal: 1.5;
+  --aether-lh-relaxed: 1.625;
+
+  /* Spacing Scale */
+  --aether-space-1: 0.25rem;
+  --aether-space-2: 0.5rem;
+  --aether-space-3: 0.75rem;
+  --aether-space-4: 1rem;
+  --aether-space-5: 1.25rem;
+  --aether-space-6: 1.5rem;
+  --aether-space-8: 2rem;
+  --aether-space-10: 2.5rem;
+  --aether-space-12: 3rem;
+  --aether-space-16: 4rem;
+
+  /* Border Radius */
+  --aether-radius-sm: 0.375rem;
+  --aether-radius-md: 0.5rem;
+  --aether-radius-lg: 0.75rem;
+  --aether-radius-xl: 1rem;
+  --aether-radius-2xl: 1.5rem;
+  --aether-radius-full: 9999px;
+
+  /* Elevation / Shadows */
+  --aether-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --aether-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --aether-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --aether-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --aether-shadow-glow: 0 0 15px rgba(99, 102, 241, 0.35);
+
+  /* Layout & Z-Index Layers */
+  --aether-z-base: 0;
+  --aether-z-dropdown: 1000;
+  --aether-z-sticky: 1020;
+  --aether-z-fixed: 1030;
+  --aether-z-modal-backdrop: 1040;
+  --aether-z-modal: 1050;
+  --aether-z-popover: 1060;
+  --aether-z-tooltip: 1070;
+
+  /* Transition Timings */
+  --aether-duration-fast: 150ms;
+  --aether-duration-normal: 250ms;
+  --aether-duration-slow: 350ms;
+  --aether-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --aether-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --aether-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}

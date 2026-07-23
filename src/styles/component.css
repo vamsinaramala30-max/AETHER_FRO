@@ -1,0 +1,25 @@
+.aether-card {
+  background-color: var(--aether-bg-surface);
+  border: 1px solid var(--aether-border-color);
+  border-radius: var(--aether-radius-lg);
+  padding: var(--aether-space-6);
+  transition: border-color var(--aether-duration-fast) var(--aether-ease-default),
+              box-shadow var(--aether-duration-fast) var(--aether-ease-default);
+}
+
+.aether-card:hover {
+  border-color: var(--aether-border-strong);
+  box-shadow: var(--aether-shadow-md);
+}
+
+.aether-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--aether-radius-md);
+  font-weight: var(--aether-font-medium);
+  padding: var(--aether-space-2) var(--aether-space-4);
+  cursor: pointer;
+  transition: background-color var(--aether-duration-fast) var(--aether-ease-default);
+  border: none;
+}

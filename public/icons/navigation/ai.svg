@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <defs>
+    <linearGradient id="aether-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="aether-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <!-- Primary Spark -->
+  <path d="M12 2C12 7 7 12 2 12C7 12 12 17 12 22C12 17 17 12 22 12C17 12 12 7 12 2Z" fill="url(#aether-cyan)" stroke="url(#aether-cyan)" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Secondary Spark -->
+  <path d="M18 3C18 5.5 16 7.5 13.5 7.5C16 7.5 18 9.5 18 12C18 9.5 20 7.5 22.5 7.5C20 7.5 18 5.5 18 3Z" fill="url(#aether-blue)"/>
+</svg>

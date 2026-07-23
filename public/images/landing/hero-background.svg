@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" fill="none">
+  <defs>
+    <radialGradient id="aether-glow" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#6366F1" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#06B6D4" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="grid-fade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="900" fill="#0B0F19"/>
+  <rect width="1440" height="900" fill="url(#aether-glow)"/>
+  <path d="M0 0h1440v900H0z" fill="url(#grid-fade)" mask="url(#grid-pattern)"/>
+  <g stroke="#6366F1" stroke-opacity="0.08" stroke-width="1">
+    <path d="M0 100h1440M0 200h1440M0 300h1440M0 400h1440M0 500h1440M0 600h1440M0 700h1440M0 800h1440"/>
+    <path d="M160 0v900M320 0v900M480 0v900M640 0v900M800 0v900M960 0v900M1120 0v900M1280 0v900"/>
+  </g>
+  <circle cx="720" cy="200" r="300" fill="#8B5CF6" opacity="0.1" filter="blur(80px)"/>
+</svg>

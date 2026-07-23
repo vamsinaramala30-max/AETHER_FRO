@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <defs>
+    <linearGradient id="aether-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="aether-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <circle cx="11" cy="11" r="7" stroke="url(#aether-cyan)" stroke-width="2.5"/>
+  <path d="M21 21L16.2 16.2" stroke="url(#aether-blue)" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="11" cy="11" r="2" fill="url(#aether-blue)"/>
+</svg>

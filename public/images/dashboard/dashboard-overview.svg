@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" rx="12" fill="#0B0F19"/>
+  <!-- Top Stat Cards -->
+  <rect x="30" y="30" width="160" height="90" rx="8" fill="#1E293B"/>
+  <rect x="220" y="30" width="160" height="90" rx="8" fill="#1E293B"/>
+  <rect x="410" y="30" width="160" height="90" rx="8" fill="#1E293B"/>
+  <!-- Main Chart Canvas -->
+  <rect x="30" y="140" width="540" height="230" rx="8" fill="#1E293B"/>
+  <path d="M60 320 Q 150 220, 250 260 T 450 180 T 540 200" fill="none" stroke="#06B6D4" stroke-width="3"/>
+  <path d="M60 320 Q 150 220, 250 260 T 450 180 T 540 200 V 340 H 60 Z" fill="#06B6D4" fill-opacity="0.1"/>
+</svg>

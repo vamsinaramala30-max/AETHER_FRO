@@ -1,0 +1,62 @@
+h1, .aether-h1 {
+  font-size: var(--aether-text-4xl);
+  font-weight: var(--aether-font-bold);
+  line-height: var(--aether-lh-tight);
+  letter-spacing: -0.02em;
+}
+
+h2, .aether-h2 {
+  font-size: var(--aether-text-3xl);
+  font-weight: var(--aether-font-semibold);
+  line-height: var(--aether-lh-tight);
+  letter-spacing: -0.01em;
+}
+
+h3, .aether-h3 {
+  font-size: var(--aether-text-2xl);
+  font-weight: var(--aether-font-semibold);
+  line-height: var(--aether-lh-snug);
+}
+
+h4, .aether-h4 {
+  font-size: var(--aether-text-xl);
+  font-weight: var(--aether-font-medium);
+  line-height: var(--aether-lh-snug);
+}
+
+.aether-body {
+  font-size: var(--aether-text-base);
+  line-height: var(--aether-lh-normal);
+}
+
+.aether-caption {
+  font-size: var(--aether-text-sm);
+  color: var(--aether-text-muted);
+}
+
+.aether-label {
+  font-size: var(--aether-text-xs);
+  font-weight: var(--aether-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aether-text-subtle);
+}
+
+/* AI Chat & Code Typography */
+.aether-code-block {
+  font-family: var(--aether-font-mono);
+  font-size: var(--aether-text-sm);
+  background-color: var(--aether-bg-subtle);
+  border: 1px solid var(--aether-border-color);
+  border-radius: var(--aether-radius-md);
+  padding: var(--aether-space-4);
+  overflow-x: auto;
+}
+
+.aether-chat-formatting p {
+  margin-bottom: var(--aether-space-3);
+}
+
+.aether-chat-formatting p:last-child {
+  margin-bottom: 0;
+}

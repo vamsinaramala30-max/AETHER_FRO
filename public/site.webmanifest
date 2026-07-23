@@ -1,0 +1,19 @@
+{
+  "name": "AETHER Platform",
+  "short_name": "AETHER",
+  "icons": [
+    {
+      "src": "/icons/favicon/favicon-16x16.svg",
+      "sizes": "16x16",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/favicon/favicon-32x32.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#0B0F19",
+  "background_color": "#0B0F19",
+  "display": "standalone"
+}

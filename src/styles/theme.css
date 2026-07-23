@@ -1,0 +1,60 @@
+/* Light Theme Defaults */
+:root, [data-theme='light'] {
+  --aether-bg-app: #f8fafc;
+  --aether-bg-surface: #ffffff;
+  --aether-bg-surface-elevated: #ffffff;
+  --aether-bg-subtle: #f1f5f9;
+
+  --aether-border-color: #e2e8f0;
+  --aether-border-strong: #cbd5e1;
+
+  --aether-text-main: #0f172a;
+  --aether-text-muted: #64748b;
+  --aether-text-subtle: #94a3b8;
+  --aether-text-inverse: #ffffff;
+
+  --aether-glass-bg: rgba(255, 255, 255, 0.75);
+  --aether-glass-border: rgba(226, 232, 240, 0.6);
+  --aether-backdrop-blur: 12px;
+}
+
+/* Dark Theme Overrides */
+[data-theme='dark'] {
+  --aether-bg-app: #090d16;
+  --aether-bg-surface: #111827;
+  --aether-bg-surface-elevated: #1f2937;
+  --aether-bg-subtle: #1e293b;
+
+  --aether-border-color: #1f293d;
+  --aether-border-strong: #374151;
+
+  --aether-text-main: #f9fafb;
+  --aether-text-muted: #9ca3af;
+  --aether-text-subtle: #6b7280;
+  --aether-text-inverse: #0f172a;
+
+  --aether-glass-bg: rgba(17, 24, 39, 0.75);
+  --aether-glass-border: rgba(255, 255, 255, 0.1);
+  --aether-shadow-glow: 0 0 20px rgba(129, 140, 248, 0.25);
+}
+
+/* Automatic System Preference Integration */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --aether-bg-app: #090d16;
+    --aether-bg-surface: #111827;
+    --aether-bg-surface-elevated: #1f2937;
+    --aether-bg-subtle: #1e293b;
+
+    --aether-border-color: #1f293d;
+    --aether-border-strong: #374151;
+
+    --aether-text-main: #f9fafb;
+    --aether-text-muted: #9ca3af;
+    --aether-text-subtle: #6b7280;
+    --aether-text-inverse: #0f172a;
+
+    --aether-glass-bg: rgba(17, 24, 39, 0.75);
+    --aether-glass-border: rgba(255, 255, 255, 0.1);
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <rect width="800" height="500" rx="16" fill="#0B0F19"/>
+  <g transform="translate(320, 170)">
+    <!-- Alert Shield -->
+    <polygon points="80,10 150,40 150,110 80,160 10,110 10,40" fill="#1F2937" stroke="#EF4444" stroke-width="3"/>
+    <!-- Exclamation Point -->
+    <line x1="80" y1="50" x2="80" y2="95" stroke="#EF4444" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="80" cy="120" r="4" fill="#EF4444"/>
+  </g>
+</svg>
