@@ -6,11 +6,15 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { App } from './app/App';
+import { initGA, trackError } from './lib/analytics';
 import './styles/global.css';
 
 // ============================================================================
 // Core Configuration & Global Clients
 // ============================================================================
+
+// Initialize Google Analytics early in the app lifetime
+initGA();
 
 /**
  * Global TanStack Query Client configured for production performance and caching.
@@ -53,8 +57,11 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Standard error logging pipeline hook (e.g., telemetry/analytics)
+    // Log error to standard console pipeline
     console.error('Uncaught Error in AETHER Core:', error, errorInfo);
+
+    // Track fatal error exception in Google Analytics 4
+    trackError(error.message || 'Uncaught Error Boundary Exception', true);
   }
 
   private handleReload = (): void => {
