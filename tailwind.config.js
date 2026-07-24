@@ -1,47 +1,26 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+module.exports = {
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
         aether: {
-          50: '#f0f6ff',
-          100: '#e0edff',
-          200: '#c7ddff',
-          300: '#9ec4ff',
-          400: '#6d9eff',
-          500: '#3b6eff',
-          600: '#254bf6',
-          700: '#1c37e3',
-          800: '#1d2eb8',
-          900: '#1d2b91',
-          950: '#020617',
+          primary: "#00E5FF",
+          secondary: "#7C3AED",
+          accent: "#00FFB3",
+          bg: "#050816",
+          surface: "#0B1120",
+          card: "#111827",
+          border: "#1F2937",
+          text: "#F8FAFC",
+          muted: "#94A3B8",
         },
-      },
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+        glow: {
+          cyan: "#22D3EE",
+          blue: "#3B82F6",
+          purple: "#8B5CF6",
+          pink: "#EC4899",
         },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
-        pulseGlow: {
-          '0%, 100%': { opacity: 0.4, transform: 'scale(1)' },
-          '50%': { opacity: 0.8, transform: 'scale(1.05)' },
-        },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
       },
     },
   },

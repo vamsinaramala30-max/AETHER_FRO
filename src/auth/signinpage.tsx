@@ -1,7 +1,7 @@
 // frontend/src/auth/SignupPage.tsx
 import React, { useState } from 'react';
-import { authService } from './authService';
-import { AuthLayout } from './AuthLayout';
+import { authService } from './authservice';
+import { AuthLayout } from './authlayout';
 
 export const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');

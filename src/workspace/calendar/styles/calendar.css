@@ -1,0 +1,74 @@
+:root {
+  --cal-bg-primary: #ffffff;
+  --cal-bg-secondary: #f8f9fa;
+  --cal-border-color: #e0e0e0;
+  --cal-text-primary: #202124;
+  --cal-text-secondary: #5f6368;
+  --cal-accent-color: #1a73e8;
+  --cal-accent-hover: #1557b0;
+  --cal-shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  --cal-shadow-md: 0 4px 8px 0 rgba(60,64,67,0.2);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--cal-text-primary);
+  background-color: var(--cal-bg-primary);
+}
+
+.calendar-page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.calendar-main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.calendar-sidebar-container {
+  width: 256px;
+  min-width: 256px;
+  border-right: 1px solid var(--cal-border-color);
+  background-color: var(--cal-bg-primary);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+  box-sizing: border-box;
+  transition: margin-left 0.2s ease-in-out;
+}
+
+.calendar-sidebar-container.collapsed {
+  margin-left: -256px;
+}
+
+.calendar-content-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--cal-bg-primary);
+}
+
+.calendar-grid-header {
+  display: grid;
+  border-bottom: 1px solid var(--cal-border-color);
+  background-color: var(--cal-bg-primary);
+}
+
+.calendar-time-gutter {
+  width: 60px;
+  min-width: 60px;
+  border-right: 1px solid var(--cal-border-color);
+  text-align: right;
+  padding-right: 8px;
+  color: var(--cal-text-secondary);
+  font-size: 11px;
+}
