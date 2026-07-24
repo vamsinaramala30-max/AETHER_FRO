@@ -39,6 +39,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       root.classList.remove('light', 'dark');
       root.classList.add(current);
+      root.setAttribute('data-theme', current);
       root.style.colorScheme = current;
     };
 

@@ -20,3 +20,44 @@
 .aether-glow {
   box-shadow: var(--aether-shadow-glow);
 }
+
+/* ==========================================================================
+   Layout Utility Classes — mapped to CSS custom properties
+   Used by PublicLayout, AppLayout, and other layout components
+   ========================================================================== */
+
+.bg-background {
+  background-color: var(--aether-bg-app);
+}
+
+.bg-surface {
+  background-color: var(--aether-bg-surface);
+}
+
+.bg-card {
+  background-color: var(--aether-bg-surface);
+}
+
+.bg-subtle {
+  background-color: var(--aether-bg-subtle);
+}
+
+.text-foreground {
+  color: var(--aether-text-main);
+}
+
+.text-muted-foreground {
+  color: var(--aether-text-muted);
+}
+
+.text-subtle {
+  color: var(--aether-text-subtle);
+}
+
+.border-border {
+  border-color: var(--aether-border-color);
+}
+
+.border-strong {
+  border-color: var(--aether-border-strong);
+}

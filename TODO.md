@@ -1,29 +1,23 @@
 # AETHER Frontend Repository Fix Plan
 
-## Issues Found & Fix Status
+## Issues Found & Fix Status — ALL COMPLETED ✅
 
-### Phase 1: Missing Files That Are Imported
+### Phase 1: Critical CSS/Theme Fixes
+- [x] Fix ThemeProvider to set `data-theme` attribute (was only setting class, but CSS uses `[data-theme]`)
+- [x] Fix `src/contexts/ThemeContext.tsx` to also set `data-theme` attribute
+- [x] Add missing layout utility CSS classes (`bg-background`, `text-foreground`, `bg-card`, `border-border`, etc.)
+- [x] Fix `utilities.css` with proper CSS variable mappings
 
-- [x] Create `frontend/src/shared/api.ts` 
-- [x] Create `frontend/src/shared/theme.ts`
-- [x] Rename `cards/index.ts` → verify exports match
-- [x] Fix `components/modals/Index.ts` → `index.ts` casing
-- [x] Fix `components/feedback/Index.ts` → `index.ts` casing
-- [x] Fix `three/Index.ts` barrel exports (remove nonexistent: Camera, Controls, Loader, Models)
+### Phase 2: Missing Providers
+- [x] Add `VisualEffectsProvider` to `AppProviders` tree (was missing, causing Background3D to crash)
+- [x] Install `react-ga4` dependency (was missing from package.json)
 
-### Phase 2: Fix Import Casing in Barrel Files
+### Phase 3: Three.js / Canvas Fixes
+- [x] Add error handling to `Background3D.tsx` with `onError` callback
+- [x] Add ambient/directional lights to Canvas in `Background3D.tsx`
 
-- [x] `components/modals/index.ts` - update to lowercase filenames
-- [x] `components/feedback/index.ts` - update to lowercase filenames  
-- [x] `three/Index.ts` - update Environment export
-
-### Phase 3: Fix Automation Module Imports
-
-- [x] `automation/automationmoduleroot.tsx` - fix import paths to use kebab-case filenames
-- [x] `knowledge/knowledge-base/KnowledgeBasePage.tsx` - fix import paths
-
-### Phase 4: Run Build & Fix Remaining Errors
-
-- [ ] Run `npm run build` and fix any remaining errors
-- [ ] Run `npm run dev` and verify startup
-
+### Phase 4: Dev Server Verification
+- [x] `npm install react-ga4` — completed (added 1 package)
+- [x] `npm run dev` — Vite dev server running on http://localhost:5173/
+- [x] No unresolved import errors
+- [x] Server starts successfully

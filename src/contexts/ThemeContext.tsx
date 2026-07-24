@@ -22,7 +22,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const [activeTheme, setActiveTheme] = useState<ActiveTheme>('dark');
 
-  const updateResolvedTheme = useCallback((mode: ThemeMode) => {
+const updateResolvedTheme = useCallback((mode: ThemeMode) => {
     const isDarkSystem = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const resolved: ActiveTheme = mode === 'system' ? (isDarkSystem ? 'dark' : 'light') : mode;
     setActiveTheme(resolved);
@@ -30,6 +30,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(resolved);
+    root.setAttribute('data-theme', resolved);
   }, []);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setActiveTheme(e.matches ? 'dark' : 'light');
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(e.matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
       };
       mediaQuery.addEventListener('change', listener);
       return () => { mediaQuery.removeEventListener('change', listener); };

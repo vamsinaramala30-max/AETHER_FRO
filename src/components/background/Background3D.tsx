@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useVisualEffects } from "../../providers/VisualEffectsProvider";
 
@@ -8,8 +8,9 @@ interface Background3DProps {
 
 export const Background3D: React.FC<Background3DProps> = ({ children }) => {
   const { isLowPower, reducedMotion, enable3D } = useVisualEffects();
+  const [hasError, setHasError] = useState(false);
 
-  if (!enable3D || reducedMotion) {
+  if (!enable3D || reducedMotion || hasError) {
     return null;
   }
 
@@ -20,7 +21,10 @@ export const Background3D: React.FC<Background3DProps> = ({ children }) => {
         dpr={isLowPower ? [1, 1] : [1, 2]}
         gl={{ powerPreference: "high-performance", antialias: !isLowPower, alpha: true }}
         style={{ pointerEvents: "none" }}
+        onError={() => setHasError(true)}
       >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[0, 5, 5]} intensity={0.8} />
         <Suspense fallback={null}>
           {children}
         </Suspense>
