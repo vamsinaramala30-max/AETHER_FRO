@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal } from '../ui/Modal';
+import { Modal } from '../ui/model';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 

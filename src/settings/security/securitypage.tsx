@@ -1,6 +1,6 @@
 // frontend/src/settings/security/SecurityPage.tsx
 import React from 'react';
-import { SecuritySettings } from './SecuritySettings';
+import { SecuritySettings } from './securitysetting';
 
 export const SecurityPage: React.FC = () => {
   return (

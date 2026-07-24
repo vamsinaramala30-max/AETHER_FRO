@@ -1,6 +1,6 @@
 import React from 'react';
 import { WeeklyReviewData } from './weeklyReviewService';
-import { ReviewStats } from './ReviewStats';
+import { ReviewStats } from './reviewstate';
 import { ReviewInsights } from './ReviewInsights';
 
 interface ReviewSummaryProps {

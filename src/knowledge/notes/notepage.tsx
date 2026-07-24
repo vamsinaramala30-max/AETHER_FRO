@@ -1,7 +1,7 @@
 // frontend/src/knowledge/notes/NotesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Note } from '../types';
-import { notesService } from './notesService';
+import { notesService } from './noteservice';
 import { NoteCard } from './NoteCard';
 import { NoteEditor } from './NoteEditor';
 import { NoteFilters } from './NoteFilters';

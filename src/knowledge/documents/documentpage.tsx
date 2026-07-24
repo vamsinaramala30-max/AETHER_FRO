@@ -1,7 +1,7 @@
 // frontend/src/knowledge/documents/DocumentsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { DocumentItem } from '../types';
-import { documentsService } from './documentsService';
+import { documentsService } from './documentservice';
 import { FileUpload } from './FileUpload';
 import { DocumentCard } from './DocumentCard';
 import { DocumentViewer } from './DocumentViewer';

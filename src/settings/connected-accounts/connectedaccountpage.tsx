@@ -1,7 +1,7 @@
 // frontend/src/settings/connected-accounts/ConnectedAccountsPage.tsx
 import React, { useEffect, useState } from 'react';
 import { ConnectedAccountCard } from './ConnectedAccountCard';
-import { connectedAccountsService, ConnectedAccount } from './connectedAccountsService';
+import { connectedAccountsService, ConnectedAccount } from './connectedaccountservice';
 
 export const ConnectedAccountsPage: React.FC = () => {
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
@@ -9,7 +9,7 @@ export const ConnectedAccountsPage: React.FC = () => {
 
   const loadData = () => {
     connectedAccountsService.getConnectedAccounts()
-      .then((data) => { setAccounts(data); })
+      .then((data: ConnectedAccount[]) => { setAccounts(data); })
       .catch(() => { setAccounts([
         { provider: 'github', identityName: '' },
         { provider: 'google', identityName: '' },

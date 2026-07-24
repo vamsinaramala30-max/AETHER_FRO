@@ -1,7 +1,7 @@
 // frontend/src/workspace/recent-files/RecentFilesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { RecentFileCard } from './RecentFileCard';
-import { recentFilesService, RecentFileData } from './recentFilesService';
+import { recentFilesService, RecentFileData } from './recentfilesservices';
 
 export const RecentFilesPage: React.FC = () => {
   const [files, setFiles] = useState<RecentFileData[]>([]);

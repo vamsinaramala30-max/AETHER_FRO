@@ -20,6 +20,8 @@ export const documentsService = {
       tags,
       createdAt: new Date().toISOString(),
       userId: 'current-user',
+      type: 'document',
+      updatedAt: new Date().toISOString(),
     };
 
     docs.push(newDoc);

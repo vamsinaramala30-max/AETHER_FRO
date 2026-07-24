@@ -1,7 +1,7 @@
 // frontend/src/knowledge/search/searchService.ts
 import { SearchResult } from '../types';
-import { notesService } from '../notes/notesService';
-import { documentsService } from '../documents/documentsService';
+import { notesService } from '../notes/noteservice';
+import { documentsService } from '../documents/documentservice';
 
 export const searchService = {
   async queryAll(query: string): Promise<SearchResult[]> {
@@ -12,8 +12,8 @@ export const searchService = {
     const results: SearchResult[] = [];
     const q = query.toLowerCase();
 
-    notes.forEach((n) => {
-      if (n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q) || n.tags.some(t => t.toLowerCase().includes(q))) {
+    notes.forEach((n: import('../types').Note) => {
+      if (n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q) || n.tags.some((t: string) => t.toLowerCase().includes(q))) {
         results.push({
           id: n.id,
           type: 'note',
@@ -25,8 +25,8 @@ export const searchService = {
       }
     });
 
-    docs.forEach((d) => {
-      if (d.name.toLowerCase().includes(q) || d.tags.some(t => t.toLowerCase().includes(q))) {
+    docs.forEach((d: import('../types').DocumentItem) => {
+      if (d.name.toLowerCase().includes(q) || d.tags.some((t: string) => t.toLowerCase().includes(q))) {
         results.push({
           id: d.id,
           type: 'document',

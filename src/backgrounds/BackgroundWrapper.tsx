@@ -1,6 +1,6 @@
 import React, { LazyExoticComponent, lazy, Suspense } from "react";
-import { CursorGlow } from "../effects/CursorGlow";
-import { NoiseOverlay } from "../effects/NoiseOverlay";
+import { CursorGlow } from "../components/effects/CursorGlow";
+import { NoiseOverlay } from "../components/effects/NoiseOverlay";
 
 export type BackgroundType =
   | "home"
@@ -13,14 +13,14 @@ export type BackgroundType =
   | "settings";
 
 const backgroundMap: Record<BackgroundType, LazyExoticComponent<React.FC>> = {
-  home: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  chat: lazy(() => import("../../backgrounds/ChatBackground").then((m) => ({ default: m.ChatBackground }))),
-  knowledge: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))), // Fallback map
-  projects: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  analytics: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  workspace: lazy(() => import("../../backgrounds/WorkspaceBackground").then((m) => ({ default: m.WorkspaceBackground }))),
-  auth: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  settings: lazy(() => import("../../backgrounds/HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  home: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  chat: lazy(() => import("./ChatBackground").then((m) => ({ default: m.ChatBackground }))),
+  knowledge: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))), // Fallback map
+  projects: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  analytics: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  workspace: lazy(() => import("./WorkspaceBackground").then((m) => ({ default: m.WorkspaceBackground }))),
+  auth: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  settings: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
 };
 
 interface BackgroundWrapperProps {

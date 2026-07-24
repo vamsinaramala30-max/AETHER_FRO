@@ -1,6 +1,6 @@
 // frontend/src/settings/connected-accounts/ConnectedAccountCard.tsx
 import React, { useState } from 'react';
-import { ConnectedAccount } from './connectedAccountsService';
+import { ConnectedAccount } from './connectedaccountservice';
 
 interface ConnectedAccountCardProps {
   account: ConnectedAccount;

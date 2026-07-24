@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { taskService, Task, TaskFiltersState } from './taskService';
 import { TaskBoard } from './TaskBoard';
 import { TaskForm } from './TaskForm';
-import { TaskFilters } from './TaskFilters';
+import { TaskFilters } from './taskfilter';
 
 export const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);

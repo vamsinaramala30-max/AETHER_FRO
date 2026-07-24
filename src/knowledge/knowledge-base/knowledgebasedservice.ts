@@ -1,7 +1,7 @@
 // frontend/src/knowledge/knowledge-base/knowledgeBaseService.ts
 import { KnowledgeNode } from '../types';
-import { notesService } from '../notes/notesService';
-import { documentsService } from '../documents/documentsService';
+import { notesService } from '../notes/noteservice';
+import { documentsService } from '../documents/documentservice';
 
 export const knowledgeBaseService = {
   async getGraphData(): Promise<KnowledgeNode[]> {
@@ -10,7 +10,7 @@ export const knowledgeBaseService = {
 
     const nodes: KnowledgeNode[] = [];
 
-    notes.forEach((note) => {
+    notes.forEach((note: import('../types').Note) => {
       nodes.push({
         id: note.id,
         label: note.title,
@@ -19,7 +19,7 @@ export const knowledgeBaseService = {
       });
     });
 
-    docs.forEach((doc) => {
+    docs.forEach((doc: import('../types').DocumentItem) => {
       nodes.push({
         id: doc.id,
         label: doc.name,
@@ -29,7 +29,7 @@ export const knowledgeBaseService = {
     });
 
     // Extract unique tags as concept nodes
-    const uniqueTags = Array.from(new Set([...notes.flatMap(n => n.tags), ...docs.flatMap(d => d.tags)]));
+    const uniqueTags = Array.from(new Set([...notes.flatMap((n: import('../types').Note) => n.tags), ...docs.flatMap((d: import('../types').DocumentItem) => d.tags)]));
     
     uniqueTags.forEach((tag) => {
       nodes.push({

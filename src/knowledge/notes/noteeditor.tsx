@@ -33,7 +33,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onCancel }
       .filter((t) => t.length > 0);
 
     onSave({
-      id: note?.id,
+      id: note?.id ?? '',
       title,
       content,
       tags,

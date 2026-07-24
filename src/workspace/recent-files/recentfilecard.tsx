@@ -1,6 +1,6 @@
 // frontend/src/workspace/recent-files/RecentFileCard.tsx
 import React from 'react';
-import { RecentFileData } from './recentFilesService';
+import { RecentFileData } from './recentfilesservices';
 
 interface RecentFileCardProps {
   file: RecentFileData;

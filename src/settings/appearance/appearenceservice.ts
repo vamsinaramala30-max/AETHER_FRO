@@ -1,5 +1,5 @@
 // frontend/src/settings/appearance/appearanceService.ts
-import { themeSystem } from '../../shared/theme'; // Reusing established client application layout hooks/context
+import { THEME } from '../../shared/theme';
 
 export type AetherTheme = 'dark-slate' | 'cyberpunk-dark' | 'oled-black';
 
@@ -11,10 +11,13 @@ export const appearanceService = {
   ],
 
   setTheme: async (themeId: AetherTheme): Promise<void> => {
-    themeSystem.setTheme(themeId === 'dark-slate' || themeId === 'oled-black' ? 'dark' : 'dark');
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('aether_theme_preference', 'dark');
   },
 
   getCurrentTheme: (): AetherTheme => {
-    return (themeSystem.isDark() ? 'dark-slate' : 'dark-slate') as AetherTheme;
+    return 'dark-slate' as AetherTheme;
   }
 };
