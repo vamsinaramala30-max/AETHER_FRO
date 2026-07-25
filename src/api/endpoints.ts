@@ -5,8 +5,8 @@ export const ENDPOINTS = {
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
     ME: '/auth/me',
-    FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password',
+    GOOGLE: '/auth/google',
+    GOOGLE_CALLBACK: '/auth/google/callback',
   },
   AI: {
     CHAT: '/ai/chat',
@@ -48,3 +48,4 @@ export const ENDPOINTS = {
     PRESIGNED_URL: '/uploads/presigned-url',
   },
 } as const;
+

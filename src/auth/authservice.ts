@@ -1,58 +1,63 @@
 // frontend/src/auth/authService.ts
-import { createClient, User } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY environment variables. Auth service will operate in a disconnected state.'
-  );
-}
-
-// Single initialized Supabase client instance using the public key boundary
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+import { authApi } from '../api/auth.api';
 
 export interface AuthResponse {
-  user: User | null;
+  user: any | null;
   error: Error | null;
 }
 
 export const authService = {
   async signUp(email: string, password: string): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    return { user: data.user, error };
+    try {
+      const res = await authApi.register({ name: email, email, password });
+      localStorage.setItem('aether_auth_token', JSON.stringify(res.accessToken));
+      return { user: { email }, error: null };
+    } catch (error: any) {
+      return { user: null, error: error as Error };
+    }
   },
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { user: data.user, error };
+    try {
+      const res = await authApi.login({ email, password });
+      localStorage.setItem('aether_auth_token', JSON.stringify(res.accessToken));
+      return { user: { email }, error: null };
+    } catch (error: any) {
+      return { user: null, error: error as Error };
+    }
   },
 
-  async signInWithGoogle(): Promise<{ error: Error | null }> {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    return { error };
+  signInWithGoogle(): void {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:5000';
+    window.location.href = `${baseUrl}/api/auth/google`;
   },
 
   async signOut(): Promise<{ error: Error | null }> {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const token = localStorage.getItem('aether_auth_token');
+      if (token) {
+        const parsedToken = JSON.parse(token);
+        await authApi.logout();
+      }
+      localStorage.removeItem('aether_auth_token');
+      return { error: null };
+    } catch (error: any) {
+      return { error: error as Error };
+    }
   },
 
   async getCurrentSession() {
-    const { data, error } = await supabase.auth.getSession();
-    return { session: data.session, error };
+    try {
+      const token = localStorage.getItem('aether_auth_token');
+      return { session: { access_token: token ? JSON.parse(token) : null }, error: null };
+    } catch {
+      return { session: null, error: new Error('No session') };
+    }
   },
 
   subscribeToAuthChanges(callback: (event: string, session: any) => void) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      callback(event, session);
-    });
-    return subscription;
+    // No-op for now - we don't have real-time auth state changes with JWT
+    // The callback will be invoked manually on login/logout
+    return { unsubscribe: () => {} };
   }
 };

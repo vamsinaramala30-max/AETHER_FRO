@@ -31,11 +31,10 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     setErrorMessage(null);
     try {
-      const { error } = await authService.signInWithGoogle();
-      if (error) setErrorMessage(error.message);
+      authService.signInWithGoogle();
     } catch (err) {
       setErrorMessage('Google OAuth connection initialization failed.');
     }
