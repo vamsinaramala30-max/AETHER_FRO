@@ -4,7 +4,7 @@ import { ENDPOINTS } from './endpoints';
 export interface AuthTokenResponse {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn: string;
 }
 
 export interface UserDTO {
@@ -26,18 +26,44 @@ export interface RegisterPayload {
   password?: string;
 }
 
-export const authApi = {
-  login: (payload: LoginPayload, config?: RequestConfig): Promise<AuthTokenResponse> =>
-    apiClient.post<AuthTokenResponse>(ENDPOINTS.AUTH.LOGIN, payload, { ...config, skipAuth: true }),
+/**
+ * Backend response envelope: { success: true, data: { user, tokens: { accessToken, refreshToken, expiresIn } } }
+ * This helper extracts the tokens from the envelope.
+ */
+function extractTokens(res: any): AuthTokenResponse {
+  // If response has the standard envelope with data.tokens
+  if (res?.data?.tokens?.accessToken) {
+    return res.data.tokens;
+  }
+  // If response has tokens at top level (alternative format)
+  if (res?.tokens?.accessToken) {
+    return res.tokens;
+  }
+  // If somehow the response IS the tokens directly
+  if (res?.accessToken) {
+    return res;
+  }
+  throw new Error('Unexpected auth response format: could not extract tokens');
+}
 
-  register: (payload: RegisterPayload, config?: RequestConfig): Promise<AuthTokenResponse> =>
-    apiClient.post<AuthTokenResponse>(ENDPOINTS.AUTH.REGISTER, payload, { ...config, skipAuth: true }),
+export const authApi = {
+  login: async (payload: LoginPayload, config?: RequestConfig): Promise<AuthTokenResponse> => {
+    const res = await apiClient.post<any>(ENDPOINTS.AUTH.LOGIN, payload, { ...config, skipAuth: true });
+    return extractTokens(res);
+  },
+
+  register: async (payload: RegisterPayload, config?: RequestConfig): Promise<AuthTokenResponse> => {
+    const res = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, payload, { ...config, skipAuth: true });
+    return extractTokens(res);
+  },
 
   logout: (config?: RequestConfig): Promise<void> =>
     apiClient.post<void>(ENDPOINTS.AUTH.LOGOUT, {}, config),
 
-  refreshToken: (refreshToken: string, config?: RequestConfig): Promise<AuthTokenResponse> =>
-    apiClient.post<AuthTokenResponse>(ENDPOINTS.AUTH.REFRESH, { refreshToken }, { ...config, skipAuth: true }),
+  refreshToken: async (refreshToken: string, config?: RequestConfig): Promise<AuthTokenResponse> => {
+    const res = await apiClient.post<any>(ENDPOINTS.AUTH.REFRESH, { refreshToken }, { ...config, skipAuth: true });
+    return extractTokens(res);
+  },
 
   getCurrentUser: (config?: RequestConfig): Promise<UserDTO> =>
     apiClient.get<UserDTO>(ENDPOINTS.AUTH.ME, config),

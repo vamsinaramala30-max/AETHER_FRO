@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authService } from '../../auth/authservice';
 
 export interface UserSession {
   id: string;
@@ -21,13 +22,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Structural integration boundary for Supabase / Auth listener
-    // Remains strictly true to initial loading state until hooked up in future sprints
     const initializeAuth = async () => {
       try {
-        setUser(null);
+        const { session, error } = await authService.getCurrentSession();
+        if (error) throw error;
+        if (session?.access_token) {
+          setUser({
+            id: 'authenticated',
+            email: 'user@aether.app',
+            created_at: new Date().toISOString(),
+          });
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Auth initialization sequence failed:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -36,18 +46,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
+      await authService.signOut();
       setUser(null);
+    } catch (error) {
+      console.error('Logout operation failed:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const refreshSession = async (): Promise<void> => {
-    // Prepared anchor for active token refreshes
-  };
+  const refreshSession = useCallback(async (): Promise<void> => {
+    try {
+      const { session, error } = await authService.getCurrentSession();
+      if (error) throw error;
+      if (session?.access_token) {
+        setUser({
+          id: 'authenticated',
+          email: 'user@aether.app',
+          created_at: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+    }
+  }, []);
 
   const isAuthenticated = user !== null;
 
