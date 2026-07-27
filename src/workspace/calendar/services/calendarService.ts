@@ -1,19 +1,21 @@
 import { Calendar } from '../types/calendar';
 
-export class CalendarService {
-  private static STORAGE_KEY = 'enterprise_calendars';
+const STORAGE_KEY = 'enterprise_calendars';
 
-  public static async fetchCalendars(): Promise<Calendar[]> {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
-    if (!raw) return [];
+export const calendarService = {
+  fetchCalendars(): Promise<Calendar[]> {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (typeof raw !== 'string' || raw.trim() === '') return Promise.resolve([]);
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw) as Calendar[];
+      return Promise.resolve(Array.isArray(parsed) ? parsed : []);
     } catch {
-      return [];
+      return Promise.resolve([]);
     }
-  }
+  },
 
-  public static async saveCalendars(calendars: Calendar[]): Promise<void> {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(calendars));
-  }
-}
+  saveCalendars(calendars: Calendar[]): Promise<void> {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(calendars));
+    return Promise.resolve();
+  },
+};

@@ -18,7 +18,9 @@ export const EventColorPicker: React.FC<EventColorPickerProps> = ({
           type="button"
           aria-label={c.name}
           title={c.name}
-          onClick={() => onSelectColor(c.hex)}
+          onClick={() => {
+            onSelectColor(c.hex);
+          }}
           style={{
             width: '24px',
             height: '24px',

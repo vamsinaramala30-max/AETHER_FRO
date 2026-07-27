@@ -9,21 +9,31 @@ export interface ModalProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'md' }) => {
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = 'md',
+}) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     if (isOpen) document.addEventListener('keydown', handleKeyDown);
-    return () => { document.removeEventListener('keydown', handleKeyDown); };
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   const maxWidths = {
     sm: 'max-w-sm',
     md: 'max-w-md',
     lg: 'max-w-lg',
-    xl: 'max-w-xl'
+    xl: 'max-w-xl',
   };
+
+  const hasTitle = typeof title === 'string' && title.trim() !== '';
 
   return (
     <AnimatePresence>
@@ -41,12 +51,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
-            className={`relative w-full ${maxWidths[maxWidth]} bg-surface-elevated/95 backdrop-blur-xl border border-border-strong rounded-2xl shadow-2xl p-6 z-10 overflow-hidden`}
+            className={`relative w-full ${maxWidths[maxWidth]} bg-surface-elevated/95 border-border-strong z-10 overflow-hidden rounded-2xl border p-6 shadow-2xl backdrop-blur-xl`}
           >
-            {title && (
-              <div className="flex items-center justify-between pb-4 border-b border-border-subtle mb-4">
-                <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
-                <button onClick={onClose} className="text-text-tertiary hover:text-text-primary p-1 rounded-lg">
+            {hasTitle && (
+              <div className="border-border-subtle mb-4 flex items-center justify-between border-b pb-4">
+                <h3 className="text-text-primary text-lg font-semibold">{title}</h3>
+                <button
+                  onClick={onClose}
+                  className="text-text-tertiary hover:text-text-primary rounded-lg p-1"
+                >
                   ✕
                 </button>
               </div>

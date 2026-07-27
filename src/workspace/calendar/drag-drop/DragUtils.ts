@@ -3,7 +3,7 @@ import { TIME_SLOT_HEIGHT_PX } from '../utils/constants';
 export const calculateTimeFromPixelOffset = (
   pixelY: number,
   baseDate: Date,
-  slotDurationMinutes = 30
+  slotDurationMinutes = 30,
 ): Date => {
   const slots = Math.floor(pixelY / TIME_SLOT_HEIGHT_PX);
   const minutes = slots * slotDurationMinutes;

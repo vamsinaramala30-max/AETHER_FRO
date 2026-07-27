@@ -31,26 +31,41 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-      <div className="relative flex items-end max-w-5xl mx-auto bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+    <form
+      onSubmit={handleSubmit}
+      className="border-t border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+    >
+      <div className="relative mx-auto flex max-w-5xl items-end rounded-xl border border-slate-200 bg-slate-50 transition-all focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800/60">
         <textarea
           ref={textareaRef}
           rows={1}
           value={content}
-          onChange={(e) => { setContent(e.target.value); }}
+          onChange={(e) => {
+            setContent(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Ask AETHER assistant anything..."
           disabled={disabled}
-          className="w-full resize-none bg-transparent py-3 pl-4 pr-12 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none disabled:opacity-50 max-h-48 min-h-[44px]"
+          className="max-h-48 min-h-[44px] w-full resize-none bg-transparent py-3 pl-4 pr-12 text-sm text-slate-800 placeholder-slate-400 focus:outline-none disabled:opacity-50 dark:text-slate-100"
         />
-        <div className="absolute right-2 bottom-1.5">
+        <div className="absolute bottom-1.5 right-2">
           <button
             type="submit"
             disabled={!content.trim() || disabled}
-            className="flex items-center justify-center p-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 transition-colors cursor-pointer"
+            className="flex cursor-pointer items-center justify-center rounded-lg bg-indigo-600 p-2 text-white transition-colors hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600"
           >
-            <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-7-9-7v14z" />
+            <svg
+              className="h-4 w-4 rotate-90 transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M12 19l9-7-9-7v14z"
+              />
             </svg>
           </button>
         </div>

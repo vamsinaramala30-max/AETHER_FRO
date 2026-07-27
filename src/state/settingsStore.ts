@@ -27,6 +27,6 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'aether-settings-storage',
-    }
-  )
+    },
+  ),
 );

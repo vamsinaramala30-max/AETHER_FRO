@@ -10,17 +10,25 @@ export interface ProjectCardProps {
   onClick?: () => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ title, description, status, updatedAt, onClick }) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({
+  title,
+  description,
+  status,
+  updatedAt,
+  onClick,
+}) => {
   return (
     <Card hoverable onClick={onClick} className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-text-primary truncate">{title}</h3>
-        <Badge variant={status === 'active' ? 'success' : status === 'draft' ? 'warning' : 'neutral'}>
+        <h3 className="text-text-primary truncate text-base font-semibold">{title}</h3>
+        <Badge
+          variant={status === 'active' ? 'success' : status === 'draft' ? 'warning' : 'neutral'}
+        >
           {status}
         </Badge>
       </div>
-      <p className="text-xs text-text-secondary line-clamp-2">{description}</p>
-      <div className="pt-2 border-t border-border-subtle flex justify-between items-center text-[10px] text-text-tertiary">
+      <p className="text-text-secondary line-clamp-2 text-xs">{description}</p>
+      <div className="border-border-subtle text-text-tertiary flex items-center justify-between border-t pt-2 text-[10px]">
         <span>Updated {updatedAt}</span>
         <span>→</span>
       </div>

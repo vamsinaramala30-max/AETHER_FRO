@@ -1,26 +1,21 @@
-import React, { LazyExoticComponent, lazy, Suspense } from "react";
-import { CursorGlow } from "../components/effects/CursorGlow";
-import { NoiseOverlay } from "../components/effects/NoiseOverlay";
+import React, { LazyExoticComponent, lazy, Suspense } from 'react';
+import { CursorGlow } from '../components/effects/CursorGlow';
+import { NoiseOverlay } from '../components/effects/NoiseOverlay';
 
 export type BackgroundType =
-  | "home"
-  | "chat"
-  | "knowledge"
-  | "projects"
-  | "analytics"
-  | "workspace"
-  | "auth"
-  | "settings";
+  'home' | 'chat' | 'knowledge' | 'projects' | 'analytics' | 'workspace' | 'auth' | 'settings';
 
 const backgroundMap: Record<BackgroundType, LazyExoticComponent<React.FC>> = {
-  home: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  chat: lazy(() => import("./ChatBackground").then((m) => ({ default: m.ChatBackground }))),
-  knowledge: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))), // Fallback map
-  projects: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  analytics: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  workspace: lazy(() => import("./WorkspaceBackground").then((m) => ({ default: m.WorkspaceBackground }))),
-  auth: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
-  settings: lazy(() => import("./HomeBackground").then((m) => ({ default: m.HomeBackground }))),
+  home: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))),
+  chat: lazy(() => import('./ChatBackground').then((m) => ({ default: m.ChatBackground }))),
+  knowledge: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))), // Fallback map
+  projects: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))),
+  analytics: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))),
+  workspace: lazy(() =>
+    import('./WorkspaceBackground').then((m) => ({ default: m.WorkspaceBackground })),
+  ),
+  auth: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))),
+  settings: lazy(() => import('./HomeBackground').then((m) => ({ default: m.HomeBackground }))),
 };
 
 interface BackgroundWrapperProps {
@@ -36,14 +31,16 @@ export const BackgroundWrapper: React.FC<BackgroundWrapperProps> = ({
   children,
   showCursorGlow = true,
   showNoise = true,
-  className = "",
+  className = '',
 }) => {
   const BackgroundComponent = backgroundMap[type] || backgroundMap.home;
 
   return (
-    <div className={`relative min-h-screen w-full bg-[#050816] text-[#F8FAFC] isolation-isolate ${className}`}>
+    <div
+      className={`isolation-isolate relative min-h-screen w-full bg-[#050816] text-[#F8FAFC] ${className}`}
+    >
       {/* Background layer container */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <Suspense fallback={<div className="absolute inset-0 bg-[#050816]" />}>
           <BackgroundComponent />
         </Suspense>
@@ -51,9 +48,7 @@ export const BackgroundWrapper: React.FC<BackgroundWrapperProps> = ({
       </div>
 
       {/* Foreground interactive content layer */}
-      <div className="relative z-20 w-full h-full pointer-events-auto">
-        {children}
-      </div>
+      <div className="pointer-events-auto relative z-20 h-full w-full">{children}</div>
 
       {/* Non-blocking cursor glow */}
       {showCursorGlow && <CursorGlow />}

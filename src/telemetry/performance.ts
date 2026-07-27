@@ -8,20 +8,23 @@ export interface PerformanceMetric {
   navigationType?: string;
 }
 
-export class PerformanceMonitor {
-  public static mark(name: string): void {
-    if (typeof performance !== 'undefined' && performance.mark) {
+export const performanceMonitor = {
+  mark(name: string): void {
+    if (typeof performance !== 'undefined' && typeof performance.mark === 'function') {
       performance.mark(name);
     }
-  }
+  },
 
-  public static measure(name: string, startMark: string, endMark: string): number | null {
-    if (typeof performance !== 'undefined' && performance.measure) {
+  measure(name: string, startMark: string, endMark: string): number | null {
+    if (typeof performance !== 'undefined' && typeof performance.measure === 'function') {
       try {
         performance.measure(name, startMark, endMark);
         const entries = performance.getEntriesByName(name, 'measure');
         const latestEntry = entries[entries.length - 1];
-        const duration = latestEntry ? latestEntry.duration : null;
+        const duration =
+          typeof latestEntry !== 'undefined' && typeof latestEntry.duration === 'number'
+            ? latestEntry.duration
+            : null;
 
         if (duration !== null) {
           logger.debug(`[Performance] ${name}: ${duration.toFixed(2)}ms`);
@@ -33,13 +36,14 @@ export class PerformanceMonitor {
       }
     }
     return null;
-  }
+  },
 
-  public static capturePageTimings(): void {
-    if (typeof window === 'undefined' || !window.performance) return;
+  capturePageTimings(): void {
+    if (typeof window === 'undefined' || typeof window.performance === 'undefined') return;
 
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-    if (navigation) {
+    const navigation = performance.getEntriesByType('navigation')[0] as
+      PerformanceNavigationTiming | undefined;
+    if (navigation !== undefined) {
       const pageLoadTime = navigation.loadEventEnd - navigation.startTime;
       const dnsTime = navigation.domainLookupEnd - navigation.domainLookupStart;
       const ttfb = navigation.responseStart - navigation.requestStart;
@@ -51,5 +55,5 @@ export class PerformanceMonitor {
         domInteractive: navigation.domInteractive,
       });
     }
-  }
-}
+  },
+};

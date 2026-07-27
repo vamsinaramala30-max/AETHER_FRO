@@ -11,31 +11,59 @@ export const MonthView: React.FC = () => {
   const current = new Date(viewState.currentDate);
 
   const grid = getMonthGrid(current.getFullYear(), current.getMonth());
-  const firstDay = grid[0][0];
+  const firstWeek = grid[0];
   const lastWeek = grid[grid.length - 1];
+  const firstDay = firstWeek[0];
   const lastDay = lastWeek[lastWeek.length - 1];
 
   const { events } = useEvents(firstDay, lastDay);
 
   return (
-    <div style={{ display: 'grid', gridTemplateRows: `repeat(${grid.length}, 1fr)`, flex: 1 }}>
+    <div
+      style={{ display: 'grid', gridTemplateRows: `repeat(${String(grid.length)}, 1fr)`, flex: 1 }}
+    >
       {grid.map((week, weekIndex) => (
-        <div key={weekIndex} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #dadce0' }}>
+        <div
+          key={weekIndex}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            borderBottom: '1px solid #dadce0',
+          }}
+        >
           {week.map((day) => {
             const dayEvents = events.filter((e) => {
               const d = new Date(e.start);
-              return d.getFullYear() === day.getFullYear() && d.getMonth() === day.getMonth() && d.getDate() === day.getDate();
+              return (
+                d.getFullYear() === day.getFullYear() &&
+                d.getMonth() === day.getMonth() &&
+                d.getDate() === day.getDate()
+              );
             });
 
             return (
-              <div key={day.toISOString()} style={{ borderRight: '1px solid #dadce0', padding: '4px', overflow: 'hidden' }}>
-                <div style={{ fontSize: '12px', fontWeight: '500', marginBottom: '4px' }}>{day.getDate()}</div>
+              <div
+                key={day.toISOString()}
+                style={{ borderRight: '1px solid #dadce0', padding: '4px', overflow: 'hidden' }}
+              >
+                <div style={{ fontSize: '12px', fontWeight: '500', marginBottom: '4px' }}>
+                  {day.getDate()}
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   {dayEvents.slice(0, 3).map((e) => (
-                    <EventCard key={e.id} event={e} onClick={() => openEventDetails(e)} style={{ position: 'relative' }} />
+                    <EventCard
+                      key={e.id}
+                      event={e}
+                      onClick={() => {
+                        openEventDetails(e);
+                      }}
+                      style={{ position: 'relative' }}
+                    />
                   ))}
                   {dayEvents.length > 3 && (
-                    <span style={{ fontSize: '10px', color: '#5f6368' }}>+{dayEvents.length - 3} more</span>
+                    <span style={{ fontSize: '10px', color: '#5f6368' }}>
+                      +{String(dayEvents.length - 3)} more
+                    </span>
                   )}
                 </div>
               </div>

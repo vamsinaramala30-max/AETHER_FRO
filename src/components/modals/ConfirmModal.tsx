@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React from 'react';
-import { Modal } from '../ui/modal';
+import { Modal } from '../ui/model';
 import { Button } from '../ui/button';
 
 export interface ConfirmModalProps {
@@ -11,13 +10,29 @@ export interface ConfirmModalProps {
   description: string;
 }
 
-export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm, title, description }) => {
+export const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+}) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-sm text-text-secondary mb-6">{description}</p>
+      <p className="text-text-secondary mb-6 text-sm">{description}</p>
       <div className="flex justify-end space-x-3">
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={() => { onConfirm(); onClose(); }}>Confirm</Button>
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            onConfirm();
+            onClose();
+          }}
+        >
+          Confirm
+        </Button>
       </div>
     </Modal>
   );

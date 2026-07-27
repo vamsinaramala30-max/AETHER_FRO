@@ -17,24 +17,28 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('aether-auth-token');
-    if (token) {
+    if (typeof token === 'string' && token.trim() !== '') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: unknown) => {
+    const err = error instanceof Error ? error : new Error(String(error));
+    return Promise.reject(err);
+  },
 );
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
       localStorage.removeItem('aether-auth-token');
       window.location.href = '/login';
     }
-    return Promise.reject(error);
-  }
+    const err = error instanceof Error ? error : new Error(String(error));
+    return Promise.reject(err);
+  },
 );
 
 export const api = apiClient;
@@ -52,4 +56,3 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
-

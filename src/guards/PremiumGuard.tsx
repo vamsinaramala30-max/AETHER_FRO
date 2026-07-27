@@ -16,7 +16,11 @@ export const PremiumGuard: React.FC<PremiumGuardProps> = ({ children, upgradePro
 
   const isEligible =
     isAuthenticated && user
-      ? isPremiumUser({ role: user.role, permissions: user.permissions, isSubscribed: user.isSubscribed })
+      ? isPremiumUser({
+          role: user.role,
+          permissions: user.permissions,
+          isSubscribed: user.isSubscribed,
+        })
       : false;
 
   if (!isEligible) {

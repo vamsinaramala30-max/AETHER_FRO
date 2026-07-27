@@ -1,5 +1,5 @@
 import React from 'react';
-import { EventReminder as IReminder, ReminderMethod } from '../types/reminder';
+import { EventReminder as IReminder } from '../types/reminder';
 import { DEFAULT_REMINDER_OPTIONS } from '../utils/constants';
 
 interface EventReminderProps {
@@ -15,7 +15,7 @@ export const EventReminder: React.FC<EventReminderProps> = ({
 }) => {
   const handleAdd = () => {
     const newRem: IReminder = {
-      id: `rem_${Date.now()}`,
+      id: `rem_${String(Date.now())}`,
       method: 'popup',
       minutesBefore: 10,
     };
@@ -32,7 +32,12 @@ export const EventReminder: React.FC<EventReminderProps> = ({
             <select
               value={r.minutesBefore}
               onChange={() => {}}
-              style={{ padding: '4px', borderRadius: '4px', border: '1px solid #dadce0', fontSize: '12px' }}
+              style={{
+                padding: '4px',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                fontSize: '12px',
+              }}
             >
               {DEFAULT_REMINDER_OPTIONS.map((opt) => (
                 <option key={opt.minutes} value={opt.minutes}>
@@ -42,7 +47,9 @@ export const EventReminder: React.FC<EventReminderProps> = ({
             </select>
             <button
               type="button"
-              onClick={() => onRemoveReminder(r.id)}
+              onClick={() => {
+                onRemoveReminder(r.id);
+              }}
               style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#5f6368' }}
             >
               ×

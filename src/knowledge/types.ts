@@ -38,4 +38,3 @@ export interface SearchResult {
   score: number;
   date: string;
 }
-

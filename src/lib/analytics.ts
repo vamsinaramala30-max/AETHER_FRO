@@ -1,9 +1,10 @@
-import ReactGA from "react-ga4";
+import ReactGA from 'react-ga4';
 
 // Environment variables configuration
-const MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
-const IS_PROD = import.meta.env.PROD;
-const IS_DEV_ENABLE = import.meta.env.VITE_GA_ENABLE_DEV === "true";
+const rawEnv: Record<string, string | undefined> = import.meta.env;
+const MEASUREMENT_ID = rawEnv['VITE_GA_MEASUREMENT_ID'];
+const IS_PROD: boolean = import.meta.env.PROD;
+const IS_DEV_ENABLE = import.meta.env.VITE_GA_ENABLE_DEV === 'true';
 
 let isInitialized = false;
 
@@ -11,7 +12,7 @@ let isInitialized = false;
  * Validates whether the Measurement ID follows standard GA4 format (G-XXXXXXXXXX)
  */
 const isValidMeasurementId = (id?: string): boolean => {
-  return typeof id === "string" && /^G-[A-Z0-9]+$/i.test(id.trim());
+  return typeof id === 'string' && /^G-[A-Z0-9]+$/i.test(id.trim());
 };
 
 /**
@@ -29,10 +30,8 @@ export const initGA = (): boolean => {
     return false;
   }
 
-  if (!MEASUREMENT_ID || !isValidMeasurementId(MEASUREMENT_ID)) {
-    console.warn(
-      "[GA4] Analytics skipped: Invalid or missing VITE_GA_MEASUREMENT_ID."
-    );
+  if (typeof MEASUREMENT_ID !== 'string' || !isValidMeasurementId(MEASUREMENT_ID)) {
+    console.warn('[GA4] Analytics skipped: Invalid or missing VITE_GA_MEASUREMENT_ID.');
     return false;
   }
 
@@ -41,7 +40,7 @@ export const initGA = (): boolean => {
     isInitialized = true;
     return true;
   } catch (error) {
-    console.error("[GA4] Failed to initialize Google Analytics:", error);
+    console.error('[GA4] Failed to initialize Google Analytics:', error);
     return false;
   }
 };
@@ -61,13 +60,14 @@ export const isGAInitialized = (): boolean => isInitialized;
 export const trackPageView = (path: string, title?: string): void => {
   if (!isInitialized) return;
   try {
+    const hasTitle = typeof title === 'string' && title.trim() !== '';
     ReactGA.send({
-      hitType: "pageview",
+      hitType: 'pageview',
       page: path,
-      title: title || document.title,
+      title: hasTitle ? title : document.title,
     });
   } catch (error) {
-    console.error("[GA4] Pageview tracking failed:", error);
+    console.error('[GA4] Pageview tracking failed:', error);
   }
 };
 
@@ -79,7 +79,7 @@ export const trackEvent = (
   action: string,
   label?: string,
   value?: number,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ): void => {
   if (!isInitialized) return;
   try {
@@ -91,7 +91,7 @@ export const trackEvent = (
       ...params,
     });
   } catch (error) {
-    console.error("[GA4] Custom event tracking failed:", error);
+    console.error('[GA4] Custom event tracking failed:', error);
   }
 };
 
@@ -99,25 +99,26 @@ export const trackEvent = (
  * User authentication & lifecycle events
  */
 export const trackLogin = (method: string): void => {
-  trackEvent("User", "login", method, undefined, { method });
+  trackEvent('User', 'login', method, undefined, { method });
 };
 
 export const trackSignUp = (method: string): void => {
-  trackEvent("User", "sign_up", method, undefined, { method });
+  trackEvent('User', 'sign_up', method, undefined, { method });
 };
 
 /**
  * UI & Interaction events
  */
 export const trackButtonClick = (buttonName: string, location?: string): void => {
-  trackEvent("UI", "click_button", buttonName, undefined, {
+  const hasLocation = typeof location === 'string' && location.trim() !== '';
+  trackEvent('UI', 'click_button', buttonName, undefined, {
     button_name: buttonName,
-    location: location || window.location.pathname,
+    location: hasLocation ? location : window.location.pathname,
   });
 };
 
 export const trackFormSubmit = (formName: string, success: boolean = true): void => {
-  trackEvent("Form", success ? "submit_success" : "submit_failure", formName, undefined, {
+  trackEvent('Form', success ? 'submit_success' : 'submit_failure', formName, undefined, {
     form_name: formName,
   });
 };
@@ -126,20 +127,21 @@ export const trackFormSubmit = (formName: string, success: boolean = true): void
  * Product-specific workflows
  */
 export const trackAIChatStarted = (modelName?: string): void => {
-  trackEvent("AI", "chat_started", modelName, undefined, {
-    model: modelName || "default",
+  const hasModel = typeof modelName === 'string' && modelName.trim() !== '';
+  trackEvent('AI', 'chat_started', modelName, undefined, {
+    model: hasModel ? modelName : 'default',
   });
 };
 
 export const trackFileUpload = (fileType: string, fileSizeMb?: number): void => {
-  trackEvent("Storage", "file_upload", fileType, fileSizeMb, {
+  trackEvent('Storage', 'file_upload', fileType, fileSizeMb, {
     file_type: fileType,
     file_size_mb: fileSizeMb,
   });
 };
 
 export const trackWorkspaceCreated = (workspaceName?: string): void => {
-  trackEvent("Workspace", "workspace_created", workspaceName, undefined, {
+  trackEvent('Workspace', 'workspace_created', workspaceName, undefined, {
     workspace_name: workspaceName,
   });
 };
@@ -147,9 +149,9 @@ export const trackWorkspaceCreated = (workspaceName?: string): void => {
 export const trackSubscriptionSuccess = (
   planName: string,
   value?: number,
-  currency: string = "USD"
+  currency: string = 'USD',
 ): void => {
-  trackEvent("ECommerce", "purchase", planName, value, {
+  trackEvent('ECommerce', 'purchase', planName, value, {
     plan: planName,
     currency,
     value,
@@ -162,11 +164,11 @@ export const trackSubscriptionSuccess = (
 export const trackError = (description: string, fatal: boolean = false): void => {
   if (!isInitialized) return;
   try {
-    ReactGA.event("exception", {
+    ReactGA.event('exception', {
       description,
       fatal,
     });
   } catch (error) {
-    console.error("[GA4] Error tracking failed:", error);
+    console.error('[GA4] Error tracking failed:', error);
   }
 };

@@ -10,33 +10,46 @@ interface NoteCardProps {
 
 export const NoteCard: React.FC<NoteCardProps> = ({ note, onEdit, onDelete }) => {
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-all flex flex-col justify-between group">
+    <div className="group flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-5 transition-all hover:border-neutral-700">
       <div>
-        <div className="flex justify-between items-start mb-2 gap-2">
-          <h3 className="text-white font-medium line-clamp-1 group-hover:text-amber-400 transition-colors">{note.title || 'Untitled Note'}</h3>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
-            className="text-neutral-500 hover:text-red-400 transition-colors text-xs p-1"
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 font-medium text-white transition-colors group-hover:text-amber-400">
+            {note.title || 'Untitled Note'}
+          </h3>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(note.id);
+            }}
+            className="p-1 text-xs text-neutral-500 transition-colors hover:text-red-400"
             title="Delete Note"
           >
             ✕
           </button>
         </div>
-        <p className="text-neutral-400 text-xs line-clamp-4 mb-4 whitespace-pre-wrap leading-relaxed">
+        <p className="mb-4 line-clamp-4 whitespace-pre-wrap text-xs leading-relaxed text-neutral-400">
           {note.content || <span className="italic text-neutral-600">No content inside.</span>}
         </p>
       </div>
       <div>
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="mb-3 flex flex-wrap gap-1.5">
           {note.tags.map((t) => (
-            <span key={t} className="text-[10px] bg-neutral-950 text-neutral-400 px-2 py-0.5 rounded border border-neutral-800">
+            <span
+              key={t}
+              className="rounded border border-neutral-800 bg-neutral-950 px-2 py-0.5 text-[10px] text-neutral-400"
+            >
               #{t}
             </span>
           ))}
         </div>
-        <div className="flex justify-between items-center text-[10px] text-neutral-500 pt-2 border-t border-neutral-800/60">
+        <div className="flex items-center justify-between border-t border-neutral-800/60 pt-2 text-[10px] text-neutral-500">
           <span>{new Date(note.updatedAt).toLocaleDateString()}</span>
-          <button onClick={() => { onEdit(note); }} className="text-amber-500 hover:underline font-medium">
+          <button
+            onClick={() => {
+              onEdit(note);
+            }}
+            className="font-medium text-amber-500 hover:underline"
+          >
             Edit →
           </button>
         </div>

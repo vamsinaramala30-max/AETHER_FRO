@@ -31,33 +31,32 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const notify = useCallback(
     (item: Omit<ToastNotification, 'id' | 'read'>): string => {
-      const id = `notif_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const id = `notif_${String(Date.now())}_${Math.random().toString(36).substring(2, 7)}`;
       const newNotif: ToastNotification = { ...item, id, read: false };
 
       setNotifications((prev) => [newNotif, ...prev]);
 
       const duration = item.duration ?? 5000;
       if (duration > 0) {
-        setTimeout(() => { dismiss(id); }, duration);
+        setTimeout(() => {
+          dismiss(id);
+        }, duration);
       }
 
       return id;
     },
-    [dismiss]
+    [dismiss],
   );
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
-  const clearAll = useCallback(() => { setNotifications([]); }, []);
+  const clearAll = useCallback(() => {
+    setNotifications([]);
+  }, []);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.read).length,
-    [notifications]
-  );
+  const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
 
   const value = useMemo<NotificationContextValue>(
     () => ({
@@ -68,7 +67,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       markAsRead,
       clearAll,
     }),
-    [notifications, unreadCount, notify, dismiss, markAsRead, clearAll]
+    [notifications, unreadCount, notify, dismiss, markAsRead, clearAll],
   );
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;

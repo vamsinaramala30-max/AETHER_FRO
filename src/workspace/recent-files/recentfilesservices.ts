@@ -16,7 +16,7 @@ const defaultFiles: RecentFileData[] = [
     type: 'code',
     lastAccessed: new Date(Date.now() - 1000 * 60 * 12).toISOString(), // 12 mins ago
     sizeStr: '42 KB',
-    location: '/src/core/schema'
+    location: '/src/core/schema',
   },
   {
     id: 'f2',
@@ -24,7 +24,7 @@ const defaultFiles: RecentFileData[] = [
     type: 'diagram',
     lastAccessed: new Date(Date.now() - 1000 * 60 * 140).toISOString(), // ~2h ago
     sizeStr: '1.8 MB',
-    location: '/assets/docs'
+    location: '/assets/docs',
   },
   {
     id: 'f3',
@@ -32,8 +32,8 @@ const defaultFiles: RecentFileData[] = [
     type: 'spreadsheet',
     lastAccessed: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     sizeStr: '512 KB',
-    location: '/finance/models'
-  }
+    location: '/finance/models',
+  },
 ];
 
 export const recentFilesService = {
@@ -43,5 +43,5 @@ export const recentFilesService = {
         resolve(defaultFiles);
       }, 200);
     });
-  }
+  },
 };

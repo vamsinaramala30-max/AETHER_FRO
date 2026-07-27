@@ -17,9 +17,9 @@ export const Card: React.FC<CardProps> = ({
   return (
     <motion.div
       whileHover={hoverable ? { y: -2, transition: { duration: 0.2 } } : undefined}
-      className={`rounded-xl border border-border-subtle p-5 transition-all duration-200 ${
+      className={`border-border-subtle rounded-xl border p-5 transition-all duration-200 ${
         glassmorphism ? 'bg-surface-base/80 backdrop-blur-md' : 'bg-surface-elevated'
-      } ${hoverable ? 'hover:border-border-strong hover:shadow-lg hover:shadow-black/5 cursor-pointer' : ''} ${className}`}
+      } ${hoverable ? 'hover:border-border-strong cursor-pointer hover:shadow-lg hover:shadow-black/5' : ''} ${className}`}
       {...props}
     >
       {children}

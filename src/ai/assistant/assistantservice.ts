@@ -31,14 +31,14 @@ class AssistantService {
     const token = localStorage.getItem('aether_auth_token');
     return {
       'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
   }
 
   public async sendMessage(
-    conversationId: string, 
-    content: string, 
-    config?: Partial<AssistantConfig>
+    conversationId: string,
+    content: string,
+    config?: Partial<AssistantConfig>,
   ): Promise<Message> {
     try {
       const headers = await this.getAuthHeaders();
@@ -62,7 +62,7 @@ class AssistantService {
             role: 'assistant',
             content: `I received your message: "${content}". This is a highly responsive local processing fallback layer. Connect your live streaming or REST pipeline seamlessly to ${this.baseRoute}/chat.`,
             timestamp: new Date().toISOString(),
-            tokensUsed: content.length / 4 + 20
+            tokensUsed: content.length / 4 + 20,
           };
           resolve(mockResponse);
         }, 1000);
@@ -80,7 +80,7 @@ class AssistantService {
 
       if (!response.ok) throw new Error('Failed to retrieve messages');
       return await response.json();
-    } catch (error) {
+    } catch {
       const stored = localStorage.getItem(`${this.fallbackKey}_${conversationId}`);
       return stored ? JSON.parse(stored) : [];
     }

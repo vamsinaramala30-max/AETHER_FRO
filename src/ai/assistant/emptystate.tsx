@@ -25,12 +25,12 @@ const SUGGESTIONS = [
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 max-w-2xl mx-auto">
+    <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 text-center">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="w-16 h-16 bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 shadow-inner"
+        className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600/10 text-3xl font-bold text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400"
       >
         A
       </motion.div>
@@ -39,7 +39,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.3 }}
-        className="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+        className="mb-2 text-2xl font-bold text-gray-900 dark:text-white"
       >
         How can AETHER assist you today?
       </motion.h2>
@@ -48,26 +48,35 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-gray-500 dark:text-gray-400 mb-8 text-sm max-w-md"
+        className="mb-8 max-w-md text-sm text-gray-500 dark:text-gray-400"
       >
-        Ask questions, refactor complex systems, or explore technical strategies with your personal engineering copilot.
+        Ask questions, refactor complex systems, or explore technical strategies with your personal
+        engineering copilot.
       </motion.p>
 
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full"
+        className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3"
       >
         {SUGGESTIONS.map((s, idx) => (
           <button
             key={idx}
-            onClick={() => { onSelectPrompt(s.prompt); }}
-            className="flex flex-col items-start p-4 text-left rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all shadow-sm group"
+            onClick={() => {
+              onSelectPrompt(s.prompt);
+            }}
+            className="group flex flex-col items-start rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50 dark:hover:bg-gray-800/80"
           >
-            <span className="text-xl mb-2 group-hover:scale-110 transition-transform">{s.icon}</span>
-            <span className="text-xs font-semibold text-gray-900 dark:text-gray-200 mb-1">{s.title}</span>
-            <span className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2">{s.prompt}</span>
+            <span className="mb-2 text-xl transition-transform group-hover:scale-110">
+              {s.icon}
+            </span>
+            <span className="mb-1 text-xs font-semibold text-gray-900 dark:text-gray-200">
+              {s.title}
+            </span>
+            <span className="line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">
+              {s.prompt}
+            </span>
           </button>
         ))}
       </motion.div>

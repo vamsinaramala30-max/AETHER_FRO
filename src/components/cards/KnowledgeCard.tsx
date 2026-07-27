@@ -11,11 +11,11 @@ export interface KnowledgeCardProps {
 export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({ title, category, size, onClick }) => {
   return (
     <Card hoverable onClick={onClick} className="flex items-start space-x-3">
-      <div className="p-2.5 bg-surface-hover rounded-xl text-lg">📄</div>
-      <div className="flex-grow min-w-0">
-        <p className="text-xs font-semibold text-accent-primary">{category}</p>
-        <h4 className="text-sm font-medium text-text-primary truncate">{title}</h4>
-        <p className="text-[10px] text-text-tertiary mt-1">{size}</p>
+      <div className="bg-surface-hover rounded-xl p-2.5 text-lg">📄</div>
+      <div className="min-w-0 flex-grow">
+        <p className="text-accent-primary text-xs font-semibold">{category}</p>
+        <h4 className="text-text-primary truncate text-sm font-medium">{title}</h4>
+        <p className="text-text-tertiary mt-1 text-[10px]">{size}</p>
       </div>
     </Card>
   );

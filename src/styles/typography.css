@@ -1,24 +1,28 @@
-h1, .aether-h1 {
+h1,
+.aether-h1 {
   font-size: var(--aether-text-4xl);
   font-weight: var(--aether-font-bold);
   line-height: var(--aether-lh-tight);
   letter-spacing: -0.02em;
 }
 
-h2, .aether-h2 {
+h2,
+.aether-h2 {
   font-size: var(--aether-text-3xl);
   font-weight: var(--aether-font-semibold);
   line-height: var(--aether-lh-tight);
   letter-spacing: -0.01em;
 }
 
-h3, .aether-h3 {
+h3,
+.aether-h3 {
   font-size: var(--aether-text-2xl);
   font-weight: var(--aether-font-semibold);
   line-height: var(--aether-lh-snug);
 }
 
-h4, .aether-h4 {
+h4,
+.aether-h4 {
   font-size: var(--aether-text-xl);
   font-weight: var(--aether-font-medium);
   line-height: var(--aether-lh-snug);

@@ -11,17 +11,17 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
   variant = 'rectangular',
   width,
-  height
+  height,
 }) => {
   const variants = {
     text: 'rounded',
     circular: 'rounded-full',
-    rectangular: 'rounded-lg'
+    rectangular: 'rounded-lg',
   };
 
   return (
     <div
-      className={`animate-pulse bg-surface-hover/60 ${variants[variant]} ${className}`}
+      className={`bg-surface-hover/60 animate-pulse ${variants[variant]} ${className}`}
       style={{ width, height }}
     />
   );

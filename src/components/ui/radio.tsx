@@ -5,18 +5,20 @@ export interface RadioProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Radio: React.FC<RadioProps> = ({ label, className = '', id, ...props }) => {
-  const radioId = id || React.useId();
+  const generatedId = React.useId();
+  const radioId = typeof id === 'string' && id.trim() !== '' ? id : generatedId;
+  const hasLabel = typeof label === 'string' && label.trim() !== '';
 
   return (
     <div className="flex items-center space-x-2.5">
       <input
         type="radio"
         id={radioId}
-        className={`w-4 h-4 border-border-strong text-accent-primary focus:ring-accent-primary bg-surface-subtle transition-all cursor-pointer ${className}`}
+        className={`border-border-strong text-accent-primary focus:ring-accent-primary bg-surface-subtle h-4 w-4 cursor-pointer transition-all ${className}`}
         {...props}
       />
-      {label && (
-        <label htmlFor={radioId} className="text-sm text-text-primary cursor-pointer select-none">
+      {hasLabel && (
+        <label htmlFor={radioId} className="text-text-primary cursor-pointer select-none text-sm">
           {label}
         </label>
       )}

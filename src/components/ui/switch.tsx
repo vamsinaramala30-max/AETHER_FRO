@@ -9,19 +9,29 @@ export interface SwitchProps {
 }
 
 export const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, disabled = false }) => {
+  const hasLabel = typeof label === 'string' && label.trim() !== '';
+
+  const handleClick = () => {
+    if (!disabled) {
+      onChange(!checked);
+    }
+  };
+
   return (
-    <label className={`inline-flex items-center space-x-3 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+    <label
+      className={`inline-flex items-center space-x-3 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+    >
       <div
-        onClick={() => !disabled && onChange(!checked)}
-        className={`w-11 h-6 rounded-full p-1 transition-colors ${checked ? 'bg-accent-primary' : 'bg-surface-hover border border-border-subtle'}`}
+        onClick={handleClick}
+        className={`h-6 w-11 rounded-full p-1 transition-colors ${checked ? 'bg-accent-primary' : 'bg-surface-hover border-border-subtle border'}`}
       >
         <motion.div
           animate={{ x: checked ? 20 : 0 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="w-4 h-4 rounded-full bg-white shadow-md"
+          className="h-4 w-4 rounded-full bg-white shadow-md"
         />
       </div>
-      {label && <span className="text-sm font-medium text-text-primary">{label}</span>}
+      {hasLabel && <span className="text-text-primary text-sm font-medium">{label}</span>}
     </label>
   );
 };

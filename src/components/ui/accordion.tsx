@@ -17,21 +17,26 @@ export const Accordion: React.FC<AccordionProps> = ({ items, allowMultiple = fal
 
   const toggle = (id: string) => {
     if (allowMultiple) {
-      setExpanded(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+      setExpanded((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
     } else {
-      setExpanded(prev => prev.includes(id) ? [] : [id]);
+      setExpanded((prev) => (prev.includes(id) ? [] : [id]));
     }
   };
 
   return (
-    <div className="space-y-2 border border-border-subtle rounded-xl p-2 bg-surface-subtle">
+    <div className="border-border-subtle bg-surface-subtle space-y-2 rounded-xl border p-2">
       {items.map((item) => {
         const isOpen = expanded.includes(item.id);
         return (
-          <div key={item.id} className="border border-border-subtle rounded-lg overflow-hidden bg-surface-base">
+          <div
+            key={item.id}
+            className="border-border-subtle bg-surface-base overflow-hidden rounded-lg border"
+          >
             <button
-              onClick={() => { toggle(item.id); }}
-              className="w-full flex items-center justify-between p-4 text-left text-sm font-medium text-text-primary hover:bg-surface-hover transition-colors"
+              onClick={() => {
+                toggle(item.id);
+              }}
+              className="text-text-primary hover:bg-surface-hover flex w-full items-center justify-between p-4 text-left text-sm font-medium transition-colors"
             >
               <span>{item.title}</span>
               <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -47,7 +52,7 @@ export const Accordion: React.FC<AccordionProps> = ({ items, allowMultiple = fal
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-4 pt-0 text-xs text-text-secondary border-t border-border-subtle/50 mt-1">
+                  <div className="text-text-secondary border-border-subtle/50 mt-1 border-t p-4 pt-0 text-xs">
                     {item.content}
                   </div>
                 </motion.div>

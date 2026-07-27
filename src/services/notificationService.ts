@@ -19,12 +19,16 @@ export class NotificationService {
   public notify(type: AppNotification['type'], message: string): void {
     const item: AppNotification = { id: crypto.randomUUID(), type, message };
     this.notifications = [...this.notifications, item];
-    this.listeners.forEach((fn) => { fn(this.notifications); });
+    this.listeners.forEach((fn) => {
+      fn(this.notifications);
+    });
   }
 
   public dismiss(id: string): void {
     this.notifications = this.notifications.filter((n) => n.id !== id);
-    this.listeners.forEach((fn) => { fn(this.notifications); });
+    this.listeners.forEach((fn) => {
+      fn(this.notifications);
+    });
   }
 }
 

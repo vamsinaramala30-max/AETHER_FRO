@@ -6,7 +6,9 @@ export const AgendaView: React.FC = () => {
   const { events } = useEvents();
   const { openEventDetails } = useEventStore();
 
-  const sorted = [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  const sorted = [...events].sort(
+    (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+  );
 
   return (
     <div style={{ padding: '16px', overflowY: 'auto' }}>
@@ -14,7 +16,9 @@ export const AgendaView: React.FC = () => {
       {sorted.map((e) => (
         <div
           key={e.id}
-          onClick={() => openEventDetails(e)}
+          onClick={() => {
+            openEventDetails(e);
+          }}
           style={{
             display: 'flex',
             gap: '16px',

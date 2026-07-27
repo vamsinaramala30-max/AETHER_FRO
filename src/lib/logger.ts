@@ -30,11 +30,7 @@ class Logger {
 
     switch (payload.level) {
       case 'debug':
-        console.debug(formatted, payload.data ?? '');
-        break;
       case 'info':
-        console.info(formatted, payload.data ?? '');
-        break;
       case 'warn':
         console.warn(formatted, payload.data ?? '');
         break;

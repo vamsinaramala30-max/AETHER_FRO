@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { useNotificationStore } from '../store/notificationStore';
-import { NotificationService } from '../services/notificationService';
+import { notificationService } from '../services/notificationService';
 
 export const useNotifications = () => {
-  const { notifications, settings, addNotification, markAsRead, clearAll, updateSettings } = useNotificationStore();
+  const { notifications, settings, addNotification, markAsRead, clearAll, updateSettings } =
+    useNotificationStore();
 
   useEffect(() => {
     if (settings.enableDesktopNotifications) {
-      NotificationService.requestPermission();
+      void notificationService.requestPermission();
     }
   }, [settings.enableDesktopNotifications]);
 

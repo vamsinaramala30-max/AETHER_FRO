@@ -9,15 +9,12 @@ export interface SceneManagerProps {
   children?: React.ReactNode;
 }
 
-export const SceneManager: React.FC<SceneManagerProps> = ({
-  showParticles = true,
-  children,
-}) => {
+export const SceneManager: React.FC<SceneManagerProps> = ({ showParticles = true, children }) => {
   return (
     <Canvas>
       <Scene>
         {showParticles && <Particles />}
-        {children || <DefaultMeshModel />}
+        {children ?? <DefaultMeshModel />}
       </Scene>
     </Canvas>
   );

@@ -1,9 +1,22 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { PublicLayout } from '../layouts/publiclayouts';
+import { GuestGuard } from '../../guards/GuestGuard';
 
 // Importing verified existing landing components safely via barrel export
-import { Home, About, Features, AI, Privacy, Security, Terms, PrivacyPolicy, Login, Signup } from '../../public/pages';
+import {
+  Home,
+  About,
+  Features,
+  AI,
+  Privacy,
+  Security,
+  Terms,
+  PrivacyPolicy,
+  Login,
+  Signup,
+  Statuses,
+} from '../../public/pages';
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -18,8 +31,23 @@ export const publicRoutes: RouteObject[] = [
       { path: 'security', element: <Security /> },
       { path: 'terms', element: <Terms /> },
       { path: 'privacy-policy', element: <PrivacyPolicy /> },
-      { path: 'login', element: <Login /> },
-      { path: 'signup', element: <Signup /> }
-    ]
-  }
+      { path: 'states', element: <Statuses /> },
+      {
+        path: 'login',
+        element: (
+          <GuestGuard>
+            <Login />
+          </GuestGuard>
+        ),
+      },
+      {
+        path: 'signup',
+        element: (
+          <GuestGuard>
+            <Signup />
+          </GuestGuard>
+        ),
+      },
+    ],
+  },
 ];

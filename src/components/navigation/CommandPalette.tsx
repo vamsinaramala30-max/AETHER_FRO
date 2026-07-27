@@ -26,18 +26,21 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => { window.removeEventListener('keydown', handleKeyDown); };
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
-  const filtered = actions.filter(action =>
-    action.title.toLowerCase().includes(query.toLowerCase()) ||
-    action.category.toLowerCase().includes(query.toLowerCase())
+  const filtered = actions.filter(
+    (action) =>
+      action.title.toLowerCase().includes(query.toLowerCase()) ||
+      action.category.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -49,22 +52,26 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
             initial={{ opacity: 0, scale: 0.96, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
-            className="relative w-full max-w-xl bg-surface-elevated/95 backdrop-blur-2xl border border-border-strong rounded-2xl shadow-2xl overflow-hidden z-10"
+            className="bg-surface-elevated/95 border-border-strong relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-2xl"
           >
-            <div className="p-4 border-b border-border-subtle flex items-center space-x-3">
+            <div className="border-border-subtle flex items-center space-x-3 border-b p-4">
               <span className="text-text-tertiary">🔍</span>
               <input
                 autoFocus
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); }}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                }}
                 placeholder="Type a command or search..."
-                className="w-full bg-transparent text-text-primary text-sm outline-none placeholder:text-text-tertiary"
+                className="text-text-primary placeholder:text-text-tertiary w-full bg-transparent text-sm outline-none"
               />
-              <span className="text-[10px] bg-surface-hover px-2 py-0.5 rounded text-text-tertiary">ESC</span>
+              <span className="bg-surface-hover text-text-tertiary rounded px-2 py-0.5 text-[10px]">
+                ESC
+              </span>
             </div>
-            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+            <div className="max-h-80 space-y-1 overflow-y-auto p-2">
               {filtered.length === 0 ? (
-                <p className="text-xs text-text-tertiary p-4 text-center">No actions found.</p>
+                <p className="text-text-tertiary p-4 text-center text-xs">No actions found.</p>
               ) : (
                 filtered.map((action) => (
                   <button
@@ -73,13 +80,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                       action.onSelect();
                       onClose();
                     }}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors text-left text-sm text-text-primary"
+                    className="hover:bg-surface-hover text-text-primary flex w-full items-center justify-between rounded-xl p-3 text-left text-sm transition-colors"
                   >
                     <div className="flex items-center space-x-3">
                       {action.icon && <span>{action.icon}</span>}
                       <span>{action.title}</span>
                     </div>
-                    <span className="text-[10px] uppercase font-semibold text-text-tertiary bg-surface-subtle px-2 py-0.5 rounded border border-border-subtle">
+                    <span className="text-text-tertiary bg-surface-subtle border-border-subtle rounded border px-2 py-0.5 text-[10px] font-semibold uppercase">
                       {action.category}
                     </span>
                   </button>

@@ -37,7 +37,7 @@ class HttpClient {
   private responseInterceptors: ResponseInterceptor[] = [];
 
   constructor() {
-    this.baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || '/api/v1';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
     this.defaultTimeout = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
 
     // --- Global Auth Token Interceptor Wiring ---
@@ -81,8 +81,14 @@ class HttpClient {
     this.responseInterceptors.push(interceptor);
   }
 
-  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
-    const url = new URL(endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`, window.location.origin);
+  private buildUrl(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>,
+  ): string {
+    const url = new URL(
+      endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`,
+      window.location.origin,
+    );
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -116,13 +122,22 @@ class HttpClient {
       currentConfig = await interceptor(currentConfig);
     }
 
-    const { timeout, retries = 0, retryDelay = 1000, params, skipAuth, ...fetchOptions } = currentConfig;
+    const {
+      timeout,
+      retries = 0,
+      retryDelay = 1000,
+      params,
+      skipAuth: _skipAuth,
+      ...fetchOptions
+    } = currentConfig;
     const url = this.buildUrl(endpoint, params);
 
     let attempt = 0;
     while (attempt <= retries) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => { controller.abort(); }, timeout);
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, timeout);
 
       try {
         let response = await fetch(url, {
@@ -192,7 +207,10 @@ class HttpClient {
     throw new ApiError({ message: 'Unknown request failure', status: 500 });
   }
 
-  public async *stream(endpoint: string, config: RequestConfig = {}): AsyncGenerator<string, void, unknown> {
+  public async *stream(
+    endpoint: string,
+    config: RequestConfig = {},
+  ): AsyncGenerator<string, void, unknown> {
     let currentConfig: RequestConfig = {
       ...config,
       headers: {
@@ -206,7 +224,7 @@ class HttpClient {
       currentConfig = await interceptor(currentConfig);
     }
 
-    const { params, skipAuth, ...fetchOptions } = currentConfig;
+    const { params, skipAuth: _skipAuth, ...fetchOptions } = currentConfig;
     const url = this.buildUrl(endpoint, params);
 
     const response = await fetch(url, fetchOptions);

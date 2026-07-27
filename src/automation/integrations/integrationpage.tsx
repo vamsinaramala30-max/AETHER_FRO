@@ -28,7 +28,7 @@ export const IntegrationsPage: React.FC = () => {
   const handleStatusChange = async (id: string, target: 'connected' | 'disconnected') => {
     try {
       const updated = await integrationsService.updateIntegrationStatus(id, target);
-      setIntegrations(prev => prev.map(i => i.id === id ? updated : i));
+      setIntegrations((prev) => prev.map((i) => (i.id === id ? updated : i)));
     } catch {
       setError('Gateway interface status update transactional drop.');
     }
@@ -36,8 +36,8 @@ export const IntegrationsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[300px]">
-        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[300px] items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
       </div>
     );
   }
@@ -45,22 +45,24 @@ export const IntegrationsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-3 text-xs bg-red-950/40 text-red-400 border border-red-900/40 rounded-lg">
+        <div className="rounded-lg border border-red-900/40 bg-red-950/40 p-3 text-xs text-red-400">
           {error}
         </div>
       )}
 
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-100">Integration Network</h1>
-        <p className="text-xs text-slate-400">Bridge secure data links to third-party endpoints, deployment engines, and team platforms.</p>
+        <p className="text-xs text-slate-400">
+          Bridge secure data links to third-party endpoints, deployment engines, and team platforms.
+        </p>
       </div>
 
       {integrations.length === 0 ? (
-        <div className="p-12 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
+        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/10 p-12 text-center">
           <p className="text-sm text-slate-500">No interface pipelines detected.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {integrations.map((integration) => (
             <IntegrationCard
               key={integration.id}

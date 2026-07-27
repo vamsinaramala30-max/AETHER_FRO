@@ -18,14 +18,30 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
       {/* Time column */}
       <div style={{ width: '60px', borderRight: '1px solid #dadce0' }}>
         {hours.map((hour) => (
-          <div key={hour} style={{ height: '48px', fontSize: '10px', color: '#5f6368', textAlign: 'right', paddingRight: '4px' }}>
-            {hour === 0 ? '' : `${hour}:00`}
+          <div
+            key={hour}
+            style={{
+              height: '48px',
+              fontSize: '10px',
+              color: '#5f6368',
+              textAlign: 'right',
+              paddingRight: '4px',
+            }}
+          >
+            {hour === 0 ? '' : `${String(hour)}:00`}
           </div>
         ))}
       </div>
 
       {/* Day columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${days.length}, 1fr)`, flex: 1, position: 'relative' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${String(days.length)}, 1fr)`,
+          flex: 1,
+          position: 'relative',
+        }}
+      >
         {days.map((day) => {
           const dayEvents = events.filter((e) => {
             const eStart = new Date(e.start);
@@ -39,7 +55,10 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
           const positioned = calculateEventPositions(dayEvents);
 
           return (
-            <div key={day.toISOString()} style={{ borderRight: '1px solid #dadce0', position: 'relative' }}>
+            <div
+              key={day.toISOString()}
+              style={{ borderRight: '1px solid #dadce0', position: 'relative' }}
+            >
               {hours.map((hour) => (
                 <div key={hour} style={{ height: '48px', borderBottom: '1px solid #f1f3f4' }} />
               ))}
@@ -48,12 +67,14 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
                 <EventCard
                   key={event.id}
                   event={event}
-                  onClick={() => openEventDetails(event)}
+                  onClick={() => {
+                    openEventDetails(event);
+                  }}
                   style={{
-                    top: `${topPercent}%`,
-                    height: `${heightPercent}%`,
-                    left: `${leftPercent}%`,
-                    width: `${widthPercent}%`,
+                    top: `${String(topPercent)}%`,
+                    height: `${String(heightPercent)}%`,
+                    left: `${String(leftPercent)}%`,
+                    width: `${String(widthPercent)}%`,
                   }}
                 />
               ))}

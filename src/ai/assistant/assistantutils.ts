@@ -76,7 +76,9 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-export const groupMessagesByDate = (conversations: Conversation[]): Record<string, Conversation[]> => {
+export const groupMessagesByDate = (
+  conversations: Conversation[],
+): Record<string, Conversation[]> => {
   const groups: Record<string, Conversation[]> = {
     Today: [],
     Yesterday: [],

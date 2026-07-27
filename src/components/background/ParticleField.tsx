@@ -1,6 +1,6 @@
-import React, { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import React, { useRef, useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 interface ParticleFieldProps {
   count?: number;
@@ -11,7 +11,7 @@ interface ParticleFieldProps {
 
 export const ParticleField: React.FC<ParticleFieldProps> = ({
   count = 1500,
-  color = "#00E5FF",
+  color = '#00E5FF',
   size = 0.03,
   speed = 0.2,
 }) => {
@@ -45,10 +45,7 @@ export const ParticleField: React.FC<ParticleFieldProps> = ({
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         size={size}

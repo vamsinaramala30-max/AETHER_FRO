@@ -29,8 +29,13 @@ export const knowledgeBaseService = {
     });
 
     // Extract unique tags as concept nodes
-    const uniqueTags = Array.from(new Set([...notes.flatMap((n: import('../types').Note) => n.tags), ...docs.flatMap((d: import('../types').DocumentItem) => d.tags)]));
-    
+    const uniqueTags = Array.from(
+      new Set([
+        ...notes.flatMap((n: import('../types').Note) => n.tags),
+        ...docs.flatMap((d: import('../types').DocumentItem) => d.tags),
+      ]),
+    );
+
     uniqueTags.forEach((tag) => {
       nodes.push({
         id: tag,

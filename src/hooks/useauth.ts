@@ -14,16 +14,21 @@ export const useAuth = () => {
   const logoutStore = useAuthStore((s) => s.logout);
 
   const login = useCallback(
-    async (credentials: { email: string; pass: string }) => {
+    (credentials: { email: string; pass: string }) => {
       setLoading(true);
       try {
-        const mockUser: User = { id: 'usr_1', email: credentials.email, name: 'Aether User', role: 'admin' };
+        const mockUser: User = {
+          id: 'usr_1',
+          email: credentials.email,
+          name: 'Aether User',
+          role: 'admin',
+        };
         setAuth(mockUser, 'jwt_token_sample');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Login failed');
       }
     },
-    [setAuth, setError, setLoading]
+    [setAuth, setError, setLoading],
   );
 
   const logout = useCallback(() => {

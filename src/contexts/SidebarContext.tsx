@@ -17,10 +17,18 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
 
-  const toggleVisibility = useCallback(() => { setIsVisible((prev) => !prev); }, []);
-  const toggleCollapse = useCallback(() => { setIsCollapsed((prev) => !prev); }, []);
-  const toggleMobileDrawer = useCallback(() => { setIsMobileDrawerOpen((prev) => !prev); }, []);
-  const setMobileDrawerOpen = useCallback((open: boolean) => { setIsMobileDrawerOpen(open); }, []);
+  const toggleVisibility = useCallback(() => {
+    setIsVisible((prev) => !prev);
+  }, []);
+  const toggleCollapse = useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
+  const toggleMobileDrawer = useCallback(() => {
+    setIsMobileDrawerOpen((prev) => !prev);
+  }, []);
+  const setMobileDrawerOpen = useCallback((open: boolean) => {
+    setIsMobileDrawerOpen(open);
+  }, []);
 
   const value = useMemo<SidebarContextValue>(
     () => ({
@@ -32,7 +40,15 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       toggleMobileDrawer,
       setMobileDrawerOpen,
     }),
-    [isVisible, isCollapsed, isMobileDrawerOpen, toggleVisibility, toggleCollapse, toggleMobileDrawer, setMobileDrawerOpen]
+    [
+      isVisible,
+      isCollapsed,
+      isMobileDrawerOpen,
+      toggleVisibility,
+      toggleCollapse,
+      toggleMobileDrawer,
+      setMobileDrawerOpen,
+    ],
   );
 
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;

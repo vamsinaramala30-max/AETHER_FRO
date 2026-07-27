@@ -1,42 +1,45 @@
 import { CalendarEvent } from '../types/event';
 
-export class EventService {
-  private static STORAGE_KEY = 'enterprise_calendar_events';
+const STORAGE_KEY = 'enterprise_calendar_events';
 
-  public static async fetchEvents(): Promise<CalendarEvent[]> {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
-    if (!raw) return [];
+export const eventService = {
+  fetchEvents(): Promise<CalendarEvent[]> {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (typeof raw !== 'string' || raw.trim() === '') return Promise.resolve([]);
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw) as CalendarEvent[];
+      return Promise.resolve(Array.isArray(parsed) ? parsed : []);
     } catch {
-      return [];
+      return Promise.resolve([]);
     }
-  }
+  },
 
-  public static async saveEvents(events: CalendarEvent[]): Promise<void> {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(events));
-  }
+  saveEvents(events: CalendarEvent[]): Promise<void> {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    return Promise.resolve();
+  },
 
-  public static async createEvent(event: CalendarEvent): Promise<CalendarEvent> {
+  async createEvent(event: CalendarEvent): Promise<CalendarEvent> {
     const events = await this.fetchEvents();
     events.push(event);
     await this.saveEvents(events);
     return event;
-  }
+  },
 
-  public static async updateEvent(id: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent> {
+  async updateEvent(id: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent> {
     const events = await this.fetchEvents();
-    const index = events.findIndex(e => e.id === id);
+    const index = events.findIndex((e) => e.id === id);
     if (index === -1) throw new Error(`Event with ID ${id} not found.`);
-    
-    events[index] = { ...events[index], ...updates, updatedAt: new Date().toISOString() };
-    await this.saveEvents(events);
-    return events[index];
-  }
 
-  public static async deleteEvent(id: string): Promise<void> {
+    const updated = { ...events[index], ...updates, updatedAt: new Date().toISOString() };
+    events[index] = updated;
+    await this.saveEvents(events);
+    return updated;
+  },
+
+  async deleteEvent(id: string): Promise<void> {
     const events = await this.fetchEvents();
-    const filtered = events.filter(e => e.id !== id);
+    const filtered = events.filter((e) => e.id !== id);
     await this.saveEvents(filtered);
-  }
-}
+  },
+};

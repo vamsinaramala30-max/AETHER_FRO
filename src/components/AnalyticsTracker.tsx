@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
-import { initGA, trackPageView } from "../lib/analytics";
+import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { initGA, trackPageView } from '../lib/analytics';
 
 interface AnalyticsTrackerProps {
   /** Optional custom flag to mark route paths as 404 */
@@ -27,7 +27,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({ isNotFoundPa
     lastTrackedPath.current = currentPath;
 
     // 3. Track regular route or 404 view
-    const title = isNotFoundPage ? "404 - Page Not Found" : document.title;
+    const title = isNotFoundPage ? '404 - Page Not Found' : document.title;
     trackPageView(currentPath, title);
   }, [location, isNotFoundPage]);
 

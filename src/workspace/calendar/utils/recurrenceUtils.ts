@@ -3,13 +3,19 @@ import { RecurrenceRule, DayOfWeek } from '../types/recurrence';
 import { addDays, parseISODate, toISODateString } from './dateUtils';
 
 const DAY_MAP: Record<DayOfWeek, number> = {
-  SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6
+  SU: 0,
+  MO: 1,
+  TU: 2,
+  WE: 3,
+  TH: 4,
+  FR: 5,
+  SA: 6,
 };
 
 export const generateOccurrences = (
   event: CalendarEvent,
   rangeStart: Date,
-  rangeEnd: Date
+  rangeEnd: Date,
 ): CalendarEvent[] => {
   if (!event.recurrenceRule) {
     return [event];
@@ -23,16 +29,19 @@ export const generateOccurrences = (
 
   let current = new Date(eventStart);
   let count = 0;
-  const maxOccurrences = rule.count || 500; // Safety threshold
-  const untilDate = rule.until ? parseISODate(rule.until) : rangeEnd;
+  const maxOccurrences = typeof rule.count === 'number' && rule.count > 0 ? rule.count : 500; // Safety threshold
+  const untilDate =
+    typeof rule.until === 'string' && rule.until.trim() !== ''
+      ? parseISODate(rule.until)
+      : rangeEnd;
 
   while (current <= rangeEnd && current <= untilDate && count < maxOccurrences) {
-    const isExcluded = event.recurringExceptionDates?.some(
-      exDate => exDate === toISODateString(current)
-    );
+    const isExcluded =
+      typeof event.recurringExceptionDates !== 'undefined' &&
+      event.recurringExceptionDates.some((exDate) => exDate === toISODateString(current));
 
     if (!isExcluded && current >= rangeStart) {
-      if (matchesRecurrenceCondition(current, rule, eventStart)) {
+      if (matchesRecurrenceCondition(current, rule)) {
         const instanceStart = new Date(current);
         const instanceEnd = new Date(instanceStart.getTime() + eventDurationMinutes * 60 * 1000);
 
@@ -50,16 +59,20 @@ export const generateOccurrences = (
     // Step current date forward according to frequency
     switch (rule.freq) {
       case 'DAILY':
-        current = addDays(current, rule.interval || 1);
+        current = addDays(current, typeof rule.interval === 'number' ? rule.interval : 1);
         break;
       case 'WEEKLY':
         current = addDays(current, 1);
         break;
       case 'MONTHLY':
-        current.setMonth(current.getMonth() + (rule.interval || 1));
+        current.setMonth(
+          current.getMonth() + (typeof rule.interval === 'number' ? rule.interval : 1),
+        );
         break;
       case 'YEARLY':
-        current.setFullYear(current.getFullYear() + (rule.interval || 1));
+        current.setFullYear(
+          current.getFullYear() + (typeof rule.interval === 'number' ? rule.interval : 1),
+        );
         break;
     }
   }
@@ -67,18 +80,14 @@ export const generateOccurrences = (
   return occurrences;
 };
 
-const matchesRecurrenceCondition = (
-  date: Date,
-  rule: RecurrenceRule,
-  originalStart: Date
-): boolean => {
-  if (rule.freq === 'WEEKLY' && rule.byDay && rule.byDay.length > 0) {
+const matchesRecurrenceCondition = (date: Date, rule: RecurrenceRule): boolean => {
+  if (rule.freq === 'WEEKLY' && Array.isArray(rule.byDay) && rule.byDay.length > 0) {
     const dayIndex = date.getDay();
-    const allowedDays = rule.byDay.map(d => DAY_MAP[d]);
+    const allowedDays = rule.byDay.map((d) => DAY_MAP[d]);
     if (!allowedDays.includes(dayIndex)) return false;
   }
 
-  if (rule.freq === 'MONTHLY' && rule.byMonthDay) {
+  if (rule.freq === 'MONTHLY' && Array.isArray(rule.byMonthDay)) {
     if (!rule.byMonthDay.includes(date.getDate())) return false;
   }
 
@@ -95,17 +104,20 @@ export const formatRecurrenceRuleText = (rule?: RecurrenceRule): string => {
     YEARLY: 'year',
   };
 
-  const unit = freqMap[rule.freq];
-  let text = rule.interval && rule.interval > 1 ? `Every ${rule.interval} ${unit}s` : `Every ${unit}`;
+  const unit = freqMap[rule.freq] ?? 'day';
+  let text =
+    typeof rule.interval === 'number' && rule.interval > 1
+      ? `Every ${String(rule.interval)} ${unit}s`
+      : `Every ${unit}`;
 
-  if (rule.byDay && rule.byDay.length > 0) {
+  if (Array.isArray(rule.byDay) && rule.byDay.length > 0) {
     text += ` on ${rule.byDay.join(', ')}`;
   }
 
-  if (rule.until) {
+  if (typeof rule.until === 'string' && rule.until.trim() !== '') {
     text += ` until ${rule.until}`;
-  } else if (rule.count) {
-    text += `, ${rule.count} times`;
+  } else if (typeof rule.count === 'number' && rule.count > 0) {
+    text += `, ${String(rule.count)} times`;
   }
 
   return text;

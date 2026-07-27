@@ -1,8 +1,8 @@
-import React, { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import React, { useRef, useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-export const NeuralNetwork: React.FC<{ color?: string }> = ({ color = "#3B82F6" }) => {
+export const NeuralNetwork: React.FC<{ color?: string }> = ({ color = '#3B82F6' }) => {
   const groupRef = useRef<THREE.Group>(null!);
   const count = 40;
 
@@ -13,8 +13,8 @@ export const NeuralNetwork: React.FC<{ color?: string }> = ({ color = "#3B82F6" 
         new THREE.Vector3(
           (Math.random() - 0.5) * 12,
           (Math.random() - 0.5) * 12,
-          (Math.random() - 0.5) * 12
-        )
+          (Math.random() - 0.5) * 12,
+        ),
       );
     }
 
@@ -23,8 +23,12 @@ export const NeuralNetwork: React.FC<{ color?: string }> = ({ color = "#3B82F6" 
       for (let j = i + 1; j < count; j++) {
         if (nodeCoords[i].distanceTo(nodeCoords[j]) < 3.5) {
           linePositions.push(
-            nodeCoords[i].x, nodeCoords[i].y, nodeCoords[i].z,
-            nodeCoords[j].x, nodeCoords[j].y, nodeCoords[j].z
+            nodeCoords[i].x,
+            nodeCoords[i].y,
+            nodeCoords[i].z,
+            nodeCoords[j].x,
+            nodeCoords[j].y,
+            nodeCoords[j].z,
           );
         }
       }
@@ -43,10 +47,7 @@ export const NeuralNetwork: React.FC<{ color?: string }> = ({ color = "#3B82F6" 
     <group ref={groupRef}>
       <lineSegments>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[lines, 3]}
-          />
+          <bufferAttribute attach="attributes-position" args={[lines, 3]} />
         </bufferGeometry>
         <lineBasicMaterial color={color} transparent opacity={0.3} depthWrite={false} />
       </lineSegments>

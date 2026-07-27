@@ -30,7 +30,7 @@ function extractAccessToken(res: any): string | null {
 /**
  * Extract refresh token from backend response for session management.
  */
-function extractRefreshToken(res: any): string | null {
+function _extractRefreshToken(res: any): string | null {
   if (res?.data?.tokens?.refreshToken) {
     return res.data.tokens.refreshToken;
   }
@@ -41,9 +41,14 @@ function extractRefreshToken(res: any): string | null {
 }
 
 export const authService = {
-  async signUp(email: string, password: string): Promise<AuthResponse> {
+  async signUp(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
     try {
-      const res = await authApi.register({ name: email, email, password });
+      const res = await authApi.register({ firstName, lastName, email, password });
       const accessToken = extractAccessToken(res);
       if (accessToken) {
         localStorage.setItem('aether_auth_token', JSON.stringify(accessToken));
@@ -68,8 +73,10 @@ export const authService = {
   },
 
   signInWithGoogle(): void {
-    // VITE_API_BASE_URL is 'http://localhost:5000/api' — strip the '/api' suffix to get server root
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL as string)?.replace(/\/api(\/v\d)?\/?$/, '') || 'http://localhost:5000';
+    // VITE_API_BASE_URL is 'http://localhost:5001/api' — strip the '/api' suffix to get server root
+    const baseUrl =
+      import.meta.env.VITE_API_BASE_URL?.replace(/\/api(\/v\d)?\/?$/, '') ||
+      'http://localhost:5001';
     // The OAuth route is mounted at /api/auth/google in the backend
     window.location.href = `${baseUrl}/api/auth/google`;
   },
@@ -78,7 +85,7 @@ export const authService = {
     try {
       const token = localStorage.getItem('aether_auth_token');
       if (token) {
-        const parsedToken = JSON.parse(token);
+        const _parsedToken = JSON.parse(token);
         await authApi.logout();
       }
       localStorage.removeItem('aether_auth_token');
@@ -94,7 +101,13 @@ export const authService = {
       if (token) {
         const parsedToken = JSON.parse(token);
         if (parsedToken) {
-          return { session: { access_token: parsedToken, user: { id: 'restored', email: 'session@aether.app' } }, error: null };
+          return {
+            session: {
+              access_token: parsedToken,
+              user: { id: 'restored', email: 'session@aether.app' },
+            },
+            error: null,
+          };
         }
       }
       return { session: null, error: null };
@@ -103,9 +116,9 @@ export const authService = {
     }
   },
 
-  subscribeToAuthChanges(callback: (event: string, session: any) => void) {
+  subscribeToAuthChanges(_callback: (event: string, session: any) => void) {
     // No-op for now - we don't have real-time auth state changes with JWT
     // The callback will be invoked manually on login/logout
     return { unsubscribe: () => {} };
-  }
+  },
 };

@@ -11,9 +11,11 @@ export const securityService = {
     // Encrypted/hashed delivery parameters processed natively via network stack architecture
     await api.post('/auth/security/credentials', payload);
   },
-  
+
   toggleTwoFactor: async (enabled: boolean): Promise<{ secret?: string; enabled: boolean }> => {
-    const response = await api.post('/auth/security/2fa', { enabled });
+    const response = await api.post<{ secret?: string; enabled: boolean }>('/auth/security/2fa', {
+      enabled,
+    });
     return response.data;
-  }
+  },
 };

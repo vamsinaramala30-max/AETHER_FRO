@@ -10,15 +10,19 @@ export const PromptCategories: React.FC<PromptCategoriesProps> = ({ active, onCh
 
   return (
     <div className="flex flex-col space-y-1">
-      <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">Domains</h3>
+      <h3 className="mb-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        Domains
+      </h3>
       {options.map((opt) => (
         <button
           key={opt}
-          onClick={() => { onChange(opt); }}
-          className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg capitalize transition-colors cursor-pointer ${
+          onClick={() => {
+            onChange(opt);
+          }}
+          className={`w-full cursor-pointer rounded-lg px-3 py-2 text-left text-xs font-medium capitalize transition-colors ${
             active === opt
-              ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+              ? 'bg-indigo-50 font-semibold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+              : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60'
           }`}
         >
           {opt}

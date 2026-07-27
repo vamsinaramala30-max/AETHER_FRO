@@ -8,7 +8,7 @@ interface EventState {
   isEventDetailsOpen: boolean;
   editingEvent: Partial<CalendarEvent> | null;
   historyStack: CalendarEvent[][]; // Undo history
-  
+
   // Actions
   setEvents: (events: CalendarEvent[]) => void;
   addEvent: (event: CalendarEvent) => void;
@@ -30,47 +30,70 @@ export const useEventStore = create<EventState>((set, get) => ({
   editingEvent: null,
   historyStack: [],
 
-  setEvents: (events) => set({ events }),
+  setEvents: (events) => {
+    set({ events });
+  },
 
-  addEvent: (event) => set((state) => ({
-    historyStack: [...state.historyStack, state.events],
-    events: [...state.events, event],
-  })),
+  addEvent: (event) => {
+    set((state) => ({
+      historyStack: [...state.historyStack, state.events],
+      events: [...state.events, event],
+    }));
+  },
 
-  updateEvent: (id, updates) => set((state) => ({
-    historyStack: [...state.historyStack, state.events],
-    events: state.events.map((e) => (e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e)),
-    selectedEvent: state.selectedEvent?.id === id ? { ...state.selectedEvent, ...updates } : state.selectedEvent,
-  })),
+  updateEvent: (id, updates) => {
+    set((state) => ({
+      historyStack: [...state.historyStack, state.events],
+      events: state.events.map((e) =>
+        e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e,
+      ),
+      selectedEvent:
+        state.selectedEvent?.id === id
+          ? { ...state.selectedEvent, ...updates }
+          : state.selectedEvent,
+    }));
+  },
 
-  deleteEvent: (id) => set((state) => ({
-    historyStack: [...state.historyStack, state.events],
-    events: state.events.filter((e) => e.id !== id),
-    selectedEvent: state.selectedEvent?.id === id ? null : state.selectedEvent,
-    isEventDetailsOpen: false,
-  })),
+  deleteEvent: (id) => {
+    set((state) => ({
+      historyStack: [...state.historyStack, state.events],
+      events: state.events.filter((e) => e.id !== id),
+      selectedEvent: state.selectedEvent?.id === id ? null : state.selectedEvent,
+      isEventDetailsOpen: false,
+    }));
+  },
 
-  setSelectedEvent: (selectedEvent) => set({ selectedEvent }),
+  setSelectedEvent: (selectedEvent) => {
+    set({ selectedEvent });
+  },
 
-  openEventForm: (initialData) => set({
-    isEventFormOpen: true,
-    editingEvent: initialData || null,
-  }),
+  openEventForm: (initialData) => {
+    set({
+      isEventFormOpen: true,
+      editingEvent: initialData || null,
+    });
+  },
 
-  closeEventForm: () => set({
-    isEventFormOpen: false,
-    editingEvent: null,
-  }),
+  closeEventForm: () => {
+    set({
+      isEventFormOpen: false,
+      editingEvent: null,
+    });
+  },
 
-  openEventDetails: (event) => set({
-    selectedEvent: event,
-    isEventDetailsOpen: true,
-  }),
+  openEventDetails: (event) => {
+    set({
+      selectedEvent: event,
+      isEventDetailsOpen: true,
+    });
+  },
 
-  closeEventDetails: () => set({
-    isEventDetailsOpen: false,
-    selectedEvent: null,
-  }),
+  closeEventDetails: () => {
+    set({
+      isEventDetailsOpen: false,
+      selectedEvent: null,
+    });
+  },
 
   undo: () => {
     const { historyStack } = get();

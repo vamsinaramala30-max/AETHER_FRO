@@ -9,4 +9,4 @@ export const THEME_KEYS = {
   SYSTEM: 'system',
 } as const;
 
-export type ThemeMode = typeof THEME_KEYS[keyof typeof THEME_KEYS];
+export type ThemeMode = (typeof THEME_KEYS)[keyof typeof THEME_KEYS];

@@ -2,47 +2,59 @@ import React from 'react';
 
 export const AetherIntroduction: React.FC = () => {
   return (
-    <section className="py-20 bg-[#0D0F16] border-b border-zinc-900" aria-labelledby="intro-heading">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <section
+      className="border-b border-zinc-900 bg-[#0D0F16] py-20"
+      aria-labelledby="intro-heading"
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <h2 id="intro-heading" className="text-2xl sm:text-3xl font-semibold text-zinc-100 tracking-tight">
+            <h2
+              id="intro-heading"
+              className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl"
+            >
               A Connected Workspace Paradigm
             </h2>
-            <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
-              Modern professional output requires more than discrete applications. Point solutions create communication boundaries, high contextual penalties, and fragmented memory. 
+            <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
+              Modern professional output requires more than discrete applications. Point solutions
+              create communication boundaries, high contextual penalties, and fragmented memory.
             </p>
-            <p className="mt-3 text-sm sm:text-base text-zinc-400 leading-relaxed">
-              Aether natively unifies core primitives within a singular workspace layer. It operates locally, connects explicitly, and remains predictable.
+            <p className="mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base">
+              Aether natively unifies core primitives within a singular workspace layer. It operates
+              locally, connects explicitly, and remains predictable.
             </p>
           </div>
-          
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-5 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:col-span-7">
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-5">
               <h3 className="text-sm font-semibold text-zinc-200">Integrated Intelligence</h3>
-              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                Contextually aware processing mapped directly over your verified data assets, tasks, and notes.
-              </p>
-            </div>
-            
-            <div className="p-5 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
-              <h3 className="text-sm font-semibold text-zinc-200">Dynamic Productivity</h3>
-              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                Task topologies and milestones designed to transform text descriptions into functional object relations.
-              </p>
-            </div>
-            
-            <div className="p-5 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
-              <h3 className="text-sm font-semibold text-zinc-200">Semantic Memory</h3>
-              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                Durable historical tracking capable of resurfacing context without relying on absolute title matches.
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">
+                Contextually aware processing mapped directly over your verified data assets, tasks,
+                and notes.
               </p>
             </div>
 
-            <div className="p-5 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-5">
+              <h3 className="text-sm font-semibold text-zinc-200">Dynamic Productivity</h3>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">
+                Task topologies and milestones designed to transform text descriptions into
+                functional object relations.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-5">
+              <h3 className="text-sm font-semibold text-zinc-200">Semantic Memory</h3>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">
+                Durable historical tracking capable of resurfacing context without relying on
+                absolute title matches.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-5">
               <h3 className="text-sm font-semibold text-zinc-200">Structured Knowledge</h3>
-              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                Clean markdown-ready documents that interface with programmatic pipelines and automation patterns.
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">
+                Clean markdown-ready documents that interface with programmatic pipelines and
+                automation patterns.
               </p>
             </div>
           </div>

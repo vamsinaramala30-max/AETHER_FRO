@@ -47,7 +47,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'aether-auth-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
-    }
-  )
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    },
+  ),
 );

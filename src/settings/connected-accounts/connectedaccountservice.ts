@@ -15,5 +15,5 @@ export const connectedAccountsService = {
 
   disconnectAccount: async (provider: string): Promise<void> => {
     await api.delete(`/user/connected-accounts/${provider}`);
-  }
+  },
 };

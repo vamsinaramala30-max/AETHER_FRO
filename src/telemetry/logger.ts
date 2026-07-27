@@ -33,7 +33,12 @@ class Logger {
     return this.levels[level] >= this.levels[this.level];
   }
 
-  private dispatch(level: LogLevel, message: string, context?: Record<string, unknown>, error?: Error): void {
+  private dispatch(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>,
+    error?: Error,
+  ): void {
     if (!this.shouldLog(level)) return;
 
     const entry: LogEntry = {
@@ -53,11 +58,7 @@ class Logger {
 
       switch (level) {
         case 'debug':
-          console.debug(...consoleArgs);
-          break;
         case 'info':
-          console.info(...consoleArgs);
-          break;
         case 'warn':
           console.warn(...consoleArgs);
           break;

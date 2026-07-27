@@ -19,7 +19,9 @@
 
 /* Reduced Motion Mode */
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -29,7 +31,8 @@
 
 /* High Contrast Mode Adjustments */
 @media (forced-colors: active) {
-  .aether-card, .aether-button {
+  .aether-card,
+  .aether-button {
     border: 1px solid CanvasText;
   }
 }

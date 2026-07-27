@@ -4,7 +4,7 @@ import { CalendarNotification, NotificationSettings } from '../types/notificatio
 interface NotificationState {
   notifications: CalendarNotification[];
   settings: NotificationSettings;
-  
+
   // Actions
   addNotification: (notification: CalendarNotification) => void;
   markAsRead: (id: string) => void;
@@ -24,17 +24,25 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     quietHoursEnd: '07:00',
   },
 
-  addNotification: (notification) => set((state) => ({
-    notifications: [notification, ...state.notifications],
-  })),
+  addNotification: (notification) => {
+    set((state) => ({
+      notifications: [notification, ...state.notifications],
+    }));
+  },
 
-  markAsRead: (id) => set((state) => ({
-    notifications: state.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-  })),
+  markAsRead: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+    }));
+  },
 
-  clearAll: () => set({ notifications: [] }),
+  clearAll: () => {
+    set({ notifications: [] });
+  },
 
-  updateSettings: (newSettings) => set((state) => ({
-    settings: { ...state.settings, ...newSettings },
-  })),
+  updateSettings: (newSettings) => {
+    set((state) => ({
+      settings: { ...state.settings, ...newSettings },
+    }));
+  },
 }));

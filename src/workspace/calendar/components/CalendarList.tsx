@@ -26,7 +26,9 @@ export const CalendarList: React.FC = () => {
             <input
               type="checkbox"
               checked={isChecked}
-              onChange={() => toggleCalendarVisibility(cal.id)}
+              onChange={() => {
+                toggleCalendarVisibility(cal.id);
+              }}
               style={{ accentColor: cal.color }}
             />
             <span

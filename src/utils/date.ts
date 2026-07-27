@@ -17,7 +17,7 @@ export const formatDate = (date: Date | string | number, locale = 'en-US'): stri
 export const formatRelativeTime = (date: Date | string | number): string => {
   const d = new Date(date);
   if (isNaN(d.getTime())) return '';
-  
+
   const now = new Date();
   const diffInSeconds = Math.floor((d.getTime() - now.getTime()) / 1000);
   const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });

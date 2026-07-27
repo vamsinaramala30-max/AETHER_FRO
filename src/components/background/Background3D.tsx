@@ -1,6 +1,6 @@
-import React, { Suspense, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { useVisualEffects } from "../../providers/VisualEffectsProvider";
+import React, { Suspense, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { useVisualEffects } from '../../providers/VisualEffectsContext';
 
 interface Background3DProps {
   children: React.ReactNode;
@@ -15,19 +15,19 @@ export const Background3D: React.FC<Background3DProps> = ({ children }) => {
   }
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       <Canvas
         camera={{ position: [0, 0, 8], fov: 60 }}
         dpr={isLowPower ? [1, 1] : [1, 2]}
-        gl={{ powerPreference: "high-performance", antialias: !isLowPower, alpha: true }}
-        style={{ pointerEvents: "none" }}
-        onError={() => setHasError(true)}
+        gl={{ powerPreference: 'high-performance', antialias: !isLowPower, alpha: true }}
+        style={{ pointerEvents: 'none' }}
+        onError={() => {
+          setHasError(true);
+        }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[0, 5, 5]} intensity={0.8} />
-        <Suspense fallback={null}>
-          {children}
-        </Suspense>
+        <Suspense fallback={null}>{children}</Suspense>
       </Canvas>
     </div>
   );

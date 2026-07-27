@@ -7,17 +7,26 @@ export const BillingPage: React.FC = () => {
   const [tier, setTier] = useState<SubscriptionTier | null>(null);
 
   useEffect(() => {
-    billingService.getCurrentSubscription().then((data) => { setTier(data); });
+    void (async () => {
+      const data = await billingService.getCurrentSubscription();
+      setTier(data);
+    })();
   }, []);
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white tracking-tight">Billing & Entitlements</h2>
-        <p className="text-sm text-slate-400 mt-1">Review active system processing tiers and corporate subscription parameters.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-white">Billing & Entitlements</h2>
+        <p className="mt-1 text-sm text-slate-400">
+          Review active system processing tiers and corporate subscription parameters.
+        </p>
       </div>
       <hr className="border-slate-800" />
-      {tier ? <BillingPlaceholder tier={tier} /> : <div className="text-xs text-slate-500 animate-pulse">Resolving parameters...</div>}
+      {tier ? (
+        <BillingPlaceholder tier={tier} />
+      ) : (
+        <div className="animate-pulse text-xs text-slate-500">Resolving parameters...</div>
+      )}
     </div>
   );
 };

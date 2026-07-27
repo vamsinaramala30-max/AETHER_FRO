@@ -8,7 +8,11 @@ export interface AuthGuardProps {
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
-  fallback = <div aria-busy="true" aria-label="Loading authentication">Loading authentication...</div>,
+  fallback = (
+    <div aria-busy="true" aria-label="Loading authentication">
+      Loading authentication...
+    </div>
+  ),
 }) => {
   const { isAuthenticated, isLoading } = useAuth();
 

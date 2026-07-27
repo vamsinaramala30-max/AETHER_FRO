@@ -3,8 +3,9 @@
   border: 1px solid var(--aether-border-color);
   border-radius: var(--aether-radius-lg);
   padding: var(--aether-space-6);
-  transition: border-color var(--aether-duration-fast) var(--aether-ease-default),
-              box-shadow var(--aether-duration-fast) var(--aether-ease-default);
+  transition:
+    border-color var(--aether-duration-fast) var(--aether-ease-default),
+    box-shadow var(--aether-duration-fast) var(--aether-ease-default);
 }
 
 .aether-card:hover {

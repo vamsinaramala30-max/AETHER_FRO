@@ -9,12 +9,12 @@ export interface TopbarProps {
 
 export const Topbar: React.FC<TopbarProps> = ({ title, leftAction, rightAction, children }) => {
   return (
-    <header className="h-16 w-full bg-surface-base/80 backdrop-blur-md border-b border-border-subtle px-6 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-surface-base/80 border-border-subtle sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b px-6 backdrop-blur-md">
       <div className="flex items-center space-x-4">
         {leftAction}
-        {title && <h1 className="text-base font-semibold text-text-primary">{title}</h1>}
+        {title && <h1 className="text-text-primary text-base font-semibold">{title}</h1>}
       </div>
-      {children && <div className="flex-grow max-w-xl mx-8">{children}</div>}
+      {children && <div className="mx-8 max-w-xl flex-grow">{children}</div>}
       <div className="flex items-center space-x-3">{rightAction}</div>
     </header>
   );

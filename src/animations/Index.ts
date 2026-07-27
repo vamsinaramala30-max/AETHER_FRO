@@ -11,4 +11,3 @@ export * from './loding';
 export * from './hover';
 export * from './chat';
 export * from './dashboard';
-

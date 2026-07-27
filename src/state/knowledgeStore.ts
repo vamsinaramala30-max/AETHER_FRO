@@ -28,11 +28,22 @@ export const useKnowledgeStore = create<KnowledgeState>()((set) => ({
   isLoading: false,
   error: null,
 
-  setDocuments: (documents) => set({ documents, isLoading: false }),
-  addDocument: (doc) => set((state) => ({ documents: [doc, ...state.documents] })),
-  removeDocument: (id) =>
-    set((state) => ({ documents: state.documents.filter((d) => d.id !== id) })),
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error, isLoading: false }),
+  setDocuments: (documents) => {
+    set({ documents, isLoading: false });
+  },
+  addDocument: (doc) => {
+    set((state) => ({ documents: [doc, ...state.documents] }));
+  },
+  removeDocument: (id) => {
+    set((state) => ({ documents: state.documents.filter((d) => d.id !== id) }));
+  },
+  setSearchQuery: (searchQuery) => {
+    set({ searchQuery });
+  },
+  setLoading: (isLoading) => {
+    set({ isLoading });
+  },
+  setError: (error) => {
+    set({ error, isLoading: false });
+  },
 }));

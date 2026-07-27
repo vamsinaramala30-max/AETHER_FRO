@@ -1,4 +1,4 @@
-import { BaseEntity, ID } from './common';
+import { BaseEntity } from './common';
 
 export type UserRole = 'owner' | 'admin' | 'member' | 'viewer';
 

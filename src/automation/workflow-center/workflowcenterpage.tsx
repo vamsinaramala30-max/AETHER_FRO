@@ -16,7 +16,7 @@ export const WorkflowCenterPage: React.FC = () => {
       const data = await workflowService.getWorkflows();
       setWorkflows(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Could not establish synchronization with core automation framework.');
     } finally {
       setLoading(false);
@@ -30,7 +30,7 @@ export const WorkflowCenterPage: React.FC = () => {
   const handleToggle = async (id: string) => {
     try {
       const updated = await workflowService.toggleWorkflow(id);
-      setWorkflows(prev => prev.map(w => w.id === id ? updated : w));
+      setWorkflows((prev) => prev.map((w) => (w.id === id ? updated : w)));
     } catch {
       setError('State transaction failed.');
     }
@@ -49,15 +49,20 @@ export const WorkflowCenterPage: React.FC = () => {
       triggerType: 'Manual Trigger',
       createdAt: new Date().toISOString(),
       nodes: [
-        { id: `node-${Date.now()}`, type: 'trigger', name: 'Initialization Event', config: { origin: 'system' } }
-      ]
+        {
+          id: `node-${Date.now()}`,
+          type: 'trigger',
+          name: 'Initialization Event',
+          config: { origin: 'system' },
+        },
+      ],
     };
     setEditingWorkflow(fresh);
   };
 
   const handleSave = async (updatedWorkflow: Workflow) => {
     try {
-      const saved = await workflowService.saveWorkflow(updatedWorkflow);
+      await workflowService.saveWorkflow(updatedWorkflow);
       setEditingWorkflow(null);
       fetchWorkflows();
     } catch {
@@ -66,7 +71,8 @@ export const WorkflowCenterPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Confirm immediate architectural destruction of this workflow context?')) return;
+    if (!window.confirm('Confirm immediate architectural destruction of this workflow context?'))
+      return;
     try {
       await workflowService.deleteWorkflow(id);
       fetchWorkflows();
@@ -77,8 +83,8 @@ export const WorkflowCenterPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[300px]">
-        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[300px] items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
       </div>
     );
   }
@@ -86,7 +92,7 @@ export const WorkflowCenterPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-3 text-xs bg-red-950/40 text-red-400 border border-red-900/40 rounded-lg">
+        <div className="rounded-lg border border-red-900/40 bg-red-950/40 p-3 text-xs text-red-400">
           {error}
         </div>
       )}
@@ -95,29 +101,35 @@ export const WorkflowCenterPage: React.FC = () => {
         <WorkflowBuilder
           workflow={editingWorkflow}
           onSave={handleSave}
-          onCancel={() => { setEditingWorkflow(null); }}
+          onCancel={() => {
+            setEditingWorkflow(null);
+          }}
         />
       ) : (
         <>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-100">Workflow Matrix</h1>
-              <p className="text-xs text-slate-400">Design, deploy, and inspect continuous reactive orchestration streams.</p>
+              <p className="text-xs text-slate-400">
+                Design, deploy, and inspect continuous reactive orchestration streams.
+              </p>
             </div>
             <button
               onClick={handleCreateNew}
-              className="px-3.5 py-2 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors shadow-sm shadow-indigo-600/10"
+              className="rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm shadow-indigo-600/10 transition-colors hover:bg-indigo-500"
             >
               + Create Blueprint
             </button>
           </div>
 
           {workflows.length === 0 ? (
-            <div className="p-12 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
-              <p className="text-sm text-slate-500">No pipelines deployed inside this zone boundary.</p>
+            <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/10 p-12 text-center">
+              <p className="text-sm text-slate-500">
+                No pipelines deployed inside this zone boundary.
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
               {workflows.map((workflow) => (
                 <WorkflowCard
                   key={workflow.id}

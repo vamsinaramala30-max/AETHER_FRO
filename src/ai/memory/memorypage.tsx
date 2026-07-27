@@ -21,22 +21,27 @@ export const MemoryPage: React.FC = () => {
 
   const handlePrune = async (id: string) => {
     await memoryService.deleteMemory(id);
-    setMemories(memories.filter(m => m.id !== id));
+    setMemories(memories.filter((m) => m.id !== id));
   };
 
-  const matched = memories.filter(m => {
-    const textMatch = m.content.toLowerCase().includes(search.toLowerCase()) || m.associatedTokens.some(t => t.toLowerCase().includes(search.toLowerCase()));
+  const matched = memories.filter((m) => {
+    const textMatch =
+      m.content.toLowerCase().includes(search.toLowerCase()) ||
+      m.associatedTokens.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     const catMatch = category === 'all' || m.category === category;
     return textMatch && catMatch;
   });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+    <div className="mx-auto min-h-screen max-w-7xl space-y-6 bg-slate-50 p-6 dark:bg-slate-900">
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-center dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Agent Memory Matrix</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Inspecting vector weights and structured relational items embedded during chat execution.
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Agent Memory Matrix
+          </h1>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            Inspecting vector weights and structured relational items embedded during chat
+            execution.
           </p>
         </div>
         <MemorySearch value={search} onChange={setSearch} />
@@ -45,16 +50,20 @@ export const MemoryPage: React.FC = () => {
       <MemoryFilters selectedCategory={category} onSelectCategory={setCategory} />
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-          {[1, 2, 3].map(n => <div key={n} className="h-32 bg-slate-200 dark:bg-slate-800 rounded-xl" />)}
+        <div className="grid animate-pulse grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="h-32 rounded-xl bg-slate-200 dark:bg-slate-800" />
+          ))}
         </div>
       ) : matched.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-          <p className="text-xs text-slate-400">No active context vectors match search thresholds.</p>
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-xs text-slate-400">
+            No active context vectors match search thresholds.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {matched.map(m => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {matched.map((m) => (
             <MemoryCard key={m.id} memory={m} onPrune={handlePrune} />
           ))}
         </div>

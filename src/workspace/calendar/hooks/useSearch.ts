@@ -8,7 +8,7 @@ export const useSearch = () => {
   };
 
   return {
-    searchQuery: filters.query || '',
+    searchQuery: typeof filters.query === 'string' ? filters.query : '',
     setSearchQuery,
     resetFilters,
   };

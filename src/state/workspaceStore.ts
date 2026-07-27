@@ -25,8 +25,16 @@ export const useWorkspaceStore = create<WorkspaceState>()((set) => ({
   isLoading: false,
   error: null,
 
-  setWorkspaces: (workspaces) => set({ workspaces, isLoading: false }),
-  setCurrentWorkspace: (currentWorkspace) => set({ currentWorkspace }),
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error, isLoading: false }),
+  setWorkspaces: (workspaces) => {
+    set({ workspaces, isLoading: false });
+  },
+  setCurrentWorkspace: (currentWorkspace) => {
+    set({ currentWorkspace });
+  },
+  setLoading: (isLoading) => {
+    set({ isLoading });
+  },
+  setError: (error) => {
+    set({ error, isLoading: false });
+  },
 }));

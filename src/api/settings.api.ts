@@ -12,6 +12,9 @@ export const settingsApi = {
   getProfile: (config?: RequestConfig): Promise<UserProfileDTO> =>
     apiClient.get<UserProfileDTO>(ENDPOINTS.SETTINGS.PROFILE, config),
 
-  updateProfile: (payload: Partial<UserProfileDTO>, config?: RequestConfig): Promise<UserProfileDTO> =>
+  updateProfile: (
+    payload: Partial<UserProfileDTO>,
+    config?: RequestConfig,
+  ): Promise<UserProfileDTO> =>
     apiClient.patch<UserProfileDTO>(ENDPOINTS.SETTINGS.PROFILE, payload, config),
 };

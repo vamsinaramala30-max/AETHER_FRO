@@ -7,8 +7,8 @@ export interface ErrorReportOptions {
   metadata?: Record<string, unknown>;
 }
 
-export class ErrorReporter {
-  public static captureException(error: Error, options: ErrorReportOptions = {}): void {
+export const errorReporter = {
+  captureException(error: Error, options: ErrorReportOptions = {}): void {
     const { handled = true, severity = 'error', metadata = {} } = options;
 
     logger.error(`[ErrorReporter] ${error.name}: ${error.message}`, error, {
@@ -25,13 +25,14 @@ export class ErrorReporter {
       severity,
       ...metadata,
     });
-  }
+  },
 
-  public static initializeGlobalHandlers(): void {
+  initializeGlobalHandlers(): void {
     if (typeof window === 'undefined') return;
 
     window.onerror = (message, source, lineno, colno, error) => {
-      ErrorReporter.captureException(error || new Error(String(message)), {
+      const msgStr = typeof message === 'string' ? message : 'Global script error';
+      errorReporter.captureException(error ?? new Error(msgStr), {
         handled: false,
         severity: 'fatal',
         metadata: { source, lineno, colno },
@@ -39,12 +40,14 @@ export class ErrorReporter {
     };
 
     window.onunhandledrejection = (event: PromiseRejectionEvent) => {
-      const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
-      ErrorReporter.captureException(error, {
+      const reasonStr =
+        typeof event.reason === 'string' ? event.reason : 'Unhandled Promise Rejection';
+      const error = event.reason instanceof Error ? event.reason : new Error(reasonStr);
+      errorReporter.captureException(error, {
         handled: false,
         severity: 'error',
         metadata: { type: 'unhandled_rejection' },
       });
     };
-  }
-}
+  },
+};

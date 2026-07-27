@@ -12,13 +12,15 @@ export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
   position = 'top',
-  delay = 200
+  delay = 200,
 }) => {
   const [visible, setVisible] = useState(false);
   let timer: ReturnType<typeof setTimeout>;
 
   const show = () => {
-    timer = setTimeout(() => { setVisible(true); }, delay);
+    timer = setTimeout(() => {
+      setVisible(true);
+    }, delay);
   };
 
   const hide = () => {
@@ -30,11 +32,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
     top: '-top-2 left-1/2 -translate-x-1/2 -translate-y-full',
     bottom: '-bottom-2 left-1/2 -translate-x-1/2 translate-y-full',
     left: 'top-1/2 -left-2 -translate-x-full -translate-y-1/2',
-    right: 'top-1/2 -right-2 translate-x-full -translate-y-1/2'
+    right: 'top-1/2 -right-2 translate-x-full -translate-y-1/2',
   };
 
   return (
-    <div className="relative inline-block" onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}>
+    <div
+      className="relative inline-block"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+    >
       {children}
       <AnimatePresence>
         {visible && (
@@ -43,7 +51,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`absolute z-50 px-2.5 py-1 text-xs font-medium text-text-primary bg-surface-elevated border border-border-strong rounded-md shadow-xl whitespace-nowrap pointer-events-none ${positions[position]}`}
+            className={`text-text-primary bg-surface-elevated border-border-strong pointer-events-none absolute z-50 whitespace-nowrap rounded-md border px-2.5 py-1 text-xs font-medium shadow-xl ${positions[position]}`}
           >
             {content}
           </motion.div>

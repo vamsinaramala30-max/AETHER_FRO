@@ -29,7 +29,7 @@ export interface CalendarEvent {
   title: string;
   description?: string;
   start: string; // ISO 8601 string (e.g. 2026-07-24T09:00:00Z)
-  end: string;   // ISO 8601 string
+  end: string; // ISO 8601 string
   isAllDay: boolean;
   timeZone: string;
   color?: string; // Overrides calendar color if set
@@ -40,7 +40,7 @@ export interface CalendarEvent {
   participants: Participant[];
   reminders: EventReminder[];
   attachments: EventAttachment[];
-  
+
   // Recurrence
   recurrenceRule?: RecurrenceRule;
   recurrenceId?: string; // If instance of a recurring series

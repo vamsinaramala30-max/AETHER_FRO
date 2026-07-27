@@ -13,4 +13,3 @@ export * from './Particles';
 export * from './scene';
 export * from './SceneManager';
 export * from './useThreescene';
-

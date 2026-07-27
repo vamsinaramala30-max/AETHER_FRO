@@ -1,34 +1,37 @@
-export class StorageService {
-  private prefix = 'aether_';
+const PREFIX = 'aether_';
 
-  public set<T>(key: string, value: T): void {
+export const storageService = {
+  set(key: string, value: unknown): void {
     try {
       const serialized = JSON.stringify(value);
-      localStorage.setItem(`${this.prefix}${key}`, serialized);
+      localStorage.setItem(`${PREFIX}${key}`, serialized);
     } catch (e) {
       console.error('StorageService set error', e);
     }
-  }
+  },
 
-  public get<T>(key: string, defaultValue: T): T {
+  get<T>(key: string, defaultValue: T): T {
     try {
-      const item = localStorage.getItem(`${this.prefix}${key}`);
-      return item ? (JSON.parse(item) as T) : defaultValue;
+      const item = localStorage.getItem(`${PREFIX}${key}`);
+      if (typeof item === 'string' && item.trim() !== '') {
+        return JSON.parse(item) as T;
+      }
+      return defaultValue;
     } catch (e) {
       console.error('StorageService get error', e);
       return defaultValue;
     }
-  }
+  },
 
-  public remove(key: string): void {
-    localStorage.removeItem(`${this.prefix}${key}`);
-  }
+  remove(key: string): void {
+    localStorage.removeItem(`${PREFIX}${key}`);
+  },
 
-  public clear(): void {
+  clear(): void {
     Object.keys(localStorage)
-      .filter((k) => k.startsWith(this.prefix))
-      .forEach((k) => { localStorage.removeItem(k); });
-  }
-}
-
-export const storageService = new StorageService();
+      .filter((k) => k.startsWith(PREFIX))
+      .forEach((k) => {
+        localStorage.removeItem(k);
+      });
+  },
+};

@@ -1,10 +1,15 @@
 import React from 'react';
-import { useDragDropContext } from './DragDropProvider';
+import { useDragDropContext } from './DragDropContext';
 
 export const EventDragLayer: React.FC = () => {
   const { activeDragEvent } = useDragDropContext();
 
   if (!activeDragEvent) return null;
+
+  const bgColor =
+    typeof activeDragEvent.color === 'string' && activeDragEvent.color.trim() !== ''
+      ? activeDragEvent.color
+      : '#039be5';
 
   return (
     <div
@@ -17,7 +22,7 @@ export const EventDragLayer: React.FC = () => {
         left: 0,
         transform: 'translate(-50%, -50%)',
         opacity: 0.8,
-        backgroundColor: activeDragEvent.color || '#039be5',
+        backgroundColor: bgColor,
         color: '#ffffff',
         padding: '6px 12px',
         borderRadius: '4px',

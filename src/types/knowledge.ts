@@ -1,4 +1,4 @@
-import { BaseEntity, ID } from './common';
+import { BaseEntity } from './common';
 
 export type DocumentType = 'pdf' | 'docx' | 'txt' | 'markdown' | 'url';
 

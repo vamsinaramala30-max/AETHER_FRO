@@ -15,5 +15,5 @@ export const preferencesService = {
 
   savePreference: async (key: keyof UIPreferences, value: boolean): Promise<void> => {
     await api.patch('/user/preferences', { [key]: value });
-  }
+  },
 };

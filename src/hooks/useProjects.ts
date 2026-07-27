@@ -23,7 +23,7 @@ export const useProjects = () => {
       };
       addProject(newProj);
     },
-    [addProject]
+    [addProject],
   );
 
   return {

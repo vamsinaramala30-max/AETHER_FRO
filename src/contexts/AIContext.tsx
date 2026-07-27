@@ -88,7 +88,7 @@ export const AIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       uiPreferences,
       selectConversation,
       updatePreferences,
-    ]
+    ],
   );
 
   return <AIContext.Provider value={value}>{children}</AIContext.Provider>;

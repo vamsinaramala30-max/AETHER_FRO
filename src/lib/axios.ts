@@ -7,7 +7,7 @@ import axios, {
 import { apiConfig } from '../config/api.config';
 import { authConfig } from '../config/auth.config';
 
-export interface ApiError {
+export interface ApiError extends Error {
   message: string;
   code?: string;
   status?: number;
@@ -24,39 +24,47 @@ export const httpClient: AxiosInstance = axios.create({
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem(authConfig.tokenKey);
-    if (token && config.headers) {
+    if (typeof token === 'string' && token.trim() !== '') {
       config.headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token}`;
     }
     return config;
   },
-  (error: AxiosError) => Promise.reject(normalizeError(error))
+  (error: AxiosError) => Promise.reject(normalizeError(error)),
 );
 
 // Response Interceptor: Normalize Errors
 httpClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => Promise.reject(normalizeError(error))
+  (error: AxiosError) => Promise.reject(normalizeError(error)),
 );
 
 function normalizeError(error: AxiosError): ApiError {
-  if (error.response) {
-    const data = error.response.data as Record<string, unknown>;
-    return {
-      message: (data?.message as string) || error.message || 'An unexpected API error occurred.',
-      code: (data?.code as string) || 'HTTP_ERROR',
-      status: error.response.status,
-      details: data,
-    };
-  } else if (error.request) {
-    return {
-      message: 'Network error. Server did not respond.',
-      code: 'ERR_NETWORK',
-    };
+  if (axios.isAxiosError(error) && error.response !== undefined) {
+    const data = error.response.data as Record<string, unknown> | undefined;
+    const msg =
+      data !== undefined && typeof data.message === 'string'
+        ? data.message
+        : error.message.trim() !== ''
+          ? error.message
+          : 'An unexpected API error occurred.';
+    const code = data !== undefined && typeof data.code === 'string' ? data.code : 'HTTP_ERROR';
+    const errObj = new Error(msg) as ApiError;
+    errObj.code = code;
+    errObj.status = error.response.status;
+    errObj.details = data;
+    return errObj;
+  } else if (axios.isAxiosError(error) && error.request !== undefined) {
+    const errObj = new Error('Network error. Server did not respond.') as ApiError;
+    errObj.code = 'ERR_NETWORK';
+    return errObj;
   }
-  return {
-    message: error.message || 'Unknown request exception.',
-    code: 'UNKNOWN_ERROR',
-  };
+  const msg =
+    typeof error.message === 'string' && error.message.trim() !== ''
+      ? error.message
+      : 'Unknown request exception.';
+  const errObj = new Error(msg) as ApiError;
+  errObj.code = 'UNKNOWN_ERROR';
+  return errObj;
 }
 
 export const createCancelTokenSource = () => axios.CancelToken.source();

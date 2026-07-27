@@ -12,13 +12,13 @@ export const EmptyView: React.FC<EmptyViewProps> = ({
   title = 'No Data Found',
   description = 'There are no items to display in this workspace.',
   actionLabel,
-  onAction
+  onAction,
 }) => {
   return (
-    <div className="w-full p-12 text-center flex flex-col items-center justify-center space-y-3 border border-dashed border-border-subtle rounded-2xl bg-surface-subtle">
+    <div className="border-border-subtle bg-surface-subtle flex w-full flex-col items-center justify-center space-y-3 rounded-2xl border border-dashed p-12 text-center">
       <div className="text-4xl">🍃</div>
-      <h3 className="text-base font-semibold text-text-primary">{title}</h3>
-      <p className="text-xs text-text-tertiary max-w-sm">{description}</p>
+      <h3 className="text-text-primary text-base font-semibold">{title}</h3>
+      <p className="text-text-tertiary max-w-sm text-xs">{description}</p>
       {actionLabel && onAction && (
         <Button size="sm" variant="secondary" onClick={onAction} className="mt-2">
           {actionLabel}

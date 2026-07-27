@@ -9,12 +9,17 @@ let supabaseClient: SupabaseClient | null = null;
  * Gracefully defaults to null if Supabase key/URL are not supplied in env.
  */
 export const getSupabaseClient = (): SupabaseClient | null => {
-  if (supabaseClient) return supabaseClient;
+  if (supabaseClient !== null) return supabaseClient;
 
   const url = env.VITE_SUPABASE_URL;
   const key = env.VITE_SUPABASE_ANON_KEY;
 
-  if (!url || !key) {
+  if (
+    typeof url !== 'string' ||
+    url.trim() === '' ||
+    typeof key !== 'string' ||
+    key.trim() === ''
+  ) {
     logger.warn('Supabase initialization skipped: Missing credentials in environment.');
     return null;
   }

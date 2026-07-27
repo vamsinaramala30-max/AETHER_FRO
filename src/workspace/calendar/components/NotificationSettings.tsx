@@ -11,7 +11,9 @@ export const NotificationSettings: React.FC = () => {
         <input
           type="checkbox"
           checked={settings.enableDesktopNotifications}
-          onChange={(e) => updateSettings({ enableDesktopNotifications: e.target.checked })}
+          onChange={(e) => {
+            updateSettings({ enableDesktopNotifications: e.target.checked });
+          }}
         />
         Enable Desktop Alerts
       </label>

@@ -1,16 +1,18 @@
 /**
  * Throttles function invocation to at most once per wait interval.
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
-  limit: number
+  limit: number,
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
+  let inThrottle = false;
   return function (...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
     }
   };
 }

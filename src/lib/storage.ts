@@ -14,12 +14,12 @@ export class SafeStorage {
     }
   }
 
-  set<T>(key: string, value: T, ttlMs?: number): boolean {
-    if (!this.storage) return false;
+  set(key: string, value: unknown, ttlMs?: number): boolean {
+    if (this.storage === null) return false;
     try {
-      const item: StorageItem<T> = {
+      const item: StorageItem<unknown> = {
         value,
-        expiresAt: ttlMs ? Date.now() + ttlMs : undefined,
+        expiresAt: typeof ttlMs === 'number' && ttlMs > 0 ? Date.now() + ttlMs : undefined,
       };
       this.storage.setItem(key, JSON.stringify(item));
       return true;
@@ -28,27 +28,27 @@ export class SafeStorage {
     }
   }
 
-  get<T>(key: string): T | null {
-    if (!this.storage) return null;
+  get<T>(key: string, fallback?: T): T | null {
+    if (this.storage === null) return fallback ?? null;
     try {
       const raw = this.storage.getItem(key);
-      if (!raw) return null;
+      if (typeof raw !== 'string' || raw.trim() === '') return fallback ?? null;
 
-      const item: StorageItem<T> = JSON.parse(raw);
+      const item = JSON.parse(raw) as StorageItem<T>;
 
-      if (item.expiresAt && Date.now() > item.expiresAt) {
+      if (typeof item.expiresAt === 'number' && Date.now() > item.expiresAt) {
         this.remove(key);
-        return null;
+        return fallback ?? null;
       }
 
       return item.value;
     } catch {
-      return null;
+      return fallback ?? null;
     }
   }
 
   remove(key: string): boolean {
-    if (!this.storage) return false;
+    if (this.storage === null) return false;
     try {
       this.storage.removeItem(key);
       return true;
@@ -58,7 +58,7 @@ export class SafeStorage {
   }
 
   clear(): void {
-    if (this.storage) {
+    if (this.storage !== null) {
       try {
         this.storage.clear();
       } catch {

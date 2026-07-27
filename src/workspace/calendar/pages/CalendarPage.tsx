@@ -38,9 +38,7 @@ export const CalendarPage: React.FC = () => {
         <CalendarToolbar />
         <div className="calendar-main-container">
           {viewState.isSidebarOpen && <CalendarSidebar />}
-          <main className="calendar-content-view">
-            {renderActiveView()}
-          </main>
+          <main className="calendar-content-view">{renderActiveView()}</main>
         </div>
         <EventForm />
         <EventDetails />

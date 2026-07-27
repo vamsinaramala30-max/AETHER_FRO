@@ -4,13 +4,22 @@ import { DocumentItem } from '../types';
 export const documentsService = {
   async getDocuments(): Promise<DocumentItem[]> {
     await new Promise((res) => setTimeout(res, 500));
-    return JSON.parse(localStorage.getItem('aether_docs') || '[]');
+    const stored = localStorage.getItem('aether_docs');
+    if (typeof stored === 'string' && stored.trim() !== '') {
+      try {
+        const parsed = JSON.parse(stored) as DocumentItem[];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
   },
 
   async uploadDocument(file: File, tags: string[]): Promise<DocumentItem> {
     await new Promise((res) => setTimeout(res, 1200)); // Simulate upload
     const docs = await this.getDocuments();
-    
+
     const newDoc: DocumentItem = {
       id: crypto.randomUUID(),
       name: file.name,
@@ -33,5 +42,5 @@ export const documentsService = {
     const docs = await this.getDocuments();
     const filtered = docs.filter((d) => d.id !== id);
     localStorage.setItem('aether_docs', JSON.stringify(filtered));
-  }
+  },
 };

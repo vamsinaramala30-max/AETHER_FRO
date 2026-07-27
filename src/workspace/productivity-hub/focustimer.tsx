@@ -1,5 +1,5 @@
 // frontend/src/workspace/productivity-hub/FocusTimer.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface FocusTimerProps {
   onSessionComplete: (minutes: number) => void;
@@ -11,24 +11,10 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({ onSessionComplete }) => 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [mode, setMode] = useState<'focus' | 'break'>('focus');
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      handleLifecycleCompletion();
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isActive, timeLeft]);
-
-  const handleLifecycleCompletion = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+  const handleLifecycleCompletion = useCallback(() => {
+    if (timerRef.current !== null) clearInterval(timerRef.current);
     setIsActive(false);
 
     if (mode === 'focus') {
@@ -41,14 +27,28 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({ onSessionComplete }) => 
       setMode('focus');
       setTimeLeft(DEFAULT_TIME);
     }
-  };
+  }, [mode, onSessionComplete, DEFAULT_TIME]);
+
+  useEffect(() => {
+    if (isActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      handleLifecycleCompletion();
+    }
+
+    return () => {
+      if (timerRef.current !== null) clearInterval(timerRef.current);
+    };
+  }, [isActive, timeLeft, handleLifecycleCompletion]);
 
   const toggleTimer = () => {
     setIsActive(!isActive);
   };
 
   const resetTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current !== null) clearInterval(timerRef.current);
     setIsActive(false);
     setTimeLeft(mode === 'focus' ? DEFAULT_TIME : 5 * 60);
   };
@@ -60,33 +60,37 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({ onSessionComplete }) => 
   };
 
   return (
-    <div className="w-full p-5 rounded-xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-sm flex flex-col items-center justify-center text-center space-y-4">
+    <div className="flex w-full flex-col items-center justify-center space-y-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-5 text-center backdrop-blur-sm">
       <div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono ${
-          mode === 'focus' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-        }`}>
+        <span
+          className={`rounded-full px-2.5 py-1 font-mono text-xs font-semibold uppercase tracking-wider ${
+            mode === 'focus'
+              ? 'border border-blue-500/20 bg-blue-500/10 text-blue-400'
+              : 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+          }`}
+        >
           {mode === 'focus' ? 'Deep Work Mode' : 'Recovery Buffer'}
         </span>
       </div>
 
-      <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white select-none">
+      <div className="select-none font-mono text-4xl font-black tracking-tight text-white sm:text-5xl">
         {formatDisplayTime(timeLeft)}
       </div>
 
-      <div className="flex items-center gap-3 w-full max-w-[240px]">
+      <div className="flex w-full max-w-[240px] items-center gap-3">
         <button
           onClick={toggleTimer}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm ${
-            isActive 
-              ? 'bg-amber-600 hover:bg-amber-500 text-white' 
-              : 'bg-blue-600 hover:bg-blue-500 text-white'
+          className={`flex-1 rounded-lg py-2 text-sm font-semibold shadow-sm transition-colors ${
+            isActive
+              ? 'bg-amber-600 text-white hover:bg-amber-500'
+              : 'bg-blue-600 text-white hover:bg-blue-500'
           }`}
         >
           {isActive ? 'Pause Block' : 'Initialize'}
         </button>
         <button
           onClick={resetTimer}
-          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-sm font-medium transition-colors"
+          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700"
         >
           Reset
         </button>

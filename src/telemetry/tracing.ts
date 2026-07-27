@@ -11,7 +11,9 @@ class Tracer {
   private activeSpans: Map<string, TraceSpan> = new Map();
 
   private generateId(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   public startSpan(name: string, tags: Record<string, string | number | boolean> = {}): TraceSpan {
@@ -35,7 +37,11 @@ class Tracer {
     return span;
   }
 
-  public traceAsync<T>(name: string, fn: () => Promise<T>, tags: Record<string, string | number | boolean> = {}): Promise<T> {
+  public traceAsync<T>(
+    name: string,
+    fn: () => Promise<T>,
+    tags: Record<string, string | number | boolean> = {},
+  ): Promise<T> {
     const span = this.startSpan(name, tags);
     return fn().finally(() => {
       this.endSpan(span.spanId);

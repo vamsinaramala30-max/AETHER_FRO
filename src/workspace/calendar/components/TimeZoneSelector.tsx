@@ -12,7 +12,9 @@ export const TimeZoneSelector: React.FC = () => {
       <select
         id="tz-select"
         value={currentTimeZone}
-        onChange={(e) => setTimeZone(e.target.value)}
+        onChange={(e) => {
+          setTimeZone(e.target.value);
+        }}
         style={{
           width: '100%',
           padding: '6px 8px',

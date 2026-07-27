@@ -48,4 +48,3 @@ export const ENDPOINTS = {
     PRESIGNED_URL: '/uploads/presigned-url',
   },
 } as const;
-

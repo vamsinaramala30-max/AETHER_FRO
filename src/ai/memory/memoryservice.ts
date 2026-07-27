@@ -12,8 +12,23 @@ class MemoryService {
   private fallbackKey = 'aether_vector_memories';
 
   private seedData: MemoryItem[] = [
-    { id: 'mem_1', category: 'semantic', content: 'Prefers deep dark interface variants; enforces strict design token consistency across Tailwind workflows.', importanceScore: 8, associatedTokens: ['ui', 'ux', 'theme'], createdAt: new Date(Date.now() - 172800000).toISOString() },
-    { id: 'mem_2', category: 'episodic', content: 'Indicated current API server addresses use port 8080 under staging routes.', importanceScore: 9, associatedTokens: ['network', 'api'], createdAt: new Date().toISOString() }
+    {
+      id: 'mem_1',
+      category: 'semantic',
+      content:
+        'Prefers deep dark interface variants; enforces strict design token consistency across Tailwind workflows.',
+      importanceScore: 8,
+      associatedTokens: ['ui', 'ux', 'theme'],
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+    },
+    {
+      id: 'mem_2',
+      category: 'episodic',
+      content: 'Indicated current API server addresses use port 8080 under staging routes.',
+      importanceScore: 9,
+      associatedTokens: ['network', 'api'],
+      createdAt: new Date().toISOString(),
+    },
   ];
 
   public async getMemories(): Promise<MemoryItem[]> {
@@ -37,7 +52,7 @@ class MemoryService {
       return true;
     } catch {
       const data = await this.getMemories();
-      const filtered = data.filter(m => m.id !== id);
+      const filtered = data.filter((m) => m.id !== id);
       localStorage.setItem(this.fallbackKey, JSON.stringify(filtered));
       return true;
     }

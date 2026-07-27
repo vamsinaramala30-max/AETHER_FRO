@@ -9,19 +9,31 @@ export interface StatsCardProps {
   icon?: React.ReactNode;
 }
 
-export const StatsCard: React.FC<StatsCardProps> = ({ title, value, change, isPositive = true, icon }) => {
+export const StatsCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  change,
+  isPositive = true,
+  icon,
+}) => {
   return (
     <Card hoverable className="flex items-center justify-between">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">{title}</p>
-        <h2 className="text-2xl font-bold text-text-primary mt-1">{value}</h2>
+        <p className="text-text-tertiary text-xs font-semibold uppercase tracking-wider">{title}</p>
+        <h2 className="text-text-primary mt-1 text-2xl font-bold">{value}</h2>
         {change && (
-          <p className={`text-xs mt-1.5 font-medium ${isPositive ? 'text-status-success' : 'text-status-error'}`}>
+          <p
+            className={`mt-1.5 text-xs font-medium ${isPositive ? 'text-status-success' : 'text-status-error'}`}
+          >
             {isPositive ? '↑' : '↓'} {change} vs last cycle
           </p>
         )}
       </div>
-      {icon && <div className="p-3 bg-accent-primary/10 rounded-xl text-accent-primary text-xl">{icon}</div>}
+      {icon && (
+        <div className="bg-accent-primary/10 text-accent-primary rounded-xl p-3 text-xl">
+          {icon}
+        </div>
+      )}
     </Card>
   );
 };

@@ -6,14 +6,14 @@ interface CalendarState {
   calendars: Calendar[];
   viewState: ViewState;
   selectedCalendarIds: string[];
-  
+
   // Actions
   setCalendars: (calendars: Calendar[]) => void;
   addCalendar: (calendar: Calendar) => void;
   updateCalendar: (id: string, updates: Partial<Calendar>) => void;
   deleteCalendar: (id: string) => void;
   toggleCalendarVisibility: (id: string) => void;
-  
+
   // View State Actions
   setCurrentView: (view: CalendarViewType) => void;
   setCurrentDate: (date: string) => void;
@@ -50,12 +50,12 @@ const initialCalendars: Calendar[] = [
     updatedAt: new Date().toISOString(),
     ownerId: 'user-1',
     source: 'local',
-  }
+  },
 ];
 
 export const useCalendarStore = create<CalendarState>((set) => ({
   calendars: initialCalendars,
-  selectedCalendarIds: initialCalendars.map(c => c.id),
+  selectedCalendarIds: initialCalendars.map((c) => c.id),
   viewState: {
     currentView: 'week',
     currentDate: new Date().toISOString().split('T')[0],
@@ -64,54 +64,74 @@ export const useCalendarStore = create<CalendarState>((set) => ({
     isSidebarOpen: true,
   },
 
-  setCalendars: (calendars) => set({ 
-    calendars, 
-    selectedCalendarIds: calendars.filter(c => c.isVisible).map(c => c.id) 
-  }),
+  setCalendars: (calendars) => {
+    set({
+      calendars,
+      selectedCalendarIds: calendars.filter((c) => c.isVisible).map((c) => c.id),
+    });
+  },
 
-  addCalendar: (calendar) => set((state) => ({
-    calendars: [...state.calendars, calendar],
-    selectedCalendarIds: [...state.selectedCalendarIds, calendar.id]
-  })),
+  addCalendar: (calendar) => {
+    set((state) => ({
+      calendars: [...state.calendars, calendar],
+      selectedCalendarIds: [...state.selectedCalendarIds, calendar.id],
+    }));
+  },
 
-  updateCalendar: (id, updates) => set((state) => ({
-    calendars: state.calendars.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-  })),
+  updateCalendar: (id, updates) => {
+    set((state) => ({
+      calendars: state.calendars.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+    }));
+  },
 
-  deleteCalendar: (id) => set((state) => ({
-    calendars: state.calendars.filter((c) => c.id !== id),
-    selectedCalendarIds: state.selectedCalendarIds.filter((cId) => cId !== id),
-  })),
+  deleteCalendar: (id) => {
+    set((state) => ({
+      calendars: state.calendars.filter((c) => c.id !== id),
+      selectedCalendarIds: state.selectedCalendarIds.filter((cId) => cId !== id),
+    }));
+  },
 
-  toggleCalendarVisibility: (id) => set((state) => {
-    const isVisible = state.selectedCalendarIds.includes(id);
-    const updatedIds = isVisible
-      ? state.selectedCalendarIds.filter((cId) => cId !== id)
-      : [...state.selectedCalendarIds, id];
-    
-    return {
-      selectedCalendarIds: updatedIds,
-      calendars: state.calendars.map((c) => c.id === id ? { ...c, isVisible: !isVisible } : c)
-    };
-  }),
+  toggleCalendarVisibility: (id) => {
+    set((state) => {
+      const isVisible = state.selectedCalendarIds.includes(id);
+      const updatedIds = isVisible
+        ? state.selectedCalendarIds.filter((cId) => cId !== id)
+        : [...state.selectedCalendarIds, id];
 
-  setCurrentView: (currentView) => set((state) => ({
-    viewState: { ...state.viewState, currentView }
-  })),
+      return {
+        selectedCalendarIds: updatedIds,
+        calendars: state.calendars.map((c) => (c.id === id ? { ...c, isVisible: !isVisible } : c)),
+      };
+    });
+  },
 
-  setCurrentDate: (currentDate) => set((state) => ({
-    viewState: { ...state.viewState, currentDate }
-  })),
+  setCurrentView: (currentView) => {
+    set((state) => ({
+      viewState: { ...state.viewState, currentView },
+    }));
+  },
 
-  setSelectedTimeZone: (selectedTimeZone) => set((state) => ({
-    viewState: { ...state.viewState, selectedTimeZone }
-  })),
+  setCurrentDate: (currentDate) => {
+    set((state) => ({
+      viewState: { ...state.viewState, currentDate },
+    }));
+  },
 
-  toggleMiniCalendar: () => set((state) => ({
-    viewState: { ...state.viewState, isMiniCalendarOpen: !state.viewState.isMiniCalendarOpen }
-  })),
+  setSelectedTimeZone: (selectedTimeZone) => {
+    set((state) => ({
+      viewState: { ...state.viewState, selectedTimeZone },
+    }));
+  },
 
-  toggleSidebar: () => set((state) => ({
-    viewState: { ...state.viewState, isSidebarOpen: !state.viewState.isSidebarOpen }
-  })),
+  toggleMiniCalendar: () => {
+    set((state) => ({
+      viewState: { ...state.viewState, isMiniCalendarOpen: !state.viewState.isMiniCalendarOpen },
+    }));
+  },
+
+  toggleSidebar: () => {
+    set((state) => ({
+      viewState: { ...state.viewState, isSidebarOpen: !state.viewState.isSidebarOpen },
+    }));
+  },
 }));

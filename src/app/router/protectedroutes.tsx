@@ -9,14 +9,16 @@ const ProtectedGuard: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (isLoading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center bg-background text-foreground"
+      <div
+        className="bg-background text-foreground flex min-h-screen items-center justify-center"
         aria-busy="true"
         aria-live="polite"
       >
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-sm font-medium tracking-wide opacity-75">Loading Aether Framework...</span>
+          <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+          <span className="text-sm font-medium tracking-wide opacity-75">
+            Loading Aether Framework...
+          </span>
         </div>
       </div>
     );
@@ -41,14 +43,17 @@ export const protectedRoutes: RouteObject[] = [
       {
         index: true,
         element: (
-          <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-border rounded-lg bg-card text-center p-6">
-            <h2 className="text-xl font-bold tracking-tight mb-2">Core Core Application Shell Mounted</h2>
-            <p className="text-sm text-muted-foreground max-w-md">
-              AETHER application foundation initialized successfully. Submodules will hook into this protected routing tree structure directly.
+          <div className="border-border bg-card flex h-64 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
+            <h2 className="mb-2 text-xl font-bold tracking-tight">
+              Core Core Application Shell Mounted
+            </h2>
+            <p className="text-muted-foreground max-w-md text-sm">
+              AETHER application foundation initialized successfully. Submodules will hook into this
+              protected routing tree structure directly.
             </p>
           </div>
-        )
-      }
-    ]
-  }
+        ),
+      },
+    ],
+  },
 ];

@@ -14,7 +14,7 @@ export const useAI = () => {
     (status: 'idle' | 'thinking' | 'streaming' | 'error') => {
       setAssistantStatus(status);
     },
-    [setAssistantStatus]
+    [setAssistantStatus],
   );
 
   return { assistantStatus, isTyping, error, setStatus, setIsTyping, setError };

@@ -17,10 +17,12 @@ export const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
   const handleAdd = () => {
     if (!emailInput.trim() || !emailInput.includes('@')) return;
 
+    const namePart = emailInput.split('@')[0] ?? emailInput;
+
     const newP: Participant = {
-      id: `p_${Date.now()}`,
+      id: `p_${String(Date.now())}`,
       email: emailInput.trim(),
-      displayName: emailInput.split('@')[0],
+      displayName: namePart,
       status: 'needsAction',
       role: 'required',
     };
@@ -31,19 +33,29 @@ export const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
 
   return (
     <div style={{ marginTop: '12px' }}>
-      <label style={{ fontSize: '13px', fontWeight: '500', color: '#3c4043' }}>Guests / Participants</label>
+      <label style={{ fontSize: '13px', fontWeight: '500', color: '#3c4043' }}>
+        Guests / Participants
+      </label>
       <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
         <input
           type="email"
           placeholder="Add guest email..."
           value={emailInput}
-          onChange={(e) => setEmailInput(e.target.value)}
+          onChange={(e) => {
+            setEmailInput(e.target.value);
+          }}
           style={{ flex: 1, padding: '6px 8px', border: '1px solid #dadce0', borderRadius: '4px' }}
         />
         <button
           type="button"
           onClick={handleAdd}
-          style={{ padding: '6px 12px', backgroundColor: '#1a73e8', color: '#fff', border: 'none', borderRadius: '4px' }}
+          style={{
+            padding: '6px 12px',
+            backgroundColor: '#1a73e8',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+          }}
         >
           Add
         </button>
@@ -63,10 +75,14 @@ export const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
               fontSize: '12px',
             }}
           >
-            <span>{p.displayName} ({p.email})</span>
+            <span>
+              {p.displayName} ({p.email})
+            </span>
             <button
               type="button"
-              onClick={() => onRemoveParticipant(p.id)}
+              onClick={() => {
+                onRemoveParticipant(p.id);
+              }}
               style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#d93025' }}
             >
               Remove

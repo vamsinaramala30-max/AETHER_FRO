@@ -22,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activePath,
   onNavigate,
   brandName = 'AETHER',
-  brandLogo
+  brandLogo,
 }) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -30,17 +30,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <motion.aside
       animate={{ width: collapsed ? 80 : 256 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="h-screen bg-surface-subtle/80 backdrop-blur-xl border-r border-border-subtle flex flex-col justify-between p-4 relative z-20 select-none"
+      className="bg-surface-subtle/80 border-border-subtle relative z-20 flex h-screen select-none flex-col justify-between border-r p-4 backdrop-blur-xl"
     >
       <div>
-        <div className="flex items-center justify-between mb-8 px-2">
+        <div className="mb-8 flex items-center justify-between px-2">
           <div className="flex items-center space-x-3 overflow-hidden">
-            {brandLogo || <div className="w-8 h-8 rounded-lg bg-accent-primary flex items-center justify-center font-bold text-white shrink-0">A</div>}
-            {!collapsed && <span className="font-bold text-lg text-text-primary tracking-wide">{brandName}</span>}
+            {brandLogo || (
+              <div className="bg-accent-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-white">
+                A
+              </div>
+            )}
+            {!collapsed && (
+              <span className="text-text-primary text-lg font-bold tracking-wide">{brandName}</span>
+            )}
           </div>
           <button
-            onClick={() => { setCollapsed(!collapsed); }}
-            className="text-text-tertiary hover:text-text-primary p-1 rounded-md hover:bg-surface-hover"
+            onClick={() => {
+              setCollapsed(!collapsed);
+            }}
+            className="text-text-tertiary hover:text-text-primary hover:bg-surface-hover rounded-md p-1"
           >
             {collapsed ? '→' : '←'}
           </button>
@@ -52,17 +60,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => { onNavigate(item.path); }}
-                className={`w-full flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                onClick={() => {
+                  onNavigate(item.path);
+                }}
+                className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/20'
+                    ? 'bg-accent-primary/10 text-accent-primary border-accent-primary/20 border'
                     : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                 }`}
               >
-                <span className="text-lg shrink-0">{item.icon}</span>
+                <span className="shrink-0 text-lg">{item.icon}</span>
                 {!collapsed && <span className="ml-3 truncate">{item.label}</span>}
                 {!collapsed && item.badge && (
-                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-surface-hover text-text-tertiary">
+                  <span className="bg-surface-hover text-text-tertiary ml-auto rounded-full px-2 py-0.5 text-xs">
                     {item.badge}
                   </span>
                 )}
@@ -72,8 +82,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      <div className="border-t border-border-subtle pt-4 px-2">
-        {!collapsed && <p className="text-[10px] text-text-tertiary uppercase tracking-widest">AETHER OS v2.4</p>}
+      <div className="border-border-subtle border-t px-2 pt-4">
+        {!collapsed && (
+          <p className="text-text-tertiary text-[10px] uppercase tracking-widest">AETHER OS v2.4</p>
+        )}
       </div>
     </motion.aside>
   );

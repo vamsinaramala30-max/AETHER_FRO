@@ -7,17 +7,15 @@ export const formatBytes = (bytes: number, decimals = 2): string => {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  const sizeUnit = sizes[i] ?? 'Bytes';
+  const value = (bytes / Math.pow(k, i)).toFixed(dm);
+  return `${value} ${sizeUnit}`;
 };
 
 /**
  * Formats currency values utilizing Internationalization API.
  */
-export const formatCurrency = (
-  amount: number,
-  currency = 'USD',
-  locale = 'en-US'
-): string => {
+export const formatCurrency = (amount: number, currency = 'USD', locale = 'en-US'): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,

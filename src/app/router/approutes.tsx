@@ -9,8 +9,8 @@ export const AppRouter: React.FC = () => {
     ...protectedRoutes,
     {
       path: '*',
-      element: <Navigate to="/" replace />
-    }
+      element: <Navigate to="/" replace />,
+    },
   ]);
 
   return <>{routingElement}</>;

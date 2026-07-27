@@ -3,8 +3,9 @@ import { useCalendar } from '../hooks/useCalendar';
 import { CALENDAR_VIEWS } from '../utils/constants';
 import { addDays } from '../utils/dateUtils';
 import { SearchBar } from './SearchBar';
-import { ImportExportService } from '../services/importExportService';
+import { importExportService } from '../services/importExportService';
 import { useEventStore } from '../store/eventStore';
+import { CalendarViewType } from '../types/calendar';
 
 export const CalendarToolbar: React.FC = () => {
   const { viewState, setCurrentView, setCurrentDate } = useCalendar();
@@ -31,7 +32,10 @@ export const CalendarToolbar: React.FC = () => {
         nextDate = addDays(current, delta * 7);
     }
 
-    setCurrentDate(nextDate.toISOString().split('T')[0]);
+    const isoStr = nextDate.toISOString().split('T')[0];
+    if (isoStr) {
+      setCurrentDate(isoStr);
+    }
   };
 
   return (
@@ -48,16 +52,36 @@ export const CalendarToolbar: React.FC = () => {
         <h1 style={{ fontSize: '20px', margin: 0, fontWeight: '400' }}>Enterprise Calendar</h1>
         <button
           type="button"
-          onClick={() => setCurrentDate(new Date().toISOString().split('T')[0])}
-          style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #dadce0', cursor: 'pointer' }}
+          onClick={() => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr) setCurrentDate(todayStr);
+          }}
+          style={{
+            padding: '6px 12px',
+            borderRadius: '4px',
+            border: '1px solid #dadce0',
+            cursor: 'pointer',
+          }}
         >
           Today
         </button>
         <div>
-          <button type="button" onClick={() => handleNavigate(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              handleNavigate(-1);
+            }}
+            style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}
+          >
             ‹
           </button>
-          <button type="button" onClick={() => handleNavigate(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              handleNavigate(1);
+            }}
+            style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}
+          >
             ›
           </button>
         </div>
@@ -69,15 +93,24 @@ export const CalendarToolbar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
           type="button"
-          onClick={() => ImportExportService.downloadICS(events)}
-          style={{ padding: '6px 12px', border: '1px solid #dadce0', borderRadius: '4px', cursor: 'pointer' }}
+          onClick={() => {
+            importExportService.downloadICS(events);
+          }}
+          style={{
+            padding: '6px 12px',
+            border: '1px solid #dadce0',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
         >
           Export ICS
         </button>
 
         <select
           value={viewState.currentView}
-          onChange={(e) => setCurrentView(e.target.value as any)}
+          onChange={(e) => {
+            setCurrentView(e.target.value as CalendarViewType);
+          }}
           style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #dadce0' }}
         >
           {CALENDAR_VIEWS.map((v) => (

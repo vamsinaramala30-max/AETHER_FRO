@@ -8,7 +8,7 @@ export interface ParticlesProps {
 }
 
 export const Particles: React.FC<ParticlesProps> = ({ count = THREE_DEFAULTS.particles.count }) => {
-  const meshRef = useRef<THREE.Points>(null!);
+  const meshRef = useRef<THREE.Points | null>(null);
 
   const particlesPosition = useMemo(() => {
     const positions = new Float32Array(count * 3);
@@ -21,19 +21,17 @@ export const Particles: React.FC<ParticlesProps> = ({ count = THREE_DEFAULTS.par
   }, [count]);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.05;
-      meshRef.current.rotation.x += delta * 0.02;
+    const mesh = meshRef.current;
+    if (mesh !== null) {
+      mesh.rotation.y += delta * 0.05;
+      mesh.rotation.x += delta * 0.02;
     }
   });
 
   return (
     <points ref={meshRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particlesPosition, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[particlesPosition, 3]} />
       </bufferGeometry>
       <pointsMaterial
         size={THREE_DEFAULTS.particles.size}

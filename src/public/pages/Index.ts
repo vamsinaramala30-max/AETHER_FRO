@@ -8,4 +8,4 @@ export { TermsPage as Terms } from './Terms/termspage';
 export { PrivacyPolicyPage as PrivacyPolicy } from './PrivacyPolicy/privacypolicypage';
 export { LoginPage as Login } from '../../auth/loginpage';
 export { SignupPage as Signup } from '../../auth/signinpage';
-
+export { StatusShowcasePage as Statuses } from './StatusShowcasePage';

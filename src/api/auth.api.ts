@@ -21,7 +21,8 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password?: string;
 }
@@ -48,20 +49,36 @@ function extractTokens(res: any): AuthTokenResponse {
 
 export const authApi = {
   login: async (payload: LoginPayload, config?: RequestConfig): Promise<AuthTokenResponse> => {
-    const res = await apiClient.post<any>(ENDPOINTS.AUTH.LOGIN, payload, { ...config, skipAuth: true });
+    const res = await apiClient.post<any>(ENDPOINTS.AUTH.LOGIN, payload, {
+      ...config,
+      skipAuth: true,
+    });
     return extractTokens(res);
   },
 
-  register: async (payload: RegisterPayload, config?: RequestConfig): Promise<AuthTokenResponse> => {
-    const res = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, payload, { ...config, skipAuth: true });
+  register: async (
+    payload: RegisterPayload,
+    config?: RequestConfig,
+  ): Promise<AuthTokenResponse> => {
+    const res = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, payload, {
+      ...config,
+      skipAuth: true,
+    });
     return extractTokens(res);
   },
 
   logout: (config?: RequestConfig): Promise<void> =>
     apiClient.post<void>(ENDPOINTS.AUTH.LOGOUT, {}, config),
 
-  refreshToken: async (refreshToken: string, config?: RequestConfig): Promise<AuthTokenResponse> => {
-    const res = await apiClient.post<any>(ENDPOINTS.AUTH.REFRESH, { refreshToken }, { ...config, skipAuth: true });
+  refreshToken: async (
+    refreshToken: string,
+    config?: RequestConfig,
+  ): Promise<AuthTokenResponse> => {
+    const res = await apiClient.post<any>(
+      ENDPOINTS.AUTH.REFRESH,
+      { refreshToken },
+      { ...config, skipAuth: true },
+    );
     return extractTokens(res);
   },
 

@@ -8,30 +8,35 @@ export interface ValidationError {
 export const validateCalendarEvent = (event: Partial<CalendarEvent>): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  if (!event.title || event.title.trim() === '') {
+  if (typeof event.title !== 'string' || event.title.trim() === '') {
     errors.push({ field: 'title', message: 'Event title is required.' });
   }
 
-  if (!event.calendarId) {
+  if (typeof event.calendarId !== 'string' || event.calendarId.trim() === '') {
     errors.push({ field: 'calendarId', message: 'Target calendar must be selected.' });
   }
 
-  if (!event.start) {
+  if (typeof event.start !== 'string' || event.start.trim() === '') {
     errors.push({ field: 'start', message: 'Start time is required.' });
   }
 
-  if (!event.end) {
+  if (typeof event.end !== 'string' || event.end.trim() === '') {
     errors.push({ field: 'end', message: 'End time is required.' });
   }
 
-  if (event.start && event.end) {
+  if (
+    typeof event.start === 'string' &&
+    event.start.trim() !== '' &&
+    typeof event.end === 'string' &&
+    event.end.trim() !== ''
+  ) {
     const startMs = new Date(event.start).getTime();
     const endMs = new Date(event.end).getTime();
 
-    if (isNaN(startMs)) {
+    if (Number.isNaN(startMs)) {
       errors.push({ field: 'start', message: 'Start time is invalid.' });
     }
-    if (isNaN(endMs)) {
+    if (Number.isNaN(endMs)) {
       errors.push({ field: 'end', message: 'End time is invalid.' });
     }
     if (startMs > endMs) {

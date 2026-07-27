@@ -8,13 +8,18 @@ export interface FileValidationOptions {
 
 export const validateFileForUpload = (
   file: File,
-  options: FileValidationOptions = {}
+  options: FileValidationOptions = {},
 ): { valid: boolean; error?: string } => {
-  if (options.maxSizeInBytes && file.size > options.maxSizeInBytes) {
+  if (
+    typeof options.maxSizeInBytes === 'number' &&
+    options.maxSizeInBytes > 0 &&
+    file.size > options.maxSizeInBytes
+  ) {
     return { valid: false, error: 'File size exceeds maximum allowed threshold.' };
   }
-  if (options.allowedTypes && options.allowedTypes.length > 0) {
-    const isAllowed = options.allowedTypes.some((type) => {
+  if (Array.isArray(options.allowedTypes) && options.allowedTypes.length > 0) {
+    const allowed = options.allowedTypes;
+    const isAllowed = allowed.some((type) => {
       if (type.endsWith('/*')) {
         return file.type.startsWith(type.replace('/*', ''));
       }

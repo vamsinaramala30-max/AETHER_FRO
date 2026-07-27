@@ -17,7 +17,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, shareUr
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Share Link">
       <div className="space-y-4">
-        <Input value={shareUrl} readOnly rightIcon={<Button size="sm" onClick={handleCopy}>Copy</Button>} />
+        <Input
+          value={shareUrl}
+          readOnly
+          rightIcon={
+            <Button size="sm" onClick={handleCopy}>
+              Copy
+            </Button>
+          }
+        />
       </div>
     </Modal>
   );

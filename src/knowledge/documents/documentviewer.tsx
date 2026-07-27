@@ -9,28 +9,33 @@ interface DocumentViewerProps {
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({ doc, onClose }) => {
   return (
-    <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-6 space-y-4">
-      <div className="flex justify-between items-center pb-3 border-b border-neutral-800">
+    <div className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-950 p-6">
+      <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-amber-500">📂</span>
           <div>
-            <h2 className="text-white font-medium text-sm">{doc.name}</h2>
-            <p className="text-[10px] text-neutral-500 font-mono">ID: {doc.id}</p>
+            <h2 className="text-sm font-medium text-white">{doc.name}</h2>
+            <p className="font-mono text-[10px] text-neutral-500">ID: {doc.id}</p>
           </div>
         </div>
-        <button onClick={onClose} className="text-neutral-400 hover:text-white text-xs px-3 py-1 bg-neutral-900 rounded border border-neutral-800">Close</button>
+        <button
+          onClick={onClose}
+          className="rounded border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-400 hover:text-white"
+        >
+          Close
+        </button>
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-8 min-h-[320px] flex flex-col items-center justify-center text-center">
-        <div className="text-3xl mb-3">🛡️</div>
-        <h4 className="text-white text-xs font-medium mb-1">Encrypted Ingest Pipeline Active</h4>
-        <p className="text-[11px] text-neutral-400 max-w-md mx-auto mb-4 leading-relaxed">
+      <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center">
+        <div className="mb-3 text-3xl">🛡️</div>
+        <h4 className="mb-1 text-xs font-medium text-white">Encrypted Ingest Pipeline Active</h4>
+        <p className="mx-auto mb-4 max-w-md text-[11px] leading-relaxed text-neutral-400">
           File system parsing sandbox container blocks direct inline preview frames for security.
         </p>
         <a
           href={doc.url}
           download={doc.name}
-          className="bg-neutral-950 border border-neutral-800 text-amber-500 hover:text-amber-400 px-4 py-2 rounded-lg text-xs font-mono transition-colors"
+          className="rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2 font-mono text-xs text-amber-500 transition-colors hover:text-amber-400"
         >
           Download & Verify Signature File
         </a>

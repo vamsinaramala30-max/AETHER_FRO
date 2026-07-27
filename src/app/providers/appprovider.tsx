@@ -11,9 +11,7 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <VisualEffectsProvider>
-          {children}
-        </VisualEffectsProvider>
+        <VisualEffectsProvider>{children}</VisualEffectsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

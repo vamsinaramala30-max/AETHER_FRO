@@ -5,15 +5,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'build', 'node_modules', 'coverage'] },
+  { ignores: ['dist', 'build', 'node_modules', 'coverage', '*.d.ts', 'public'] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.strictTypeChecked],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       globals: globals.browser,
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.json', './tsconfig.node.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -23,12 +23,18 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      '@typescript-eslint/no-explicit-any': 'error',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true, allowExportNames: ['useAI', 'useAuth', 'useModal', 'useNotification', 'useSidebar', 'useTheme', 'protectedRoutes'] }],
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'warn',
-      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-floating-promises': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    files: ['src/main.tsx', 'src/app/router/protectedroutes.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 );

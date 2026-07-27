@@ -6,9 +6,9 @@ import { Footer } from '../../public/landing/Footer/footer';
 
 export const PublicLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground tracking-tight antialiased">
+    <div className="bg-background text-foreground flex min-h-screen flex-col tracking-tight antialiased">
       <PublicNavbar />
-      <main id="main-content" className="flex-grow w-full focus:outline-none" tabIndex={-1}>
+      <main id="main-content" className="w-full flex-grow focus:outline-none" tabIndex={-1}>
         <Outlet />
       </main>
       <Footer />

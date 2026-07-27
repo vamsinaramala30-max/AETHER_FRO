@@ -9,7 +9,10 @@ export const IntegrationStatus: React.FC<IntegrationStatusProps> = ({ status }) 
   const getBadgeConfig = () => {
     switch (status) {
       case 'connected':
-        return { text: 'Operational', style: 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' };
+        return {
+          text: 'Operational',
+          style: 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20',
+        };
       case 'error':
         return { text: 'Fault Detected', style: 'bg-red-950/40 text-red-400 border-red-500/20' };
       default:
@@ -20,7 +23,9 @@ export const IntegrationStatus: React.FC<IntegrationStatusProps> = ({ status }) 
   const cfg = getBadgeConfig();
 
   return (
-    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-semibold ${cfg.style}`}>
+    <span
+      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cfg.style}`}
+    >
       {cfg.text}
     </span>
   );

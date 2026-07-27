@@ -19,67 +19,82 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ onSubmit, onCancel }
       name,
       cronExpression,
       targetEndpoint,
-      isActive: true
+      isActive: true,
     });
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="bg-slate-900/50 border border-slate-800 p-5 rounded-xl space-y-4 max-w-xl">
-      <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
+    <form
+      onSubmit={handleFormSubmit}
+      className="max-w-xl space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-5"
+    >
+      <h3 className="border-b border-slate-800 pb-2 text-sm font-semibold uppercase tracking-wider text-slate-200">
         Schedule Periodic Operational Task
       </h3>
 
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Task Context Label</label>
+          <label className="mb-1 block text-xs font-medium text-slate-400">
+            Task Context Label
+          </label>
           <input
             type="text"
             required
             placeholder="e.g. Daily Metrics Compilation"
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
             value={name}
-            onChange={(e) => { setName(e.target.value); }}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Standard Cron Layout</label>
+            <label className="mb-1 block text-xs font-medium text-slate-400">
+              Standard Cron Layout
+            </label>
             <input
               type="text"
               required
               placeholder="0 * * * *"
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
               value={cronExpression}
-              onChange={(e) => { setCronExpression(e.target.value); }}
+              onChange={(e) => {
+                setCronExpression(e.target.value);
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Internal Execution Route</label>
+            <label className="mb-1 block text-xs font-medium text-slate-400">
+              Internal Execution Route
+            </label>
             <input
               type="text"
               required
               placeholder="/v1/tasks/target"
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
               value={targetEndpoint}
-              onChange={(e) => { setTargetEndpoint(e.target.value); }}
+              onChange={(e) => {
+                setTargetEndpoint(e.target.value);
+              }}
             />
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 justify-end pt-2 border-t border-slate-800/60">
+      <div className="flex items-center justify-end gap-2 border-t border-slate-800/60 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 text-xs rounded border border-slate-700 hover:bg-slate-800 text-slate-400 transition-colors"
+          className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:bg-slate-800"
         >
           Abort
         </button>
         <button
           type="submit"
-          className="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium transition-colors"
+          className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-500"
         >
           Commit Cron Task
         </button>

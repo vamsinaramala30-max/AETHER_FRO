@@ -11,7 +11,9 @@ export const CalendarSidebar: React.FC = () => {
     <aside className="calendar-sidebar-container">
       <button
         type="button"
-        onClick={() => openEventForm()}
+        onClick={() => {
+          openEventForm();
+        }}
         style={{
           display: 'flex',
           alignItems: 'center',

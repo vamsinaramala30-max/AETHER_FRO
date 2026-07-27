@@ -1,10 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export const useLocalStorage = <T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] => {
+export const useLocalStorage = <T>(
+  key: string,
+  initialValue: T,
+): [T, (value: T | ((val: T) => T)) => void] => {
   const readValue = useCallback(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      if (typeof item === 'string' && item.trim() !== '') {
+        return JSON.parse(item) as T;
+      }
+      return initialValue;
     } catch {
       return initialValue;
     }
@@ -22,7 +28,7 @@ export const useLocalStorage = <T>(key: string, initialValue: T): [T, (value: T 
         // Fallback gracefully on storage quote limit or restrictions
       }
     },
-    [key, storedValue]
+    [key, storedValue],
   );
 
   useEffect(() => {

@@ -15,28 +15,32 @@ export const KnowledgeBasePage: React.FC = () => {
       setNodes(data);
       setLoading(false);
     };
-    load();
+    void load();
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white tracking-tight">Relational Matrix</h1>
-        <p className="text-xs text-neutral-400 mt-1">Unified semantic structural link topology view of system records.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Relational Matrix</h1>
+        <p className="mt-1 text-xs text-neutral-400">
+          Unified semantic structural link topology view of system records.
+        </p>
       </div>
 
       {loading ? (
-        <div className="h-64 flex items-center justify-center border border-neutral-800 border-dashed rounded-xl bg-neutral-900/40 font-mono text-xs text-neutral-400 animate-pulse">
+        <div className="flex h-64 animate-pulse items-center justify-center rounded-xl border border-dashed border-neutral-800 bg-neutral-900/40 font-mono text-xs text-neutral-400">
           Computing active connections topological trace...
         </div>
       ) : (
         <>
           <KnowledgeGraph nodes={nodes} />
-          
+
           <div className="space-y-3">
-            <h2 className="text-white font-medium text-sm tracking-wide uppercase text-neutral-400 text-xs">Indexed Map Nodes ({nodes.length})</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {nodes.map(node => (
+            <h2 className="text-sm text-xs font-medium uppercase tracking-wide text-neutral-400 text-white">
+              Indexed Map Nodes ({nodes.length})
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {nodes.map((node) => (
                 <KnowledgeCard key={node.id} node={node} />
               ))}
             </div>
@@ -46,4 +50,3 @@ export const KnowledgeBasePage: React.FC = () => {
     </div>
   );
 };
-

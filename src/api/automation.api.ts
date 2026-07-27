@@ -20,6 +20,10 @@ export const automationApi = {
   getWorkflows: (config?: RequestConfig): Promise<WorkflowDTO[]> =>
     apiClient.get<WorkflowDTO[]>(ENDPOINTS.AUTOMATION.WORKFLOWS, config),
 
-  executeWorkflow: (id: string, payload?: Record<string, unknown>, config?: RequestConfig): Promise<WorkflowExecutionResultDTO> =>
+  executeWorkflow: (
+    id: string,
+    payload?: Record<string, unknown>,
+    config?: RequestConfig,
+  ): Promise<WorkflowExecutionResultDTO> =>
     apiClient.post<WorkflowExecutionResultDTO>(ENDPOINTS.AUTOMATION.EXECUTE(id), payload, config),
 };

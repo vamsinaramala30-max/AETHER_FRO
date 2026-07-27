@@ -11,10 +11,17 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children, fallback }) =>
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return fallback ? <>{fallback}</> : <div aria-busy="true">Loading security controls...</div>;
+    return fallback !== undefined && fallback !== null ? (
+      <>{fallback}</>
+    ) : (
+      <div aria-busy="true">Loading security controls...</div>
+    );
   }
 
-  const hasAdmin = isAuthenticated && user ? isAdminUser({ role: user.role, permissions: user.permissions }) : false;
+  const hasAdmin =
+    isAuthenticated && user
+      ? isAdminUser({ role: user.role, permissions: user.permissions })
+      : false;
 
   if (!hasAdmin) {
     return (

@@ -14,7 +14,7 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ brand, links, actions }) => {
   return (
-    <nav className="w-full h-16 border-b border-border-subtle bg-surface-base/90 backdrop-blur-lg px-8 flex items-center justify-between">
+    <nav className="border-border-subtle bg-surface-base/90 flex h-16 w-full items-center justify-between border-b px-8 backdrop-blur-lg">
       <div className="flex items-center space-x-8">
         <div>{brand}</div>
         <div className="flex space-x-6">
@@ -23,7 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({ brand, links, actions }) => {
               key={link.href}
               href={link.href}
               className={`text-sm font-medium transition-colors ${
-                link.active ? 'text-accent-primary font-semibold' : 'text-text-secondary hover:text-text-primary'
+                link.active
+                  ? 'text-accent-primary font-semibold'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {link.label}

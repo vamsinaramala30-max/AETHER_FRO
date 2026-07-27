@@ -35,7 +35,10 @@ export const aiApi = {
   sendMessage: (payload: AiChatPayload, config?: RequestConfig): Promise<AiChatResponse> =>
     apiClient.post<AiChatResponse>(ENDPOINTS.AI.CHAT, payload, config),
 
-  streamMessage: (payload: AiChatPayload, config?: RequestConfig): AsyncGenerator<string, void, unknown> =>
+  streamMessage: (
+    payload: AiChatPayload,
+    config?: RequestConfig,
+  ): AsyncGenerator<string, void, unknown> =>
     apiClient.stream(ENDPOINTS.AI.STREAM, {
       ...config,
       method: 'POST',

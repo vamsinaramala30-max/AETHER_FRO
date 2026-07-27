@@ -6,12 +6,23 @@ export const SearchBar: React.FC = () => {
   const { searchQuery, setSearchQuery } = useSearch();
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '400px', margin: '0 16px' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        flex: 1,
+        maxWidth: '400px',
+        margin: '0 16px',
+      }}
+    >
       <input
         type="text"
         placeholder="Search events..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+        }}
         style={{
           width: '100%',
           padding: '8px 12px',

@@ -9,21 +9,23 @@ export interface DividerProps {
 export const Divider: React.FC<DividerProps> = ({
   orientation = 'horizontal',
   label,
-  className = ''
+  className = '',
 }) => {
   if (orientation === 'vertical') {
-    return <div className={`w-[1px] bg-border-subtle h-full self-stretch ${className}`} />;
+    return <div className={`bg-border-subtle h-full w-[1px] self-stretch ${className}`} />;
   }
 
+  const hasLabel = typeof label === 'string' && label.trim() !== '';
+
   return (
-    <div className={`relative flex items-center w-full my-4 ${className}`}>
-      <div className="flex-grow border-t border-border-subtle" />
-      {label && (
-        <span className="px-3 text-xs uppercase tracking-wider text-text-tertiary bg-surface-base">
+    <div className={`relative my-4 flex w-full items-center ${className}`}>
+      <div className="border-border-subtle flex-grow border-t" />
+      {hasLabel && (
+        <span className="text-text-tertiary bg-surface-base px-3 text-xs uppercase tracking-wider">
           {label}
         </span>
       )}
-      <div className="flex-grow border-t border-border-subtle" />
+      <div className="border-border-subtle flex-grow border-t" />
     </div>
   );
 };

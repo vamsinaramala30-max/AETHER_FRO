@@ -1,5 +1,6 @@
 /* Light Theme Defaults */
-:root, [data-theme='light'] {
+:root,
+[data-theme='light'] {
   --aether-bg-app: #f8fafc;
   --aether-bg-surface: #ffffff;
   --aether-bg-surface-elevated: #ffffff;

@@ -14,15 +14,17 @@ const mockReviewData: WeeklyReviewData = {
   goalsAdvanced: 3,
   insights: [
     'Webpack-to-Vite migration cut HMR delay by 85%.',
-    'Morning execution blocks yield 40% higher structural code clarity than evening stretches.'
+    'Morning execution blocks yield 40% higher structural code clarity than evening stretches.',
   ],
-  blockers: [
-    'Upstream API schema synchronization delay slowed down task integration.'
-  ]
+  blockers: ['Upstream API schema synchronization delay slowed down task integration.'],
 };
 
 export const weeklyReviewService = {
   async getLatestReview(): Promise<WeeklyReviewData> {
-    return new Promise((resolve) => setTimeout(() => { resolve({ ...mockReviewData }); }, 500));
-  }
+    return new Promise((resolve) =>
+      setTimeout(() => {
+        resolve({ ...mockReviewData });
+      }, 500),
+    );
+  },
 };

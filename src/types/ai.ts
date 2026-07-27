@@ -1,4 +1,4 @@
-import { BaseEntity, ID } from './common';
+import { BaseEntity } from './common';
 
 export type AIModelType = 'gpt-4o' | 'claude-3-5-sonnet' | 'llama-3' | 'custom-rag';
 

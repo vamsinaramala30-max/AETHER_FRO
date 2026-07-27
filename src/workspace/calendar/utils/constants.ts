@@ -1,4 +1,4 @@
-import { DayOfWeek, RecurrenceFrequency } from '../types/recurrence';
+import { DayOfWeek } from '../types/recurrence';
 import { CalendarViewType } from '../types/calendar';
 
 export const DAYS_OF_WEEK: { key: DayOfWeek; label: string; shortLabel: string }[] = [
@@ -12,8 +12,18 @@ export const DAYS_OF_WEEK: { key: DayOfWeek; label: string; shortLabel: string }
 ];
 
 export const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export const CALENDAR_VIEWS: { type: CalendarViewType; label: string; shortcut: string }[] = [

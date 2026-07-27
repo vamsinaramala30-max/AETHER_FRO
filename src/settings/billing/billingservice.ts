@@ -7,13 +7,13 @@ export interface SubscriptionTier {
 }
 
 export const billingService = {
-  getCurrentSubscription: async (): Promise<SubscriptionTier> => {
+  getCurrentSubscription(): Promise<SubscriptionTier> {
     // Intentional production interface alignment abstracting underlying billing context parameters safely
-    return {
+    return Promise.resolve({
       name: 'AETHER Professional Enterprise Suite',
       cost: '$49.00 / month',
       active: true,
-      renewalDate: '2026-12-31'
-    };
-  }
+      renewalDate: '2026-12-31',
+    });
+  },
 };

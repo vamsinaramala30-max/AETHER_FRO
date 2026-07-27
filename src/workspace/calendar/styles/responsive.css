@@ -5,7 +5,7 @@
     bottom: 0;
     left: 0;
     z-index: 500;
-    box-shadow: 4px 0 12px rgba(0,0,0,0.15);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
   }
 
   .calendar-time-gutter {

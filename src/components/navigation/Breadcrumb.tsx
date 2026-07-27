@@ -12,14 +12,14 @@ export interface BreadcrumbProps {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, onNavigate }) => {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-xs text-text-tertiary">
+    <nav aria-label="Breadcrumb" className="text-text-tertiary flex items-center space-x-2 text-xs">
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
         return (
           <React.Fragment key={idx}>
             {idx > 0 && <span>/</span>}
             {isLast || !item.href ? (
-              <span className="font-semibold text-text-primary">{item.label}</span>
+              <span className="text-text-primary font-semibold">{item.label}</span>
             ) : (
               <button
                 onClick={() => onNavigate && item.href && onNavigate(item.href)}

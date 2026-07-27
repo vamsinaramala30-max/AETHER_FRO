@@ -64,4 +64,4 @@ export const Permission = {
   SYSTEM_CONFIGURE: 'settings:configure',
 } as const;
 
-export type PermissionType = (typeof Permission)[keyof typeof Permission] | string;
+export type PermissionType = (typeof Permission)[keyof typeof Permission];

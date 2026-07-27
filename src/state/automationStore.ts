@@ -24,16 +24,23 @@ export const useAutomationStore = create<AutomationState>()((set) => ({
   isLoading: false,
   error: null,
 
-  setWorkflows: (workflows) => set({ workflows, isLoading: false }),
-  addWorkflow: (workflow) => set((state) => ({ workflows: [workflow, ...state.workflows] })),
-  toggleWorkflowStatus: (id) =>
+  setWorkflows: (workflows) => {
+    set({ workflows, isLoading: false });
+  },
+  addWorkflow: (workflow) => {
+    set((state) => ({ workflows: [workflow, ...state.workflows] }));
+  },
+  toggleWorkflowStatus: (id) => {
     set((state) => ({
       workflows: state.workflows.map((w) =>
-        w.id === id
-          ? { ...w, status: w.status === 'active' ? 'paused' : 'active' }
-          : w
+        w.id === id ? { ...w, status: w.status === 'active' ? 'paused' : 'active' } : w,
       ),
-    })),
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error, isLoading: false }),
+    }));
+  },
+  setLoading: (isLoading) => {
+    set({ isLoading });
+  },
+  setError: (error) => {
+    set({ error, isLoading: false });
+  },
 }));

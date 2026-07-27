@@ -1,9 +1,9 @@
 import { CalendarEvent } from '../types/event';
 import { ScheduledReminderNotification } from '../types/reminder';
 
-export class ReminderService {
-  public static calculateReminders(event: CalendarEvent): ScheduledReminderNotification[] {
-    if (!event.reminders || event.reminders.length === 0) return [];
+export const reminderService = {
+  calculateReminders(event: CalendarEvent): ScheduledReminderNotification[] {
+    if (!Array.isArray(event.reminders) || event.reminders.length === 0) return [];
 
     const eventStartTime = new Date(event.start).getTime();
 
@@ -18,5 +18,5 @@ export class ReminderService {
         isDelivered: false,
       };
     });
-  }
-}
+  },
+};

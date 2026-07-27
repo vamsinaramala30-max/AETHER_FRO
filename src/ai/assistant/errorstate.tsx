@@ -8,10 +8,10 @@ interface ErrorStateProps {
 
 export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry, onDismiss }) => {
   return (
-    <div className="p-4 my-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 flex items-start justify-between gap-3 text-sm">
+    <div className="my-2 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
       <div className="flex items-start gap-3">
         <svg
-          className="w-5 h-5 text-red-500 mt-0.5 shrink-0"
+          className="mt-0.5 h-5 w-5 shrink-0 text-red-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -28,11 +28,11 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry, onDism
           <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{message}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex shrink-0 items-center gap-2">
         {onRetry && (
           <button
             onClick={onRetry}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+            className="rounded-lg bg-red-100 px-2.5 py-1 text-xs font-medium text-red-800 transition-colors hover:bg-red-200 dark:bg-red-900/60 dark:text-red-200 dark:hover:bg-red-800"
           >
             Retry
           </button>
@@ -41,7 +41,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry, onDism
           <button
             onClick={onDismiss}
             aria-label="Dismiss error"
-            className="p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500"
+            className="rounded-lg p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
           >
             ✕
           </button>

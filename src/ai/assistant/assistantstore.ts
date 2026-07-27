@@ -33,7 +33,9 @@ class AssistantStore {
   }
 
   private notify(): void {
-    this.listeners.forEach((listener) => { listener(); });
+    this.listeners.forEach((listener) => {
+      listener();
+    });
   }
 
   private setState(partialState: Partial<AssistantState>): void {
@@ -59,8 +61,11 @@ class AssistantStore {
       const storedConvs = localStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
       const storedActiveId = localStorage.getItem(STORAGE_KEYS.ACTIVE_ID);
 
-      const conversations: Record<string, Conversation> = storedConvs ? JSON.parse(storedConvs) : {};
-      const activeConversationId = storedActiveId && conversations[storedActiveId] ? storedActiveId : null;
+      const conversations: Record<string, Conversation> = storedConvs
+        ? JSON.parse(storedConvs)
+        : {};
+      const activeConversationId =
+        storedActiveId && conversations[storedActiveId] ? storedActiveId : null;
 
       this.state = {
         ...this.state,
@@ -231,11 +236,7 @@ class AssistantStore {
     this.setState({ abortController });
 
     try {
-      await assistantService.sendMessage(
-        activeId,
-        content,
-        { temperature: 0.7, model: 'default' }
-      );
+      await assistantService.sendMessage(activeId, content, { temperature: 0.7, model: 'default' });
 
       this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
     } catch (err: unknown) {
@@ -279,7 +280,7 @@ class AssistantStore {
     conversationId: string,
     messageId: string,
     status: Message['status'],
-    error?: string
+    error?: string,
   ): void {
     const conv = this.state.conversations[conversationId];
     if (!conv) return;

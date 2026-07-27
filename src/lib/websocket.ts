@@ -34,7 +34,10 @@ export class WebSocketManager {
       this.socket = new WebSocket(this.config.url);
       this.bindEvents();
     } catch (err) {
-      logger.error('WebSocket connection initialization failed', err);
+      logger.error(
+        'WebSocket connection initialization failed',
+        err instanceof Error ? err : new Error(String(err)),
+      );
       this.scheduleReconnect();
     }
   }
@@ -48,15 +51,20 @@ export class WebSocketManager {
       this.startHeartbeat();
     };
 
-    this.socket.onmessage = (event) => {
+    this.socket.onmessage = (event: MessageEvent) => {
       try {
-        const parsed = JSON.parse(event.data);
-        const eventType = parsed.type || 'message';
+        const parsed = JSON.parse(event.data as string) as Record<string, unknown>;
+        const eventType =
+          typeof parsed.type === 'string' && parsed.type.trim() !== '' ? parsed.type : 'message';
         const callbacks = this.handlers.get(eventType);
-        callbacks?.forEach((cb) => { cb(parsed.payload ?? parsed); });
+        callbacks?.forEach((cb) => {
+          cb(parsed.payload ?? parsed);
+        });
       } catch {
         const rawCallbacks = this.handlers.get('raw');
-        rawCallbacks?.forEach((cb) => { cb(event.data); });
+        rawCallbacks?.forEach((cb) => {
+          cb(event.data);
+        });
       }
     };
 
@@ -69,7 +77,10 @@ export class WebSocketManager {
     };
 
     this.socket.onerror = (error) => {
-      logger.error('WebSocket error occurred', error);
+      logger.error(
+        'WebSocket error occurred',
+        error instanceof Error ? error : new Error('WebSocket error event'),
+      );
     };
   }
 
@@ -106,7 +117,9 @@ export class WebSocketManager {
   private scheduleReconnect(): void {
     if (this.reconnectAttempts < this.config.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      setTimeout(() => { this.connect(); }, this.config.reconnectIntervalMs);
+      setTimeout(() => {
+        this.connect();
+      }, this.config.reconnectIntervalMs);
     } else {
       logger.error('WebSocket reconnect failed: Max retry limits reached.');
     }

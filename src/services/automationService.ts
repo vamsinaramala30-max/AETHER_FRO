@@ -5,7 +5,10 @@ export class AutomationService {
     return automationApi.getWorkflows();
   }
 
-  public async runWorkflow(id: string, payload?: Record<string, unknown>): Promise<WorkflowExecutionResultDTO> {
+  public async runWorkflow(
+    id: string,
+    payload?: Record<string, unknown>,
+  ): Promise<WorkflowExecutionResultDTO> {
     return automationApi.executeWorkflow(id, payload);
   }
 }

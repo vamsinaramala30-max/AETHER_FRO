@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { AssistantLayout } from './assistantlayout';
 import { AssistantHeader } from './assistantheader';
 import { ChatSidebar } from './chatsidebar';
 import { ChatWindow } from './chatwindows';
@@ -8,7 +7,6 @@ import { EmptyState } from './emptystate';
 import { ErrorState } from './errorstate';
 import { TypingIndicator } from './typingindicator';
 import { useAssistantState, useAssistantActions, useActiveConversation } from './assistanthooks';
-import { assistantStore } from './assistantstore';
 
 export const AssistantPage: React.FC = () => {
   const state = useAssistantState();
@@ -22,14 +20,12 @@ export const AssistantPage: React.FC = () => {
   const isStreaming = state.isStreaming;
   const error = state.error;
 
-  const selectConversation = actions.setActiveConversation;
   const createNewConversation = actions.createConversation;
   const sendMessage = actions.sendMessage;
   const clearError = () => {};
   const retryLastMessage = actions.retryLastMessage;
 
   const isMobileMenuOpen = state.sidebarOpen;
-  const toggleMobileMenu = actions.toggleSidebar;
   const setMobileMenuOpen = actions.setSidebarOpen;
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -43,7 +39,7 @@ export const AssistantPage: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isStreaming, scrollToBottom]);
+  }, [messages.length, isStreaming, scrollToBottom]);
 
   // Keyboard shortcut support: Cmd/Ctrl + K (New Chat), Escape (Close Mobile Menu)
   useEffect(() => {
@@ -57,38 +53,34 @@ export const AssistantPage: React.FC = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => { window.removeEventListener('keydown', handleKeyDown); };
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [createNewConversation, isMobileMenuOpen, setMobileMenuOpen]);
 
-  const activeConversation = conversations.find(
-    (c) => c.id === activeConversationId
-  );
+  const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
   return (
-    <div className="flex flex-col h-full w-full relative overflow-hidden bg-background">
+    <div className="bg-background relative flex h-full w-full flex-col overflow-hidden">
       <AssistantHeader
         title={activeConversation?.title || 'AI Assistant'}
         onClearSession={createNewConversation}
       />
-      
+
       <div className="flex flex-1 overflow-hidden">
         <ChatSidebar />
-        
-        <div className="flex-1 flex flex-col">
+
+        <div className="flex flex-1 flex-col">
           {error ? (
-            <div className="flex-1 flex items-center justify-center p-4">
-              <ErrorState
-                message={error}
-                onRetry={retryLastMessage}
-                onDismiss={clearError}
-              />
+            <div className="flex flex-1 items-center justify-center p-4">
+              <ErrorState message={error} onRetry={retryLastMessage} onDismiss={clearError} />
             </div>
           ) : !activeConversationId || (messages.length === 0 && !isLoading) ? (
-            <div className="flex-1 flex items-center justify-center p-4">
+            <div className="flex flex-1 items-center justify-center p-4">
               <EmptyState onSelectPrompt={createNewConversation} />
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            <div className="flex-1 space-y-4 overflow-y-auto p-4 md:p-6">
               <ChatWindow messages={messages} isLoading={isLoading} />
               {isStreaming && (
                 <div className="pt-2">
@@ -99,11 +91,8 @@ export const AssistantPage: React.FC = () => {
             </div>
           )}
 
-          <div className="p-4 border-t border-border/40 bg-background/95 backdrop-blur support-[backdrop-filter]:bg-background/60">
-            <ChatInput
-              onSendMessage={sendMessage}
-              disabled={isLoading || isStreaming}
-            />
+          <div className="border-border/40 bg-background/95 support-[backdrop-filter]:bg-background/60 border-t p-4 backdrop-blur">
+            <ChatInput onSendMessage={sendMessage} disabled={isLoading || isStreaming} />
           </div>
         </div>
       </div>

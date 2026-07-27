@@ -1,50 +1,49 @@
 import { authApi, LoginPayload, RegisterPayload, UserDTO } from '../api';
 import { storageService } from './storageService';
 
-export class AuthService {
-  private tokenKey = 'auth_token';
+const TOKEN_KEY = 'auth_token';
 
-  public setToken(token: string): void {
-    storageService.set(this.tokenKey, token);
-  }
+export const authService = {
+  setToken(token: string): void {
+    storageService.set(TOKEN_KEY, token);
+  },
 
-  public getToken(): string | null {
-    return storageService.get<string | null>(this.tokenKey, null);
-  }
+  getToken(): string | null {
+    return storageService.get<string | null>(TOKEN_KEY, null);
+  },
 
-  public clearToken(): void {
-    storageService.remove(this.tokenKey);
-  }
+  clearToken(): void {
+    storageService.remove(TOKEN_KEY);
+  },
 
-  public async login(payload: LoginPayload): Promise<UserDTO> {
+  async login(payload: LoginPayload): Promise<UserDTO> {
     const res = await authApi.login(payload);
     this.setToken(res.accessToken);
     return authApi.getCurrentUser();
-  }
+  },
 
-  public async register(payload: RegisterPayload): Promise<UserDTO> {
+  async register(payload: RegisterPayload): Promise<UserDTO> {
     const res = await authApi.register(payload);
     this.setToken(res.accessToken);
     return authApi.getCurrentUser();
-  }
+  },
 
-  public async logout(): Promise<void> {
+  async logout(): Promise<void> {
     try {
       await authApi.logout();
     } finally {
       this.clearToken();
     }
-  }
+  },
 
-  public async getCurrentUser(): Promise<UserDTO | null> {
-    if (!this.getToken()) return null;
+  async getCurrentUser(): Promise<UserDTO | null> {
+    const token = this.getToken();
+    if (typeof token !== 'string' || token.trim() === '') return null;
     try {
       return await authApi.getCurrentUser();
     } catch {
       this.clearToken();
       return null;
     }
-  }
-}
-
-export const authService = new AuthService();
+  },
+};

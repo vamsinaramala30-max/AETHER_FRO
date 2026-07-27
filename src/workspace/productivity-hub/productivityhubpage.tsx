@@ -16,11 +16,11 @@ export const ProductivityHubPage: React.FC = () => {
       setLoading(true);
       const [fetchedStats, fetchedHistory] = await Promise.all([
         productivityService.getStats(),
-        productivityService.getHistory()
+        productivityService.getHistory(),
       ]);
       setStats(fetchedStats);
       setChartData(fetchedHistory);
-    } catch (err) {
+    } catch {
       setError('Failed to instantiate analytical core telemetry models.');
     } finally {
       setLoading(false);
@@ -28,43 +28,47 @@ export const ProductivityHubPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchHubData();
+    void fetchHubData();
   }, [fetchHubData]);
 
-  const handleSessionComplete = async (minutes: number) => {
-    try {
-      const updatedStats = await productivityService.logFocusSession(minutes);
-      setStats(updatedStats);
-    } catch (err) {
-      console.error('Telemetry error updating local cache matrix');
-    }
+  const handleSessionComplete = (minutes: number) => {
+    void (async () => {
+      try {
+        const updatedStats = await productivityService.logFocusSession(minutes);
+        setStats(updatedStats);
+      } catch {
+        console.error('Telemetry error updating local cache matrix');
+      }
+    })();
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 text-slate-100 min-h-screen">
+    <div className="mx-auto min-h-screen w-full max-w-7xl space-y-6 p-4 text-slate-100 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+        <h1 className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl">
           Productivity Telemetry Control
         </h1>
-        <p className="text-sm text-slate-400 mt-1">Monitor attention engineering limits, focus loops, and system block efficiency metrics.</p>
+        <p className="mt-1 text-sm text-slate-400">
+          Monitor attention engineering limits, focus loops, and system block efficiency metrics.
+        </p>
       </div>
 
-      {error && (
-        <div className="p-4 bg-red-950/30 border border-red-900/50 rounded-xl text-sm text-red-400">
+      {typeof error === 'string' && error.trim() !== '' && (
+        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {loading || !stats ? (
-        <div className="w-full h-64 flex flex-col items-center justify-center gap-2">
-          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono text-slate-500">POLLING PERFORMANCE REGISTERS...</span>
+        <div className="flex h-64 w-full flex-col items-center justify-center gap-2">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <span className="font-mono text-xs text-slate-500">POLLING PERFORMANCE REGISTERS...</span>
         </div>
       ) : (
         <div className="space-y-6">
           <ProductivityStats stats={stats} />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <ProductivityChart data={chartData} />
             </div>

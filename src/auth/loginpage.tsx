@@ -24,7 +24,7 @@ export const LoginPage: React.FC = () => {
         // Safe navigation fallback window redirection to skip layout state mismatches
         window.location.href = '/dashboard';
       }
-    } catch (err: any) {
+    } catch {
       setErrorMessage('An unexpected authorization breakdown occurred.');
     } finally {
       setIsLoading(false);
@@ -35,16 +35,22 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
     try {
       authService.signInWithGoogle();
-    } catch (err) {
+    } catch {
       setErrorMessage('Google OAuth connection initialization failed.');
     }
   };
 
   return (
-    <AuthLayout title="Welcome to Aether" subtitle="Sign in to your development architecture workspace">
+    <AuthLayout
+      title="Welcome to Aether"
+      subtitle="Sign in to your development architecture workspace"
+    >
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {errorMessage && (
-          <div role="alert" className="p-3 text-sm rounded-lg bg-red-950/40 border border-red-800 text-red-400 font-medium">
+          <div
+            role="alert"
+            className="rounded-lg border border-red-800 bg-red-950/40 p-3 text-sm font-medium text-red-400"
+          >
             {errorMessage}
           </div>
         )}
@@ -62,8 +68,10 @@ export const LoginPage: React.FC = () => {
               required
               disabled={isLoading}
               value={email}
-              onChange={(e) => { setEmail(e.target.value); }}
-              className="block w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 disabled:opacity-50 transition-colors"
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
             />
           </div>
         </div>
@@ -81,8 +89,10 @@ export const LoginPage: React.FC = () => {
               required
               disabled={isLoading}
               value={password}
-              onChange={(e) => { setPassword(e.target.value); }}
-              className="block w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 disabled:opacity-50 transition-colors"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
             />
           </div>
         </div>
@@ -91,7 +101,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading || !email || !password}
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 disabled:opacity-40 disabled:hover:bg-cyan-600 transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="flex w-full cursor-pointer justify-center rounded-lg border border-transparent bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-cyan-600"
           >
             {isLoading ? 'Authenticating...' : 'Sign in'}
           </button>
@@ -103,7 +113,7 @@ export const LoginPage: React.FC = () => {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-800"></div>
           </div>
-          <span className="relative bg-slate-900 px-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">
+          <span className="relative bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Or operate via identity providers
           </span>
         </div>
@@ -112,7 +122,7 @@ export const LoginPage: React.FC = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full inline-flex justify-center py-2.5 px-4 rounded-lg border border-slate-800 bg-slate-950 text-sm font-medium text-slate-300 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-colors cursor-pointer"
+            className="inline-flex w-full cursor-pointer justify-center rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
           >
             <span className="mr-2 font-bold text-slate-400">G</span> Sign in with Google
           </button>
@@ -121,7 +131,10 @@ export const LoginPage: React.FC = () => {
 
       <p className="mt-6 text-center text-sm text-slate-400">
         New to the framework?{' '}
-        <a href="/signup" className="font-medium text-cyan-400 hover:text-cyan-300 underline underline-offset-4 transition-colors">
+        <a
+          href="/signup"
+          className="font-medium text-cyan-400 underline underline-offset-4 transition-colors hover:text-cyan-300"
+        >
           Create an identity instance
         </a>
       </p>

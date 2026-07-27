@@ -14,7 +14,7 @@ export const useKnowledge = () => {
     (query: string) => {
       setSearchQuery(query);
     },
-    [setSearchQuery]
+    [setSearchQuery],
   );
 
   return { documents, searchQuery, isLoading, error, handleSearch, removeDocument };

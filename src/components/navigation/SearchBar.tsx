@@ -12,12 +12,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChange,
   placeholder = 'Search...',
-  onClear
+  onClear,
 }) => {
   return (
     <Input
       value={value}
-      onChange={(e) => { onChange(e.target.value); }}
+      onChange={(e) => {
+        onChange(e.target.value);
+      }}
       placeholder={placeholder}
       leftIcon={<span>🔍</span>}
       rightIcon={

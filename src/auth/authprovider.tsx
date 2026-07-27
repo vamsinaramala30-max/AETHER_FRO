@@ -5,7 +5,6 @@ import { authService } from './authservice';
 export interface UserSession {
   id: string;
   email?: string;
-  created_at: string;
 }
 
 interface AuthContextType {
@@ -28,12 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { session, error } = await authService.getCurrentSession();
         if (error) throw error;
-        
+
         if (session?.user) {
           setUser({
             id: session.user.id,
             email: session.user.email,
-            created_at: session.user.created_at,
           });
         } else {
           setUser(null);
@@ -46,21 +44,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    initializeAuth();
+    void initializeAuth();
 
     // Wire global active live session event handler boundary
-    const subscription = authService.subscribeToAuthChanges((event: string, session: any) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          created_at: session.user.created_at,
-        });
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
+    const subscription = authService.subscribeToAuthChanges(
+      (_event: string, session: { user?: { id: string; email?: string } } | null) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+          });
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      },
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -88,7 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser({
           id: session.user.id,
           email: session.user.email,
-          created_at: session.user.created_at,
         });
       }
     } catch (error) {

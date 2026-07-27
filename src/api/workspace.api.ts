@@ -15,6 +15,9 @@ export const workspaceApi = {
   getWorkspaceById: (id: string, config?: RequestConfig): Promise<WorkspaceDTO> =>
     apiClient.get<WorkspaceDTO>(ENDPOINTS.WORKSPACE.BY_ID(id), config),
 
-  createWorkspace: (payload: { name: string; slug: string }, config?: RequestConfig): Promise<WorkspaceDTO> =>
+  createWorkspace: (
+    payload: { name: string; slug: string },
+    config?: RequestConfig,
+  ): Promise<WorkspaceDTO> =>
     apiClient.post<WorkspaceDTO>(ENDPOINTS.WORKSPACE.BASE, payload, config),
 };

@@ -14,8 +14,13 @@ export const notificationService = {
     return response.data;
   },
 
-  updatePreferences: async (prefs: NotificationPreferencesData): Promise<NotificationPreferencesData> => {
-    const response = await api.put<NotificationPreferencesData>('/user/settings/notifications', prefs);
+  updatePreferences: async (
+    prefs: NotificationPreferencesData,
+  ): Promise<NotificationPreferencesData> => {
+    const response = await api.put<NotificationPreferencesData>(
+      '/user/settings/notifications',
+      prefs,
+    );
     return response.data;
-  }
+  },
 };

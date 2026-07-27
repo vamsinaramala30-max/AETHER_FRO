@@ -31,12 +31,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const updateTheme = () => {
-      const current = theme === 'system' 
-        ? (mediaQuery.matches ? 'dark' : 'light') 
-        : theme;
-      
+      const current = theme === 'system' ? (mediaQuery.matches ? 'dark' : 'light') : theme;
+
       setResolvedTheme(current);
-      
+
       root.classList.remove('light', 'dark');
       root.classList.add(current);
       root.setAttribute('data-theme', current);
@@ -46,7 +44,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateTheme();
 
     mediaQuery.addEventListener('change', updateTheme);
-    return () => { mediaQuery.removeEventListener('change', updateTheme); };
+    return () => {
+      mediaQuery.removeEventListener('change', updateTheme);
+    };
   }, [theme]);
 
   return (

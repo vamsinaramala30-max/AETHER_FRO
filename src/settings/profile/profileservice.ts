@@ -16,9 +16,9 @@ export const profileService = {
     const response = await api.get<UserProfile>('/auth/profile');
     return response.data;
   },
-  
+
   updateProfile: async (data: Partial<UserProfile>): Promise<UserProfile> => {
     const response = await api.patch<UserProfile>('/auth/profile', data);
     return response.data;
-  }
+  },
 };

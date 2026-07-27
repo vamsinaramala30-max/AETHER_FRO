@@ -1,5 +1,3 @@
-import { MONTH_NAMES, DAYS_OF_WEEK } from './constants';
-
 export const isLeapYear = (year: number): boolean => {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 };
@@ -9,7 +7,7 @@ export const getDaysInMonth = (year: number, month: number): number => {
 };
 
 export const formatTwoDigits = (num: number): string => {
-  return num < 10 ? `0${num}` : `${num}`;
+  return num < 10 ? `0${String(num)}` : String(num);
 };
 
 export const parseISODate = (isoString: string): Date => {
@@ -17,7 +15,7 @@ export const parseISODate = (isoString: string): Date => {
 };
 
 export const toISODateString = (date: Date): string => {
-  const yyyy = date.getFullYear();
+  const yyyy = String(date.getFullYear());
   const mm = formatTwoDigits(date.getMonth() + 1);
   const dd = formatTwoDigits(date.getDate());
   return `${yyyy}-${mm}-${dd}`;
@@ -39,7 +37,7 @@ export const format12HourTime = (date: Date): string => {
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12; // convert 0 to 12
-  return `${hours}:${minutes} ${ampm}`;
+  return `${String(hours)}:${minutes} ${ampm}`;
 };
 
 export const isSameDay = (d1: Date, d2: Date): boolean => {
@@ -74,9 +72,9 @@ export const getEndOfWeek = (date: Date, startOnMonday = false): Date => {
 export const getMonthGrid = (year: number, month: number, startOnMonday = false): Date[][] => {
   const firstDayOfMonth = new Date(year, month, 1);
   const startDay = getStartOfWeek(firstDayOfMonth, startOnMonday);
-  
+
   const grid: Date[][] = [];
-  let currentDay = new Date(startDay);
+  const currentDay = new Date(startDay);
 
   for (let week = 0; week < 6; week++) {
     const weekDays: Date[] = [];

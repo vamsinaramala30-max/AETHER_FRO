@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { RoleType, Role } from '../permissions/roles';
 import { PermissionType } from '../permissions/permissions';
 
@@ -30,13 +38,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
 
-  const refreshSession = useCallback(async () => {
+  const refreshSession = useCallback(() => {
     setStatus('loading');
     try {
-      // Integration hook to underlying API / AuthService session check
       const token = localStorage.getItem('aether_token');
-      if (token) {
-        // Mock session revalidation
+      if (typeof token === 'string' && token.trim() !== '') {
         setUser({
           id: 'usr_01',
           email: 'operator@aether.ai',
@@ -54,40 +60,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       setStatus('unauthenticated');
     }
+    return Promise.resolve();
   }, []);
 
   useEffect(() => {
-    refreshSession();
+    void refreshSession();
   }, [refreshSession]);
 
-  const login = useCallback(async (_credentials: Record<string, unknown>) => {
-    setStatus('loading');
-    try {
-      localStorage.setItem('aether_token', 'mock_jwt_token');
-      await refreshSession();
-    } catch (err) {
-      setStatus('unauthenticated');
-      throw err;
-    }
-  }, [refreshSession]);
+  const login = useCallback(
+    (credentials: Record<string, unknown>) => {
+      setStatus('loading');
+      void (async () => {
+        try {
+          const token =
+            typeof credentials.token === 'string' ? credentials.token : 'mock_jwt_token';
+          localStorage.setItem('aether_token', token);
+          await refreshSession();
+        } catch (err) {
+          setStatus('unauthenticated');
+          throw err;
+        }
+      })();
+      return Promise.resolve();
+    },
+    [refreshSession],
+  );
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('aether_token');
     setUser(null);
     setStatus('unauthenticated');
+    return Promise.resolve();
   }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       status,
-      isAuthenticated: status === 'authenticated' && !!user,
+      isAuthenticated: status === 'authenticated' && user !== null,
       isLoading: status === 'loading',
       login,
       logout,
       refreshSession,
     }),
-    [user, status, login, logout, refreshSession]
+    [user, status, login, logout, refreshSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

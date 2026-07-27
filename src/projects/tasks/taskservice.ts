@@ -16,34 +16,72 @@ export interface TaskFiltersState {
 
 // In-memory fallback mock database reflecting the production service architecture
 let mockTasks: Task[] = [
-  { id: 't1', title: 'Optimize React.memo rendering in dashboard', description: 'Profile re-renders on theme change.', status: 'in_progress', priority: 'high', dueDate: '2026-07-25', tags: ['performance', 'frontend'] },
-  { id: 't2', title: 'Implement JWT Token Refresh Interceptor', description: 'Handle 401 errors gracefully across Axios instances.', status: 'todo', priority: 'high', dueDate: '2026-07-28', tags: ['auth', 'backend'] },
-  { id: 't3', title: 'Refactor Global Sidebar Layout', description: 'Ensure perfect CSS Grid alignment on 4K displays.', status: 'done', priority: 'medium', dueDate: '2026-07-18', tags: ['ui', 'responsive'] }
+  {
+    id: 't1',
+    title: 'Optimize React.memo rendering in dashboard',
+    description: 'Profile re-renders on theme change.',
+    status: 'in_progress',
+    priority: 'high',
+    dueDate: '2026-07-25',
+    tags: ['performance', 'frontend'],
+  },
+  {
+    id: 't2',
+    title: 'Implement JWT Token Refresh Interceptor',
+    description: 'Handle 401 errors gracefully across Axios instances.',
+    status: 'todo',
+    priority: 'high',
+    dueDate: '2026-07-28',
+    tags: ['auth', 'backend'],
+  },
+  {
+    id: 't3',
+    title: 'Refactor Global Sidebar Layout',
+    description: 'Ensure perfect CSS Grid alignment on 4K displays.',
+    status: 'done',
+    priority: 'medium',
+    dueDate: '2026-07-18',
+    tags: ['ui', 'responsive'],
+  },
 ];
 
 export const taskService = {
-  async getTasks(): Promise<Task[]> {
-    return new Promise((resolve) => setTimeout(() => { resolve([...mockTasks]); }, 400));
+  getTasks(): Promise<Task[]> {
+    return new Promise((resolve) =>
+      setTimeout(() => {
+        resolve([...mockTasks]);
+      }, 400),
+    );
   },
-  async createTask(task: Omit<Task, 'id'>): Promise<Task> {
+  createTask(task: Omit<Task, 'id'>): Promise<Task> {
     return new Promise((resolve) => {
-      const newTask: Task = { ...task, id: `task_${Date.now()}` };
+      const newTask: Task = { ...task, id: `task_${String(Date.now())}` };
       mockTasks.push(newTask);
-      setTimeout(() => { resolve(newTask); }, 300);
+      setTimeout(() => {
+        resolve(newTask);
+      }, 300);
     });
   },
-  async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+  updateTask(id: string, updates: Partial<Task>): Promise<Task> {
     return new Promise((resolve, reject) => {
-      const index = mockTasks.findIndex(t => t.id === id);
-      if (index === -1) { reject(new Error('Task not found')); return; }
-      mockTasks[index] = { ...mockTasks[index], ...updates };
-      setTimeout(() => { resolve(mockTasks[index]); }, 200);
+      const index = mockTasks.findIndex((t) => t.id === id);
+      if (index === -1) {
+        reject(new Error('Task not found'));
+        return;
+      }
+      const updated = { ...mockTasks[index], ...updates };
+      mockTasks[index] = updated;
+      setTimeout(() => {
+        resolve(updated);
+      }, 200);
     });
   },
-  async deleteTask(id: string): Promise<void> {
+  deleteTask(id: string): Promise<void> {
     return new Promise((resolve) => {
-      mockTasks = mockTasks.filter(t => t.id !== id);
-      setTimeout(() => { resolve(); }, 200);
+      mockTasks = mockTasks.filter((t) => t.id !== id);
+      setTimeout(() => {
+        resolve();
+      }, 200);
     });
-  }
+  },
 };

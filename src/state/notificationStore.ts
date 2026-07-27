@@ -20,7 +20,7 @@ interface NotificationState {
 export const useNotificationStore = create<NotificationState>()((set) => ({
   notifications: [],
 
-  addNotification: (notif) =>
+  addNotification: (notif) => {
     set((state) => ({
       notifications: [
         {
@@ -31,12 +31,16 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
         },
         ...state.notifications,
       ],
-    })),
+    }));
+  },
 
-  markAsRead: (id) =>
+  markAsRead: (id) => {
     set((state) => ({
       notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    })),
+    }));
+  },
 
-  clearAll: () => set({ notifications: [] }),
+  clearAll: () => {
+    set({ notifications: [] });
+  },
 }));

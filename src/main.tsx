@@ -74,7 +74,7 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
         <div
           role="alert"
           aria-live="assertive"
-          className="aria-error-screen flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 p-6 text-slate-100 font-sans"
+          className="aria-error-screen flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 p-6 font-sans text-slate-100"
         >
           <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-md">
             <div className="mb-4 flex items-center gap-3">
@@ -100,7 +100,7 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
               A critical runtime issue occurred. The application state was preserved safely.
             </p>
             {this.state.error && (
-              <pre className="mb-6 max-h-32 overflow-x-auto rounded-md bg-slate-950 p-3 text-xs font-mono text-slate-300 border border-slate-800/80">
+              <pre className="mb-6 max-h-32 overflow-x-auto rounded-md border border-slate-800/80 bg-slate-950 p-3 font-mono text-xs text-slate-300">
                 {this.state.error.message}
               </pre>
             )}
@@ -135,10 +135,10 @@ function RootLoadingFallback(): ReactNode {
       className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 text-slate-100"
     >
       <div className="relative flex items-center justify-center">
-        <div className="h-12 w-12 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin" />
-        <div className="absolute h-6 w-6 rounded-full border-2 border-cyan-500/20 border-b-cyan-400 animate-spin flex-row-reverse" />
+        <div className="h-12 w-12 animate-spin rounded-full border-2 border-indigo-500/20 border-t-indigo-500" />
+        <div className="absolute h-6 w-6 animate-spin flex-row-reverse rounded-full border-2 border-cyan-500/20 border-b-cyan-400" />
       </div>
-      <p className="mt-4 text-xs font-medium tracking-widest text-slate-400 uppercase">
+      <p className="mt-4 text-xs font-medium uppercase tracking-widest text-slate-400">
         Initializing AETHER...
       </p>
     </div>
@@ -168,5 +168,5 @@ root.render(
         </BrowserRouter>
       </QueryClientProvider>
     </RootErrorBoundary>
-  </StrictMode>
+  </StrictMode>,
 );

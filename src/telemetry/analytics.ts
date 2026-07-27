@@ -59,7 +59,12 @@ class AnalyticsService {
     });
   }
 
-  public trackAIInteraction(action: string, model: string, durationMs: number, tokens?: number): void {
+  public trackAIInteraction(
+    action: string,
+    model: string,
+    durationMs: number,
+    tokens?: number,
+  ): void {
     this.track('ai_interaction', {
       action,
       model,

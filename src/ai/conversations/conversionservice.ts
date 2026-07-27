@@ -5,8 +5,22 @@ class ConversationService {
   private fallbackKey = 'aether_conversations_registry';
 
   private mockRegistry: Conversation[] = [
-    { id: 'default_session', title: 'Global Context Orchestrator', summary: 'Primary development hub sync session', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), messageCount: 4 },
-    { id: 'conv_2', title: 'Refactoring Knowledge Abstraction', summary: 'Isolating data pipelines for vector indexes', createdAt: new Date(Date.now() - 86400000).toISOString(), updatedAt: new Date(Date.now() - 86400000).toISOString(), messageCount: 12 }
+    {
+      id: 'default_session',
+      title: 'Global Context Orchestrator',
+      summary: 'Primary development hub sync session',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messageCount: 4,
+    },
+    {
+      id: 'conv_2',
+      title: 'Refactoring Knowledge Abstraction',
+      summary: 'Isolating data pipelines for vector indexes',
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      updatedAt: new Date(Date.now() - 86400000).toISOString(),
+      messageCount: 12,
+    },
   ];
 
   public async getConversations(): Promise<Conversation[]> {
@@ -30,13 +44,13 @@ class ConversationService {
       title,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      messageCount: 0
+      messageCount: 0,
     };
     try {
       const response = await fetch(this.baseRoute, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
+        body: JSON.stringify({ title }),
       });
       if (!response.ok) throw new Error();
       return await response.json();

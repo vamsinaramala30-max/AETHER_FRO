@@ -1,12 +1,13 @@
 import React from 'react';
-import * as THREE from 'three';
 import { THREE_DEFAULTS } from './constants';
 
 export interface DefaultMeshModelProps {
   color?: string;
 }
 
-export const DefaultMeshModel: React.FC<DefaultMeshModelProps> = ({ color = THREE_DEFAULTS.colors.primary }) => {
+export const DefaultMeshModel: React.FC<DefaultMeshModelProps> = ({
+  color = THREE_DEFAULTS.colors.primary,
+}) => {
   return (
     <mesh>
       <boxGeometry args={[1, 1, 1]} />
@@ -14,4 +15,3 @@ export const DefaultMeshModel: React.FC<DefaultMeshModelProps> = ({ color = THRE
     </mesh>
   );
 };
-

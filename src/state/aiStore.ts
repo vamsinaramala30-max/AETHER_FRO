@@ -45,45 +45,61 @@ export const useAIStore = create<AIState>()((set) => ({
   isTyping: false,
   error: null,
 
-  setConversations: (conversations) => set({ conversations }),
+  setConversations: (conversations) => {
+    set({ conversations });
+  },
 
-  setActiveConversation: (id) => set({ activeConversationId: id }),
+  setActiveConversation: (id) => {
+    set({ activeConversationId: id });
+  },
 
-  setMessages: (conversationId, messages) =>
+  setMessages: (conversationId, messages) => {
     set((state) => ({
       messages: { ...state.messages, [conversationId]: messages },
-    })),
+    }));
+  },
 
-  addMessage: (conversationId, message) =>
+  addMessage: (conversationId, message) => {
     set((state) => {
-      const existing = state.messages[conversationId] || [];
+      const existing = state.messages[conversationId] ?? [];
       return {
         messages: {
           ...state.messages,
           [conversationId]: [...existing, message],
         },
       };
-    }),
+    });
+  },
 
-  appendStreamContent: (conversationId, messageId, chunk) =>
+  appendStreamContent: (conversationId, messageId, chunk) => {
     set((state) => {
-      const convMessages = state.messages[conversationId] || [];
+      const convMessages = state.messages[conversationId] ?? [];
       const updated = convMessages.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, content: msg.content + chunk, isStreaming: true }
-          : msg
+        msg.id === messageId ? { ...msg, content: msg.content + chunk, isStreaming: true } : msg,
       );
       return { messages: { ...state.messages, [conversationId]: updated } };
-    }),
+    });
+  },
 
-  setAssistantStatus: (assistantStatus) => set({ assistantStatus }),
-  setIsTyping: (isTyping) => set({ isTyping }),
-  setError: (error) => set({ error }),
+  setAssistantStatus: (assistantStatus) => {
+    set({ assistantStatus });
+  },
+  setIsTyping: (isTyping) => {
+    set({ isTyping });
+  },
+  setError: (error) => {
+    set({ error });
+  },
 
-  clearConversation: (conversationId) =>
+  clearConversation: (conversationId) => {
     set((state) => {
-      const updatedMessages = { ...state.messages };
-      delete updatedMessages[conversationId];
+      const updatedMessages: Record<string, ChatMessage[]> = {};
+      Object.keys(state.messages).forEach((key) => {
+        if (key !== conversationId) {
+          updatedMessages[key] = state.messages[key];
+        }
+      });
       return { messages: updatedMessages };
-    }),
+    });
+  },
 }));

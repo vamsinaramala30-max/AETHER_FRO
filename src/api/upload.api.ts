@@ -10,7 +10,11 @@ export interface UploadResponseDTO {
 }
 
 export const uploadApi = {
-  uploadFile: (file: File, onProgress?: (progress: number) => void, config?: RequestConfig): Promise<UploadResponseDTO> => {
+  uploadFile: (
+    file: File,
+    onProgress?: (progress: number) => void,
+    config?: RequestConfig,
+  ): Promise<UploadResponseDTO> => {
     const formData = new FormData();
     formData.append('file', file);
     return apiClient.post<UploadResponseDTO>(ENDPOINTS.UPLOADS.SINGLE, formData, config);

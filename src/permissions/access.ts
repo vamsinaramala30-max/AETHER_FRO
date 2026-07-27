@@ -1,5 +1,5 @@
 import { RoleType, ROLE_HIERARCHY, Role } from './roles';
-import { PermissionType, Permission } from './permissions';
+import { PermissionType } from './permissions';
 
 export interface UserAccessContext {
   role: RoleType;
@@ -11,8 +11,8 @@ export interface UserAccessContext {
  * Verifies if user holds minimum role weight in hierarchy.
  */
 export function hasMinimumRole(userRole: RoleType, requiredRole: RoleType): boolean {
-  const userWeight = ROLE_HIERARCHY[userRole] ?? 0;
-  const requiredWeight = ROLE_HIERARCHY[requiredRole] ?? 0;
+  const userWeight = ROLE_HIERARCHY[userRole];
+  const requiredWeight = ROLE_HIERARCHY[requiredRole];
   return userWeight >= requiredWeight;
 }
 
@@ -20,19 +20,27 @@ export function hasMinimumRole(userRole: RoleType, requiredRole: RoleType): bool
  * Checks if user holds a specific permission string or explicit wildcards/admin rights.
  */
 export function hasPermission(
-  access: UserAccessContext,
-  requiredPermission: PermissionType
+  access: UserAccessContext | null | undefined,
+  requiredPermission: PermissionType,
 ): boolean {
-  if (!access || !access.role) return false;
+  if (
+    access === null ||
+    access === undefined ||
+    typeof access.role !== 'string' ||
+    access.role.trim() === ''
+  )
+    return false;
   if (access.role === Role.SUPERADMIN) return true;
 
-  if (access.permissions.includes('*') || access.permissions.includes(requiredPermission)) {
+  const perms = access.permissions as string[];
+  if (perms.includes('*') || perms.includes(requiredPermission)) {
     return true;
   }
 
   // Domain-level wildcard support (e.g. "projects:*")
-  const [domain] = requiredPermission.split(':');
-  if (domain && access.permissions.includes(`${domain}:*`)) {
+  const parts = requiredPermission.split(':');
+  const domain = parts[0];
+  if (typeof domain === 'string' && domain.trim() !== '' && perms.includes(`${domain}:*`)) {
     return true;
   }
 
@@ -43,8 +51,8 @@ export function hasPermission(
  * Evaluates whether user has ALL required permissions.
  */
 export function hasAllPermissions(
-  access: UserAccessContext,
-  requiredPermissions: PermissionType[]
+  access: UserAccessContext | null | undefined,
+  requiredPermissions: PermissionType[],
 ): boolean {
   return requiredPermissions.every((perm) => hasPermission(access, perm));
 }
@@ -53,8 +61,8 @@ export function hasAllPermissions(
  * Evaluates whether user has AT LEAST ONE of the required permissions.
  */
 export function hasAnyPermission(
-  access: UserAccessContext,
-  requiredPermissions: PermissionType[]
+  access: UserAccessContext | null | undefined,
+  requiredPermissions: PermissionType[],
 ): boolean {
   return requiredPermissions.some((perm) => hasPermission(access, perm));
 }
@@ -62,18 +70,15 @@ export function hasAnyPermission(
 /**
  * Premium feature gate check.
  */
-export function isPremiumUser(access: UserAccessContext): boolean {
-  if (!access) return false;
-  return (
-    access.isSubscribed === true ||
-    hasMinimumRole(access.role, Role.PREMIUM)
-  );
+export function isPremiumUser(access: UserAccessContext | null | undefined): boolean {
+  if (access === null || access === undefined) return false;
+  return access.isSubscribed === true || hasMinimumRole(access.role, Role.PREMIUM);
 }
 
 /**
  * Admin status verification.
  */
-export function isAdminUser(access: UserAccessContext): boolean {
-  if (!access) return false;
+export function isAdminUser(access: UserAccessContext | null | undefined): boolean {
+  if (access === null || access === undefined) return false;
   return hasMinimumRole(access.role, Role.ADMIN);
 }

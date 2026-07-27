@@ -9,7 +9,7 @@ export const useTheme = () => {
     (newTheme: 'light' | 'dark' | 'system') => {
       updateSettings({ theme: newTheme });
     },
-    [updateSettings]
+    [updateSettings],
   );
 
   useEffect(() => {

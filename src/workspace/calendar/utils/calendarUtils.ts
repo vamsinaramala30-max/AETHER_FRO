@@ -11,18 +11,18 @@ export interface PositionedEvent {
 export const calculateEventPositions = (
   events: CalendarEvent[],
   dayStartHour = 0,
-  dayEndHour = 24
+  dayEndHour = 24,
 ): PositionedEvent[] => {
   const totalMinutesInDay = (dayEndHour - dayStartHour) * 60;
 
   // Filter out all-day events (handled separately)
   const timedEvents = events
-    .filter(e => !e.isAllDay)
+    .filter((e) => !e.isAllDay)
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
   const positionedEvents: PositionedEvent[] = [];
 
-  timedEvents.forEach(event => {
+  timedEvents.forEach((event) => {
     const start = new Date(event.start);
     const end = new Date(event.end);
 
@@ -46,11 +46,11 @@ export const calculateEventPositions = (
     let overlapCount = 1;
     let columnIndex = 0;
 
+    const curr = positionedEvents[i];
+
     for (let j = 0; j < i; j++) {
       const prev = positionedEvents[j];
-      const curr = positionedEvents[i];
 
-      const prevStart = new Date(prev.event.start).getTime();
       const prevEnd = new Date(prev.event.end).getTime();
       const currStart = new Date(curr.event.start).getTime();
 
@@ -62,8 +62,8 @@ export const calculateEventPositions = (
 
     if (overlapCount > 1) {
       const width = 100 / overlapCount;
-      positionedEvents[i].widthPercent = width;
-      positionedEvents[i].leftPercent = (columnIndex % overlapCount) * width;
+      curr.widthPercent = width;
+      curr.leftPercent = (columnIndex % overlapCount) * width;
     }
   }
 

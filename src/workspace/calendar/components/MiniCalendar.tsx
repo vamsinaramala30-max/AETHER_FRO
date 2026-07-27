@@ -13,10 +13,31 @@ export const MiniCalendar: React.FC = () => {
       <div style={{ fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>
         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textTransform: 'uppercase', color: '#5f6368' }}>
-        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '2px',
+          textTransform: 'uppercase',
+          color: '#5f6368',
+        }}
+      >
+        <span>S</span>
+        <span>M</span>
+        <span>T</span>
+        <span>W</span>
+        <span>T</span>
+        <span>F</span>
+        <span>S</span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginTop: '4px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '2px',
+          marginTop: '4px',
+        }}
+      >
         {grid.flatMap((week) =>
           week.map((day) => {
             const isSelected = isSameDay(day, currentDate);
@@ -26,7 +47,9 @@ export const MiniCalendar: React.FC = () => {
               <button
                 key={day.toISOString()}
                 type="button"
-                onClick={() => setCurrentDate(day.toISOString().split('T')[0])}
+                onClick={() => {
+                  setCurrentDate(day.toISOString().split('T')[0]);
+                }}
                 style={{
                   border: 'none',
                   background: isSelected ? '#1a73e8' : activeToday ? '#e8f0fe' : 'none',
@@ -42,7 +65,7 @@ export const MiniCalendar: React.FC = () => {
                 {day.getDate()}
               </button>
             );
-          })
+          }),
         )}
       </div>
     </div>

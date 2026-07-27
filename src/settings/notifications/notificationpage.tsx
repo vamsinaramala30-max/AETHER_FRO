@@ -8,21 +8,37 @@ export const NotificationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    notificationService.getPreferences()
-      .then((res) => { setData(res); })
-      .catch(() => { setData({ emailAlerts: true, securityAlerts: true, systemUpdates: false, weeklyDigest: false }); }) // Isolated fallback safe execution
-      .finally(() => { setLoading(false); });
+    notificationService
+      .getPreferences()
+      .then((res) => {
+        setData(res);
+      })
+      .catch(() => {
+        setData({
+          emailAlerts: true,
+          securityAlerts: true,
+          systemUpdates: false,
+          weeklyDigest: false,
+        });
+      }) // Isolated fallback safe execution
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white tracking-tight">Notification Channels</h2>
-        <p className="text-sm text-slate-400 mt-1">Configure event notifications and transmission infrastructure bounds.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-white">Notification Channels</h2>
+        <p className="mt-1 text-sm text-slate-400">
+          Configure event notifications and transmission infrastructure bounds.
+        </p>
       </div>
       <hr className="border-slate-800" />
       {loading ? (
-        <div className="text-sm text-slate-400 animate-pulse">Loading messaging configuration framework...</div>
+        <div className="animate-pulse text-sm text-slate-400">
+          Loading messaging configuration framework...
+        </div>
       ) : (
         data && <NotificationPreferences initialData={data} />
       )}

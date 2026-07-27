@@ -1,4 +1,4 @@
-export type NotificationType = 
+export type NotificationType =
   | 'event_invitation'
   | 'event_update'
   | 'event_cancelled'

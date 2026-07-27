@@ -6,14 +6,18 @@ import { documentsService } from '../documents/documentservice';
 export const searchService = {
   async queryAll(query: string): Promise<SearchResult[]> {
     if (!query.trim()) return [];
-    
+
     const notes = await notesService.getNotes();
     const docs = await documentsService.getDocuments();
     const results: SearchResult[] = [];
     const q = query.toLowerCase();
 
     notes.forEach((n: import('../types').Note) => {
-      if (n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q) || n.tags.some((t: string) => t.toLowerCase().includes(q))) {
+      if (
+        n.title.toLowerCase().includes(q) ||
+        n.content.toLowerCase().includes(q) ||
+        n.tags.some((t: string) => t.toLowerCase().includes(q))
+      ) {
         results.push({
           id: n.id,
           type: 'note',
@@ -26,7 +30,10 @@ export const searchService = {
     });
 
     docs.forEach((d: import('../types').DocumentItem) => {
-      if (d.name.toLowerCase().includes(q) || d.tags.some((t: string) => t.toLowerCase().includes(q))) {
+      if (
+        d.name.toLowerCase().includes(q) ||
+        d.tags.some((t: string) => t.toLowerCase().includes(q))
+      ) {
         results.push({
           id: d.id,
           type: 'document',
