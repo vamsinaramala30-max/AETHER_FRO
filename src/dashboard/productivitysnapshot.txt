@@ -1,71 +1,94 @@
-import React from 'react';
+import React from "react";
+import { motion } from "framer-motion";
 
-interface ProductivitySnapshotProps {
-  efficiencyMetric?: number;
-  weeklyDelta?: number;
-  distribution?: { label: string; percentage: number }[];
+export interface ProductivityData {
+  weeklyGoalHours: number;
+  completedHours: number;
+  focusScore: number; // 0-100
+  efficiencyRating: string;
 }
 
-export const ProductivitySnapshot: React.FC<ProductivitySnapshotProps> = ({ 
-  efficiencyMetric = 88, 
-  weeklyDelta = 4.2,
-  distribution = [
-    { label: 'Engineering Execution', percentage: 55 },
-    { label: 'Architectural Analysis', percentage: 30 },
-    { label: 'Operational Syncs', percentage: 15 }
-  ]
+export interface ProductivitySnapshotProps {
+  data?: ProductivityData;
+  isLoading?: boolean;
+}
+
+const defaultData: ProductivityData = {
+  weeklyGoalHours: 40,
+  completedHours: 31.5,
+  focusScore: 88,
+  efficiencyRating: "Optimal",
+};
+
+export const ProductivitySnapshot: React.FC<ProductivitySnapshotProps> = ({
+  data = defaultData,
+  isLoading = false,
 }) => {
+  if (isLoading) {
+    return (
+      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse space-y-4">
+        <div className="h-6 w-40 bg-slate-800 rounded" />
+        <div className="h-24 bg-slate-800/40 rounded-xl" />
+      </div>
+    );
+  }
+
+  const { weeklyGoalHours, completedHours, focusScore, efficiencyRating } = data;
+  const percentage = weeklyGoalHours > 0
+    ? Math.min(Math.round((completedHours / weeklyGoalHours) * 100), 100)
+    : 0;
+
   return (
-    <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Optimization Vector</h3>
-      
-      {/* Structural Data Layout Grid */}
-      <div className="flex items-baseline gap-2">
-        <span className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">{efficiencyMetric}%</span>
-        <span className={`text-xs font-bold ${weeklyDelta >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-          {weeklyDelta >= 0 ? '↑' : '↓'} {Math.abs(weeklyDelta)}% vs baseline
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.3 }}
+      className="p-6 bg-slate-900 border border-slate-800 rounded-2xl"
+      aria-label="Productivity Snapshot"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-slate-100">Productivity Snapshot</h2>
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
+          {efficiencyRating}
         </span>
       </div>
-      <p className="text-xs text-slate-400 mt-1">Aggregate workspace performance index</p>
 
-      {/* Direct Native Flex/Bar Layout Visualization */}
-      <div className="mt-5 space-y-3">
+      <div className="space-y-4">
         <div>
-          <div className="flex justify-between text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-            <span>Resource Vector Allocation</span>
+          <div className="flex justify-between text-xs font-medium text-slate-400 mb-1.5">
+            <span>Weekly Goal Progress</span>
+            <span className="text-slate-200 font-mono">
+              {completedHours}h / {weeklyGoalHours}h ({percentage}%)
+            </span>
           </div>
-          <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex overflow-hidden">
-            {distribution.map((d, index) => {
-              const bgColors = ['bg-primary-500', 'bg-indigo-500', 'bg-cyan-500'];
-              return (
-                <div 
-                  key={index}
-                  className={`${bgColors[index % bgColors.length]} h-full`}
-                  style={{ width: `${d.percentage}%` }}
-                  title={`${d.label}: ${d.percentage}%`}
-                />
-              );
-            })}
+          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-indigo-500 h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${percentage}%` }}
+              role="progressbar"
+              aria-valuenow={percentage}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
           </div>
         </div>
 
-        {/* Legend Mapping */}
-        <div className="pt-2 space-y-1.5">
-          {distribution.map((d, index) => {
-            const dotColors = ['bg-primary-500', 'bg-indigo-500', 'bg-cyan-500'];
-            return (
-              <div key={index} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 min-w-0">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColors[index % dotColors.length]}`} />
-                  <span className="truncate font-medium">{d.label}</span>
-                </div>
-                <span className="font-mono text-slate-500 font-bold ml-2">{d.percentage}%</span>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+            <span className="text-xs text-slate-500 block">Focus Score</span>
+            <span className="text-xl font-bold text-slate-100 mt-1 block font-mono">
+              {focusScore}<span className="text-xs text-slate-500">/100</span>
+            </span>
+          </div>
+          <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+            <span className="text-xs text-slate-500 block">Time Tracked</span>
+            <span className="text-xl font-bold text-slate-100 mt-1 block font-mono">
+              {completedHours}h
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.section>
   );
 };
 

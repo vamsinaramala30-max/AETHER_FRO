@@ -1,62 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 
-interface WelcomeHeaderProps {
-  user?: {
-    name?: string;
-    email?: string;
-  } | null;
-  isLoadingUser?: boolean;
+export interface UserProfile {
+  name: string;
+  role?: string;
+  avatarUrl?: string;
+}
+
+export interface WelcomeHeaderProps {
+  user?: UserProfile | null;
+  lastUpdated?: Date;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({
-  user = null,
-  isLoadingUser = false,
+  user,
+  lastUpdated = new Date(),
+  onRefresh,
+  isRefreshing = false,
 }) => {
-  const [greeting, setGreeting] = useState<string>('Welcome');
-  const [formattedDate, setFormattedDate] = useState<string>('');
-
-  useEffect(() => {
-    const hours = new Date().getHours();
-    if (hours < 12) setGreeting('Good morning');
-    else if (hours < 18) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
-
-    setFormattedDate(
-      new Date().toLocaleDateString(undefined, {
-        weekday: 'long',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    );
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   }, []);
 
-  if (isLoadingUser) {
-    return <div className="h-12 w-1/3 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />;
-  }
+  const formattedTime = useMemo(() => {
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+    }).format(lastUpdated);
+  }, [lastUpdated]);
 
-  const hasName = user !== null && typeof user.name === 'string' && user.name.trim() !== '';
-  const hasEmail = user !== null && typeof user.email === 'string' && user.email.trim() !== '';
-  const displayName = hasName
-    ? (user.name as string)
-    : hasEmail
-      ? ((user.email as string).split('@')[0] ?? 'Aether Operator')
-      : 'Aether Operator';
+  const displayName = user?.name || "Member";
 
   return (
-    <header className="flex flex-col gap-2 border-b border-slate-200/60 bg-transparent pb-6 md:flex-row md:items-center md:justify-between dark:border-slate-800/60">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 transition-colors duration-200 md:text-3xl dark:text-white">
-          {greeting}, <span className="text-primary-600 dark:text-primary-400">{displayName}</span>
+    <motion.header
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-slate-900 border border-slate-800 rounded-2xl shadow-sm"
+    >
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 tracking-tight">
+          {greeting}, <span className="text-indigo-400">{displayName}</span>
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Systems initialized. Ready to orchestrate workspace execution paths.
+        <p className="text-sm text-slate-400">
+          {user?.role ? `${user.role} • ` : ""}System status optimal. Last synced at {formattedTime}.
         </p>
       </div>
-      <div className="self-start rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-200 md:self-center md:text-sm dark:bg-slate-800 dark:text-slate-300">
-        {formattedDate}
-      </div>
-    </header>
+
+      {onRefresh && (
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          aria-label="Refresh Dashboard"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg
+            className={`w-4 h-4 text-slate-400 ${isRefreshing ? "animate-spin" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          <span>{isRefreshing ? "Syncing..." : "Refresh"}</span>
+        </button>
+      )}
+    </motion.header>
   );
 };
 

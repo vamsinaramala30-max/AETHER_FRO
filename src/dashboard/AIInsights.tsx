@@ -1,67 +1,105 @@
-import React from 'react';
+import React from "react";
+import { motion } from "framer-motion";
 
-interface InsightNode {
+export interface InsightItem {
   id: string;
-  confidence: number;
-  message: string;
-  domain: string;
+  type: "critical" | "optimization" | "info";
+  title: string;
+  summary: string;
+  actionText?: string;
+  onAction?: () => void;
 }
 
-interface AIInsightsProps {
-  insights?: InsightNode[];
-  isProcessing?: boolean;
-  isServiceAvailable?: boolean;
+export interface AIInsightsProps {
+  insights?: InsightItem[];
+  isLoading?: boolean;
 }
+
+const defaultInsights: InsightItem[] = [
+  {
+    id: "ins-1",
+    type: "optimization",
+    title: "Bundle Optimization",
+    summary: "Lazy loading route chunk 'analytics' can reduce initial load time by ~340ms.",
+    actionText: "Review Chunk",
+  },
+  {
+    id: "ins-2",
+    type: "info",
+    title: "Cache Hit Ratio",
+    summary: "TanStack Query cache retention rate is operating at 98.2% efficiency over 24 hours.",
+  },
+];
 
 export const AIInsights: React.FC<AIInsightsProps> = ({
-  insights = [],
-  isProcessing = false,
-  isServiceAvailable = true,
+  insights = defaultInsights,
+  isLoading = false,
 }) => {
-  if (isProcessing)
-    return <div className="h-44 w-full animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />;
+  if (isLoading) {
+    return (
+      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse space-y-3">
+        <div className="h-6 w-28 bg-slate-800 rounded" />
+        <div className="h-20 bg-slate-800/40 rounded-xl" />
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/40 to-white/70 p-6 backdrop-blur-md dark:border-indigo-900/40 dark:from-indigo-950/20 dark:to-slate-900/70">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-          <span>Aether AI Core</span>
-          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-indigo-500" />
-        </h3>
-        <span className="text-2xs rounded-full bg-indigo-100 px-2 py-0.5 font-mono text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300">
-          {isServiceAvailable ? 'Online' : 'Offline'}
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.25 }}
+      className="p-6 bg-slate-900 border border-slate-800 rounded-2xl"
+      aria-label="Automated System Insights"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+          Automated Insights
+        </h2>
+        <span className="text-xs text-indigo-400 font-medium bg-indigo-950/60 border border-indigo-800/50 px-2 py-0.5 rounded-full">
+          Engine Active
         </span>
       </div>
 
-      {!isServiceAvailable ? (
-        <p className="text-sm italic text-slate-400">Cognitive deduction subsystem suspended.</p>
-      ) : insights.length === 0 ? (
-        <p className="text-sm italic text-slate-400">
-          Awaiting pipeline analysis matrix telemetry...
-        </p>
+      {!insights || insights.length === 0 ? (
+        <p className="text-sm text-slate-500 text-center py-4">No active insights detected.</p>
       ) : (
         <div className="space-y-3">
-          {insights.map((ins) => (
+          {insights.map((insight) => (
             <div
-              key={ins.id}
-              className="rounded-lg border border-slate-100 bg-white/80 p-3 text-sm dark:border-indigo-950/40 dark:bg-slate-900/50"
+              key={insight.id}
+              className="p-4 rounded-xl bg-slate-950/50 border border-slate-800 space-y-2"
             >
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="text-2xs font-bold uppercase tracking-wide text-indigo-500">
-                  {ins.domain}
-                </span>
-                <span className="text-3xs font-mono text-slate-400">
-                  conf: {(ins.confidence * 100).toFixed(0)}%
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-200">{insight.title}</span>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded uppercase font-bold tracking-wider ${
+                    insight.type === "critical"
+                      ? "bg-red-950/60 text-red-400 border border-red-800/50"
+                      : insight.type === "optimization"
+                      ? "bg-amber-950/60 text-amber-400 border border-amber-800/50"
+                      : "bg-sky-950/60 text-sky-400 border border-sky-800/50"
+                  }`}
+                >
+                  {insight.type}
                 </span>
               </div>
-              <p className="font-medium leading-normal text-slate-700 dark:text-slate-300">
-                {ins.message}
-              </p>
+              <p className="text-xs text-slate-400 leading-relaxed">{insight.summary}</p>
+              {insight.actionText && insight.onAction && (
+                <button
+                  type="button"
+                  onClick={insight.onAction}
+                  className="mt-2 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors focus:outline-none"
+                >
+                  {insight.actionText} →
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </motion.section>
   );
 };
 

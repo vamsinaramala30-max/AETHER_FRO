@@ -1,65 +1,115 @@
-import React from 'react';
+import React from "react";
+import { motion } from "framer-motion";
 
-interface ScheduleItem {
+export interface Deliverable {
   id: string;
-  time: string;
   title: string;
-  type: 'critical' | 'routine' | 'sync';
+  completed: boolean;
+  category: string;
 }
 
-interface TodaySummaryProps {
-  schedule?: ScheduleItem[];
+export interface TodaySummaryProps {
+  deliverables?: Deliverable[];
   isLoading?: boolean;
 }
 
-export const TodaySummary: React.FC<TodaySummaryProps> = ({ schedule = [], isLoading = false }) => {
+const defaultDeliverables: Deliverable[] = [
+  { id: "d1", title: "Review architectural pull request", completed: true, category: "Core" },
+  { id: "d2", title: "Deploy stage updates to production environment", completed: true, category: "DevOps" },
+  { id: "d3", title: "Finalize API schema specifications", completed: false, category: "Backend" },
+  { id: "d4", title: "Audit accessibility for dashboard accessibility compliance", completed: false, category: "Frontend" },
+];
+
+export const TodaySummary: React.FC<TodaySummaryProps> = ({
+  deliverables = defaultDeliverables,
+  isLoading = false,
+}) => {
+  const completedCount = deliverables.filter((d) => d.completed).length;
+  const progressPercentage = deliverables.length
+    ? Math.round((completedCount / deliverables.length) * 100)
+    : 0;
+
   if (isLoading) {
-    return <div className="h-64 w-full animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />;
+    return (
+      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse space-y-4">
+        <div className="h-6 w-36 bg-slate-800 rounded" />
+        <div className="h-4 w-full bg-slate-800 rounded" />
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-10 bg-slate-800/40 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-slate-200 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/70">
-      <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">
-        Chronological Agenda
-      </h3>
-      {schedule.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center dark:border-slate-800">
-          <p className="text-sm text-slate-400 dark:text-slate-500">
-            No events or blocks mapped for the current lifecycle.
-          </p>
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
+      className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between"
+    >
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-100">Today's Deliverables</h2>
+          <span className="text-xs font-medium text-slate-400 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+            {completedCount} of {deliverables.length} Done
+          </span>
         </div>
-      ) : (
-        <div className="max-h-[320px] space-y-4 overflow-y-auto pr-2">
-          {schedule.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-start gap-4 rounded-lg border border-slate-100 bg-slate-50 p-3 transition-all hover:bg-slate-100 dark:border-slate-800/80 dark:bg-slate-800/40 dark:hover:bg-slate-800"
-            >
-              <span className="whitespace-nowrap rounded bg-slate-200 px-2 py-1 font-mono text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
-                {item.time}
-              </span>
-              <div className="min-w-0 flex-1">
-                <h4 className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                  {item.title}
-                </h4>
-                <div className="mt-1 flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      item.type === 'critical'
-                        ? 'bg-rose-500'
-                        : item.type === 'sync'
-                          ? 'bg-amber-500'
-                          : 'bg-emerald-500'
+
+        {/* Progress bar */}
+        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-6">
+          <div
+            className="bg-indigo-500 h-full rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercentage}%` }}
+            role="progressbar"
+            aria-valuenow={progressPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
+        </div>
+
+        {deliverables.length === 0 ? (
+          <p className="text-sm text-slate-500 py-4 text-center">No deliverables scheduled for today.</p>
+        ) : (
+          <ul className="space-y-3">
+            {deliverables.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60"
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className={`w-4 h-4 rounded-full flex items-center justify-center border ${
+                      item.completed
+                        ? "bg-indigo-500 border-indigo-400 text-slate-950"
+                        : "border-slate-600 bg-transparent"
                     }`}
-                  />
-                  <span className="text-xs capitalize text-slate-400">{item.type} level</span>
+                  >
+                    {item.completed && (
+                      <svg className="w-2.5 h-2.5 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      item.completed ? "text-slate-400 line-through" : "text-slate-200"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                <span className="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                  {item.category}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </motion.section>
   );
 };
 

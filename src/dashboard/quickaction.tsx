@@ -1,98 +1,77 @@
-import React from 'react';
+import React from "react";
+import { motion } from "framer-motion";
 
-interface QuickActionItem {
+export interface QuickActionItem {
+  id: string;
   label: string;
-  description: string;
-  handler: () => void;
-  icon: string;
+  description?: string;
+  icon?: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
 }
 
-interface QuickActionsProps {
+export interface QuickActionsProps {
   actions?: QuickActionItem[];
-  onActionTrigger?: (actionKey: string) => void;
 }
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ actions, onActionTrigger }) => {
-  // Safe Fallback Architecture using predefined workspace standard events
-  const defaultActions = [
+export const QuickActions: React.FC<QuickActionsProps> = ({ actions }) => {
+  const defaultActions: QuickActionItem[] = [
     {
-      key: 'ai_query',
-      label: 'Query AI Node',
-      description: 'Initialize Aether Core LLM runtime',
-      icon: '🤖',
+      id: "action-1",
+      label: "New Project",
+      description: "Initialize workspace",
+      onClick: () => {},
     },
     {
-      key: 'new_task',
-      label: 'Push Direct Task',
-      description: 'Allocate unit onto workspace stack',
-      icon: '⚡',
+      id: "action-2",
+      label: "Invite Team",
+      description: "Manage permissions",
+      onClick: () => {},
     },
     {
-      key: 'note_append',
-      label: 'Append Raw Note',
-      description: 'Commit volatile insight text',
-      icon: '📝',
+      id: "action-3",
+      label: "System Logs",
+      description: "View runtime audit",
+      onClick: () => {},
     },
     {
-      key: 'doc_stage',
-      label: 'Stage Document',
-      description: 'Ingest vector payload binary',
-      icon: '📤',
+      id: "action-4",
+      label: "Settings",
+      description: "Configure options",
+      onClick: () => {},
     },
   ];
 
-  const handleTrigger = (key: string, customHandler?: () => void) => {
-    if (customHandler) customHandler();
-    else if (onActionTrigger) onActionTrigger(key);
-  };
+  const actionList = actions && actions.length > 0 ? actions : defaultActions;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/70">
-      <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">Command Actions</h3>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {actions
-          ? actions.map((act, index) => (
-              <button
-                key={index}
-                onClick={act.handler}
-                className="focus:ring-primary-500/40 group flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all duration-200 hover:bg-slate-50 focus:outline-none focus:ring-2 dark:border-slate-800 dark:hover:bg-slate-800/60"
-              >
-                <span className="rounded-lg bg-slate-100 p-1.5 text-xl transition-transform group-hover:scale-105 dark:bg-slate-800">
-                  {act.icon}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-200">
-                    {act.label}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
-                    {act.description}
-                  </p>
-                </div>
-              </button>
-            ))
-          : defaultActions.map((act) => (
-              <button
-                key={act.key}
-                onClick={() => {
-                  handleTrigger(act.key);
-                }}
-                className="focus:ring-primary-500/40 group flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all duration-200 hover:bg-slate-50 focus:outline-none focus:ring-2 dark:border-slate-800 dark:hover:bg-slate-800/60"
-              >
-                <span className="rounded-lg bg-slate-100 p-1.5 text-xl transition-transform group-hover:scale-105 dark:bg-slate-800">
-                  {act.icon}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-200">
-                    {act.label}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
-                    {act.description}
-                  </p>
-                </div>
-              </button>
-            ))}
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.2 }}
+      className="p-6 bg-slate-900 border border-slate-800 rounded-2xl"
+      aria-label="Quick Actions"
+    >
+      <h2 className="text-lg font-bold text-slate-100 mb-4">Quick Actions</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {actionList.map((action) => (
+          <button
+            key={action.id}
+            type="button"
+            onClick={action.onClick}
+            disabled={action.disabled}
+            className="flex flex-col items-start p-3.5 bg-slate-950/60 hover:bg-slate-800 border border-slate-800/80 hover:border-slate-700 rounded-xl transition-all text-left focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed group"
+          >
+            <span className="text-sm font-semibold text-slate-200 group-hover:text-indigo-400 transition-colors">
+              {action.label}
+            </span>
+            {action.description && (
+              <span className="text-xs text-slate-500 mt-1 line-clamp-1">{action.description}</span>
+            )}
+          </button>
+        ))}
       </div>
-    </div>
+    </motion.section>
   );
 };
 
