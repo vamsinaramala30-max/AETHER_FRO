@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SystemPrompt } from './promptService';
+import { SystemPrompt } from './promptservice';
 
 interface PromptEditorProps {
   prompt: SystemPrompt | null;

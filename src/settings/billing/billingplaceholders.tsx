@@ -1,6 +1,6 @@
 // frontend/src/settings/billing/BillingPlaceholder.tsx
 import React from 'react';
-import { SubscriptionTier } from './billingService';
+import { SubscriptionTier } from './billingservice';
 
 interface BillingPlaceholderProps {
   tier: SubscriptionTier;

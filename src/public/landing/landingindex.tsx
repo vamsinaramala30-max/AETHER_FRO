@@ -3,7 +3,7 @@ import { PublicPageLayout } from '../components/publicpagelayout';
 import { Hero } from './Hero/hero';
 import { SocialProof } from './Hero/SocialProof';
 import { AetherIntroduction } from './AetherIntroduction/aetherintroduction';
-import { IntelligencePreview } from './IntelligencePreview/intelligencepreview';
+import { IntelligencePreview } from './Intelligencepreview/intelligencepreview';
 import { ProductivityPreview } from './ProductivityPreview/ProductivityPreview';
 import { MemoryPreview } from './MemoryPreview/memorypreview';
 import { KnowledgePreview } from './KnowledgePreview/knowledgepreview';

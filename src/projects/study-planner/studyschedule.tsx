@@ -1,6 +1,6 @@
 import React from 'react';
-import { StudySession } from './studyPlannerService';
-import { StudySessionCard } from './StudySessionCard';
+import { StudySession } from './studyplannerservice';
+import { StudySessionCard } from './studysessioncard';
 
 interface StudyScheduleProps {
   sessions: StudySession[];

@@ -1,7 +1,7 @@
 // frontend/src/settings/profile/ProfilePage.tsx
 import React, { useEffect, useState } from 'react';
-import { ProfileForm } from './ProfileForm';
-import { profileService, UserProfile } from './profileService';
+import { ProfileForm } from './profileform';
+import { profileService, UserProfile } from './profileservice';
 
 export const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);

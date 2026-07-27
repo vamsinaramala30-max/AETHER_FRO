@@ -1,5 +1,5 @@
 import React from 'react';
-import { TaskFiltersState } from './taskService';
+import { TaskFiltersState } from './taskservice';
 
 interface TaskFiltersProps {
   filters: TaskFiltersState;

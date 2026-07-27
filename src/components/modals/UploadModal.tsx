@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from '../ui/model';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 export interface UploadModalProps {
   isOpen: boolean;

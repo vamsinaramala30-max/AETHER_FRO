@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner } from '../ui/Spinner';
+import { Spinner } from '../ui/spinner';
 
 export interface LoadingViewProps {
   message?: string;

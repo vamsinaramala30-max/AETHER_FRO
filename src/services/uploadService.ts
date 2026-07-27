@@ -1,4 +1,4 @@
-import { uploadApi, UploadResponseDTO } from '../api';
+import { uploadApi, UploadResponseDTO } from '../api/Index';
 
 export class UploadService {
   public async uploadSingle(

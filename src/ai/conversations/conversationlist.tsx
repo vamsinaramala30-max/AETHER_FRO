@@ -1,6 +1,6 @@
 import React from 'react';
-import { Conversation } from '../assistant/assistantService';
-import { ConversationItem } from './ConversationItem';
+import { Conversation } from '../assistant/assistantservice';
+import { ConversationItem } from './conversationitem';
 
 interface ConversationListProps {
   conversations: Conversation[];

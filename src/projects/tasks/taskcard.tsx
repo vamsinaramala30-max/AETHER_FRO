@@ -1,5 +1,5 @@
 import React from 'react';
-import { Task } from './taskService';
+import { Task } from './taskservice';
 
 interface TaskCardProps {
   task: Task;

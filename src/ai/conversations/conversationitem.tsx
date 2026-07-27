@@ -1,5 +1,5 @@
 import React from 'react';
-import { Conversation } from '../assistant/assistantService';
+import { Conversation } from '../assistant/assistantservice';
 
 interface ConversationItemProps {
   conversation: Conversation;

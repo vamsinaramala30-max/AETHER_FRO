@@ -1,4 +1,4 @@
-import { aiApi, AiChatPayload, AiChatResponse, AiModelDTO } from '../api';
+import { aiApi, AiChatPayload, AiChatResponse, AiModelDTO } from '../api/Index';
 
 export class AiService {
   public async sendMessage(payload: AiChatPayload): Promise<AiChatResponse> {

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
-import { Spinner } from './Spinner';
+import { Spinner } from './spinner';
 
 export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'glow';

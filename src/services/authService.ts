@@ -1,4 +1,4 @@
-import { authApi, LoginPayload, RegisterPayload, UserDTO } from '../api';
+import { authApi, LoginPayload, RegisterPayload, UserDTO } from '../api/Index';
 import { storageService } from './storageService';
 
 const TOKEN_KEY = 'auth_token';

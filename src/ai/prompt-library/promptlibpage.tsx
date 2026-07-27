@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { promptService, SystemPrompt } from './promptService';
-import { PromptCategories } from './PromptCategories';
-import { PromptCard } from './PromptCard';
-import { PromptEditor } from './PromptEditor';
+import { promptService, SystemPrompt } from './promptservice';
+import { PromptCategories } from './promptcategories';
+import { PromptCard } from './promptcard';
+import { PromptEditor } from './prompteditor';
 
 export const PromptLibraryPage: React.FC = () => {
   const [prompts, setPrompts] = useState<SystemPrompt[]>([]);

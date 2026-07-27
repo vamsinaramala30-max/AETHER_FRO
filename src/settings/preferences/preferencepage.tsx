@@ -1,6 +1,6 @@
 // frontend/src/settings/preferences/PreferencesPage.tsx
 import React, { useEffect, useState } from 'react';
-import { PreferenceSection } from './PreferenceSection';
+import { PreferenceSection } from './preferenceSection';
 import { preferencesService, UIPreferences } from './preferencesService';
 
 export const PreferencesPage: React.FC = () => {

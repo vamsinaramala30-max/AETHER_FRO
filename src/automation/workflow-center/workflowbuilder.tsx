@@ -1,7 +1,7 @@
 // frontend/src/automation/workflow-center/WorkflowBuilder.tsx
 import React, { useState } from 'react';
-import { Workflow, WorkflowNodeData } from './workflowService';
-import { WorkflowNode } from './WorkflowNode';
+import { Workflow, WorkflowNodeData } from './workflowservice';
+import { WorkflowNode } from './workflownode';
 
 interface WorkflowBuilderProps {
   workflow: Workflow;

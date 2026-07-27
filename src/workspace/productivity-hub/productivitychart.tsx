@@ -1,6 +1,6 @@
 // frontend/src/workspace/productivity-hub/ProductivityChart.tsx
 import React from 'react';
-import { ChartDataPoint } from './productivityService';
+import { ChartDataPoint } from './productivityservice';
 
 interface ProductivityChartProps {
   data: ChartDataPoint[];

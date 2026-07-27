@@ -1,7 +1,7 @@
 import React from 'react';
-import { WeeklyReviewData } from './weeklyReviewService';
+import { WeeklyReviewData } from './weeklyreviewservice';
 import { ReviewStats } from './reviewstate';
-import { ReviewInsights } from './ReviewInsights';
+import { ReviewInsights } from './reviewInsights';
 
 interface ReviewSummaryProps {
   review: WeeklyReviewData;

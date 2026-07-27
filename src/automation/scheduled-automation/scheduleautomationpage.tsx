@@ -1,8 +1,8 @@
 // frontend/src/automation/scheduled-automation/ScheduledAutomationPage.tsx
 import React, { useEffect, useState } from 'react';
-import { automationService, ScheduledTask } from './automationService';
-import { AutomationCard } from './AutomationCard';
-import { ScheduleForm } from './ScheduleForm';
+import { automationService, ScheduledTask } from './automationservice';
+import { AutomationCard } from './automationcard';
+import { ScheduleForm } from './scheduleform';
 
 export const ScheduledAutomationPage: React.FC = () => {
   const [tasks, setTasks] = useState<ScheduledTask[]>([]);

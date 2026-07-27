@@ -1,5 +1,5 @@
 import React from 'react';
-import { PublicPageLayout } from '../../components/PublicPageLayout';
+import { PublicPageLayout } from '../../components/publicpagelayout';
 
 export const TermsPage: React.FC = () => {
   return (

@@ -1,4 +1,4 @@
-import { automationApi, WorkflowDTO, WorkflowExecutionResultDTO } from '../api';
+import { automationApi, WorkflowDTO, WorkflowExecutionResultDTO } from '../api/Index';
 
 export class AutomationService {
   public async listWorkflows(): Promise<WorkflowDTO[]> {

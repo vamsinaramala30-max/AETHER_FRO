@@ -1,8 +1,8 @@
 // frontend/src/knowledge/search/SearchPage.tsx
 import React, { useState, useEffect } from 'react';
 import { SearchResult } from '../types';
-import { searchService } from './searchService';
-import { SearchInput } from './SearchInput';
+import { searchService } from './searchservice';
+import { SearchInput } from './searchinput';
 import { SearchFilters } from './searchfilter';
 import { SearchResults } from './searchresult';
 

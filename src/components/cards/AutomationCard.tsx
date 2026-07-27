@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Switch } from '../ui/Switch';
+import { Card } from '../ui/card';
+import { Switch } from '../ui/switch';
 
 export interface AutomationCardProps {
   title: string;

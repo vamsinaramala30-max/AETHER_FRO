@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { weeklyReviewService, WeeklyReviewData } from './weeklyReviewService';
-import { ReviewSummary } from './ReviewSummary';
+import { weeklyReviewService, WeeklyReviewData } from './weeklyreviewservice';
+import { ReviewSummary } from './reviewsummary';
 
 export const WeeklyReviewPage: React.FC = () => {
   const [reviewData, setReviewData] = useState<WeeklyReviewData | null>(null);

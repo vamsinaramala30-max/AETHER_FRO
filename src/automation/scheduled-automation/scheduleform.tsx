@@ -1,6 +1,6 @@
 // frontend/src/automation/scheduled-automation/ScheduleForm.tsx
 import React, { useState } from 'react';
-import { ScheduledTask } from './automationService';
+import { ScheduledTask } from './automationservice';
 
 interface ScheduleFormProps {
   onSubmit: (task: Omit<ScheduledTask, 'id' | 'lastExecutionStatus' | 'lastRun'>) => void;

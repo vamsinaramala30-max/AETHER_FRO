@@ -1,4 +1,4 @@
-import { workspaceApi, WorkspaceDTO } from '../api';
+import { workspaceApi, WorkspaceDTO } from '../api/Index';
 
 export class WorkspaceService {
   public async getWorkspaces(): Promise<WorkspaceDTO[]> {

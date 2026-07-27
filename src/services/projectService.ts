@@ -1,4 +1,4 @@
-import { projectsApi, ProjectDTO, CreateProjectPayload } from '../api';
+import { projectsApi, ProjectDTO, CreateProjectPayload } from '../api/Index';
 
 export class ProjectService {
   public async listProjects(workspaceId: string): Promise<ProjectDTO[]> {

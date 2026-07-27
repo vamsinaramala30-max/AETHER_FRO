@@ -1,9 +1,9 @@
 // frontend/src/workspace/productivity-hub/ProductivityHubPage.tsx
 import React, { useState, useEffect } from 'react';
-import { ProductivityStats } from './ProductivityStats';
-import { ProductivityChart } from './ProductivityChart';
-import { FocusTimer } from './FocusTimer';
-import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityService';
+import { ProductivityStats } from './productivitystats';
+import { ProductivityChart } from './productivitychart';
+import { FocusTimer } from './focustimer';
+import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityservice';
 
 export const ProductivityHubPage: React.FC = () => {
   const [stats, setStats] = useState<ProductivityStatsData | null>(null);

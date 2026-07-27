@@ -1,6 +1,6 @@
 // frontend/src/settings/notifications/NotificationPreferences.tsx
 import React, { useState } from 'react';
-import { NotificationPreferencesData, notificationService } from './notificationService';
+import { NotificationPreferencesData, notificationService } from './notificationservice';
 
 interface NotificationPreferencesProps {
   initialData: NotificationPreferencesData;

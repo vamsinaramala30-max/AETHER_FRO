@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { studyPlannerService, StudySession } from './studyPlannerService';
-import { StudySchedule } from './StudySchedule';
-import { StudyProgress } from './StudyProgress';
+import { studyPlannerService, StudySession } from './studyplannerservice';
+import { StudySchedule } from './studyschedule';
+import { StudyProgress } from './studyprogress';
 
 export const StudyPlannerPage: React.FC = () => {
   const [sessions, setSessions] = useState<StudySession[]>([]);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SystemPrompt } from './promptService';
+import { SystemPrompt } from './promptservice';
 
 interface PromptCardProps {
   prompt: SystemPrompt;

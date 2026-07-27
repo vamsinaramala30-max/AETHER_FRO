@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { memoryService, MemoryItem } from './memoryService';
-import { MemoryCard } from './MemoryCard';
-import { MemoryFilters } from './MemoryFilters';
-import { MemorySearch } from './MemorySearch';
+import { memoryService, MemoryItem } from './memoryservice';
+import { MemoryCard } from './memorycard';
+import { MemoryFilters } from './memoryfilters';
+import { MemorySearch } from './memorysearch';
 
 export const MemoryPage: React.FC = () => {
   const [memories, setMemories] = useState<MemoryItem[]>([]);

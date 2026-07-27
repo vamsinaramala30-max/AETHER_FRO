@@ -1,4 +1,4 @@
-import { ChatMessageDTO } from '../api';
+import { ChatMessageDTO } from '../api/Index';
 import { storageService } from './storageService';
 
 export interface ChatSession {

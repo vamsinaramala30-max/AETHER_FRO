@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Note } from '../types';
 import { notesService } from './noteservice';
-import { NoteCard } from './NoteCard';
-import { NoteEditor } from './NoteEditor';
-import { NoteFilters } from './NoteFilters';
+import { NoteCard } from './notecard';
+import { NoteEditor } from './noteeditor';
+import { NoteFilters } from './notefilters';
 
 export const NotesPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);

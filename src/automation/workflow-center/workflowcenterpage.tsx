@@ -1,8 +1,8 @@
 // frontend/src/automation/workflow-center/WorkflowCenterPage.tsx
 import React, { useEffect, useState } from 'react';
-import { workflowService, Workflow } from './workflowService';
-import { WorkflowCard } from './WorkflowCard';
-import { WorkflowBuilder } from './WorkflowBuilder';
+import { workflowService, Workflow } from './workflowservice';
+import { WorkflowCard } from './workflowcard';
+import { WorkflowBuilder } from './workflowbuilder';
 
 export const WorkflowCenterPage: React.FC = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);

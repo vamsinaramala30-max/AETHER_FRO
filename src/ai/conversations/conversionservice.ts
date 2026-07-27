@@ -1,4 +1,4 @@
-import { Conversation } from '../assistant/assistantService';
+import { Conversation } from '../assistant/assistantservice';
 
 class ConversationService {
   private baseRoute = '/api/v1/ai/conversations';

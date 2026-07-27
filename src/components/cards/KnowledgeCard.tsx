@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '../ui/card';
 
 export interface KnowledgeCardProps {
   title: string;

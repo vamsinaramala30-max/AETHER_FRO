@@ -1,7 +1,7 @@
 // frontend/src/workspace/favorites/FavoritesPage.tsx
 import React, { useState, useEffect } from 'react';
-import { FavoriteCard } from './FavoriteCard';
-import { favoritesService, FavoriteItemData } from './favoritesService';
+import { FavoriteCard } from './favoritecard';
+import { favoritesService, FavoriteItemData } from './favoritesservice';
 
 export const FavoritesPage: React.FC = () => {
   const [favorites, setFavorites] = useState<FavoriteItemData[]>([]);

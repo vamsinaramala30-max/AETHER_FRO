@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Goal } from './goalService';
-import { GoalProgress } from './GoalProgress';
+import { Goal } from './goalservice';
+import { GoalProgress } from './goalprogress';
 
 interface GoalCardProps {
   goal: Goal;

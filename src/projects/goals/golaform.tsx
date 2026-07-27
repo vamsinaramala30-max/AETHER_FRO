@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Goal } from './goalService';
+import { Goal } from './goalservice';
 
 interface GoalFormProps {
   onSubmit: (goal: Omit<Goal, 'id' | 'progress'>) => void;

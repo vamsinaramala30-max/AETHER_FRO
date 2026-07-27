@@ -1,7 +1,7 @@
 // frontend/src/settings/notifications/NotificationsPage.tsx
 import React, { useEffect, useState } from 'react';
 import { NotificationPreferences } from './notificationperferences';
-import { notificationService, NotificationPreferencesData } from './notificationService';
+import { notificationService, NotificationPreferencesData } from './notificationservice';
 
 export const NotificationsPage: React.FC = () => {
   const [data, setData] = useState<NotificationPreferencesData | null>(null);

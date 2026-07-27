@@ -1,6 +1,6 @@
 // frontend/src/settings/profile/ProfileForm.tsx
 import React, { useState } from 'react';
-import { UserProfile, profileService } from './profileService';
+import { UserProfile, profileService } from './profileservice';
 
 interface ProfileFormProps {
   initialProfile: UserProfile;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { WeeklyReviewData } from './weeklyReviewService';
+import { WeeklyReviewData } from './weeklyreviewservice';
 
 interface ReviewStatsProps {
   data: WeeklyReviewData;

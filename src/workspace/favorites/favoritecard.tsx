@@ -1,6 +1,6 @@
 // frontend/src/workspace/favorites/FavoriteCard.tsx
 import React from 'react';
-import { FavoriteItemData } from './favoritesService';
+import { FavoriteItemData } from './favoritesservice';
 
 interface FavoriteCardProps {
   item: FavoriteItemData;

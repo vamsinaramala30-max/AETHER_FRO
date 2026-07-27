@@ -1,6 +1,6 @@
 import React from 'react';
-import { ConversationList } from './ConversationList';
-import { useAssistantState, useAssistantActions } from './assistantHooks';
+import { ConversationList } from './conversationlist';
+import { useAssistantState, useAssistantActions } from './assistanthooks';
 
 export const ChatSidebar: React.FC = () => {
   const { conversations, activeConversationId, searchQuery, sidebarOpen } = useAssistantState();

@@ -1,6 +1,6 @@
 // frontend/src/workspace/productivity-hub/ProductivityStats.tsx
 import React from 'react';
-import { ProductivityStatsData } from './productivityService';
+import { ProductivityStatsData } from './productivityservice';
 
 interface ProductivityStatsProps {
   stats: ProductivityStatsData;

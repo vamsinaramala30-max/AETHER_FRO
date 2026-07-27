@@ -1,6 +1,6 @@
 import React from 'react';
 import { Integration } from './integrationservice';
-import { IntegrationStatus } from './IntegrationStatus';
+import { IntegrationStatus } from './integrationstatus';
 
 interface IntegrationCardProps {
   integration: Integration;

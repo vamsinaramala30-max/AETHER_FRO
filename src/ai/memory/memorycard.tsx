@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryItem } from './memoryService';
+import { MemoryItem } from './memoryservice';
 
 interface MemoryCardProps {
   memory: MemoryItem;

@@ -1,6 +1,6 @@
 // frontend/src/settings/appearance/AppearancePage.tsx
 import React from 'react';
-import { ThemeSelector } from './ThemeSelector';
+import { ThemeSelector } from './themeselector';
 
 export const AppearancePage: React.FC = () => {
   return (

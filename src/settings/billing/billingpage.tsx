@@ -1,7 +1,7 @@
 // frontend/src/settings/billing/BillingPage.tsx
 import React, { useEffect, useState } from 'react';
 import { BillingPlaceholder } from './billingplaceholders';
-import { billingService, SubscriptionTier } from './billingService';
+import { billingService, SubscriptionTier } from './billingservice';
 
 export const BillingPage: React.FC = () => {
   const [tier, setTier] = useState<SubscriptionTier | null>(null);

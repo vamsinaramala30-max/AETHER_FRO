@@ -16,7 +16,7 @@ import {
   Login,
   Signup,
   Statuses,
-} from '../../public/pages';
+} from '../../public/pages/Index';
 
 export const publicRoutes: RouteObject[] = [
   {

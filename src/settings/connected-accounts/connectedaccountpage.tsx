@@ -1,6 +1,6 @@
 // frontend/src/settings/connected-accounts/ConnectedAccountsPage.tsx
 import React, { useEffect, useState } from 'react';
-import { ConnectedAccountCard } from './ConnectedAccountCard';
+import { ConnectedAccountCard } from './connectedaccountcard';
 import { connectedAccountsService, ConnectedAccount } from './connectedaccountservice';
 
 export const ConnectedAccountsPage: React.FC = () => {

@@ -1,6 +1,6 @@
 // frontend/src/automation/workflow-center/WorkflowCard.tsx
 import React from 'react';
-import { Workflow } from './workflowService';
+import { Workflow } from './workflowservice';
 
 interface WorkflowCardProps {
   workflow: Workflow;

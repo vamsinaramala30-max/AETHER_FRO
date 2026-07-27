@@ -1,6 +1,6 @@
 // frontend/src/settings/security/SecuritySettings.tsx
 import React, { useState } from 'react';
-import { securityService } from './securityService';
+import { securityService } from './securityservice';
 
 export const SecuritySettings: React.FC = () => {
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { goalService, Goal } from './goalService';
-import { GoalCard } from './GoalCard';
+import { goalService, Goal } from './goalservice';
+import { GoalCard } from './goalcard';
 import { GoalForm } from './golaform';
 
 export const GoalsPage: React.FC = () => {

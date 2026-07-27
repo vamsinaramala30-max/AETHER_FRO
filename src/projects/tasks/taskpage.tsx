@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { taskService, Task, TaskFiltersState } from './taskService';
-import { TaskBoard } from './TaskBoard';
-import { TaskForm } from './TaskForm';
+import { taskService, Task, TaskFiltersState } from './taskservice';
+import { TaskBoard } from './taskboard';
+import { TaskForm } from './taskform';
 import { TaskFilters } from './taskfilter';
 
 export const TasksPage: React.FC = () => {

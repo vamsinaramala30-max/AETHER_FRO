@@ -1,4 +1,4 @@
-import { knowledgeApi, KnowledgeDocumentDTO } from '../api';
+import { knowledgeApi, KnowledgeDocumentDTO } from '../api/Index';
 
 export class KnowledgeService {
   public async searchDocs(query: string): Promise<KnowledgeDocumentDTO[]> {

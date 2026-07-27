@@ -1,5 +1,5 @@
 import React from 'react';
-import { StudySession } from './studyPlannerService';
+import { StudySession } from './studyplannerservice';
 
 interface StudySessionCardProps {
   session: StudySession;

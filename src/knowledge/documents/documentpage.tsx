@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DocumentItem } from '../types';
 import { documentsService } from './documentservice';
-import { FileUpload } from './FileUpload';
-import { DocumentCard } from './DocumentCard';
-import { DocumentViewer } from './DocumentViewer';
+import { FileUpload } from './fileupload';
+import { DocumentCard } from './documentcard';
+import { DocumentViewer } from './documentviewer';
 
 export const DocumentsPage: React.FC = () => {
   const [docs, setDocs] = useState<DocumentItem[]>([]);

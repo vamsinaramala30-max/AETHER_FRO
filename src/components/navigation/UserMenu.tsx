@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dropdown, DropdownItem } from '../ui/Dropdown';
-import { Avatar } from '../ui/Avatar';
+import { Dropdown, DropdownItem } from '../ui/dropdown';
+import { Avatar } from '../ui/avatar';
 
 export interface UserMenuProps {
   user: {

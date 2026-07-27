@@ -1,6 +1,6 @@
 // frontend/src/automation/scheduled-automation/AutomationCard.tsx
 import React from 'react';
-import { ScheduledTask } from './automationService';
+import { ScheduledTask } from './automationservice';
 
 interface AutomationCardProps {
   task: ScheduledTask;
