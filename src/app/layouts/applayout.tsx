@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 
-export const AppLayout: React.FC = () => {
+export const AppLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <div className="bg-background text-foreground flex min-h-screen overflow-hidden">
       {/* Structural Desktop Navigation Boundary Container */}

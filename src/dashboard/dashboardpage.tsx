@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import WelcomeHeader, { UserProfile } from "./WelcomeHeader";
-import DailyOverview, { MetricItem } from "./DailyOverview";
-import TodaySummary, { Deliverable } from "./TodaySummary";
-import QuickActions, { QuickActionItem } from "./QuickActions";
-import RecentActivity, { ActivityItem } from "./RecentActivity";
+import WelcomeHeader, { UserProfile } from "./welcomeheader";
+import DailyOverview, { MetricItem } from "./dailyoverview";
+import TodaySummary, { Deliverable } from "./todaysummary";
+import QuickActions, { QuickActionItem } from "./quickaction";
+import RecentActivity, { ActivityItem } from "./recentactive";
 import AIInsights, { InsightItem } from "./AIInsights";
-import ProductivitySnapshot, { ProductivityData } from "./ProductivitySnapshot";
-import DashboardSkeleton from "./DashboardSkeleton";
+import ProductivitySnapshot, { ProductivityData } from "./productivitysnapshot";
+import DashboardSkeleton from "./dashboardskeleton";
 
 export interface DashboardDataState {
   user: UserProfile;
