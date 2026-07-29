@@ -1,16 +1,10 @@
-// frontend/src/app/providers/AuthProvider.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from './authservice';
-
-export interface UserSession {
-  id: string;
-  email?: string;
-}
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { authService, AuthUser, AuthSession } from '../../auth/authService';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: UserSession | null;
+  user: AuthUser | null;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -18,27 +12,51 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserSession | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isInitializingRef = useRef<boolean>(false);
+
+  // Helper to prevent setting state if user object hasn't structurally changed
+  const updateStateIfChanged = useCallback((newUser: AuthUser | null) => {
+    setUser((prevUser) => {
+      if (!prevUser && !newUser) return null;
+      if (prevUser && newUser && prevUser.id === newUser.id && prevUser.email === newUser.email) {
+        return prevUser; // Retain current object reference to avoid re-renders
+      }
+      return newUser;
+    });
+  }, []);
+
+  const refreshSession = useCallback(async (): Promise<void> => {
+    try {
+      const { session, error } = await authService.getCurrentSession();
+      if (error || !session) {
+        updateStateIfChanged(null);
+      } else {
+        updateStateIfChanged(session.user);
+      }
+    } catch (error) {
+      console.error('[AuthProvider] Session refresh error:', error);
+      updateStateIfChanged(null);
+    }
+  }, [updateStateIfChanged]);
 
   useEffect(() => {
-    // Initializing existing active token session safely
+    // Guard against double execution in React StrictMode
+    if (isInitializingRef.current) return;
+    isInitializingRef.current = true;
+
     const initializeAuth = async () => {
       try {
-        const { session, error } = await authService.getCurrentSession();
-        if (error) throw error;
-
+        const { session } = await authService.getCurrentSession();
         if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email,
-          });
+          updateStateIfChanged(session.user);
         } else {
-          setUser(null);
+          updateStateIfChanged(null);
         }
       } catch (error) {
-        console.error('Auth initialization sequence failed:', error);
-        setUser(null);
+        console.error('[AuthProvider] Initial session fetch failed:', error);
+        updateStateIfChanged(null);
       } finally {
         setIsLoading(false);
       }
@@ -46,16 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     void initializeAuth();
 
-    // Wire global active live session event handler boundary
+    // Subscribe to live auth changes from authService
     const subscription = authService.subscribeToAuthChanges(
-      (_event: string, session: { user?: { id: string; email?: string } } | null) => {
+      (_event: string, session: AuthSession | null) => {
         if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email,
-          });
+          updateStateIfChanged(session.user);
         } else {
-          setUser(null);
+          updateStateIfChanged(null);
         }
         setIsLoading(false);
       },
@@ -64,46 +79,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [updateStateIfChanged]);
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const { error } = await authService.signOut();
-      if (error) throw error;
-      setUser(null);
+      await authService.signOut();
+      updateStateIfChanged(null);
     } catch (error) {
-      console.error('Logout operation failed:', error);
+      console.error('[AuthProvider] Logout failed:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [updateStateIfChanged]);
 
-  const refreshSession = async (): Promise<void> => {
-    try {
-      const { session, error } = await authService.getCurrentSession();
-      if (error) throw error;
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-        });
-      }
-    } catch (error) {
-      console.error('Session refresh failed:', error);
-    }
-  };
-
-  const isAuthenticated = user !== null;
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, logout, refreshSession }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      isAuthenticated: user !== null,
+      isLoading,
+      user,
+      logout,
+      refreshSession,
+    }),
+    [isLoading, user, logout, refreshSession],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
