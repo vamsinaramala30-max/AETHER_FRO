@@ -156,7 +156,7 @@ export const authService = {
       }
 
       // Validate session against backend server
-      const res = await authApi.getMe();
+      const res = await authApi.getCurrentUser();
       const user = extractUserData(res);
 
       if (!user) {
