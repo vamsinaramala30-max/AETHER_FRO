@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../app/providers/authprovider';
-import { useAuthStore } from '../../../state/authStore';
+import { useAuth } from '../../../hooks/useauth';
 import { ProductPreview } from './ProductPreview';
 import {
   ArrowRight,
@@ -15,12 +14,8 @@ import {
 } from 'lucide-react';
 
 export const Hero: React.FC = () => {
-  const { isAuthenticated: isAuthContext, user: contextUser } = useAuth();
-  const { isAuthenticated: isAuthStore, user: storeUser } = useAuthStore();
-
-  const isAuthenticated = isAuthContext || isAuthStore;
-  const userName =
-    storeUser?.name || (contextUser?.email ? contextUser.email.split('@')[0] : null) || 'Architect';
+  const { isAuthenticated, user } = useAuth();
+  const userName = user?.name || (user?.email ? user.email.split('@')[0] : null) || 'Architect';
 
   return (
     <section

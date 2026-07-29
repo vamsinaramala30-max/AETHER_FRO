@@ -18,13 +18,13 @@ export const authService = {
 
   async login(payload: LoginPayload): Promise<UserDTO> {
     const res = await authApi.login(payload);
-    this.setToken(res.accessToken);
+    this.setToken(res.tokens.accessToken);
     return authApi.getCurrentUser();
   },
 
   async register(payload: RegisterPayload): Promise<UserDTO> {
     const res = await authApi.register(payload);
-    this.setToken(res.accessToken);
+    this.setToken(res.tokens.accessToken);
     return authApi.getCurrentUser();
   },
 

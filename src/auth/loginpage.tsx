@@ -1,5 +1,6 @@
 // frontend/src/auth/LoginPage.tsx
 import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from './authservice';
 import { AuthLayout } from './authlayout';
 
@@ -8,6 +9,9 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +25,8 @@ export const LoginPage: React.FC = () => {
       if (error) {
         setErrorMessage(error.message);
       } else {
-        // Safe navigation fallback window redirection to skip layout state mismatches
-        window.location.href = '/dashboard';
+        const fromPath = (location.state as { from?: string } | null)?.from || '/app';
+        navigate(fromPath, { replace: true });
       }
     } catch {
       setErrorMessage('An unexpected authorization breakdown occurred.');
@@ -131,12 +135,12 @@ export const LoginPage: React.FC = () => {
 
       <p className="mt-6 text-center text-sm text-slate-400">
         New to the framework?{' '}
-        <a
-          href="/signup"
+        <Link
+          to="/signup"
           className="font-medium text-cyan-400 underline underline-offset-4 transition-colors hover:text-cyan-300"
         >
           Create an identity instance
-        </a>
+        </Link>
       </p>
     </AuthLayout>
   );

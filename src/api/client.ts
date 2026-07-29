@@ -1,3 +1,5 @@
+import { authConfig } from '../config/auth.config';
+
 export interface RequestConfig extends RequestInit {
   timeout?: number;
   retries?: number;
@@ -47,26 +49,15 @@ class HttpClient {
       }
 
       try {
-        const rawToken = localStorage.getItem('aether_auth_token');
-        if (rawToken) {
-          // Parse JSON string stored by StorageService
-          const token = JSON.parse(rawToken);
-          if (token) {
-            config.headers = {
-              ...config.headers,
-              Authorization: `Bearer ${token}`,
-            };
-          }
-        }
-      } catch {
-        // Fallback in case stored item is a raw string rather than JSON
-        const rawToken = localStorage.getItem('aether_auth_token');
-        if (rawToken) {
+        const token = localStorage.getItem(authConfig.tokenKey);
+        if (token) {
           config.headers = {
             ...config.headers,
-            Authorization: `Bearer ${rawToken}`,
+            [authConfig.tokenHeader]: `${authConfig.tokenPrefix}${token}`,
           };
         }
+      } catch {
+        // Storage may be unavailable in restrictive environments; continue without auth headers.
       }
 
       return config;
@@ -299,3 +290,6 @@ class HttpClient {
 }
 
 export const apiClient = new HttpClient();
+
+
+

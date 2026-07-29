@@ -1,8 +1,8 @@
 import React, { Suspense } from 'react';
-import { RouteObject, Navigate, Outlet } from 'react-router-dom';
+import { RouteObject, Outlet } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/applayout';
-import { useAuth } from '@/hooks/useauth';
+import { ProtectedGuard } from '@/guards/ProtectedGuard';
 
 import { DashboardPage } from '@/dashboard/dashboardpage';
 import { AssistantPage } from '@/ai/assistant/assistantpage';
@@ -33,8 +33,6 @@ import { PreferencesPage } from '@/settings/preferences/preferencepage';
 import { ConnectedAccountsPage } from '@/settings/connected-accounts/connectedaccountpage';
 import { BillingPage } from '@/settings/billing/billingpage';
 
-const ProtectedGuard: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{children}</>;
-
 /**
  * Loading Spinner for Route-level Transitions
  */
@@ -47,31 +45,16 @@ const PageLoadingSpinner: React.FC = () => (
 /**
  * Authenticated Layout Wrapper with Protected Guard Check
  */
-const ProtectedLayoutWrapper: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+const ProtectedLayoutWrapper: React.FC = () => (
+  <ProtectedGuard>
+    <AppLayout>
+      <Suspense fallback={<PageLoadingSpinner />}>
+        <Outlet />
+      </Suspense>
+    </AppLayout>
+  </ProtectedGuard>
+);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return (
-    <ProtectedGuard>
-      <AppLayout>
-        <Suspense fallback={<PageLoadingSpinner />}>
-          <Outlet />
-        </Suspense>
-      </AppLayout>
-    </ProtectedGuard>
-  );
-};
 
 /**
  * Core Protected Route Definitions for React Router v7

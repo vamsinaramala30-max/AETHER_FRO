@@ -27,44 +27,56 @@ export interface RegisterPayload {
   password?: string;
 }
 
-/**
- * Backend response envelope: { success: true, data: { user, tokens: { accessToken, refreshToken, expiresIn } } }
- * This helper extracts the tokens from the envelope.
- */
-function extractTokens(res: any): AuthTokenResponse {
-  // If response has the standard envelope with data.tokens
-  if (res?.data?.tokens?.accessToken) {
-    return res.data.tokens;
+export interface AuthApiResult {
+  user?: UserDTO;
+  tokens: AuthTokenResponse;
+}
+
+function normalizeAuthResponse(response: unknown): AuthApiResult {
+  const payload = (response as any)?.data ?? response;
+  const envelope = (payload as any)?.data ?? payload;
+  const tokens = (envelope as any)?.tokens ?? (payload as any)?.tokens;
+  const user = (envelope as any)?.user ?? (payload as any)?.user;
+
+  if (!tokens || typeof tokens.accessToken !== 'string') {
+    throw new Error('Unexpected auth response format: missing tokens');
   }
-  // If response has tokens at top level (alternative format)
-  if (res?.tokens?.accessToken) {
-    return res.tokens;
+
+  return {
+    tokens: tokens as AuthTokenResponse,
+    user: user as UserDTO | undefined,
+  };
+}
+
+function extractUser(response: unknown): UserDTO {
+  const payload = (response as any)?.data ?? response;
+  const user = (payload as any)?.user ?? payload;
+
+  if (!user || typeof user !== 'object' || typeof user.id !== 'string') {
+    throw new Error('Unexpected auth response format: missing user information');
   }
-  // If somehow the response IS the tokens directly
-  if (res?.accessToken) {
-    return res;
-  }
-  throw new Error('Unexpected auth response format: could not extract tokens');
+
+  return user as UserDTO;
 }
 
 export const authApi = {
-  login: async (payload: LoginPayload, config?: RequestConfig): Promise<AuthTokenResponse> => {
+  login: async (payload: LoginPayload, config?: RequestConfig): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(ENDPOINTS.AUTH.LOGIN, payload, {
       ...config,
       skipAuth: true,
     });
-    return extractTokens(res);
+    return normalizeAuthResponse(res);
   },
 
   register: async (
     payload: RegisterPayload,
     config?: RequestConfig,
-  ): Promise<AuthTokenResponse> => {
+  ): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, payload, {
       ...config,
       skipAuth: true,
     });
-    return extractTokens(res);
+    return normalizeAuthResponse(res);
   },
 
   logout: (config?: RequestConfig): Promise<void> =>
@@ -73,15 +85,17 @@ export const authApi = {
   refreshToken: async (
     refreshToken: string,
     config?: RequestConfig,
-  ): Promise<AuthTokenResponse> => {
+  ): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(
       ENDPOINTS.AUTH.REFRESH,
       { refreshToken },
       { ...config, skipAuth: true },
     );
-    return extractTokens(res);
+    return normalizeAuthResponse(res);
   },
 
-  getCurrentUser: (config?: RequestConfig): Promise<UserDTO> =>
-    apiClient.get<UserDTO>(ENDPOINTS.AUTH.ME, config),
+  getCurrentUser: async (config?: RequestConfig): Promise<UserDTO> => {
+    const res = await apiClient.get<any>(ENDPOINTS.AUTH.ME, config);
+    return extractUser(res);
+  },
 };

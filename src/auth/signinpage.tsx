@@ -1,5 +1,6 @@
 // frontend/src/auth/SignupPage.tsx
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { authService } from './authservice';
 import { AuthLayout } from './authlayout';
 
@@ -207,12 +208,12 @@ export const SignupPage: React.FC = () => {
 
       <p className="mt-6 text-center text-sm text-slate-400">
         Already have a configured profile?{' '}
-        <a
-          href="/login"
+        <Link
+          to="/login"
           className="font-medium text-cyan-400 underline underline-offset-4 transition-colors hover:text-cyan-300"
         >
           Sign in instead
-        </a>
+        </Link>
       </p>
     </AuthLayout>
   );

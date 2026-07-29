@@ -1,16 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authService } from '../../auth/authservice';
-
-export interface UserSession {
-  id: string;
-  email?: string;
-  created_at: string;
-}
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { authService, AuthUser } from '../../auth/authservice';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: UserSession | null;
+  user: AuthUser | null;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -18,72 +12,99 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserSession | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const { session, error } = await authService.getCurrentSession();
-        if (error) throw error;
-        if (session?.accessToken) {
-          setUser({
-            id: 'authenticated',
-            email: 'user@aether.app',
-            created_at: new Date().toISOString(),
-          });
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Auth initialization sequence failed:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+  const updateUser = useCallback((nextUser: AuthUser | null) => {
+    setUser((previousUser) => {
+      if (!previousUser && !nextUser) return null;
+      if (
+        previousUser &&
+        nextUser &&
+        previousUser.id === nextUser.id &&
+        previousUser.email === nextUser.email
+      ) {
+        return previousUser;
       }
-    };
-
-    initializeAuth();
-  }, []);
-
-  const logout = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      await authService.signOut();
-      setUser(null);
-    } catch (error) {
-      console.error('Logout operation failed:', error);
-    } finally {
-      setIsLoading(false);
-    }
+      return nextUser;
+    });
   }, []);
 
   const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const { session, error } = await authService.getCurrentSession();
-      if (error) throw error;
-      if (session?.accessToken) {
-        setUser({
-          id: 'authenticated',
-          email: 'user@aether.app',
-          created_at: new Date().toISOString(),
-        });
+      if (error || !session) {
+        updateUser(null);
+      } else {
+        updateUser(session.user);
       }
     } catch (error) {
-      console.error('Session refresh failed:', error);
+      console.error('[AuthProvider] Session refresh failed:', error);
+      updateUser(null);
     }
-  }, []);
+  }, [updateUser]);
 
-  const isAuthenticated = user !== null;
+  const logout = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await authService.signOut();
+      updateUser(null);
+    } catch (error) {
+      console.error('[AuthProvider] Logout operation failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [updateUser]);
 
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, logout, refreshSession }}>
-      {children}
-    </AuthContext.Provider>
+  useEffect(() => {
+    let isMounted = true;
+
+    const subscription = authService.subscribeToAuthChanges((_, session) => {
+      if (!isMounted) return;
+      updateUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    const initializeAuth = async () => {
+      try {
+        const { session } = await authService.initialize();
+        if (!isMounted) return;
+        updateUser(session?.user ?? null);
+      } catch (error) {
+        console.error('[AuthProvider] Initial session fetch failed:', error);
+        if (isMounted) {
+          updateUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [updateUser]);
+
+  const contextValue = useMemo(
+    () => ({
+      isAuthenticated: user !== null,
+      isLoading,
+      user,
+      logout,
+      refreshSession,
+    }),
+    [isLoading, user, logout, refreshSession],
   );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

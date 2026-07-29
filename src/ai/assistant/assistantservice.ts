@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from '../../constants/storagekey';
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -28,11 +30,12 @@ class AssistantService {
   private fallbackKey = 'aether_fallback_messages';
 
   private async getAuthHeaders(): Promise<HeadersInit> {
-    const token = localStorage.getItem('aether_auth_token');
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     return {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: 'Bearer ' + token } : {}),
     };
+
   }
 
   public async sendMessage(
@@ -92,3 +95,4 @@ class AssistantService {
 }
 
 export const assistantService = new AssistantService();
+
