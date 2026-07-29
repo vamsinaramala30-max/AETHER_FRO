@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { authService, AuthUser, AuthSession } from '../../auth/authService';
+import { authService, AuthUser, AuthSession } from './authservice';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper to prevent setting state if user object hasn't structurally changed
   const updateStateIfChanged = useCallback((newUser: AuthUser | null) => {
-    setUser((prevUser) => {
+    setUser((prevUser: AuthUser | null) => {
       if (!prevUser && !newUser) return null;
       if (prevUser && newUser && prevUser.id === newUser.id && prevUser.email === newUser.email) {
         return prevUser; // Retain current object reference to avoid re-renders
