@@ -15,6 +15,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+<<<<<<< HEAD
   const updateUser = useCallback((nextUser: AuthUser | null) => {
     setUser((previousUser) => {
       if (!previousUser && !nextUser) return null;
@@ -25,6 +26,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         previousUser.email === nextUser.email
       ) {
         return previousUser;
+=======
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const { session, error } = await authService.getCurrentSession();
+        if (error) throw error;
+        if (session?.accessToken) {
+          setUser({
+            id: 'authenticated',
+            email: 'user@aether.app',
+            created_at: new Date().toISOString(),
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth initialization sequence failed:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+>>>>>>> 19791367768ed0b92fd72126e7e9d85df398ff26
       }
       return nextUser;
     });
@@ -33,10 +55,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const { session, error } = await authService.getCurrentSession();
+<<<<<<< HEAD
       if (error || !session) {
         updateUser(null);
       } else {
         updateUser(session.user);
+=======
+      if (error) throw error;
+      if (session?.accessToken) {
+        setUser({
+          id: 'authenticated',
+          email: 'user@aether.app',
+          created_at: new Date().toISOString(),
+        });
+>>>>>>> 19791367768ed0b92fd72126e7e9d85df398ff26
       }
     } catch (error) {
       console.error('[AuthProvider] Session refresh failed:', error);
