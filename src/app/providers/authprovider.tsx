@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { session, error } = await authService.getCurrentSession();
         if (error) throw error;
-        if (session?.access_token) {
+        if (session?.accessToken) {
           setUser({
             id: 'authenticated',
             email: 'user@aether.app',
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { session, error } = await authService.getCurrentSession();
       if (error) throw error;
-      if (session?.access_token) {
+      if (session?.accessToken) {
         setUser({
           id: 'authenticated',
           email: 'user@aether.app',
