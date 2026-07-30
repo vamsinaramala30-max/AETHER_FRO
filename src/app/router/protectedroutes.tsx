@@ -4,34 +4,47 @@ import { RouteObject, Outlet } from 'react-router-dom';
 import { AppLayout } from '@/app/layouts/applayout';
 import { ProtectedGuard } from '@/guards/ProtectedGuard';
 
-import { DashboardPage } from '@/dashboard/dashboardpage';
-import { AssistantPage } from '@/ai/assistant/assistantpage';
-import { ConversationsPage } from '@/ai/conversations/conversationpage';
-import { MemoryPage } from '@/ai/memory/memorypage';
-import { PromptLibraryPage } from '@/ai/prompt-library/promptlibpage';
-import { TasksPage } from '@/projects/tasks/taskpage';
-import { GoalsPage } from '@/projects/goals/goalpage';
-import { StudyPlannerPage } from '@/projects/study-planner/studyplannerpage';
-import { WeeklyReviewPage } from '@/projects/weekly-review/weeklyreviewpage';
-import { NotesPage } from '@/knowledge/notes/notepage';
-import { DocumentsPage } from '@/knowledge/documents/documentpage';
+// Home
+import { HomePage } from '@/home/HomePage';
+
+// AI
+import { AssistantPage } from '@/ai/assistant/AssistantPage';
+import { ConversationsPage } from '@/ai/conversations/conversationPage';
+import { MemoryPage } from '@/ai/memory/MemoryPage';
+import { PromptLibraryPage } from '@/ai/prompt-library/promptlibPage';
+
+// Projects
+import { TasksPage } from '@/projects/tasks/taskPage';
+import { GoalsPage } from '@/projects/goals/goalPage';
+import { StudyPlannerPage } from '@/projects/study-planner/StudyPlannerPage';
+import { WeeklyReviewPage } from '@/projects/weekly-review/WeeklyReviewPage';
+
+// Knowledge
+import { NotesPage } from '@/knowledge/notes/notePage';
+import { DocumentsPage } from '@/knowledge/documents/documentPage';
 import { KnowledgeBasePage } from '@/knowledge/knowledge-base/KnowledgeBasePage';
-import { SearchPage } from '@/knowledge/search/searchpage';
-import { WorkflowCenterPage } from '@/automation/workflow-center/workflowcenterpage';
-import { IntegrationsPage } from '@/automation/integrations/integrationpage';
-import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationpage';
-import { FutureAIFeaturesPage } from '@/automation/future-ai-features/futureAIfeaturespage';
-import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
-import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhubpage';
-import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
+import { SearchPage } from '@/knowledge/search/SearchPage';
+
+// Automation
+import { WorkflowCenterPage } from '@/automation/workflow-center/WorkflowCenterPage';
+import { IntegrationsPage } from '@/automation/integrations/integrationPage';
+import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationPage';
+import { FutureAIFeaturesPage } from '@/automation/future-ai-features/FutureAIFeaturesPage';
+
+// Workspace
+import { CalendarPage } from '@/workspace/calendar/pages/calendarpage';
+import { ProductivityHubPage } from '@/workspace/productivity-hub/ProductivityHubPage';
+import { RecentFilesPage } from '@/workspace/recent-files/recentfilePage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
-import { ProfilePage } from '@/settings/profile/profilepage';
+
+// Settings
+import { ProfilePage } from '@/settings/profile/ProfilePage';
 import { AppearancePage } from '@/settings/appearance/apperancepage';
 import { NotificationsPage } from '@/settings/notifications/notificationpage';
-import { SecurityPage } from '@/settings/security/securitypage';
+import { SecurityPage } from '@/settings/security/SecurityPage';
 import { PreferencesPage } from '@/settings/preferences/preferencepage';
 import { ConnectedAccountsPage } from '@/settings/connected-accounts/connectedaccountpage';
-import { BillingPage } from '@/settings/billing/billingpage';
+import { BillingPage } from '@/settings/billing/BillingPage';
 
 /**
  * Loading Spinner for Route-level Transitions
@@ -55,7 +68,6 @@ const ProtectedLayoutWrapper: React.FC = () => (
   </ProtectedGuard>
 );
 
-
 /**
  * Core Protected Route Definitions for React Router v7
  */
@@ -66,7 +78,7 @@ export const protectedRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <DashboardPage />,
+        element: <HomePage />,
       },
       // AI Section
       {
