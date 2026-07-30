@@ -46,6 +46,18 @@ import { PreferencesPage } from '@/settings/preferences/preferencepage';
 import { ConnectedAccountsPage } from '@/settings/connected-accounts/connectedaccountpage';
 import { BillingPage } from '@/settings/billing/BillingPage';
 
+import { DailyOverviewPage } from '@/dashboard/dailyoverviewpage';
+import { SchedulePage } from '@/dashboard/schedulepage';
+import { RecentActivityPage } from '@/dashboard/recentactivitypage';
+import { QuickActionsPage } from '@/dashboard/quickactionspage';
+import { AIInsightsPage } from '@/ai/insights/aiinsightspage';
+import { ProjectsPage } from '@/projects/projectspage';
+import { FinanceOverviewPage } from '@/workspace/finance/financeoverviewpage';
+import { FocusModePage } from '@/workspace/focus/focusmodepage';
+import { SmartRemindersPage } from '@/automation/reminders/smartreminderspage';
+import { AnalyticsReportPage } from '@/analytics/analyticsreportpage';
+import { BarChart3, TrendingUp, Target, Clock, Bot } from 'lucide-react';
+
 /**
  * Loading Spinner for Route-level Transitions
  */
@@ -80,6 +92,22 @@ export const protectedRoutes: RouteObject[] = [
         index: true,
         element: <HomePage />,
       },
+      {
+        path: 'overview',
+        element: <DailyOverviewPage />,
+      },
+      {
+        path: 'schedule',
+        element: <SchedulePage />,
+      },
+      {
+        path: 'activity',
+        element: <RecentActivityPage />,
+      },
+      {
+        path: 'quick-actions',
+        element: <QuickActionsPage />,
+      },
       // AI Section
       {
         path: 'assistant',
@@ -90,6 +118,10 @@ export const protectedRoutes: RouteObject[] = [
         element: <ConversationsPage />,
       },
       {
+        path: 'conversations/:conversationId',
+        element: <ConversationsPage />,
+      },
+      {
         path: 'memory',
         element: <MemoryPage />,
       },
@@ -97,10 +129,18 @@ export const protectedRoutes: RouteObject[] = [
         path: 'prompts',
         element: <PromptLibraryPage />,
       },
+      {
+        path: 'insights',
+        element: <AIInsightsPage />,
+      },
       // Projects Section
       {
         path: 'tasks',
         element: <TasksPage />,
+      },
+      {
+        path: 'projects',
+        element: <ProjectsPage />,
       },
       {
         path: 'goals',
@@ -131,6 +171,11 @@ export const protectedRoutes: RouteObject[] = [
         path: 'search',
         element: <SearchPage />,
       },
+      // Finance Section
+      {
+        path: 'finance',
+        element: <FinanceOverviewPage />,
+      },
       // Automation Section
       {
         path: 'workflows',
@@ -145,6 +190,10 @@ export const protectedRoutes: RouteObject[] = [
         element: <ScheduledAutomationPage />,
       },
       {
+        path: 'reminders',
+        element: <SmartRemindersPage />,
+      },
+      {
         path: 'future-ai',
         element: <FutureAIFeaturesPage />,
       },
@@ -152,6 +201,10 @@ export const protectedRoutes: RouteObject[] = [
       {
         path: 'calendar',
         element: <CalendarPage />,
+      },
+      {
+        path: 'focus',
+        element: <FocusModePage />,
       },
       {
         path: 'productivity',
@@ -164,6 +217,47 @@ export const protectedRoutes: RouteObject[] = [
       {
         path: 'favorites',
         element: <FavoritesPage />,
+      },
+      // Analytics Section
+      {
+        path: 'analytics/productivity',
+        element: (
+          <AnalyticsReportPage
+            title="Productivity Report"
+            subtitle="Detailed analysis of daily throughput, focus sessions, and completed deliverables."
+            icon={<BarChart3 className="w-6 h-6 text-purple-400" />}
+          />
+        ),
+      },
+      {
+        path: 'analytics/goals',
+        element: (
+          <AnalyticsReportPage
+            title="Goal Progress Tracking"
+            subtitle="Trajectory analysis for quarterly OKRs and milestone completions."
+            icon={<Target className="w-6 h-6 text-emerald-400" />}
+          />
+        ),
+      },
+      {
+        path: 'analytics/time',
+        element: (
+          <AnalyticsReportPage
+            title="Time Allocation Insights"
+            subtitle="Breakdown of deep work vs meeting overhead across projects."
+            icon={<Clock className="w-6 h-6 text-blue-400" />}
+          />
+        ),
+      },
+      {
+        path: 'analytics/ai',
+        element: (
+          <AnalyticsReportPage
+            title="AI Recommendations"
+            subtitle="Smart suggestions for workflow optimization and automated task delegation."
+            icon={<Bot className="w-6 h-6 text-amber-400" />}
+          />
+        ),
       },
       // Settings Section
       {

@@ -20,7 +20,7 @@ export const ConversationsPage: React.FC = () => {
         const res = await conversationService.getConversations();
         setConversations(res);
         if (res.length > 0 && !conversationId) {
-          navigate(`/ai/conversations/${res[0].id}`);
+          navigate(`/app/conversations/${res[0].id}`);
         }
       } catch (err) {
         console.error(err);
@@ -36,7 +36,7 @@ export const ConversationsPage: React.FC = () => {
     if (!title?.trim()) return;
     const fresh = await conversationService.createConversation(title.trim());
     setConversations([fresh, ...conversations]);
-    navigate(`/ai/conversations/${fresh.id}`);
+    navigate(`/app/conversations/${fresh.id}`);
   };
 
   const filtered = conversations.filter(
@@ -46,16 +46,16 @@ export const ConversationsPage: React.FC = () => {
   );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-900">
+    <div className="flex h-[calc(100vh-2rem)] w-full overflow-hidden bg-[#090C15] text-slate-100 rounded-2xl border border-[#192032]">
       {/* Thread Navigation Panel */}
-      <div className="flex h-full w-80 shrink-0 flex-col border-r border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-800">
+      <div className="flex h-full w-80 shrink-0 flex-col border-r border-[#192032] bg-[#0B0E17]">
+        <div className="flex items-center justify-between border-b border-[#192032] p-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Context Buffers
           </h2>
           <button
             onClick={handleCreate}
-            className="cursor-pointer rounded-md p-1 text-indigo-600 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="cursor-pointer rounded-lg p-1.5 text-purple-400 hover:text-white transition-colors hover:bg-[#131A2B]"
             title="Initialize Context Thread"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,17 +77,17 @@ export const ConversationsPage: React.FC = () => {
           <ConversationList
             conversations={filtered}
             activeId={conversationId || ''}
-            onSelect={(id) => navigate(`/ai/conversations/${id}`)}
+            onSelect={(id) => navigate(`/app/conversations/${id}`)}
           />
         )}
       </div>
 
       {/* Main Execution Viewports */}
-      <div className="relative h-full flex-1">
+      <div className="relative h-full flex-1 bg-[#090C15]">
         {conversationId ? (
           <AssistantPage />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#090C15]">
             <p className="text-xs text-slate-400">No telemetry context selected.</p>
           </div>
         )}

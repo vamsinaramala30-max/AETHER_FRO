@@ -9,11 +9,11 @@ export interface ConnectedAccount {
 
 export const connectedAccountsService = {
   getConnectedAccounts: async (): Promise<ConnectedAccount[]> => {
-    const response = await api.get<ConnectedAccount[]>('/user/connected-accounts');
+    const response = await api.get<ConnectedAccount[]>('/users/connected-accounts');
     return response.data;
   },
 
   disconnectAccount: async (provider: string): Promise<void> => {
-    await api.delete(`/user/connected-accounts/${provider}`);
+    await api.delete(`/users/connected-accounts/${provider}`);
   },
 };

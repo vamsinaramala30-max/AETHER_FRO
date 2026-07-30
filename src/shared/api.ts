@@ -16,7 +16,10 @@ export const apiClient = axios.create({
 // Request interceptor for auth tokens
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('aether-auth-token');
+    const token =
+      localStorage.getItem('aether_access_token') ||
+      localStorage.getItem('aether-auth-token') ||
+      localStorage.getItem('auth_token');
     if (typeof token === 'string' && token.trim() !== '') {
       config.headers.Authorization = `Bearer ${token}`;
     }

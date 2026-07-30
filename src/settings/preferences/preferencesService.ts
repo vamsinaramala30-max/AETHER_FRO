@@ -9,11 +9,11 @@ export interface UIPreferences {
 
 export const preferencesService = {
   getPreferences: async (): Promise<UIPreferences> => {
-    const response = await api.get<UIPreferences>('/user/preferences');
+    const response = await api.get<UIPreferences>('/users/preferences');
     return response.data;
   },
 
   savePreference: async (key: keyof UIPreferences, value: boolean): Promise<void> => {
-    await api.patch('/user/preferences', { [key]: value });
+    await api.patch('/users/preferences', { [key]: value });
   },
 };

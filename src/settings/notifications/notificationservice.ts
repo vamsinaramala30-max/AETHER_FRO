@@ -10,7 +10,7 @@ export interface NotificationPreferencesData {
 
 export const notificationService = {
   getPreferences: async (): Promise<NotificationPreferencesData> => {
-    const response = await api.get<NotificationPreferencesData>('/user/settings/notifications');
+    const response = await api.get<NotificationPreferencesData>('/notifications');
     return response.data;
   },
 
@@ -18,7 +18,7 @@ export const notificationService = {
     prefs: NotificationPreferencesData,
   ): Promise<NotificationPreferencesData> => {
     const response = await api.put<NotificationPreferencesData>(
-      '/user/settings/notifications',
+      '/notifications',
       prefs,
     );
     return response.data;

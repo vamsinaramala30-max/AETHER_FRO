@@ -76,10 +76,10 @@ class HttpClient {
     endpoint: string,
     params?: Record<string, string | number | boolean | undefined>,
   ): string {
-    const url = new URL(
-      endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`,
-      window.location.origin,
-    );
+    const cleanBaseUrl = this.baseUrl.replace(/\/+$/, '');
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const fullPath = endpoint.startsWith('http') ? endpoint : `${cleanBaseUrl}${cleanEndpoint}`;
+    const url = new URL(fullPath, window.location.origin);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
