@@ -1,40 +1,21 @@
 import { Conversation } from '../assistant/assistantservice';
+import { api } from '../../shared/api';
 
 class ConversationService {
-  private baseRoute = '/api/v1/ai/conversations';
-  private fallbackKey = 'aether_conversations_registry';
-
-  private mockRegistry: Conversation[] = [
-    {
-      id: 'default_session',
-      title: 'Global Context Orchestrator',
-      summary: 'Primary development hub sync session',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messageCount: 4,
-    },
-    {
-      id: 'conv_2',
-      title: 'Refactoring Knowledge Abstraction',
-      summary: 'Isolating data pipelines for vector indexes',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString(),
-      messageCount: 12,
-    },
-  ];
+  private baseRoute = '/ai/conversations';
+  private storageKey = 'aether_conversations_registry';
 
   public async getConversations(): Promise<Conversation[]> {
     try {
-      const response = await fetch(this.baseRoute);
-      if (!response.ok) throw new Error('Network error parsing sessions');
-      return await response.json();
-    } catch {
-      const stored = localStorage.getItem(this.fallbackKey);
-      if (!stored) {
-        localStorage.setItem(this.fallbackKey, JSON.stringify(this.mockRegistry));
-        return this.mockRegistry;
+      const response = await api.get<Conversation[] | { data: Conversation[] }>(this.baseRoute);
+      const data = Array.isArray(response.data) ? response.data : (response.data as any)?.data || [];
+      if (data.length > 0) {
+        localStorage.setItem(this.storageKey, JSON.stringify(data));
       }
-      return JSON.parse(stored);
+      return data;
+    } catch {
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? JSON.parse(stored) : [];
     }
   }
 
@@ -47,17 +28,15 @@ class ConversationService {
       messageCount: 0,
     };
     try {
-      const response = await fetch(this.baseRoute, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
-      });
-      if (!response.ok) throw new Error();
-      return await response.json();
+      const response = await api.post<Conversation | { data: Conversation }>(this.baseRoute, { title });
+      const created = (response.data as any)?.data || response.data || fresh;
+      const current = await this.getConversations();
+      localStorage.setItem(this.storageKey, JSON.stringify([created, ...current]));
+      return created;
     } catch {
       const current = await this.getConversations();
       const updated = [fresh, ...current];
-      localStorage.setItem(this.fallbackKey, JSON.stringify(updated));
+      localStorage.setItem(this.storageKey, JSON.stringify(updated));
       return fresh;
     }
   }

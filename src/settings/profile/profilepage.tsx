@@ -1,9 +1,10 @@
-// frontend/src/settings/profile/ProfilePage.tsx
 import React, { useEffect, useState } from 'react';
 import { ProfileForm } from './profileform';
 import { profileService, UserProfile } from './profileservice';
+import { useAuth } from '@/app/providers/authprovider';
 
 export const ProfilePage: React.FC = () => {
+  const { user, refreshSession } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,12 +15,24 @@ export const ProfilePage: React.FC = () => {
         const data = await profileService.getCurrentProfile();
         setProfile(data);
       } catch {
-        setError('Failed to load profile settings.');
+        if (user) {
+          setProfile({
+            id: user.id || 'usr_default',
+            email: user.email || '',
+            firstName: user.firstName || (user.name ? user.name.split(' ')[0] : 'User'),
+            lastName: user.lastName || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
+            avatarUrl: user.avatarUrl,
+            bio: '',
+            company: '',
+          });
+        } else {
+          setError('Failed to load profile settings.');
+        }
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return <div className="animate-pulse text-sm text-slate-400">Loading profile settings...</div>;
@@ -65,6 +78,7 @@ export const ProfilePage: React.FC = () => {
         initialProfile={profile}
         onUpdateSuccess={(updated) => {
           setProfile(updated);
+          void refreshSession();
         }}
       />
     </div>

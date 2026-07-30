@@ -52,6 +52,7 @@ export const SecuritySettings: React.FC = () => {
           <input
             type="password"
             id="current"
+            autoComplete="current-password"
             value={passwords.current}
             onChange={(e) => {
               setPasswords({ ...passwords, current: e.target.value });
@@ -67,6 +68,7 @@ export const SecuritySettings: React.FC = () => {
           <input
             type="password"
             id="new"
+            autoComplete="new-password"
             value={passwords.new}
             onChange={(e) => {
               setPasswords({ ...passwords, new: e.target.value });
@@ -82,6 +84,7 @@ export const SecuritySettings: React.FC = () => {
           <input
             type="password"
             id="confirm"
+            autoComplete="new-password"
             value={passwords.confirm}
             onChange={(e) => {
               setPasswords({ ...passwords, confirm: e.target.value });
