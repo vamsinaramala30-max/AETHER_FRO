@@ -1,7 +1,8 @@
-// frontend/src/automation/integrations/IntegrationsPage.tsx
 import React, { useEffect, useState } from 'react';
 import { integrationsService, Integration } from './integrationservice';
 import { IntegrationCard } from './integrationcard';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { Cpu } from 'lucide-react';
 
 export const IntegrationsPage: React.FC = () => {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
@@ -43,35 +44,49 @@ export const IntegrationsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       {error && (
-        <div className="rounded-lg border border-red-900/40 bg-red-950/40 p-3 text-xs text-red-400">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-400">
           {error}
         </div>
       )}
 
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-100">Integration Network</h1>
-        <p className="text-xs text-slate-400">
-          Bridge secure data links to third-party endpoints, deployment engines, and team platforms.
-        </p>
-      </div>
+      <div className="space-y-6">
+        <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 shadow-lg shadow-cyan-500/20">
+              <Cpu className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Integration Network
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Bridge secure data links to third-party endpoints, deployment engines, and team
+                platforms.
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {integrations.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/10 p-12 text-center">
-          <p className="text-sm text-slate-500">No interface pipelines detected.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {integrations.map((integration) => (
-            <IntegrationCard
-              key={integration.id}
-              integration={integration}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+        {integrations.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              No integration pipelines detected.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {integrations.map((integration) => (
+              <IntegrationCard
+                key={integration.id}
+                integration={integration}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </PageWrapper>
   );
 };

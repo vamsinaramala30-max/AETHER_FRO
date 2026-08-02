@@ -24,19 +24,19 @@ export const Accordion: React.FC<AccordionProps> = ({ items, allowMultiple = fal
   };
 
   return (
-    <div className="border-border-subtle bg-surface-subtle space-y-2 rounded-xl border p-2">
+    <div className="space-y-2 rounded-xl border border-border-subtle bg-surface-subtle p-2">
       {items.map((item) => {
         const isOpen = expanded.includes(item.id);
         return (
           <div
             key={item.id}
-            className="border-border-subtle bg-surface-base overflow-hidden rounded-lg border"
+            className="overflow-hidden rounded-lg border border-border-subtle bg-surface-base"
           >
             <button
               onClick={() => {
                 toggle(item.id);
               }}
-              className="text-text-primary hover:bg-surface-hover flex w-full items-center justify-between p-4 text-left text-sm font-medium transition-colors"
+              className="flex w-full items-center justify-between p-4 text-left text-sm font-medium text-text-primary transition-colors hover:bg-surface-hover"
             >
               <span>{item.title}</span>
               <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -52,7 +52,7 @@ export const Accordion: React.FC<AccordionProps> = ({ items, allowMultiple = fal
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="text-text-secondary border-border-subtle/50 mt-1 border-t p-4 pt-0 text-xs">
+                  <div className="border-border-subtle/50 mt-1 border-t p-4 pt-0 text-xs text-text-secondary">
                     {item.content}
                   </div>
                 </motion.div>

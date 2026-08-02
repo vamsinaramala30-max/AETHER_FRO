@@ -3,8 +3,11 @@
 [data-theme='light'] {
   --aether-bg-app: #f8fafc;
   --aether-bg-surface: #ffffff;
-  --aether-bg-surface-elevated: #ffffff;
-  --aether-bg-subtle: #f1f5f9;
+  --aether-bg-surface-elevated: #f1f5f9;
+  --aether-bg-subtle: #f8fafc;
+  --aether-bg-hover: #f1f5f9;
+  --aether-bg-selected: #e0e7ff;
+  --aether-bg-disabled: #f1f5f9;
 
   --aether-border-color: #e2e8f0;
   --aether-border-strong: #cbd5e1;
@@ -14,27 +17,43 @@
   --aether-text-subtle: #94a3b8;
   --aether-text-inverse: #ffffff;
 
-  --aether-glass-bg: rgba(255, 255, 255, 0.75);
-  --aether-glass-border: rgba(226, 232, 240, 0.6);
+  --aether-primary: #4f46e5;
+  --aether-primary-hover: #4338ca;
+  --aether-secondary: #0891b2;
+  --aether-accent: #7c3aed;
+
+  --aether-overlay: rgba(15, 23, 42, 0.4);
+  --aether-glass-bg: rgba(255, 255, 255, 0.85);
+  --aether-glass-border: rgba(226, 232, 240, 0.8);
   --aether-backdrop-blur: 12px;
+  --aether-shadow-glow: 0 0 15px rgba(99, 102, 241, 0.15);
 }
 
 /* Dark Theme Overrides */
 [data-theme='dark'] {
-  --aether-bg-app: #090d16;
-  --aether-bg-surface: #111827;
-  --aether-bg-surface-elevated: #1f2937;
-  --aether-bg-subtle: #1e293b;
+  --aether-bg-app: #080c14;
+  --aether-bg-surface: #0e1422;
+  --aether-bg-surface-elevated: #161e31;
+  --aether-bg-subtle: #131b2e;
+  --aether-bg-hover: #1e293b;
+  --aether-bg-selected: #252e4a;
+  --aether-bg-disabled: #0f172a;
 
-  --aether-border-color: #1f293d;
-  --aether-border-strong: #374151;
+  --aether-border-color: #1e293b;
+  --aether-border-strong: #334155;
 
-  --aether-text-main: #f9fafb;
-  --aether-text-muted: #9ca3af;
-  --aether-text-subtle: #6b7280;
+  --aether-text-main: #f8fafc;
+  --aether-text-muted: #94a3b8;
+  --aether-text-subtle: #64748b;
   --aether-text-inverse: #0f172a;
 
-  --aether-glass-bg: rgba(17, 24, 39, 0.75);
+  --aether-primary: #6366f1;
+  --aether-primary-hover: #4f46e5;
+  --aether-secondary: #06b6d4;
+  --aether-accent: #8b5cf6;
+
+  --aether-overlay: rgba(0, 0, 0, 0.7);
+  --aether-glass-bg: rgba(14, 20, 34, 0.85);
   --aether-glass-border: rgba(255, 255, 255, 0.1);
   --aether-shadow-glow: 0 0 20px rgba(129, 140, 248, 0.25);
 }
@@ -42,20 +61,29 @@
 /* Automatic System Preference Integration */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --aether-bg-app: #090d16;
-    --aether-bg-surface: #111827;
-    --aether-bg-surface-elevated: #1f2937;
-    --aether-bg-subtle: #1e293b;
+    --aether-bg-app: #080c14;
+    --aether-bg-surface: #0e1422;
+    --aether-bg-surface-elevated: #161e31;
+    --aether-bg-subtle: #131b2e;
+    --aether-bg-hover: #1e293b;
+    --aether-bg-selected: #252e4a;
+    --aether-bg-disabled: #0f172a;
 
-    --aether-border-color: #1f293d;
-    --aether-border-strong: #374151;
+    --aether-border-color: #1e293b;
+    --aether-border-strong: #334155;
 
-    --aether-text-main: #f9fafb;
-    --aether-text-muted: #9ca3af;
-    --aether-text-subtle: #6b7280;
+    --aether-text-main: #f8fafc;
+    --aether-text-muted: #94a3b8;
+    --aether-text-subtle: #64748b;
     --aether-text-inverse: #0f172a;
 
-    --aether-glass-bg: rgba(17, 24, 39, 0.75);
+    --aether-primary: #6366f1;
+    --aether-primary-hover: #4f46e5;
+    --aether-secondary: #06b6d4;
+    --aether-accent: #8b5cf6;
+
+    --aether-overlay: rgba(0, 0, 0, 0.7);
+    --aether-glass-bg: rgba(14, 20, 34, 0.85);
     --aether-glass-border: rgba(255, 255, 255, 0.1);
   }
 }

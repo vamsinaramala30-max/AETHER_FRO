@@ -1,282 +1,262 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Bot,
-  CheckSquare,
-  BookOpen,
-  DollarSign,
-  Briefcase,
-  Zap,
-  BarChart3,
-  Settings,
-  LogOut,
-  Sparkles,
-  Menu,
-} from 'lucide-react';
+import { Building2, Sparkles, Menu, Bell, Search, Moon, Sun } from 'lucide-react';
 
-import { useAuth } from '@/app/providers/authprovider';
+import { useTheme } from '@/app/providers/themeprovider';
+import { GlobalSearch } from '@/components/search/GlobalSearch';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { Sidebar } from '@/components/sidebar';
 
-interface NavSection {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  items: { label: string; href: string; active?: boolean }[];
+// ---------------------------------------------------------------------------
+// Top Header Bar (Desktop & Mobile Header)
+// ---------------------------------------------------------------------------
+
+interface TopHeaderProps {
+  onMobileMenuOpen: () => void;
+  onSearchOpen: () => void;
+  onNotificationsOpen: () => void;
+  unreadCount: number;
 }
 
-export const AppLayout: React.FC<React.PropsWithChildren> = () => {
-  const { user, logout } = useAuth();
+const DesktopHeader: React.FC<{
+  onSearchOpen: () => void;
+  onNotificationsOpen: () => void;
+  unreadCount: number;
+}> = ({ onSearchOpen, onNotificationsOpen, unreadCount }) => {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const userDisplayName =
-    (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.name || user?.email?.split('@')[0]) || 'User';
-  const userEmail = user?.email || '';
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    home: true,
-    ai: true,
-    tasks: true,
-    knowledge: true,
-    workspace: true,
-    automation: true,
-    analytics: true,
-    settings: true,
-  });
-
-  const toggleSection = (id: string) => {
-    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const navSections: NavSection[] = [
-    {
-      id: 'home',
-      label: 'Home',
-      icon: <Home className="w-4 h-4" />,
-      items: [
-        { label: 'Dashboard', href: '/app' },
-        { label: 'Daily Overview', href: '/app/overview' },
-        { label: "Today's Schedule", href: '/app/schedule' },
-        { label: 'Recent Activity', href: '/app/activity' },
-        { label: 'Quick Actions', href: '/app/quick-actions' },
-      ],
-    },
-    {
-      id: 'ai',
-      label: 'AI',
-      icon: <Bot className="w-4 h-4" />,
-      items: [
-        { label: 'AI Assistant', href: '/app/assistant' },
-        { label: 'Conversations', href: '/app/conversations' },
-        { label: 'Memory', href: '/app/memory' },
-        { label: 'Prompt Library', href: '/app/prompts' },
-        { label: 'AI Insights', href: '/app/insights' },
-      ],
-    },
-    {
-      id: 'tasks',
-      label: 'Tasks',
-      icon: <CheckSquare className="w-4 h-4" />,
-      items: [
-        { label: 'Tasks', href: '/app/tasks' },
-        { label: 'Projects', href: '/app/projects' },
-        { label: 'Goals', href: '/app/goals' },
-        { label: 'Calendar', href: '/app/calendar' },
-        { label: 'Weekly Review', href: '/app/weekly-review' },
-      ],
-    },
-    {
-      id: 'knowledge',
-      label: 'Knowledge',
-      icon: <BookOpen className="w-4 h-4" />,
-      items: [
-        { label: 'Notes', href: '/app/notes' },
-        { label: 'Documents', href: '/app/documents' },
-        { label: 'Knowledge Base', href: '/app/knowledge-base' },
-        { label: 'Search', href: '/app/search' },
-      ],
-    },
-    {
-      id: 'finance',
-      label: 'Finance',
-      icon: <DollarSign className="w-4 h-4" />,
-      items: [{ label: 'Overview', href: '/app/finance' }],
-    },
-    {
-      id: 'workspace',
-      label: 'Workspace',
-      icon: <Briefcase className="w-4 h-4" />,
-      items: [
-        { label: 'Focus Mode', href: '/app/focus' },
-        { label: 'Productivity Hub', href: '/app/productivity' },
-        { label: 'Recent Files', href: '/app/recent-files' },
-        { label: 'Favorites', href: '/app/favorites' },
-      ],
-    },
-    {
-      id: 'automation',
-      label: 'Automation',
-      icon: <Zap className="w-4 h-4" />,
-      items: [
-        { label: 'Workflow Center', href: '/app/workflows' },
-        { label: 'Integrations', href: '/app/integrations' },
-        { label: 'Scheduled Actions', href: '/app/scheduled-automation' },
-        { label: 'Smart Reminders', href: '/app/reminders' },
-      ],
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: <BarChart3 className="w-4 h-4" />,
-      items: [
-        { label: 'Productivity Report', href: '/app/analytics/productivity' },
-        { label: 'Goal Progress', href: '/app/analytics/goals' },
-        { label: 'Time Insights', href: '/app/analytics/time' },
-        { label: 'AI Recommendations', href: '/app/analytics/ai' },
-      ],
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: <Settings className="w-4 h-4" />,
-      items: [
-        { label: 'Profile', href: '/app/settings/profile' },
-        { label: 'Appearance', href: '/app/settings/appearance' },
-        { label: 'Notifications', href: '/app/settings/notifications' },
-        { label: 'Security', href: '/app/settings/security' },
-        { label: 'Connected Accounts', href: '/app/settings/accounts' },
-        { label: 'Preferences', href: '/app/settings/preferences' },
-      ],
-    },
-  ];
+  // Create breadcrumb segments
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const breadcrumbs = pathParts.slice(1); // omit 'app'
 
   return (
-    <div className="bg-[#090C15] text-slate-100 flex min-h-screen font-sans selection:bg-purple-500/30">
-      {/* Sidebar Navigation */}
-      <aside
-        className={`bg-[#0B0E17] border-r border-[#192032] flex flex-col transition-all duration-300 z-30 shrink-0 ${
-          collapsed ? 'w-16' : 'w-64'
-        } hidden md:flex min-h-screen sticky top-0 h-screen`}
-      >
-        {/* Header Branding */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-[#192032]/60">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-900/30">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            {!collapsed && <span className="font-extrabold text-base tracking-tight text-white">Aether</span>}
-          </div>
-          <button
-            type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
+    <header className="bg-aether-surface/80 hidden shrink-0 items-center justify-between border-b border-aether-border px-6 py-2.5 backdrop-blur-md md:flex">
+      {/* Left Breadcrumbs & Status */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 text-xs font-medium text-aether-muted">
+          <Link
+            to="/app"
+            className="flex items-center gap-1.5 transition-colors hover:text-aether-main"
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+            <Building2 className="h-3.5 w-3.5 text-indigo-400" />
+            <span>Workspace</span>
+          </Link>
+          {breadcrumbs.map((crumb, idx) => (
+            <React.Fragment key={crumb + idx}>
+              <span className="text-aether-subtleText">/</span>
+              <span
+                className={`capitalize ${idx === breadcrumbs.length - 1 ? 'font-semibold text-aether-main' : 'hover:text-aether-main'}`}
+              >
+                {crumb.replace('-', ' ')}
+              </span>
+            </React.Fragment>
+          ))}
         </div>
-
-        {/* Scrollable Navigation Groups */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800">
-          {navSections.map((section) => {
-            const isOpen = openSections[section.id];
-            return (
-              <div key={section.id} className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => toggleSection(section.id)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-[#131A2B] rounded-xl transition-all group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-slate-400 group-hover:text-purple-400 transition-colors">
-                      {section.icon}
-                    </span>
-                    {!collapsed && <span>{section.label}</span>}
-                  </div>
-                  {!collapsed && (
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                        isOpen ? '' : '-rotate-90'
-                      }`}
-                    />
-                  )}
-                </button>
-
-                {/* Section Items */}
-                {!collapsed && isOpen && (
-                  <div className="pl-9 pr-1 space-y-1 py-0.5">
-                    {section.items.map((item) => {
-                      const isActive = location.pathname === item.href;
-                      return (
-                        <Link
-                          key={item.label}
-                          to={item.href}
-                          className={`block px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                            isActive
-                              ? 'text-white bg-[#1A1F36] border border-purple-500/30'
-                              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                          }`}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="h-3 w-px bg-aether-border" />
+        <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+          <span>AI Engine Active</span>
         </div>
+      </div>
 
-        {/* Footer Status & Auth */}
-        <div className="p-3 border-t border-[#192032]/60 space-y-2">
-          {!collapsed && (
-            <div className="flex items-center gap-2.5 px-3 py-2 bg-[#101524] border border-[#1E2638] rounded-xl">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0">
-                {userDisplayName[0] || 'U'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold text-white truncate">{userDisplayName}</div>
-                <div className="text-[10px] text-slate-400 truncate">{userEmail}</div>
-              </div>
-            </div>
+      {/* Right Quick Actions */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onSearchOpen}
+          className="flex items-center gap-2 rounded-xl border border-aether-border bg-aether-subtle px-3 py-1.5 text-xs text-aether-muted transition-all hover:border-aether-border-strong hover:text-aether-main"
+        >
+          <Search className="h-3.5 w-3.5 text-indigo-400" />
+          <span>Quick Search</span>
+          <kbd className="py-0.2 rounded border border-aether-border bg-aether-surface px-1 font-mono text-[9px] text-aether-subtleText">
+            ⌘K
+          </kbd>
+        </button>
+
+        <button
+          type="button"
+          onClick={onNotificationsOpen}
+          className="relative rounded-xl border border-aether-border bg-aether-subtle p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+          title="Notifications"
+        >
+          <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px] font-bold text-white">
+              {unreadCount}
+            </span>
           )}
-          <button
-            type="button"
-            onClick={() => void logout()}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-xl transition-colors"
-          >
-            <LogOut className="w-4 h-4 text-slate-500" />
-            {!collapsed && <span>Sign out</span>}
-          </button>
-        </div>
-      </aside>
+        </button>
 
-      {/* Mobile Top Navigation Header */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0B0E17] border-b border-[#192032]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-extrabold text-base text-white">Aether</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-400 hover:text-white"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        </header>
+        <button
+          type="button"
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          className="rounded-xl border border-aether-border bg-aether-subtle p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+          title="Toggle Theme"
+        >
+          {resolvedTheme === 'dark' ? (
+            <Sun className="h-4 w-4 text-amber-400" />
+          ) : (
+            <Moon className="h-4 w-4 text-indigo-400" />
+          )}
+        </button>
+      </div>
+    </header>
+  );
+};
 
-        {/* Main Canvas Area */}
-        <main id="app-content" className="flex-1 overflow-y-auto pl-6 pr-6 py-6 md:pl-8 md:pr-8">
+const TopHeader: React.FC<TopHeaderProps> = ({
+  onMobileMenuOpen,
+  onSearchOpen,
+  onNotificationsOpen,
+  unreadCount,
+}) => (
+  <header className="flex shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-4 py-3 md:hidden">
+    <div className="flex items-center gap-2.5">
+      <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500">
+        <Sparkles className="h-3.5 w-3.5 text-white" />
+      </div>
+      <span className="text-base font-extrabold text-aether-main">Aether OS</span>
+    </div>
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={onSearchOpen}
+        className="rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Search className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onNotificationsOpen}
+        className="relative rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 && (
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-indigo-500" />
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={onMobileMenuOpen}
+        className="rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+    </div>
+  </header>
+);
+
+// ---------------------------------------------------------------------------
+// AppLayout
+// ---------------------------------------------------------------------------
+
+export const AppLayout: React.FC<React.PropsWithChildren> = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadCount] = useState(3);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((p) => !p);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault();
+        setCollapsed((p) => !p);
+      }
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+        setNotificationsOpen(false);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  const location = useLocation();
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-aether-bg font-sans text-aether-main selection:bg-indigo-500/30">
+      {/* Desktop Sidebar */}
+      <div className="hidden h-full shrink-0 flex-col md:flex">
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((p) => !p)}
+          onSearchOpen={() => setSearchOpen(true)}
+          onNotificationsOpen={() => setNotificationsOpen((p) => !p)}
+          unreadCount={unreadCount}
+        />
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out md:hidden ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <Sidebar
+          collapsed={false}
+          onToggleCollapse={() => {}}
+          onMobileClose={() => setMobileOpen(false)}
+          isMobile
+          onSearchOpen={() => {
+            setSearchOpen(true);
+            setMobileOpen(false);
+          }}
+          onNotificationsOpen={() => {
+            setNotificationsOpen((p) => !p);
+            setMobileOpen(false);
+          }}
+          unreadCount={unreadCount}
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Desktop Sticky Header */}
+        <DesktopHeader
+          onSearchOpen={() => setSearchOpen(true)}
+          onNotificationsOpen={() => setNotificationsOpen((p) => !p)}
+          unreadCount={unreadCount}
+        />
+
+        {/* Mobile Header */}
+        <TopHeader
+          onMobileMenuOpen={() => setMobileOpen(true)}
+          onSearchOpen={() => setSearchOpen(true)}
+          onNotificationsOpen={() => setNotificationsOpen((p) => !p)}
+          unreadCount={unreadCount}
+        />
+
+        {/* Page Content */}
+        <main id="app-content" className="flex-1 overflow-y-auto bg-aether-bg" role="main">
           <Outlet />
         </main>
       </div>
+
+      {/* Global Search Modal */}
+      {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
+
+      {/* Notification Center Panel */}
+      {notificationsOpen && <NotificationCenter onClose={() => setNotificationsOpen(false)} />}
     </div>
   );
 };

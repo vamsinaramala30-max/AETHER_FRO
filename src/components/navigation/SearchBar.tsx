@@ -24,7 +24,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       leftIcon={<span>🔍</span>}
       rightIcon={
         value ? (
-          <button onClick={onClear} className="text-text-tertiary hover:text-text-primary text-xs">
+          <button onClick={onClear} className="text-xs text-text-tertiary hover:text-text-primary">
             ✕
           </button>
         ) : undefined

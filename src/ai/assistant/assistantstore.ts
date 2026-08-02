@@ -140,6 +140,44 @@ class AssistantStore {
     this.saveToStorage();
   };
 
+  public togglePinConversation = (id: string): void => {
+    const conv = this.state.conversations[id];
+    if (!conv) return;
+
+    const updatedConv: Conversation = {
+      ...conv,
+      metadata: {
+        ...conv.metadata,
+        pinned: !conv.metadata.pinned,
+      },
+    };
+
+    this.setState({
+      conversations: { ...this.state.conversations, [id]: updatedConv },
+    });
+
+    this.saveToStorage();
+  };
+
+  public toggleArchiveConversation = (id: string): void => {
+    const conv = this.state.conversations[id];
+    if (!conv) return;
+
+    const updatedConv: Conversation = {
+      ...conv,
+      metadata: {
+        ...conv.metadata,
+        archived: !conv.metadata.archived,
+      },
+    };
+
+    this.setState({
+      conversations: { ...this.state.conversations, [id]: updatedConv },
+    });
+
+    this.saveToStorage();
+  };
+
   public setDraft = (id: string, draft: string): void => {
     const conv = this.state.conversations[id];
     if (!conv) return;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Goal } from './goalservice';
 import { GoalProgress } from './goalprogress';
+import { Check, Edit2 } from 'lucide-react';
 
 interface GoalCardProps {
   goal: Goal;
@@ -17,139 +18,58 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onUpdateProgress }) =>
   };
 
   return (
-    <div
-      style={{
-        background: '#141414',
-        border: '1px solid #232323',
-        borderRadius: '8px',
-        padding: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-start justify-between">
         <div>
-          <span
-            style={{
-              fontSize: '0.65rem',
-              textTransform: 'uppercase',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              background: '#222',
-              color: '#999',
-              fontWeight: 'bold',
-              border: '1px solid #333',
-            }}
-          >
+          <span className="inline-block rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
             {goal.category}
           </span>
-          <h3
-            style={{
-              margin: '0.5rem 0 0 0',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              color: '#f0f0f0',
-            }}
-          >
+          <h3 className="mt-2 text-base font-bold leading-snug text-slate-900 dark:text-white">
             {goal.title}
           </h3>
         </div>
       </div>
 
-      <p style={{ margin: 0, fontSize: '0.85rem', color: '#aaa', lineHeight: 1.4 }}>
+      <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
         {goal.description}
       </p>
 
-      <div
-        style={{
-          background: '#0a0a0a',
-          padding: '0.5rem 0.75rem',
-          borderRadius: '4px',
-          border: '1px solid #1f1f1f',
-          fontSize: '0.8rem',
-          color: '#888',
-        }}
-      >
-        <strong style={{ color: '#ccc' }}>Success Criteria:</strong> {goal.metrics}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-slate-800/50">
+        <strong className="font-bold text-slate-900 dark:text-slate-200">Success Criteria:</strong>{' '}
+        <span className="text-slate-600 dark:text-slate-400">{goal.metrics}</span>
       </div>
 
-      <div style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+      <div className="mt-auto pt-2">
         <GoalProgress progress={goal.progress} />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+      <div className="flex items-center gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">
         {editing ? (
-          <>
+          <div className="flex w-full items-center gap-2">
             <input
               type="number"
               min="0"
               max="100"
               value={inputValue}
-              onChange={(e) => {
-                setInputValue(parseInt(e.target.value) || 0);
-              }}
-              style={{
-                background: '#000',
-                border: '1px solid #444',
-                color: '#fff',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                width: '60px',
-                fontSize: '0.8rem',
-              }}
+              onChange={(e) => setInputValue(parseInt(e.target.value) || 0)}
+              className="w-20 rounded-lg border border-indigo-500 bg-white px-2 py-1 text-xs font-bold text-slate-900 outline-none dark:bg-slate-800 dark:text-white"
             />
             <button
               onClick={saveProgress}
-              style={{
-                background: '#00cc66',
-                border: 'none',
-                color: '#000',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-              }}
+              className="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
             >
-              Save
+              <Check className="h-3.5 w-3.5" /> Save
             </button>
-            <button
-              onClick={() => {
-                setEditing(false);
-              }}
-              style={{
-                background: 'transparent',
-                border: '1px solid #444',
-                color: '#aaa',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '0.75rem',
-                cursor: 'pointer',
-              }}
-            >
-              Cancel
-            </button>
-          </>
+          </div>
         ) : (
           <button
-            onClick={() => {
-              setEditing(true);
-            }}
-            style={{
-              background: 'transparent',
-              border: '1px solid #333',
-              color: '#888',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              cursor: 'pointer',
-            }}
+            onClick={() => setEditing(true)}
+            className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
           >
-            Adjust Progression Metrics
+            <Edit2 className="h-3.5 w-3.5" /> Adjust Progress
           </button>
         )}
-        <span style={{ fontSize: '0.75rem', color: '#555', marginLeft: 'auto' }}>
+        <span className="ml-auto text-[11px] font-medium text-slate-500 dark:text-slate-400">
           Target: {goal.targetDate}
         </span>
       </div>

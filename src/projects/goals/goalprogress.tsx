@@ -8,36 +8,15 @@ export const GoalProgress: React.FC<GoalProgressProps> = ({ progress }) => {
   const progressPercent = Math.min(100, Math.max(0, progress));
 
   return (
-    <div style={{ width: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '0.8rem',
-          marginBottom: '0.35rem',
-          color: '#aaa',
-        }}
-      >
-        <span>Execution Depth</span>
-        <span style={{ fontWeight: 'bold', color: '#00cc66' }}>{String(progressPercent)}%</span>
+    <div className="w-full space-y-1.5">
+      <div className="flex justify-between text-xs font-semibold">
+        <span className="text-slate-500 dark:text-slate-400">Completion</span>
+        <span className="font-bold text-emerald-600 dark:text-emerald-400">{progressPercent}%</span>
       </div>
-      <div
-        style={{
-          width: '100%',
-          height: '6px',
-          background: '#222',
-          borderRadius: '3px',
-          overflow: 'hidden',
-        }}
-      >
+      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
         <div
-          style={{
-            width: `${String(progressPercent)}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #0066cc, #00cc66)',
-            borderRadius: '3px',
-            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
+          className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
     </div>

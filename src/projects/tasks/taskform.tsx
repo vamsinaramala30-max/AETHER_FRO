@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Task } from './taskservice';
+import { Plus, CheckSquare } from 'lucide-react';
 
 interface TaskFormProps {
   onSubmit: (task: Omit<Task, 'id'>) => void;
@@ -11,6 +12,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
   const [priority, setPriority] = useState<Task['priority']>('medium');
   const [dueDate, setDueDate] = useState('');
   const [tagInput, setTagInput] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleFormSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -35,6 +37,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
     setPriority('medium');
     setDueDate('');
     setTagInput('');
+    setIsOpen(false);
   };
 
   const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -44,142 +47,111 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
     }
   };
 
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-xs font-bold text-slate-700 shadow-sm transition-all hover:border-indigo-400 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50"
+      >
+        <Plus className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+        Create New Task
+      </button>
+    );
+  }
+
   return (
     <form
       onSubmit={handleFormSubmit}
-      style={{
-        background: '#161616',
-        border: '1px solid #2d2d2d',
-        borderRadius: '8px',
-        padding: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        marginBottom: '2rem',
-      }}
+      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
-      <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff' }}>Create New Architecture Task</h3>
-
-      <input
-        type="text"
-        placeholder="Task Title"
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-        }}
-        required
-        style={{
-          background: '#0a0a0a',
-          border: '1px solid #333',
-          color: '#fff',
-          padding: '0.6rem',
-          borderRadius: '4px',
-        }}
-      />
-
-      <textarea
-        placeholder="Task Execution Description..."
-        value={description}
-        onChange={(e) => {
-          setDescription(e.target.value);
-        }}
-        style={{
-          background: '#0a0a0a',
-          border: '1px solid #333',
-          color: '#fff',
-          padding: '0.6rem',
-          borderRadius: '4px',
-          minHeight: '80px',
-          resize: 'vertical',
-        }}
-      />
-
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <div
-          style={{
-            flex: 1,
-            minWidth: '140px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.25rem',
-          }}
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+        <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+          <CheckSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+          Create New Task
+        </h3>
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
         >
-          <label style={{ fontSize: '0.75rem', color: '#aaa' }}>Priority</label>
-          <select
-            value={priority}
-            onChange={handlePriorityChange}
-            style={{
-              background: '#0a0a0a',
-              border: '1px solid #333',
-              color: '#fff',
-              padding: '0.5rem',
-              borderRadius: '4px',
-            }}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        <div
-          style={{
-            flex: 1,
-            minWidth: '140px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.25rem',
-          }}
-        >
-          <label style={{ fontSize: '0.75rem', color: '#aaa' }}>Due Date</label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => {
-              setDueDate(e.target.value);
-            }}
-            style={{
-              background: '#0a0a0a',
-              border: '1px solid #333',
-              color: '#fff',
-              padding: '0.45rem',
-              borderRadius: '4px',
-            }}
-          />
-        </div>
+          Cancel
+        </button>
       </div>
 
       <input
         type="text"
-        placeholder="Tags (comma separated: ui, perf, core)"
-        value={tagInput}
-        onChange={(e) => {
-          setTagInput(e.target.value);
-        }}
-        style={{
-          background: '#0a0a0a',
-          border: '1px solid #333',
-          color: '#fff',
-          padding: '0.6rem',
-          borderRadius: '4px',
-        }}
+        placeholder="Task title..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
       />
 
-      <button
-        type="submit"
-        style={{
-          background: '#0066cc',
-          color: '#fff',
-          border: 'none',
-          padding: '0.6rem',
-          borderRadius: '4px',
-          fontWeight: 600,
-          cursor: 'pointer',
-          transition: 'background 0.2s',
-        }}
-      >
-        Commit Task
-      </button>
+      <textarea
+        placeholder="Task description & acceptance criteria..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={3}
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+      />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Priority
+          </label>
+          <select
+            value={priority}
+            onChange={handlePriorityChange}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Due Date
+          </label>
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Tags (comma separated)
+          </label>
+          <input
+            type="text"
+            placeholder="ui, core, api"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 hover:shadow-indigo-500/20"
+        >
+          Save Task
+        </button>
+      </div>
     </form>
   );
 };

@@ -1,4 +1,3 @@
-// frontend/src/settings/security/SecuritySettings.tsx
 import React, { useState } from 'react';
 import { securityService } from './securityservice';
 
@@ -10,7 +9,7 @@ export const SecuritySettings: React.FC = () => {
   const handlePasswordChange = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      setStatus({ success: false, text: 'New credentials do not match confirmed target values.' });
+      setStatus({ success: false, text: 'New passwords do not match.' });
       return;
     }
     setSubmitting(true);
@@ -23,11 +22,11 @@ export const SecuritySettings: React.FC = () => {
         });
         setStatus({
           success: true,
-          text: 'Access token configuration metrics modified successfully.',
+          text: 'Password updated successfully.',
         });
         setPasswords({ current: '', new: '', confirm: '' });
       } catch {
-        setStatus({ success: false, text: 'Identity token confirmation verification failed.' });
+        setStatus({ success: false, text: 'Verification failed. Please check current password.' });
       } finally {
         setSubmitting(false);
       }
@@ -35,18 +34,25 @@ export const SecuritySettings: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl space-y-8">
-      <form onSubmit={handlePasswordChange} className="space-y-4">
-        <h3 className="text-base font-medium text-white">Modify Authentication Secret</h3>
+    <div className="max-w-2xl space-y-6">
+      <form onSubmit={handlePasswordChange} className="space-y-5">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Update Password</h3>
         {status && (
           <div
-            className={`rounded-md p-4 text-sm ${status.success ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-rose-500/20 bg-rose-500/10 text-rose-400'}`}
+            className={`rounded-xl p-4 text-xs font-semibold ${
+              status.success
+                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                : 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400'
+            }`}
           >
             {status.text}
           </div>
         )}
         <div>
-          <label htmlFor="current" className="mb-1 block text-sm font-medium text-slate-300">
+          <label
+            htmlFor="current"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Current Password
           </label>
           <input
@@ -54,51 +60,51 @@ export const SecuritySettings: React.FC = () => {
             id="current"
             autoComplete="current-password"
             value={passwords.current}
-            onChange={(e) => {
-              setPasswords({ ...passwords, current: e.target.value });
-            }}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+            onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
             required
           />
         </div>
         <div>
-          <label htmlFor="new" className="mb-1 block text-sm font-medium text-slate-300">
-            New Password Target
+          <label
+            htmlFor="new"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
+            New Password
           </label>
           <input
             type="password"
             id="new"
             autoComplete="new-password"
             value={passwords.new}
-            onChange={(e) => {
-              setPasswords({ ...passwords, new: e.target.value });
-            }}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+            onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
             required
           />
         </div>
         <div>
-          <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-slate-300">
-            Confirm New Password Target
+          <label
+            htmlFor="confirm"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
+            Confirm New Password
           </label>
           <input
             type="password"
             id="confirm"
             autoComplete="new-password"
             value={passwords.confirm}
-            onChange={(e) => {
-              setPasswords({ ...passwords, confirm: e.target.value });
-            }}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+            onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
             required
           />
         </div>
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:bg-indigo-600/50"
+          className="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-50"
         >
-          {submitting ? 'Updating Core Secret...' : 'Commit Security Update'}
+          {submitting ? 'Updating Password...' : 'Save New Password'}
         </button>
       </form>
     </div>

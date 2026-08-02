@@ -37,14 +37,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {hasLabel && (
           <label
             htmlFor={inputId}
-            className="text-text-secondary block text-xs font-semibold uppercase tracking-wider"
+            className="block text-xs font-semibold uppercase tracking-wider text-text-secondary"
           >
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {hasLeftIcon && (
-            <div className="text-text-tertiary pointer-events-none absolute left-3 flex items-center">
+            <div className="pointer-events-none absolute left-3 flex items-center text-text-tertiary">
               {leftIcon}
             </div>
           )}
@@ -52,23 +52,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             disabled={disabled}
-            className={`bg-surface-subtle w-full border ${
+            className={`w-full border bg-surface-subtle ${
               hasError
                 ? 'border-status-error focus:ring-status-error'
-                : 'border-border-subtle focus:border-accent-primary focus:ring-accent-primary/20'
-            } text-text-primary placeholder:text-text-tertiary rounded-lg text-sm outline-none transition-all duration-200 focus:ring-2 ${
+                : 'focus:ring-accent-primary/20 border-border-subtle focus:border-accent-primary'
+            } rounded-lg text-sm text-text-primary outline-none transition-all duration-200 placeholder:text-text-tertiary focus:ring-2 ${
               hasLeftIcon ? 'pl-9' : 'pl-3'
-            } ${hasRightIcon ? 'pr-9' : 'pr-3'} disabled:bg-surface-elevated py-2 disabled:opacity-50 ${className}`}
+            } ${hasRightIcon ? 'pr-9' : 'pr-3'} py-2 disabled:bg-surface-elevated disabled:opacity-50 ${className}`}
             {...props}
           />
           {hasRightIcon && (
-            <div className="text-text-tertiary absolute right-3 flex items-center">{rightIcon}</div>
+            <div className="absolute right-3 flex items-center text-text-tertiary">{rightIcon}</div>
           )}
         </div>
         {hasError ? (
-          <p className="text-status-error text-xs font-medium">{error}</p>
+          <p className="text-xs font-medium text-status-error">{error}</p>
         ) : hasHelperText ? (
-          <p className="text-text-tertiary text-xs">{helperText}</p>
+          <p className="text-xs text-text-tertiary">{helperText}</p>
         ) : null}
       </div>
     );

@@ -19,7 +19,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-text-secondary mb-6 text-sm">{description}</p>
+      <p className="mb-6 text-sm text-text-secondary">{description}</p>
       <div className="flex justify-end space-x-3">
         <Button variant="ghost" onClick={onClose}>
           Cancel

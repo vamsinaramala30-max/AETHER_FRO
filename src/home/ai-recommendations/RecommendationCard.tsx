@@ -8,13 +8,13 @@ interface RecommendationCardProps {
 
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommendation }) => {
   return (
-    <div className="p-4 bg-indigo-950/20 border border-indigo-800/40 rounded-xl space-y-3">
-      <div className="flex justify-between items-start">
+    <div className="space-y-3 rounded-xl border border-indigo-800/40 bg-indigo-950/20 p-4">
+      <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-indigo-400" />
           <h4 className="text-sm font-bold text-white">{recommendation.title}</h4>
         </div>
-        <span className="text-[10px] font-mono text-indigo-300 bg-indigo-900/50 px-2 py-0.5 rounded border border-indigo-700/50">
+        <span className="rounded border border-indigo-700/50 bg-indigo-900/50 px-2 py-0.5 font-mono text-[10px] text-indigo-300">
           {(recommendation.confidenceScore * 100).toFixed(0)}% match
         </span>
       </div>

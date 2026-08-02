@@ -68,10 +68,7 @@ export const authApi = {
     return normalizeAuthResponse(res);
   },
 
-  register: async (
-    payload: RegisterPayload,
-    config?: RequestConfig,
-  ): Promise<AuthApiResult> => {
+  register: async (payload: RegisterPayload, config?: RequestConfig): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, payload, {
       ...config,
       skipAuth: true,
@@ -82,10 +79,7 @@ export const authApi = {
   logout: (config?: RequestConfig): Promise<void> =>
     apiClient.post<void>(ENDPOINTS.AUTH.LOGOUT, {}, config),
 
-  refreshToken: async (
-    refreshToken: string,
-    config?: RequestConfig,
-  ): Promise<AuthApiResult> => {
+  refreshToken: async (refreshToken: string, config?: RequestConfig): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(
       ENDPOINTS.AUTH.REFRESH,
       { refreshToken },

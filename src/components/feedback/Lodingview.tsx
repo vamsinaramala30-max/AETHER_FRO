@@ -11,7 +11,7 @@ export const LoadingView: React.FC<LoadingViewProps> = ({
   return (
     <div className="flex h-64 w-full flex-col items-center justify-center space-y-4">
       <Spinner size="lg" />
-      <p className="text-text-tertiary text-xs font-medium">{message}</p>
+      <p className="text-xs font-medium text-text-tertiary">{message}</p>
     </div>
   );
 };

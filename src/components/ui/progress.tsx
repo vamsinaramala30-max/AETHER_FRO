@@ -24,14 +24,14 @@ export const Progress: React.FC<ProgressProps> = ({
   return (
     <div className={`w-full space-y-1 ${className}`}>
       {showLabel && (
-        <div className="text-text-secondary flex justify-between text-xs font-medium">
+        <div className="flex justify-between text-xs font-medium text-text-secondary">
           <span>Progress</span>
           <span>{clampedValue}%</span>
         </div>
       )}
-      <div className={`bg-surface-hover w-full overflow-hidden rounded-full ${heights[size]}`}>
+      <div className={`w-full overflow-hidden rounded-full bg-surface-hover ${heights[size]}`}>
         <div
-          className="from-accent-primary to-accent-secondary h-full rounded-full bg-gradient-to-r transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-accent-primary to-accent-secondary transition-all duration-300"
           style={{ width: `${String(clampedValue)}%` }}
         />
       </div>

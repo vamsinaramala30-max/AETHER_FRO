@@ -1,4 +1,7 @@
 import React from 'react';
+import '../styles/calendar.css';
+import '../styles/events.css';
+import '../styles/responsive.css';
 import { useCalendar } from '../hooks/useCalendar';
 import { CalendarToolbar } from '../components/CalendarToolbar';
 import { CalendarSidebar } from '../components/CalendarSidebar';

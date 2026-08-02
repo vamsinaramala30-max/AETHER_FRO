@@ -13,11 +13,11 @@ export const RecentCard: React.FC<RecentCardProps> = ({ title, type, timestamp }
       <div className="flex items-center space-x-3">
         <span className="text-sm">⏱</span>
         <div>
-          <p className="text-text-primary text-xs font-medium">{title}</p>
-          <p className="text-text-tertiary text-[10px]">{type}</p>
+          <p className="text-xs font-medium text-text-primary">{title}</p>
+          <p className="text-[10px] text-text-tertiary">{type}</p>
         </div>
       </div>
-      <span className="text-text-tertiary text-[10px]">{timestamp}</span>
+      <span className="text-[10px] text-text-tertiary">{timestamp}</span>
     </Card>
   );
 };

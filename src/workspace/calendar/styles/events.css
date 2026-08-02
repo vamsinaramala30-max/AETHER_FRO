@@ -35,7 +35,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--aether-overlay, rgba(0, 0, 0, 0.5));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,12 +43,29 @@
 }
 
 .modal-content {
-  background: #ffffff;
-  border-radius: 8px;
-  width: 520px;
-  max-width: 90vw;
+  background: var(--cal-bg-primary, var(--aether-bg-surface, #ffffff));
+  color: var(--cal-text-primary, var(--aether-text-main, #0f172a));
+  border: 1px solid var(--cal-border-color, var(--aether-border-color, #e2e8f0));
+  border-radius: 12px;
+  width: 560px;
+  max-width: 92vw;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--cal-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.2));
   padding: 24px;
+}
+
+/* Form inputs inside modal inherit theme */
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  background-color: var(--cal-input-bg, var(--aether-bg-surface, #ffffff));
+  color: var(--cal-text-primary, var(--aether-text-main, #0f172a));
+  border: 1px solid var(--cal-border-color, var(--aether-border-color, #e2e8f0));
+  border-radius: 6px;
+}
+
+.modal-content input::placeholder,
+.modal-content textarea::placeholder {
+  color: var(--cal-text-secondary, var(--aether-text-muted, #64748b));
 }

@@ -19,8 +19,8 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card hoverable className="flex items-center justify-between">
       <div>
-        <p className="text-text-tertiary text-xs font-semibold uppercase tracking-wider">{title}</p>
-        <h2 className="text-text-primary mt-1 text-2xl font-bold">{value}</h2>
+        <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">{title}</p>
+        <h2 className="mt-1 text-2xl font-bold text-text-primary">{value}</h2>
         {change && (
           <p
             className={`mt-1.5 text-xs font-medium ${isPositive ? 'text-status-success' : 'text-status-error'}`}
@@ -30,7 +30,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         )}
       </div>
       {icon && (
-        <div className="bg-accent-primary/10 text-accent-primary rounded-xl p-3 text-xl">
+        <div className="bg-accent-primary/10 rounded-xl p-3 text-xl text-accent-primary">
           {icon}
         </div>
       )}

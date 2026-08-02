@@ -6,23 +6,11 @@ export const CalendarList: React.FC = () => {
 
   return (
     <div style={{ marginTop: '16px' }}>
-      <div style={{ fontSize: '13px', fontWeight: '600', color: '#5f6368', marginBottom: '8px' }}>
-        My Calendars
-      </div>
+      <div className="cal-list-label">My Calendars</div>
       {calendars.map((cal) => {
         const isChecked = selectedCalendarIds.includes(cal.id);
         return (
-          <label
-            key={cal.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '4px 0',
-              fontSize: '13px',
-              cursor: 'pointer',
-            }}
-          >
+          <label key={cal.id} className="cal-list-item">
             <input
               type="checkbox"
               checked={isChecked}
@@ -38,6 +26,7 @@ export const CalendarList: React.FC = () => {
                 borderRadius: '50%',
                 backgroundColor: cal.color,
                 display: 'inline-block',
+                flexShrink: 0,
               }}
             />
             {cal.title}

@@ -1,4 +1,3 @@
-// frontend/src/settings/profile/ProfileForm.tsx
 import React, { useState } from 'react';
 import { UserProfile, profileService } from './profileservice';
 
@@ -42,15 +41,22 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       {message && (
         <div
-          className={`rounded-md p-4 text-sm ${message.type === 'success' ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-rose-500/20 bg-rose-500/10 text-rose-400'}`}
+          className={`rounded-xl p-4 text-xs font-semibold ${
+            message.type === 'success'
+              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+              : 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400'
+          }`}
         >
           {message.text}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-slate-300">
+          <label
+            htmlFor="firstName"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             First Name
           </label>
           <input
@@ -59,11 +65,14 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
           />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-slate-300">
+          <label
+            htmlFor="lastName"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Last Name
           </label>
           <input
@@ -72,13 +81,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="company" className="mb-1 block text-sm font-medium text-slate-300">
+        <label
+          htmlFor="company"
+          className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+        >
           Company / Organization
         </label>
         <input
@@ -87,12 +99,15 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
           name="company"
           value={formData.company}
           onChange={handleChange}
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
         />
       </div>
 
       <div>
-        <label htmlFor="bio" className="mb-1 block text-sm font-medium text-slate-300">
+        <label
+          htmlFor="bio"
+          className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+        >
           Bio
         </label>
         <textarea
@@ -101,16 +116,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
           rows={4}
           value={formData.bio}
           onChange={handleChange}
-          className="w-full resize-none rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white transition focus:border-indigo-500 focus:outline-none"
+          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
         />
       </div>
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 disabled:bg-indigo-600/50"
+        className="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-50"
       >
-        {isSubmitting ? 'Saving Changes...' : 'Save Changes'}
+        {isSubmitting ? 'Saving Changes...' : 'Save Profile Changes'}
       </button>
     </form>
   );

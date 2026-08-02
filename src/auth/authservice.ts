@@ -23,7 +23,8 @@ type AuthChangeListener = (event: AuthChangeEvent, session: AuthSession | null) 
 
 const listeners = new Set<AuthChangeListener>();
 let currentSession: AuthSession | null = null;
-let initializationPromise: Promise<{ session: AuthSession | null; error: Error | null }> | null = null;
+let initializationPromise: Promise<{ session: AuthSession | null; error: Error | null }> | null =
+  null;
 
 function notifyListeners(event: AuthChangeEvent, session: AuthSession | null) {
   const sameSession =
@@ -122,9 +123,7 @@ async function refreshSessionUsingRefreshToken(
     }
 
     setStoredTokens(result.tokens);
-    const user = await buildUserFromResponse(
-      result.user ? result : await authApi.getCurrentUser(),
-    );
+    const user = await buildUserFromResponse(result.user ? result : await authApi.getCurrentUser());
 
     const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
     notifyListeners('TOKEN_REFRESHED', session);
@@ -195,9 +194,7 @@ export const authService = {
       }
 
       setStoredTokens(result.tokens);
-      const user = await buildUserFromResponse(
-        result.user ?? (await authApi.getCurrentUser()),
-      );
+      const user = await buildUserFromResponse(result.user ?? (await authApi.getCurrentUser()));
       const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
       notifyListeners('SIGNED_IN', session);
       return { user, error: null };
@@ -217,9 +214,7 @@ export const authService = {
       }
 
       setStoredTokens(result.tokens);
-      const user = await buildUserFromResponse(
-        result.user ?? (await authApi.getCurrentUser()),
-      );
+      const user = await buildUserFromResponse(result.user ?? (await authApi.getCurrentUser()));
       const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
       notifyListeners('SIGNED_IN', session);
       return { user, error: null };

@@ -14,13 +14,13 @@ export const Checkbox: React.FC<CheckboxProps> = ({ label, className = '', id, .
       <input
         type="checkbox"
         id={checkboxId}
-        className={`border-border-strong text-accent-primary focus:ring-accent-primary bg-surface-subtle h-4 w-4 cursor-pointer rounded transition-all ${className}`}
+        className={`h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-subtle text-accent-primary transition-all focus:ring-accent-primary ${className}`}
         {...props}
       />
       {hasLabel && (
         <label
           htmlFor={checkboxId}
-          className="text-text-primary cursor-pointer select-none text-sm"
+          className="cursor-pointer select-none text-sm text-text-primary"
         >
           {label}
         </label>

@@ -30,9 +30,7 @@ export async function fetchAIRecommendations(): Promise<AIRecommendation[]> {
       reason: 'Token secret #0294 has not been rotated in over 90 days',
       confidenceScore: 0.98,
       type: 'security',
-      suggestedActions: [
-        { id: 'sa-3', label: 'Rotate Now', actionPayload: 'cmd:rotate-token' },
-      ],
+      suggestedActions: [{ id: 'sa-3', label: 'Rotate Now', actionPayload: 'cmd:rotate-token' }],
     },
   ];
 }

@@ -1,297 +1,183 @@
 import React, { Suspense } from 'react';
-import { RouteObject, Outlet } from 'react-router-dom';
+import { RouteObject, Outlet, Navigate } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/applayout';
 import { ProtectedGuard } from '@/guards/ProtectedGuard';
 
-// Home
+// ── Home ─────────────────────────────────────────────────────────────────────
 import { HomePage } from '@/home/HomePage';
 
-// AI
-import { AssistantPage } from '@/ai/assistant/AssistantPage';
-import { ConversationsPage } from '@/ai/conversations/conversationPage';
-import { MemoryPage } from '@/ai/memory/MemoryPage';
-import { PromptLibraryPage } from '@/ai/prompt-library/promptlibPage';
+// ── AI ───────────────────────────────────────────────────────────────────────
+import { AIModulePage } from '@/ai/AIModulePage';
+import { AssistantPage } from '@/ai/assistant/assistantpage';
+import { MemoryPage } from '@/ai/memory/memorypage';
+import { PromptLibraryPage } from '@/ai/prompt-library/promptlibpage';
+import { ModelsPage } from '@/ai/models/ModelsPage';
+import { AgentsPage } from '@/ai/agents/AgentsPage';
 
-// Projects
-import { TasksPage } from '@/projects/tasks/taskPage';
-import { GoalsPage } from '@/projects/goals/goalPage';
-import { StudyPlannerPage } from '@/projects/study-planner/StudyPlannerPage';
-import { WeeklyReviewPage } from '@/projects/weekly-review/WeeklyReviewPage';
+// ── Projects ─────────────────────────────────────────────────────────────────
+import { ProjectsPage } from '@/projects/projectspage';
+import { TasksPage } from '@/projects/tasks/taskpage';
+import { GoalsPage } from '@/projects/goals/goalpage';
 
-// Knowledge
-import { NotesPage } from '@/knowledge/notes/notePage';
-import { DocumentsPage } from '@/knowledge/documents/documentPage';
+// ── Knowledge ─────────────────────────────────────────────────────────────────
+import { KnowledgePage } from '@/knowledge/KnowledgePage';
+import { NotesPage } from '@/knowledge/notes/notepage';
+import { DocumentsPage } from '@/knowledge/documents/documentpage';
 import { KnowledgeBasePage } from '@/knowledge/knowledge-base/KnowledgeBasePage';
-import { SearchPage } from '@/knowledge/search/SearchPage';
+import { SearchPage } from '@/knowledge/search/searchpage';
 
-// Automation
-import { WorkflowCenterPage } from '@/automation/workflow-center/WorkflowCenterPage';
-import { IntegrationsPage } from '@/automation/integrations/integrationPage';
-import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationPage';
-import { FutureAIFeaturesPage } from '@/automation/future-ai-features/FutureAIFeaturesPage';
+// ── Calendar ─────────────────────────────────────────────────────────────────
+import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
 
-// Workspace
-import { CalendarPage } from '@/workspace/calendar/pages/calendarpage';
-import { ProductivityHubPage } from '@/workspace/productivity-hub/ProductivityHubPage';
-import { RecentFilesPage } from '@/workspace/recent-files/recentfilePage';
-import { FavoritesPage } from '@/workspace/favorites/favoritepage';
+// ── Automation ───────────────────────────────────────────────────────────────
+import { AutomationPage } from '@/automation/AutomationPage';
+import { WorkflowCenterPage } from '@/automation/workflow-center/workflowcenterpage';
+import { IntegrationsPage } from '@/automation/integrations/integrationpage';
+import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationpage';
 
-// Settings
-import { ProfilePage } from '@/settings/profile/ProfilePage';
+// ── Workspace ─────────────────────────────────────────────────────────────────
+import { WorkspacePage } from '@/workspace/WorkspacePage';
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+import { ProfilePage } from '@/settings/profile/profilepage';
 import { AppearancePage } from '@/settings/appearance/apperancepage';
 import { NotificationsPage } from '@/settings/notifications/notificationpage';
-import { SecurityPage } from '@/settings/security/SecurityPage';
+import { SecurityPage } from '@/settings/security/securitypage';
 import { PreferencesPage } from '@/settings/preferences/preferencepage';
 import { ConnectedAccountsPage } from '@/settings/connected-accounts/connectedaccountpage';
-import { BillingPage } from '@/settings/billing/BillingPage';
+import { BillingPage } from '@/settings/billing/billingpage';
 
-import { DailyOverviewPage } from '@/dashboard/dailyoverviewpage';
-import { SchedulePage } from '@/dashboard/schedulepage';
-import { RecentActivityPage } from '@/dashboard/recentactivitypage';
-import { QuickActionsPage } from '@/dashboard/quickactionspage';
-import { AIInsightsPage } from '@/ai/insights/aiinsightspage';
-import { ProjectsPage } from '@/projects/projectspage';
-import { FinanceOverviewPage } from '@/workspace/finance/financeoverviewpage';
-import { FocusModePage } from '@/workspace/focus/focusmodepage';
-import { SmartRemindersPage } from '@/automation/reminders/smartreminderspage';
-import { AnalyticsReportPage } from '@/analytics/analyticsreportpage';
-import { BarChart3, TrendingUp, Target, Clock, Bot } from 'lucide-react';
+// ── 404 ──────────────────────────────────────────────────────────────────────
+import { AppNotFoundPage } from '@/components/ui/AppNotFoundPage';
 
-/**
- * Loading Spinner for Route-level Transitions
- */
-const PageLoadingSpinner: React.FC = () => (
-  <div className="flex h-full w-full items-center justify-center min-h-[400px]">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+// ─────────────────────────────────────────────────────────────────────────────
+// Spinner for Suspense boundaries
+// ─────────────────────────────────────────────────────────────────────────────
+const PageSpinner: React.FC = () => (
+  <div className="flex h-full min-h-[400px] w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-indigo-500/20 border-t-indigo-500" />
   </div>
 );
 
-/**
- * Authenticated Layout Wrapper with Protected Guard Check
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// Protected layout wrapper: ProtectedGuard → AppLayout → Suspense → Outlet
+// ─────────────────────────────────────────────────────────────────────────────
 const ProtectedLayoutWrapper: React.FC = () => (
   <ProtectedGuard>
     <AppLayout>
-      <Suspense fallback={<PageLoadingSpinner />}>
+      <Suspense fallback={<PageSpinner />}>
         <Outlet />
       </Suspense>
     </AppLayout>
   </ProtectedGuard>
 );
 
-/**
- * Core Protected Route Definitions for React Router v7
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// Route Definitions
+// ─────────────────────────────────────────────────────────────────────────────
 export const protectedRoutes: RouteObject[] = [
   {
     path: 'app',
     element: <ProtectedLayoutWrapper />,
     children: [
+      // ── Home Dashboard ────────────────────────────────────────────────────
       {
         index: true,
         element: <HomePage />,
       },
+
+      // ── AI Module ─────────────────────────────────────────────────────────
       {
-        path: 'overview',
-        element: <DailyOverviewPage />,
+        path: 'ai',
+        children: [
+          { index: true, element: <AIModulePage /> },
+          { path: 'assistant', element: <AssistantPage /> },
+          { path: 'conversations', element: <Navigate to="/app/ai/assistant" replace /> },
+          {
+            path: 'conversations/:conversationId',
+            element: <Navigate to="/app/ai/assistant" replace />,
+          },
+          { path: 'memory', element: <MemoryPage /> },
+          { path: 'prompts', element: <PromptLibraryPage /> },
+          { path: 'models', element: <ModelsPage /> },
+          { path: 'agents', element: <AgentsPage /> },
+        ],
       },
-      {
-        path: 'schedule',
-        element: <SchedulePage />,
-      },
-      {
-        path: 'activity',
-        element: <RecentActivityPage />,
-      },
-      {
-        path: 'quick-actions',
-        element: <QuickActionsPage />,
-      },
-      // AI Section
-      {
-        path: 'assistant',
-        element: <AssistantPage />,
-      },
-      {
-        path: 'conversations',
-        element: <ConversationsPage />,
-      },
-      {
-        path: 'conversations/:conversationId',
-        element: <ConversationsPage />,
-      },
-      {
-        path: 'memory',
-        element: <MemoryPage />,
-      },
-      {
-        path: 'prompts',
-        element: <PromptLibraryPage />,
-      },
-      {
-        path: 'insights',
-        element: <AIInsightsPage />,
-      },
-      // Projects Section
-      {
-        path: 'tasks',
-        element: <TasksPage />,
-      },
+
+      // ── Projects Module ───────────────────────────────────────────────────
       {
         path: 'projects',
-        element: <ProjectsPage />,
+        children: [
+          { index: true, element: <ProjectsPage /> },
+          { path: 'tasks', element: <TasksPage /> },
+          { path: 'goals', element: <GoalsPage /> },
+          { path: 'board', element: <ProjectsPage /> },
+          { path: 'files', element: <ProjectsPage /> },
+        ],
       },
+
+      // ── Knowledge Module ──────────────────────────────────────────────────
       {
-        path: 'goals',
-        element: <GoalsPage />,
+        path: 'knowledge',
+        children: [
+          { index: true, element: <KnowledgePage /> },
+          { path: 'documents', element: <DocumentsPage /> },
+          { path: 'notes', element: <NotesPage /> },
+          { path: 'base', element: <KnowledgeBasePage /> },
+          { path: 'search', element: <SearchPage /> },
+        ],
       },
-      {
-        path: 'study-planner',
-        element: <StudyPlannerPage />,
-      },
-      {
-        path: 'weekly-review',
-        element: <WeeklyReviewPage />,
-      },
-      // Knowledge Section
-      {
-        path: 'notes',
-        element: <NotesPage />,
-      },
-      {
-        path: 'documents',
-        element: <DocumentsPage />,
-      },
-      {
-        path: 'knowledge-base',
-        element: <KnowledgeBasePage />,
-      },
-      {
-        path: 'search',
-        element: <SearchPage />,
-      },
-      // Finance Section
-      {
-        path: 'finance',
-        element: <FinanceOverviewPage />,
-      },
-      // Automation Section
-      {
-        path: 'workflows',
-        element: <WorkflowCenterPage />,
-      },
-      {
-        path: 'integrations',
-        element: <IntegrationsPage />,
-      },
-      {
-        path: 'scheduled-automation',
-        element: <ScheduledAutomationPage />,
-      },
-      {
-        path: 'reminders',
-        element: <SmartRemindersPage />,
-      },
-      {
-        path: 'future-ai',
-        element: <FutureAIFeaturesPage />,
-      },
-      // Workspace Section
+
+      // ── Calendar ──────────────────────────────────────────────────────────
       {
         path: 'calendar',
         element: <CalendarPage />,
       },
+
+      // ── Automation Module ─────────────────────────────────────────────────
       {
-        path: 'focus',
-        element: <FocusModePage />,
+        path: 'automation',
+        children: [
+          { index: true, element: <AutomationPage /> },
+          { path: 'workflows', element: <WorkflowCenterPage /> },
+          { path: 'integrations', element: <IntegrationsPage /> },
+          { path: 'schedules', element: <ScheduledAutomationPage /> },
+          { path: 'logs', element: <AutomationPage /> },
+        ],
       },
+
+      // ── Workspace Module ──────────────────────────────────────────────────
       {
-        path: 'productivity',
-        element: <ProductivityHubPage />,
+        path: 'workspace',
+        children: [
+          { index: true, element: <WorkspacePage /> },
+          { path: 'members', element: <WorkspacePage /> },
+          { path: 'billing', element: <BillingPage /> },
+          { path: 'api-keys', element: <WorkspacePage /> },
+          { path: 'audit-logs', element: <WorkspacePage /> },
+        ],
       },
-      {
-        path: 'recent-files',
-        element: <RecentFilesPage />,
-      },
-      {
-        path: 'favorites',
-        element: <FavoritesPage />,
-      },
-      // Analytics Section
-      {
-        path: 'analytics/productivity',
-        element: (
-          <AnalyticsReportPage
-            title="Productivity Report"
-            subtitle="Detailed analysis of daily throughput, focus sessions, and completed deliverables."
-            icon={<BarChart3 className="w-6 h-6 text-purple-400" />}
-          />
-        ),
-      },
-      {
-        path: 'analytics/goals',
-        element: (
-          <AnalyticsReportPage
-            title="Goal Progress Tracking"
-            subtitle="Trajectory analysis for quarterly OKRs and milestone completions."
-            icon={<Target className="w-6 h-6 text-emerald-400" />}
-          />
-        ),
-      },
-      {
-        path: 'analytics/time',
-        element: (
-          <AnalyticsReportPage
-            title="Time Allocation Insights"
-            subtitle="Breakdown of deep work vs meeting overhead across projects."
-            icon={<Clock className="w-6 h-6 text-blue-400" />}
-          />
-        ),
-      },
-      {
-        path: 'analytics/ai',
-        element: (
-          <AnalyticsReportPage
-            title="AI Recommendations"
-            subtitle="Smart suggestions for workflow optimization and automated task delegation."
-            icon={<Bot className="w-6 h-6 text-amber-400" />}
-          />
-        ),
-      },
-      // Settings Section
+
+      // ── Settings Module ───────────────────────────────────────────────────
       {
         path: 'settings',
         children: [
-          {
-            path: 'profile',
-            element: <ProfilePage />,
-          },
-          {
-            path: 'appearance',
-            element: <AppearancePage />,
-          },
-          {
-            path: 'notifications',
-            element: <NotificationsPage />,
-          },
-          {
-            path: 'security',
-            element: <SecurityPage />,
-          },
-          {
-            path: 'preferences',
-            element: <PreferencesPage />,
-          },
-          {
-            path: 'accounts',
-            element: <ConnectedAccountsPage />,
-          },
-          {
-            path: 'billing',
-            element: <BillingPage />,
-          },
+          { index: true, element: <Navigate to="/app/settings/profile" replace /> },
+          { path: 'profile', element: <ProfilePage /> },
+          { path: 'appearance', element: <AppearancePage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
+          { path: 'security', element: <SecurityPage /> },
+          { path: 'preferences', element: <PreferencesPage /> },
+          { path: 'accounts', element: <ConnectedAccountsPage /> },
+          { path: 'billing', element: <BillingPage /> },
         ],
+      },
+
+      // ── In-app 404 ────────────────────────────────────────────────────────
+      {
+        path: '*',
+        element: <AppNotFoundPage />,
       },
     ],
   },

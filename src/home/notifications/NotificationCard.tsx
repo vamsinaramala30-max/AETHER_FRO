@@ -9,10 +9,10 @@ interface NotificationCardProps {
 export const NotificationCard: React.FC<NotificationCardProps> = ({ notification, onDismiss }) => {
   return (
     <div
-      className={`p-3 rounded-lg border flex items-start justify-between gap-3 ${
+      className={`flex items-start justify-between gap-3 rounded-lg border p-3 ${
         notification.isRead
-          ? 'bg-slate-800/40 border-slate-700/40 opacity-75'
-          : 'bg-slate-800 border-indigo-500/30'
+          ? 'border-slate-700/40 bg-slate-800/40 opacity-75'
+          : 'border-indigo-500/30 bg-slate-800'
       }`}
     >
       <div className="space-y-1">
@@ -25,7 +25,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
 
       <button
         onClick={() => onDismiss(notification.id)}
-        className="text-slate-500 hover:text-slate-300 text-xs font-bold px-1.5 py-0.5"
+        className="px-1.5 py-0.5 text-xs font-bold text-slate-500 hover:text-slate-300"
       >
         ✕
       </button>

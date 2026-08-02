@@ -15,10 +15,10 @@ export const EmptyView: React.FC<EmptyViewProps> = ({
   onAction,
 }) => {
   return (
-    <div className="border-border-subtle bg-surface-subtle flex w-full flex-col items-center justify-center space-y-3 rounded-2xl border border-dashed p-12 text-center">
+    <div className="flex w-full flex-col items-center justify-center space-y-3 rounded-2xl border border-dashed border-border-subtle bg-surface-subtle p-12 text-center">
       <div className="text-4xl">🍃</div>
-      <h3 className="text-text-primary text-base font-semibold">{title}</h3>
-      <p className="text-text-tertiary max-w-sm text-xs">{description}</p>
+      <h3 className="text-base font-semibold text-text-primary">{title}</h3>
+      <p className="max-w-sm text-xs text-text-tertiary">{description}</p>
       {actionLabel && onAction && (
         <Button size="sm" variant="secondary" onClick={onAction} className="mt-2">
           {actionLabel}

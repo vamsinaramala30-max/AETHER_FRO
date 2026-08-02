@@ -35,7 +35,6 @@ class AssistantService {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: 'Bearer ' + token } : {}),
     };
-
   }
 
   public async sendMessage(
@@ -95,4 +94,3 @@ class AssistantService {
 }
 
 export const assistantService = new AssistantService();
-

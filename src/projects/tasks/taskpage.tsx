@@ -3,6 +3,8 @@ import { taskService, Task, TaskFiltersState } from './taskservice';
 import { TaskBoard } from './taskboard';
 import { TaskForm } from './taskform';
 import { TaskFilters } from './taskfilter';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { CheckSquare, AlertCircle } from 'lucide-react';
 
 export const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -44,7 +46,7 @@ export const TasksPage: React.FC = () => {
         const created = await taskService.createTask(rawTask);
         setTasks((prev) => [...prev, created]);
       } catch {
-        alert('Failed to commit architecture task.');
+        alert('Failed to commit task.');
       }
     })();
   };
@@ -65,40 +67,47 @@ export const TasksPage: React.FC = () => {
 
   if (loading)
     return (
-      <div style={{ color: '#0066cc', padding: '2rem', textAlign: 'center', fontWeight: 'bold' }}>
-        Syncing core task sequence...
+      <div className="flex h-64 w-full items-center justify-center font-semibold text-indigo-600 dark:text-indigo-400">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          Syncing task sequence...
+        </div>
       </div>
     );
 
   const hasError = typeof error === 'string' && error.trim() !== '';
   if (hasError)
-    return <div style={{ color: '#ff4d4d', padding: '2rem', textAlign: 'center' }}>{error}</div>;
+    return (
+      <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400">
+        <AlertCircle className="h-4 w-4" />
+        {error}
+      </div>
+    );
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', color: '#fff' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-        }}
-      >
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            Task Control Plane
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#888', fontSize: '0.9rem' }}>
-            Coordinate implementation layers across AETHER pipelines.
-          </p>
+    <PageWrapper wide>
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-indigo-500/20">
+            <CheckSquare className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Task Control Plane
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Coordinate implementation layers across AETHER pipelines.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+      <div className="space-y-6">
         <TaskForm onSubmit={handleCreateTask} />
         <TaskFilters filters={filters} onChange={setFilters} />
         <TaskBoard tasks={filteredTasks} onStatusChange={handleStatusChange} />
       </div>
-    </div>
+    </PageWrapper>
   );
 };

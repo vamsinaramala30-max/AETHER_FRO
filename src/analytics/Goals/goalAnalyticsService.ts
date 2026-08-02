@@ -50,7 +50,12 @@ export const fetchGoalAnalytics = async (): Promise<GoalAnalyticsSummary> => {
         targetDate: '2026-09-15',
         milestones: [
           { id: 'm-4', title: 'Tree-shaking Recharts', completed: true, dueDate: '2026-07-10' },
-          { id: 'm-5', title: 'Code splitting React Router', completed: false, dueDate: '2026-08-10' },
+          {
+            id: 'm-5',
+            title: 'Code splitting React Router',
+            completed: false,
+            dueDate: '2026-08-10',
+          },
         ],
       },
     ],

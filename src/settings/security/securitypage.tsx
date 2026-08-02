@@ -1,20 +1,30 @@
-// frontend/src/settings/security/SecurityPage.tsx
 import React from 'react';
 import { SecuritySettings } from './securitysetting';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { ShieldCheck } from 'lucide-react';
 
 export const SecurityPage: React.FC = () => {
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight text-white">
-          Security Strategy Matrix
-        </h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Configure credentials, access layers, and token parameters safely.
-        </p>
+    <PageWrapper>
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Security & Authentication
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Configure passkeys, authentication credentials, and security rules.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <SecuritySettings />
+        </div>
       </div>
-      <hr className="border-slate-800" />
-      <SecuritySettings />
-    </div>
+    </PageWrapper>
   );
 };

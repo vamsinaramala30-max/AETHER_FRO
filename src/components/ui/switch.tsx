@@ -23,7 +23,7 @@ export const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, disabl
     >
       <div
         onClick={handleClick}
-        className={`h-6 w-11 rounded-full p-1 transition-colors ${checked ? 'bg-accent-primary' : 'bg-surface-hover border-border-subtle border'}`}
+        className={`h-6 w-11 rounded-full p-1 transition-colors ${checked ? 'bg-accent-primary' : 'border border-border-subtle bg-surface-hover'}`}
       >
         <motion.div
           animate={{ x: checked ? 20 : 0 }}
@@ -31,7 +31,7 @@ export const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, disabl
           className="h-4 w-4 rounded-full bg-white shadow-md"
         />
       </div>
-      {hasLabel && <span className="text-text-primary text-sm font-medium">{label}</span>}
+      {hasLabel && <span className="text-sm font-medium text-text-primary">{label}</span>}
     </label>
   );
 };

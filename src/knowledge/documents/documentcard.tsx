@@ -1,6 +1,6 @@
-// frontend/src/knowledge/documents/DocumentCard.tsx
 import React from 'react';
 import { DocumentItem } from '../types';
+import { FileText, Trash2, ArrowRight } from 'lucide-react';
 
 interface DocumentCardProps {
   doc: DocumentItem;
@@ -10,52 +10,52 @@ interface DocumentCardProps {
 
 export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onDelete }) => {
   return (
-    <div className="group flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-all hover:border-neutral-700">
+    <div className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <div>
         <div className="mb-2 flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <span className="flex-shrink-0 text-lg text-amber-500">📄</span>
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+              <FileText className="h-4 w-4" />
+            </div>
             <h3
-              className="line-clamp-1 text-sm font-medium text-white transition-colors group-hover:text-amber-400"
+              className="line-clamp-1 text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400"
               title={doc.name}
             >
               {doc.name}
             </h3>
           </div>
           <button
-            onClick={() => {
-              onDelete(doc.id);
-            }}
-            className="p-1 text-xs text-neutral-500 transition-colors hover:text-red-400"
+            onClick={() => onDelete(doc.id)}
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30"
           >
-            ✕
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
-        <p className="mb-4 font-mono text-[10px] text-neutral-500">
-          {(doc.size / 1024).toFixed(1)} KB | {doc.mimeType || 'unknown/binary'}
+        <p className="mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+          {(doc.size / 1024).toFixed(1)} KB · {doc.mimeType || 'Document'}
         </p>
       </div>
 
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {doc.tags.map((t) => (
             <span
               key={t}
-              className="rounded border border-neutral-800 bg-neutral-950 px-1.5 py-0.5 text-[9px] text-neutral-400"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300"
             >
               #{t}
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-between border-t border-neutral-800/60 pt-2 text-[10px]">
-          <span className="text-neutral-500">{new Date(doc.createdAt).toLocaleDateString()}</span>
+        <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+          <span className="font-medium text-slate-400">
+            {new Date(doc.createdAt).toLocaleDateString()}
+          </span>
           <button
-            onClick={() => {
-              onView(doc);
-            }}
-            className="font-medium text-amber-500 hover:underline"
+            onClick={() => onView(doc)}
+            className="flex items-center gap-1 font-bold text-indigo-600 hover:underline dark:text-indigo-400"
           >
-            View Cluster →
+            View Document <ArrowRight className="h-3 w-3" />
           </button>
         </div>
       </div>

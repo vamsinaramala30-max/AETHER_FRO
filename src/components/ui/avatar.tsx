@@ -47,7 +47,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div className="relative inline-block shrink-0">
       <div
-        className={`bg-surface-hover text-text-primary border-border-subtle flex items-center justify-center overflow-hidden rounded-full border font-semibold ${sizes[size]} ${className}`}
+        className={`flex items-center justify-center overflow-hidden rounded-full border border-border-subtle bg-surface-hover font-semibold text-text-primary ${sizes[size]} ${className}`}
       >
         {hasSrc ? (
           <img src={src} alt={alt || name} className="h-full w-full object-cover" />
@@ -57,7 +57,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       </div>
       {hasStatus && (
         <span
-          className={`border-surface-base absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${statusColors[status]}`}
+          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-surface-base ${statusColors[status]}`}
         />
       )}
     </div>

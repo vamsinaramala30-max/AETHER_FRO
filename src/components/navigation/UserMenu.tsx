@@ -22,11 +22,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout, onSettings }
     <Dropdown
       items={items}
       trigger={
-        <button className="hover:bg-surface-hover flex items-center space-x-3 rounded-xl p-1 transition-colors">
+        <button className="flex items-center space-x-3 rounded-xl p-1 transition-colors hover:bg-surface-hover">
           <Avatar src={user.avatar} name={user.name} size="sm" />
           <div className="hidden text-left sm:block">
-            <p className="text-text-primary text-xs font-semibold leading-tight">{user.name}</p>
-            <p className="text-text-tertiary text-[10px] leading-tight">{user.email}</p>
+            <p className="text-xs font-semibold leading-tight text-text-primary">{user.name}</p>
+            <p className="text-[10px] leading-tight text-text-tertiary">{user.email}</p>
           </div>
         </button>
       }

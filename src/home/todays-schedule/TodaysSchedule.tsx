@@ -14,21 +14,25 @@ export const TodaysSchedule: React.FC = () => {
   const upcomingEvents = events.filter((e) => !e.isCurrent);
 
   return (
-    <section className="bg-slate-800 border border-slate-700 p-5 rounded-xl space-y-4">
-      <div className="flex justify-between items-center">
+    <section className="space-y-4 rounded-xl border border-slate-700 bg-slate-800 p-5">
+      <div className="flex items-center justify-between">
         <h3 className="text-base font-bold text-white">Today's Schedule</h3>
         <span className="text-xs text-slate-400">{events.length} Events Scheduled</span>
       </div>
 
       {currentEvent && (
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Active Now</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+            Active Now
+          </span>
           <ScheduleCard event={currentEvent} />
         </div>
       )}
 
       <div className="space-y-2">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Upcoming</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Upcoming
+        </span>
         {upcomingEvents.map((evt) => (
           <UpcomingEvent key={evt.id} event={evt} />
         ))}

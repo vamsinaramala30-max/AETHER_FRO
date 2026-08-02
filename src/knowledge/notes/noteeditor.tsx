@@ -43,76 +43,68 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onCancel }
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900 p-6"
+      className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
-      <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-        <h3 className="text-sm font-medium text-white">{note ? 'Edit Note' : 'Create New Note'}</h3>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">
+          {note ? 'Edit Note' : 'Create New Note'}
+        </h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs text-neutral-400 hover:text-white"
+          className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
         >
           Cancel
         </button>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
-          Title
-        </label>
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Note Title</label>
         <input
           type="text"
           value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-          placeholder="Note Title"
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. System Architecture Notes"
           required
-          className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
-          Content
-        </label>
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Content</label>
         <textarea
           value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-          }}
-          placeholder="Write deep insights here..."
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Write your note content here..."
           rows={8}
-          className="w-full resize-none rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-sm leading-relaxed text-white focus:border-amber-500 focus:outline-none"
+          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-medium leading-relaxed text-slate-900 placeholder-slate-400 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
           Tags (comma separated)
         </label>
         <input
           type="text"
           value={tagInput}
-          onChange={(e) => {
-            setTagInput(e.target.value);
-          }}
+          onChange={(e) => setTagInput(e.target.value)}
           placeholder="e.g. architecture, layout, design-tokens"
-          className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
         />
       </div>
 
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex items-center justify-end gap-3 pt-3">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2 text-xs text-neutral-400 transition-colors hover:text-white"
+          className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-medium text-neutral-950 shadow-lg shadow-amber-500/10 transition-colors hover:bg-amber-600"
+          className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
         >
           Save Note
         </button>

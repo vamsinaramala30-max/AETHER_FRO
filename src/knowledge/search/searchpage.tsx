@@ -1,10 +1,11 @@
-// frontend/src/knowledge/search/SearchPage.tsx
 import React, { useState, useEffect } from 'react';
 import { SearchResult } from '../types';
 import { searchService } from './searchservice';
 import { SearchInput } from './searchinput';
 import { SearchFilters } from './searchfilter';
 import { SearchResults } from './searchresult';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { Search } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -25,7 +26,7 @@ export const SearchPage: React.FC = () => {
           const filtered = allRes.filter((r) => typeFilter === 'all' || r.type === typeFilter);
           setResults(filtered);
         } catch {
-          console.error('Error executing query across database clusters');
+          console.error('Error executing query');
         } finally {
           setLoading(false);
         }
@@ -39,39 +40,45 @@ export const SearchPage: React.FC = () => {
   }, [query, typeFilter]);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Global Query Engine</h1>
-        <p className="mt-1 text-xs text-neutral-400">
-          Deep search traversal over schema elements, indexes, and document notes.
-        </p>
+    <PageWrapper>
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/20">
+            <Search className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Semantic Search Engine
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Deep search traversal over document vaults, notes, and vector knowledge nodes.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        onClear={() => {
-          setQuery('');
-        }}
-      />
+      <div className="space-y-6">
+        <SearchInput value={query} onChange={setQuery} onClear={() => setQuery('')} />
 
-      {query.trim() !== '' && (
-        <SearchFilters typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
-      )}
+        {query.trim() !== '' && (
+          <SearchFilters typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
+        )}
 
-      {loading ? (
-        <div className="animate-pulse py-12 text-center font-mono text-xs text-neutral-500">
-          Running cluster index scans...
-        </div>
-      ) : query.trim() !== '' && results.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-900/10 py-12 text-center">
-          <p className="font-mono text-xs text-neutral-500">
-            No relevant matching structural items found.
-          </p>
-        </div>
-      ) : (
-        <SearchResults results={results} />
-      )}
-    </div>
+        {loading ? (
+          <div className="animate-pulse py-12 text-center text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            Running vector index scans...
+          </div>
+        ) : query.trim() !== '' && results.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              No matching knowledge items found.
+            </p>
+          </div>
+        ) : (
+          <SearchResults results={results} />
+        )}
+      </div>
+    </PageWrapper>
   );
 };

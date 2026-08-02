@@ -20,7 +20,7 @@ export const ConversationsPage: React.FC = () => {
         const res = await conversationService.getConversations();
         setConversations(res);
         if (res.length > 0 && !conversationId) {
-          navigate(`/app/conversations/${res[0].id}`);
+          navigate(`/app/ai/conversations/${res[0].id}`);
         }
       } catch (err) {
         console.error(err);
@@ -36,7 +36,7 @@ export const ConversationsPage: React.FC = () => {
     if (!title?.trim()) return;
     const fresh = await conversationService.createConversation(title.trim());
     setConversations([fresh, ...conversations]);
-    navigate(`/app/conversations/${fresh.id}`);
+    navigate(`/app/ai/conversations/${fresh.id}`);
   };
 
   const filtered = conversations.filter(
@@ -46,7 +46,7 @@ export const ConversationsPage: React.FC = () => {
   );
 
   return (
-    <div className="flex h-[calc(100vh-2rem)] w-full overflow-hidden bg-[#090C15] text-slate-100 rounded-2xl border border-[#192032]">
+    <div className="flex h-[calc(100vh-2rem)] w-full overflow-hidden rounded-2xl border border-[#192032] bg-[#090C15] text-slate-100">
       {/* Thread Navigation Panel */}
       <div className="flex h-full w-80 shrink-0 flex-col border-r border-[#192032] bg-[#0B0E17]">
         <div className="flex items-center justify-between border-b border-[#192032] p-4">
@@ -55,7 +55,7 @@ export const ConversationsPage: React.FC = () => {
           </h2>
           <button
             onClick={handleCreate}
-            className="cursor-pointer rounded-lg p-1.5 text-purple-400 hover:text-white transition-colors hover:bg-[#131A2B]"
+            className="cursor-pointer rounded-lg p-1.5 text-purple-400 transition-colors hover:bg-[#131A2B] hover:text-white"
             title="Initialize Context Thread"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@ export const ConversationsPage: React.FC = () => {
           <ConversationList
             conversations={filtered}
             activeId={conversationId || ''}
-            onSelect={(id) => navigate(`/app/conversations/${id}`)}
+            onSelect={(id) => navigate(`/app/ai/conversations/${id}`)}
           />
         )}
       </div>

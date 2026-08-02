@@ -45,16 +45,16 @@ export const Toast: React.FC<ToastProps> = ({ toasts, onDismiss }) => {
                 {icons[toast.type]}
               </div>
               <div className="flex-grow">
-                <p className="text-text-primary text-sm font-semibold">{toast.title}</p>
+                <p className="text-sm font-semibold text-text-primary">{toast.title}</p>
                 {hasMessage && (
-                  <p className="text-text-secondary mt-0.5 text-xs">{toast.message}</p>
+                  <p className="mt-0.5 text-xs text-text-secondary">{toast.message}</p>
                 )}
               </div>
               <button
                 onClick={() => {
                   onDismiss(toast.id);
                 }}
-                className="text-text-tertiary hover:text-text-primary text-xs"
+                className="text-xs text-text-tertiary hover:text-text-primary"
               >
                 ✕
               </button>

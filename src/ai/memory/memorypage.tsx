@@ -3,6 +3,7 @@ import { memoryService, MemoryItem } from './memoryservice';
 import { MemoryCard } from './memorycard';
 import { MemoryFilters } from './memoryfilters';
 import { MemorySearch } from './memorysearch';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 
 export const MemoryPage: React.FC = () => {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
@@ -33,8 +34,8 @@ export const MemoryPage: React.FC = () => {
   });
 
   return (
-    <div className="mx-auto min-h-screen max-w-7xl space-y-6 bg-slate-50 p-6 dark:bg-slate-900">
-      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-center dark:border-slate-800">
+    <PageWrapper>
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 md:flex-row md:items-center">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Agent Memory Matrix
@@ -68,7 +69,7 @@ export const MemoryPage: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };
 export default MemoryPage;

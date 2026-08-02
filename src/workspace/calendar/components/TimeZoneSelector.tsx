@@ -6,22 +6,15 @@ export const TimeZoneSelector: React.FC = () => {
 
   return (
     <div style={{ padding: '8px 0' }}>
-      <label htmlFor="tz-select" style={{ fontSize: '12px', color: '#5f6368', display: 'block' }}>
+      <label htmlFor="tz-select" className="cal-tz-label">
         Time Zone
       </label>
       <select
         id="tz-select"
+        className="cal-tz-select"
         value={currentTimeZone}
         onChange={(e) => {
           setTimeZone(e.target.value);
-        }}
-        style={{
-          width: '100%',
-          padding: '6px 8px',
-          borderRadius: '4px',
-          border: '1px solid #dadce0',
-          fontSize: '13px',
-          marginTop: '4px',
         }}
       >
         {timeZones.map((tz) => (

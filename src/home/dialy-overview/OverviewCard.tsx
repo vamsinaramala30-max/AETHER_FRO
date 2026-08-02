@@ -10,15 +10,17 @@ export const OverviewCard: React.FC<OverviewCardProps> = ({ metric }) => {
   const isDown = metric.trend === 'down';
 
   return (
-    <div className="bg-slate-800/80 border border-slate-700/80 p-4 rounded-xl flex flex-col justify-between hover:border-slate-600 transition-colors">
+    <div className="flex flex-col justify-between rounded-xl border border-slate-700/80 bg-slate-800/80 p-4 transition-colors hover:border-slate-600">
       <div className="flex items-center justify-between text-xs text-slate-400">
-        <span className="uppercase tracking-wider font-semibold text-[10px]">{metric.category}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">
+          {metric.category}
+        </span>
         <span className="text-slate-500">{metric.timeframe}</span>
       </div>
 
       <div className="my-2">
         <div className="text-2xl font-bold text-white">{metric.value}</div>
-        <div className="text-sm font-medium text-slate-300 mt-0.5">{metric.title}</div>
+        <div className="mt-0.5 text-sm font-medium text-slate-300">{metric.title}</div>
       </div>
 
       <div className="flex items-center gap-1.5 text-xs font-semibold">

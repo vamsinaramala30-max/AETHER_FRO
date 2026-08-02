@@ -16,7 +16,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
     <div
       role="status"
       aria-label="Loading"
-      className={`text-accent-primary inline-block animate-spin rounded-full border-current border-t-transparent ${sizes[size]} ${className}`}
+      className={`inline-block animate-spin rounded-full border-current border-t-transparent text-accent-primary ${sizes[size]} ${className}`}
     >
       <span className="sr-only">Loading...</span>
     </div>

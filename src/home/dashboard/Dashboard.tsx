@@ -11,9 +11,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ totalTasks = 24, pendingRe
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white tracking-wide">Main Dashboard Summary</h2>
+        <h2 className="text-lg font-bold tracking-wide text-white">Main Dashboard Summary</h2>
       </div>
-      <DashboardStats totalTasks={totalTasks} pendingReviews={pendingReviews} systemUptime="99.98%" />
+      <DashboardStats
+        totalTasks={totalTasks}
+        pendingReviews={pendingReviews}
+        systemUptime="99.98%"
+      />
       <DashboardWidgets />
     </section>
   );

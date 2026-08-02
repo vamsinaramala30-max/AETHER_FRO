@@ -45,47 +45,55 @@ export const CalendarToolbar: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 16px',
-        borderBottom: '1px solid #dadce0',
+        borderBottom: '1px solid var(--cal-border-color)',
+        backgroundColor: 'var(--cal-bg-primary)',
+        flexShrink: 0,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <h1 style={{ fontSize: '20px', margin: 0, fontWeight: '400' }}>Enterprise Calendar</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <h1
+          style={{
+            fontSize: '20px',
+            margin: 0,
+            fontWeight: '500',
+            color: 'var(--cal-text-primary)',
+          }}
+        >
+          Enterprise Calendar
+        </h1>
         <button
           type="button"
+          className="cal-toolbar-btn"
           onClick={() => {
             const todayStr = new Date().toISOString().split('T')[0];
             if (todayStr) setCurrentDate(todayStr);
           }}
-          style={{
-            padding: '6px 12px',
-            borderRadius: '4px',
-            border: '1px solid #dadce0',
-            cursor: 'pointer',
-          }}
         >
           Today
         </button>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <button
             type="button"
+            className="cal-toolbar-nav-btn"
             onClick={() => {
               handleNavigate(-1);
             }}
-            style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}
           >
             ‹
           </button>
           <button
             type="button"
+            className="cal-toolbar-nav-btn"
             onClick={() => {
               handleNavigate(1);
             }}
-            style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px' }}
           >
             ›
           </button>
         </div>
-        <span style={{ fontSize: '18px', fontWeight: '500' }}>{viewState.currentDate}</span>
+        <span style={{ fontSize: '18px', fontWeight: '500', color: 'var(--cal-text-primary)' }}>
+          {viewState.currentDate}
+        </span>
       </div>
 
       <SearchBar />
@@ -93,25 +101,20 @@ export const CalendarToolbar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
           type="button"
+          className="cal-toolbar-btn"
           onClick={() => {
             importExportService.downloadICS(events);
-          }}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #dadce0',
-            borderRadius: '4px',
-            cursor: 'pointer',
           }}
         >
           Export ICS
         </button>
 
         <select
+          className="cal-toolbar-select"
           value={viewState.currentView}
           onChange={(e) => {
             setCurrentView(e.target.value as CalendarViewType);
           }}
-          style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #dadce0' }}
         >
           {CALENDAR_VIEWS.map((v) => (
             <option key={v.type} value={v.type}>

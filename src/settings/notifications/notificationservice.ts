@@ -17,10 +17,7 @@ export const notificationService = {
   updatePreferences: async (
     prefs: NotificationPreferencesData,
   ): Promise<NotificationPreferencesData> => {
-    const response = await api.put<NotificationPreferencesData>(
-      '/notifications',
-      prefs,
-    );
+    const response = await api.put<NotificationPreferencesData>('/notifications', prefs);
     return response.data;
   },
 };

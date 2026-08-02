@@ -1,4 +1,3 @@
-// frontend/src/settings/notifications/NotificationPreferences.tsx
 import React, { useState } from 'react';
 import { NotificationPreferencesData, notificationService } from './notificationservice';
 
@@ -20,7 +19,7 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       try {
         await notificationService.updatePreferences(updated);
       } catch {
-        setPrefs(prefs); // Revert state on network error safely
+        setPrefs(prefs);
       } finally {
         setIsSaving(false);
       }
@@ -32,17 +31,15 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
     title: string,
     description: string,
   ) => (
-    <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-4">
+    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <div className="pr-4">
-        <h4 className="text-sm font-medium text-white">{title}</h4>
-        <p className="mt-0.5 text-xs text-slate-400">{description}</p>
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h4>
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>
       </div>
       <button
         type="button"
-        onClick={() => {
-          handleToggle(key);
-        }}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${prefs[key] ? 'bg-indigo-600' : 'bg-slate-700'}`}
+        onClick={() => handleToggle(key)}
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${prefs[key] ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}`}
       >
         <span
           className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${prefs[key] ? 'translate-x-5' : 'translate-x-0'}`}
@@ -52,10 +49,10 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
   );
 
   return (
-    <div className="relative max-w-2xl space-y-4">
+    <div className="relative space-y-4">
       {isSaving && (
-        <div className="absolute right-0 top-0 rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-400">
-          Syncing settings...
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400">
+          Syncing notification preferences...
         </div>
       )}
       {renderToggle(

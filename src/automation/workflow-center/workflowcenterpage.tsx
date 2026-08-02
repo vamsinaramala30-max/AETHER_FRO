@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { workflowService, Workflow } from './workflowservice';
 import { WorkflowCard } from './workflowcard';
 import { WorkflowBuilder } from './workflowbuilder';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 
 export const WorkflowCenterPage: React.FC = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -90,7 +91,7 @@ export const WorkflowCenterPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <PageWrapper>
       {error && (
         <div className="rounded-lg border border-red-900/40 bg-red-950/40 p-3 text-xs text-red-400">
           {error}
@@ -106,26 +107,28 @@ export const WorkflowCenterPage: React.FC = () => {
           }}
         />
       ) : (
-        <>
-          <div className="flex items-center justify-between">
+        <div className="space-y-6">
+          <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-100">Workflow Matrix</h1>
-              <p className="text-xs text-slate-400">
-                Design, deploy, and inspect continuous reactive orchestration streams.
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Workflow Center
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Design, deploy, and inspect automated reactive orchestration pipelines.
               </p>
             </div>
             <button
               onClick={handleCreateNew}
-              className="rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm shadow-indigo-600/10 transition-colors hover:bg-indigo-500"
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 hover:shadow-indigo-500/20"
             >
-              + Create Blueprint
+              + Create Workflow
             </button>
           </div>
 
           {workflows.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/10 p-12 text-center">
-              <p className="text-sm text-slate-500">
-                No pipelines deployed inside this zone boundary.
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                No active workflows created yet.
               </p>
             </div>
           ) : (
@@ -141,8 +144,8 @@ export const WorkflowCenterPage: React.FC = () => {
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };

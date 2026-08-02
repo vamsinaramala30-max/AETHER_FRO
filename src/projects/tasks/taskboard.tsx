@@ -8,98 +8,39 @@ interface TaskBoardProps {
 }
 
 const COLUMNS: { id: Task['status']; title: string }[] = [
-  { id: 'todo', title: 'To Do Blueprint' },
+  { id: 'todo', title: 'To Do' },
   { id: 'in_progress', title: 'In Execution' },
-  { id: 'review', title: 'Validation & Review' },
-  { id: 'done', title: 'Production Ready' },
+  { id: 'review', title: 'Review' },
+  { id: 'done', title: 'Done' },
 ];
 
 export const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, onStatusChange }) => {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.25rem',
-        alignItems: 'start',
-      }}
-    >
+    <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-4">
       {COLUMNS.map((col) => {
         const columnTasks = tasks.filter((t) => t.status === col.id);
         return (
           <div
             key={col.id}
-            style={{
-              background: '#141414',
-              borderRadius: '8px',
-              padding: '1rem',
-              border: '1px solid #222',
-              minHeight: '400px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-            }}
+            className="flex min-h-[450px] flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60"
           >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '2px solid #2d2d2d',
-                paddingBottom: '0.5rem',
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: '0.9rem',
-                  fontWeight: 700,
-                  color: '#fff',
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-200">
                 {col.title}
               </h3>
-              <span
-                style={{
-                  background: '#2a2a2a',
-                  color: '#fff',
-                  fontSize: '0.75rem',
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                }}
-              >
+              <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                 {columnTasks.length}
               </span>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                overflowY: 'auto',
-                maxHeight: 'calc(100vh - 300px)',
-              }}
-            >
+            <div className="flex max-h-[calc(100vh-320px)] flex-col gap-3 overflow-y-auto p-0.5">
               {columnTasks.length === 0 ? (
-                <div
-                  style={{
-                    color: '#555',
-                    fontSize: '0.8rem',
-                    textAlign: 'center',
-                    padding: '2rem 0',
-                    fontStyle: 'italic',
-                    border: '1px dashed #222',
-                    borderRadius: '6px',
-                  }}
-                >
-                  No tasks active
+                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-xs font-medium italic text-slate-400 dark:border-slate-800 dark:text-slate-500">
+                  No active tasks
                 </div>
               ) : (
-                columnTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} onStatusChange={onStatusChange} />
+                columnTasks.map((t) => (
+                  <TaskCard key={t.id} task={t} onStatusChange={onStatusChange} />
                 ))
               )}
             </div>

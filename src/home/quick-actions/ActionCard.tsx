@@ -10,19 +10,19 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onSelect }) => {
   return (
     <button
       onClick={() => onSelect(action)}
-      className="w-full text-left p-3 bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-slate-600 rounded-xl transition-all group flex flex-col justify-between"
+      className="hover:bg-slate-750 group flex w-full flex-col justify-between rounded-xl border border-slate-700 bg-slate-800 p-3 text-left transition-all hover:border-slate-600"
     >
-      <div className="flex justify-between items-start w-full">
-        <span className="text-xs font-bold text-white group-hover:text-indigo-400 transition-colors">
+      <div className="flex w-full items-start justify-between">
+        <span className="text-xs font-bold text-white transition-colors group-hover:text-indigo-400">
           {action.label}
         </span>
         {action.shortcutKey && (
-          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-900 border border-slate-700 text-slate-400 rounded">
+          <span className="rounded border border-slate-700 bg-slate-900 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
             {action.shortcutKey}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-slate-400 mt-2 line-clamp-2">{action.description}</p>
+      <p className="mt-2 line-clamp-2 text-[11px] text-slate-400">{action.description}</p>
     </button>
   );
 };

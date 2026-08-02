@@ -26,13 +26,18 @@ export const YearView: React.FC = () => {
             setCurrentView('month');
           }}
           style={{
-            border: '1px solid #dadce0',
+            border: '1px solid var(--cal-border-color)',
+            backgroundColor: 'var(--cal-bg-primary)',
             borderRadius: '8px',
             padding: '12px',
             cursor: 'pointer',
           }}
         >
-          <h4 style={{ margin: '0 0 8px 0', textAlign: 'center' }}>{monthName}</h4>
+          <h4
+            style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--cal-text-primary)' }}
+          >
+            {monthName}
+          </h4>
         </div>
       ))}
     </div>

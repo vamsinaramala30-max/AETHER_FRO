@@ -50,14 +50,14 @@ export const Drawer: React.FC<DrawerProps> = ({
             animate="animate"
             exit="exit"
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`fixed inset-y-0 ${position === 'left' ? 'left-0' : 'right-0'} bg-surface-elevated/95 border-border-strong z-10 flex w-full max-w-md flex-col border-l p-6 shadow-2xl backdrop-blur-xl`}
+            className={`fixed inset-y-0 ${position === 'left' ? 'left-0' : 'right-0'} bg-surface-elevated/95 z-10 flex w-full max-w-md flex-col border-l border-border-strong p-6 shadow-2xl backdrop-blur-xl`}
           >
             {hasTitle && (
-              <div className="border-border-subtle mb-4 flex items-center justify-between border-b pb-4">
-                <h3 className="text-text-primary text-lg font-semibold">{title}</h3>
+              <div className="mb-4 flex items-center justify-between border-b border-border-subtle pb-4">
+                <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
                 <button
                   onClick={onClose}
-                  className="text-text-tertiary hover:text-text-primary rounded-lg p-1"
+                  className="rounded-lg p-1 text-text-tertiary hover:text-text-primary"
                 >
                   ✕
                 </button>

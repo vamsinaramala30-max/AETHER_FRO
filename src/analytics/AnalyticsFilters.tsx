@@ -20,7 +20,7 @@ export const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
 }) => {
   const handlePresetSelect = (preset: DateRange['preset']) => {
     const end = new Date();
-    let start = new Date();
+    const start = new Date();
 
     if (preset === '7d') {
       start.setDate(end.getDate() - 7);
@@ -38,9 +38,9 @@ export const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="flex flex-col items-stretch justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center">
       <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">
+        <span className="mr-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Range
         </span>
         {(['7d', '30d', '90d'] as const).map((p) => (
@@ -48,10 +48,10 @@ export const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
             key={p}
             type="button"
             onClick={() => handlePresetSelect(p)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
               dateRange.preset === p
                 ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
             }`}
             aria-pressed={dateRange.preset === p}
           >
@@ -60,16 +60,16 @@ export const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
         ))}
       </div>
 
-      <div className="flex items-center gap-2 justify-end">
+      <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
           aria-label="Refresh analytics data"
         >
           <svg
-            className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -88,10 +88,10 @@ export const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
           type="button"
           onClick={onExport}
           disabled={isExporting}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-50"
           aria-label="Export analytics report"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

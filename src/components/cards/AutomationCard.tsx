@@ -18,9 +18,9 @@ export const AutomationCard: React.FC<AutomationCardProps> = ({
   return (
     <Card className="flex items-center justify-between">
       <div className="space-y-1">
-        <h4 className="text-text-primary text-sm font-semibold">{title}</h4>
-        <p className="text-text-tertiary text-xs">
-          Trigger: <span className="text-text-secondary font-medium">{trigger}</span>
+        <h4 className="text-sm font-semibold text-text-primary">{title}</h4>
+        <p className="text-xs text-text-tertiary">
+          Trigger: <span className="font-medium text-text-secondary">{trigger}</span>
         </p>
       </div>
       <Switch checked={enabled} onChange={onToggle} />

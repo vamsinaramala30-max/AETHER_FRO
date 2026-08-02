@@ -8,7 +8,9 @@ class ConversationService {
   public async getConversations(): Promise<Conversation[]> {
     try {
       const response = await api.get<Conversation[] | { data: Conversation[] }>(this.baseRoute);
-      const data = Array.isArray(response.data) ? response.data : (response.data as any)?.data || [];
+      const data = Array.isArray(response.data)
+        ? response.data
+        : (response.data as any)?.data || [];
       if (data.length > 0) {
         localStorage.setItem(this.storageKey, JSON.stringify(data));
       }
@@ -28,7 +30,9 @@ class ConversationService {
       messageCount: 0,
     };
     try {
-      const response = await api.post<Conversation | { data: Conversation }>(this.baseRoute, { title });
+      const response = await api.post<Conversation | { data: Conversation }>(this.baseRoute, {
+        title,
+      });
       const created = (response.data as any)?.data || response.data || fresh;
       const current = await this.getConversations();
       localStorage.setItem(this.storageKey, JSON.stringify([created, ...current]));

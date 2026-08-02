@@ -17,9 +17,9 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Delete Item">
-      <p className="text-text-secondary mb-6 text-sm">
+      <p className="mb-6 text-sm text-text-secondary">
         Are you sure you want to delete{' '}
-        <span className="text-text-primary font-semibold">{itemName}</span>? This action cannot be
+        <span className="font-semibold text-text-primary">{itemName}</span>? This action cannot be
         undone.
       </p>
       <div className="flex justify-end space-x-3">

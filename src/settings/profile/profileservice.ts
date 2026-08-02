@@ -19,8 +19,11 @@ export const profileService = {
       return {
         id: payload.id || 'usr_default',
         email: payload.email || 'user@aether.io',
-        firstName: payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : 'User'),
-        lastName: payload.lastName || (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : ''),
+        firstName:
+          payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : 'User'),
+        lastName:
+          payload.lastName ||
+          (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : ''),
         avatarUrl: payload.avatarUrl,
         bio: payload.bio || '',
         company: payload.company || '',
@@ -31,8 +34,11 @@ export const profileService = {
       return {
         id: payload.id || 'usr_default',
         email: payload.email || 'user@aether.io',
-        firstName: payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : 'User'),
-        lastName: payload.lastName || (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : ''),
+        firstName:
+          payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : 'User'),
+        lastName:
+          payload.lastName ||
+          (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : ''),
         avatarUrl: payload.avatarUrl,
         bio: payload.bio || '',
         company: payload.company || '',
@@ -47,8 +53,12 @@ export const profileService = {
       return {
         id: payload.id || 'usr_default',
         email: payload.email || 'user@aether.io',
-        firstName: payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : (data.firstName || 'User')),
-        lastName: payload.lastName || (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : (data.lastName || '')),
+        firstName:
+          payload.firstName ||
+          (payload.fullName ? payload.fullName.split(' ')[0] : data.firstName || 'User'),
+        lastName:
+          payload.lastName ||
+          (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : data.lastName || ''),
         avatarUrl: payload.avatarUrl || data.avatarUrl,
         bio: payload.bio !== undefined ? payload.bio : data.bio,
         company: payload.company !== undefined ? payload.company : data.company,

@@ -1,5 +1,4 @@
 import React from 'react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { TimeDistribution } from './timeInsightsService';
 
 interface TimeChartProps {
@@ -8,42 +7,53 @@ interface TimeChartProps {
 }
 
 export const TimeChart: React.FC<TimeChartProps> = ({ data, height = 300 }) => {
+  const totalHours = data.reduce((acc, curr) => acc + curr.hours, 0);
+
   return (
-    <div style={{ width: '100%', height }}>
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={65}
-            outerRadius={95}
-            paddingAngle={4}
-            dataKey="hours"
-            nameKey="category"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fillColor} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#0f172a',
-              borderColor: '#334155',
-              borderRadius: '0.5rem',
-              color: '#f8fafc',
-            }}
-            formatter={(value: number) => [`${value} hrs`, 'Time Spent']}
-          />
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            formatter={(value: string) => (
-              <span className="text-xs text-slate-700 dark:text-slate-300 mr-2">{value}</span>
-            )}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div
+      style={{ width: '100%', height }}
+      className="flex flex-col items-center justify-center p-4"
+    >
+      {/* Progress Bar Stack */}
+      <div className="flex h-6 w-full overflow-hidden rounded-xl bg-slate-800 shadow-inner">
+        {data.map((item, index) => {
+          const pct = totalHours > 0 ? (item.hours / totalHours) * 100 : 0;
+          return (
+            <div
+              key={index}
+              style={{ width: `${pct}%`, backgroundColor: item.fillColor }}
+              className="group relative h-full transition-all duration-300"
+              title={`${item.category}: ${item.hours} hrs (${Math.round(pct)}%)`}
+            />
+          );
+        })}
+      </div>
+
+      {/* Category Grid Legend */}
+      <div className="mt-6 grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
+        {data.map((item, index) => {
+          const pct = totalHours > 0 ? Math.round((item.hours / totalHours) * 100) : 0;
+          return (
+            <div
+              key={index}
+              className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/50 p-2"
+            >
+              <span
+                className="h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: item.fillColor }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium text-slate-200">{item.category}</p>
+                <p className="text-[10px] text-slate-500">
+                  {item.hours} hrs ({pct}%)
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
+
+export default TimeChart;

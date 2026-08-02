@@ -32,6 +32,12 @@ export const useAssistantActions = () => {
   const renameConversation = useCallback((id: string, title: string) => {
     assistantStore.renameConversation(id, title);
   }, []);
+  const togglePinConversation = useCallback((id: string) => {
+    assistantStore.togglePinConversation(id);
+  }, []);
+  const toggleArchiveConversation = useCallback((id: string) => {
+    assistantStore.toggleArchiveConversation(id);
+  }, []);
   const setDraft = useCallback((id: string, draft: string) => {
     assistantStore.setDraft(id, draft);
   }, []);
@@ -58,6 +64,8 @@ export const useAssistantActions = () => {
     setActiveConversation,
     deleteConversation,
     renameConversation,
+    togglePinConversation,
+    toggleArchiveConversation,
     setDraft,
     setSearchQuery,
     toggleSidebar,

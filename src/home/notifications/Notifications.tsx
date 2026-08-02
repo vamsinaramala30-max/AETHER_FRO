@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { NotificationItem, fetchNotifications, markNotificationAsRead } from './notificationsService';
+import {
+  NotificationItem,
+  fetchNotifications,
+  markNotificationAsRead,
+} from './notificationsService';
 import { NotificationCard } from './NotificationCard';
 
 export const Notifications: React.FC = () => {
@@ -16,7 +20,7 @@ export const Notifications: React.FC = () => {
   };
 
   return (
-    <section className="bg-slate-800/60 border border-slate-700 p-4 rounded-xl space-y-3">
+    <section className="space-y-3 rounded-xl border border-slate-700 bg-slate-800/60 p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-white">Notifications ({items.length})</h3>
       </div>

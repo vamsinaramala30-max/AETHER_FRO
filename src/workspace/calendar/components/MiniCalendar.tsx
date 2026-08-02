@@ -10,7 +10,14 @@ export const MiniCalendar: React.FC = () => {
 
   return (
     <div style={{ padding: '8px', fontSize: '12px' }}>
-      <div style={{ fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>
+      <div
+        style={{
+          fontWeight: '600',
+          marginBottom: '8px',
+          textAlign: 'center',
+          color: 'var(--cal-text-primary)',
+        }}
+      >
         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
       </div>
       <div
@@ -19,8 +26,8 @@ export const MiniCalendar: React.FC = () => {
           gridTemplateColumns: 'repeat(7, 1fr)',
           gap: '2px',
           textTransform: 'uppercase',
-          color: '#5f6368',
         }}
+        className="cal-mini-header-label"
       >
         <span>S</span>
         <span>M</span>
@@ -43,23 +50,20 @@ export const MiniCalendar: React.FC = () => {
             const isSelected = isSameDay(day, currentDate);
             const activeToday = isToday(day);
 
+            const btnClass = [
+              'cal-mini-day-btn',
+              isSelected ? 'selected' : activeToday ? 'today' : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
+
             return (
               <button
                 key={day.toISOString()}
                 type="button"
+                className={btnClass}
                 onClick={() => {
                   setCurrentDate(day.toISOString().split('T')[0]);
-                }}
-                style={{
-                  border: 'none',
-                  background: isSelected ? '#1a73e8' : activeToday ? '#e8f0fe' : 'none',
-                  color: isSelected ? '#fff' : activeToday ? '#1a73e8' : '#202124',
-                  borderRadius: '50%',
-                  width: '24px',
-                  height: '24px',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  margin: 'auto',
                 }}
               >
                 {day.getDate()}

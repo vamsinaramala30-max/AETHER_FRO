@@ -61,3 +61,23 @@
 .border-strong {
   border-color: var(--aether-border-strong);
 }
+
+/* Scrollbar thin utility — used on sidebar nav and similar elements */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--aether-border-strong) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--aether-border-strong);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--aether-text-subtle);
+}

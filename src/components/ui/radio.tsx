@@ -14,11 +14,11 @@ export const Radio: React.FC<RadioProps> = ({ label, className = '', id, ...prop
       <input
         type="radio"
         id={radioId}
-        className={`border-border-strong text-accent-primary focus:ring-accent-primary bg-surface-subtle h-4 w-4 cursor-pointer transition-all ${className}`}
+        className={`h-4 w-4 cursor-pointer border-border-strong bg-surface-subtle text-accent-primary transition-all focus:ring-accent-primary ${className}`}
         {...props}
       />
       {hasLabel && (
-        <label htmlFor={radioId} className="text-text-primary cursor-pointer select-none text-sm">
+        <label htmlFor={radioId} className="cursor-pointer select-none text-sm text-text-primary">
           {label}
         </label>
       )}

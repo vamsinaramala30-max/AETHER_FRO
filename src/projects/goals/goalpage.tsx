@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { goalService, Goal } from './goalservice';
 import { GoalCard } from './goalcard';
 import { GoalForm } from './golaform';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { Target } from 'lucide-react';
 
 export const GoalsPage: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -21,7 +23,7 @@ export const GoalsPage: React.FC = () => {
         const updated = await goalService.updateGoalProgress(id, nextProgress);
         setGoals((prev) => prev.map((g) => (g.id === id ? updated : g)));
       } catch {
-        alert('Error updating progress matrix.');
+        alert('Error updating progress.');
       }
     })();
   };
@@ -32,43 +34,48 @@ export const GoalsPage: React.FC = () => {
         const created = await goalService.createGoal({ ...rawGoal, progress: 0 });
         setGoals((prev) => [...prev, created]);
       } catch {
-        alert('Error mapping new macro vector target.');
+        alert('Error creating goal.');
       }
     })();
   };
 
   if (loading)
     return (
-      <div style={{ color: '#00cc66', padding: '2rem', textAlign: 'center' }}>
-        Syncing telemetry goals...
+      <div className="flex h-64 w-full items-center justify-center font-semibold text-indigo-600 dark:text-indigo-400">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          Syncing goals...
+        </div>
       </div>
     );
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', color: '#fff' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>
-          Macro Architecture Milestones
-        </h1>
-        <p style={{ margin: '0.25rem 0 0 0', color: '#888' }}>
-          High-level structural engineering objectives.
-        </p>
+    <PageWrapper>
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-lg shadow-teal-500/20">
+            <Target className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Macro Milestones & Goals
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              High-level structural objectives and quarterly milestone targets.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+      <div className="space-y-6">
         <GoalForm onSubmit={handleCreateGoal} />
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {goals.map((goal) => (
             <GoalCard key={goal.id} goal={goal} onUpdateProgress={handleUpdateProgress} />
           ))}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 };

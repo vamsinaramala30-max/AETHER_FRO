@@ -17,7 +17,7 @@ export interface TabsProps {
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className = '' }) => {
   return (
-    <div className={`border-border-subtle flex space-x-1 border-b p-1 ${className}`}>
+    <div className={`flex space-x-1 border-b border-border-subtle p-1 ${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const hasIcon = tab.icon !== undefined && tab.icon !== null;
@@ -43,7 +43,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
             {isActive && (
               <motion.div
                 layoutId="activeTabUnderline"
-                className="bg-accent-primary absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-accent-primary"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

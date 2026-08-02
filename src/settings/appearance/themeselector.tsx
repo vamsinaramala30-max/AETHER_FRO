@@ -1,6 +1,6 @@
-// frontend/src/settings/appearance/ThemeSelector.tsx
 import React, { useState } from 'react';
 import { appearanceService, AetherTheme } from './appearanceService';
+import { Check } from 'lucide-react';
 
 export const ThemeSelector: React.FC = () => {
   const themes = appearanceService.getAvailableThemes();
@@ -16,21 +16,32 @@ export const ThemeSelector: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {themes.map((t) => {
         const isActive = currentTheme === t.id;
         return (
           <button
             key={t.id}
-            onClick={() => {
-              handleThemeChange(t.id);
-            }}
-            className={`flex flex-col rounded-lg border p-4 text-left text-sm outline-none transition-all ${isActive ? 'border-indigo-500 bg-indigo-600/10 shadow-md ring-1 ring-indigo-500' : 'border-slate-800 bg-slate-900 hover:border-slate-700'}`}
+            onClick={() => handleThemeChange(t.id)}
+            className={`flex flex-col justify-between rounded-2xl border p-5 text-left transition-all ${
+              isActive
+                ? 'border-indigo-600 bg-indigo-50/50 shadow-md ring-2 ring-indigo-500 dark:bg-indigo-950/20'
+                : 'border-slate-200 bg-white hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-800/60 dark:hover:border-slate-700'
+            }`}
           >
-            <span className={`font-semibold ${isActive ? 'text-indigo-400' : 'text-white'}`}>
-              {t.label}
-            </span>
-            <span className="mt-2 text-xs leading-relaxed text-slate-400">{t.description}</span>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <span
+                  className={`text-base font-bold ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'}`}
+                >
+                  {t.label}
+                </span>
+                {isActive && <Check className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />}
+              </div>
+              <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                {t.description}
+              </p>
+            </div>
           </button>
         );
       })}

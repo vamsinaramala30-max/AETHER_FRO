@@ -13,10 +13,10 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
   onContinue,
 }) => {
   return (
-    <div className="bg-status-success/5 border-status-success/20 flex w-full flex-col items-center justify-center space-y-3 rounded-2xl border p-12 text-center">
-      <div className="text-status-success text-4xl">✓</div>
-      <h3 className="text-text-primary text-base font-semibold">{title}</h3>
-      <p className="text-text-secondary text-xs">{message}</p>
+    <div className="flex w-full flex-col items-center justify-center space-y-3 rounded-2xl border border-status-success/20 bg-status-success/5 p-12 text-center">
+      <div className="text-4xl text-status-success">✓</div>
+      <h3 className="text-base font-semibold text-text-primary">{title}</h3>
+      <p className="text-xs text-text-secondary">{message}</p>
       {onContinue && (
         <Button size="sm" variant="primary" onClick={onContinue} className="mt-2">
           Continue

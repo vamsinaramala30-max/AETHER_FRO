@@ -7,13 +7,13 @@ interface RecentProjectCardProps {
 
 export const RecentProjectCard: React.FC<RecentProjectCardProps> = ({ project }) => {
   return (
-    <div className="p-4 bg-slate-800 border border-slate-700 rounded-xl space-y-3">
-      <div className="flex justify-between items-start">
+    <div className="space-y-3 rounded-xl border border-slate-700 bg-slate-800 p-4">
+      <div className="flex items-start justify-between">
         <div>
           <h4 className="text-sm font-bold text-white">{project.name}</h4>
-          <span className="text-xs font-mono text-indigo-400">{project.repository}</span>
+          <span className="font-mono text-xs text-indigo-400">{project.repository}</span>
         </div>
-        <span className="text-[10px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">
+        <span className="rounded border border-slate-700 bg-slate-900 px-2 py-0.5 text-[10px] text-slate-400">
           {project.branch}
         </span>
       </div>
@@ -23,15 +23,15 @@ export const RecentProjectCard: React.FC<RecentProjectCardProps> = ({ project })
           <span>Progress</span>
           <span>{project.completionPercentage}%</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900">
           <div
-            className="h-full bg-indigo-500 rounded-full"
+            className="h-full rounded-full bg-indigo-500"
             style={{ width: `${project.completionPercentage}%` }}
           />
         </div>
       </div>
 
-      <div className="text-[10px] text-slate-500 text-right">Modified {project.lastModified}</div>
+      <div className="text-right text-[10px] text-slate-500">Modified {project.lastModified}</div>
     </div>
   );
 };

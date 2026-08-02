@@ -40,6 +40,10 @@ export async function fetchNotifications(): Promise<NotificationItem[]> {
   ];
 }
 
-export async function markNotificationAsRead(id: string): Promise<boolean> {
+export async function markNotificationAsRead(_id: string): Promise<boolean> {
+  return true;
+}
+
+export async function deleteNotification(_id: string): Promise<boolean> {
   return true;
 }

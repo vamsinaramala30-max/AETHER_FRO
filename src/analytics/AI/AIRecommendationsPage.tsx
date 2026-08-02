@@ -20,11 +20,11 @@ export const AIRecommendationsPage: React.FC<AIRecommendationsPageProps> = ({
 
   if (isLoading || !data) {
     return (
-      <div className="p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 animate-pulse space-y-4">
-        <div className="h-6 w-48 bg-slate-200 dark:bg-slate-700 rounded"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-40 bg-slate-100 dark:bg-slate-700/50 rounded-lg"></div>
-          <div className="h-40 bg-slate-100 dark:bg-slate-700/50 rounded-lg"></div>
+      <div className="animate-pulse space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+        <div className="h-6 w-48 rounded bg-slate-200 dark:bg-slate-700"></div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="h-40 rounded-lg bg-slate-100 dark:bg-slate-700/50"></div>
+          <div className="h-40 rounded-lg bg-slate-100 dark:bg-slate-700/50"></div>
         </div>
       </div>
     );

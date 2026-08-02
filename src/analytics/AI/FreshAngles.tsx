@@ -10,10 +10,10 @@ interface SectionProps {
 export const FreshAngles: React.FC<SectionProps> = ({ items, onApply }) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+      <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
         <span>💡</span> Fresh Angles
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {items.map((item) => (
           <RecommendationCard key={item.id} recommendation={item} onApply={onApply} />
         ))}

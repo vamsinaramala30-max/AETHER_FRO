@@ -9,7 +9,7 @@ export const SuggestedAction: React.FC<SuggestedActionProps> = ({ label, onExecu
   return (
     <button
       onClick={onExecute}
-      className="text-xs font-medium px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors shadow-sm"
+      className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500"
     >
       {label}
     </button>

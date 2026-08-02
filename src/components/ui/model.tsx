@@ -51,14 +51,14 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
-            className={`relative w-full ${maxWidths[maxWidth]} bg-surface-elevated/95 border-border-strong z-10 overflow-hidden rounded-2xl border p-6 shadow-2xl backdrop-blur-xl`}
+            className={`relative w-full ${maxWidths[maxWidth]} bg-surface-elevated/95 z-10 overflow-hidden rounded-2xl border border-border-strong p-6 shadow-2xl backdrop-blur-xl`}
           >
             {hasTitle && (
-              <div className="border-border-subtle mb-4 flex items-center justify-between border-b pb-4">
-                <h3 className="text-text-primary text-lg font-semibold">{title}</h3>
+              <div className="mb-4 flex items-center justify-between border-b border-border-subtle pb-4">
+                <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
                 <button
                   onClick={onClose}
-                  className="text-text-tertiary hover:text-text-primary rounded-lg p-1"
+                  className="rounded-lg p-1 text-text-tertiary hover:text-text-primary"
                 >
                   ✕
                 </button>
