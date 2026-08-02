@@ -15,10 +15,11 @@ export const ScheduledAutomationPage: React.FC = () => {
     try {
       setLoading(true);
       const data = await automationService.getTasks();
-      setTasks(data);
+      setTasks(Array.isArray(data) ? data : []);
       setError(null);
     } catch {
       setError('Failed to extract active execution scheduler table rows.');
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -31,7 +32,7 @@ export const ScheduledAutomationPage: React.FC = () => {
   const handleToggle = async (id: string) => {
     try {
       const updated = await automationService.toggleTask(id);
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      setTasks((prev) => (Array.isArray(prev) ? prev.map((t) => (t.id === id ? updated : t)) : []));
     } catch {
       setError('Task execution scheduler assignment toggling failure.');
     }
@@ -56,6 +57,8 @@ export const ScheduledAutomationPage: React.FC = () => {
       </div>
     );
   }
+
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
 
   return (
     <PageWrapper>
@@ -95,7 +98,7 @@ export const ScheduledAutomationPage: React.FC = () => {
           <ScheduleForm onSubmit={handleCreateTask} onCancel={() => setIsFormOpen(false)} />
         )}
 
-        {tasks.length === 0 ? (
+        {safeTasks.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               No structured routines are currently mapped inside the scheduler.
@@ -103,7 +106,7 @@ export const ScheduledAutomationPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => (
+            {safeTasks.map((task) => (
               <AutomationCard key={task.id} task={task} onToggle={handleToggle} />
             ))}
           </div>

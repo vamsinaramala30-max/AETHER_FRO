@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { Calendar, ViewState, CalendarViewType } from '../types/calendar';
-import { getUserLocalTimeZone } from '../utils/timezoneUtils';
 
 interface CalendarState {
   calendars: Calendar[];
@@ -24,28 +23,56 @@ interface CalendarState {
 
 const initialCalendars: Calendar[] = [
   {
-    id: 'primary-1',
+    id: 'cal-personal',
     title: 'Personal',
-    color: '#039be5',
+    color: '#38bdf8',
     isPrimary: true,
     isVisible: true,
     isCustom: false,
     accessLevel: 'owner',
-    timeZone: getUserLocalTimeZone(),
+    timeZone: 'UTC',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ownerId: 'user-1',
     source: 'local',
   },
   {
-    id: 'work-2',
+    id: 'cal-work',
     title: 'Work & Projects',
-    color: '#7986cb',
+    color: '#a855f7',
     isPrimary: false,
     isVisible: true,
     isCustom: true,
     accessLevel: 'owner',
-    timeZone: getUserLocalTimeZone(),
+    timeZone: 'UTC',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ownerId: 'user-1',
+    source: 'local',
+  },
+  {
+    id: 'cal-ai',
+    title: 'AI & Learning',
+    color: '#22c55e',
+    isPrimary: false,
+    isVisible: true,
+    isCustom: true,
+    accessLevel: 'owner',
+    timeZone: 'UTC',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ownerId: 'user-1',
+    source: 'local',
+  },
+  {
+    id: 'cal-reminders',
+    title: 'Reminders',
+    color: '#f97316',
+    isPrimary: false,
+    isVisible: true,
+    isCustom: true,
+    accessLevel: 'owner',
+    timeZone: 'UTC',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ownerId: 'user-1',
@@ -59,7 +86,7 @@ export const useCalendarStore = create<CalendarState>((set) => ({
   viewState: {
     currentView: 'week',
     currentDate: new Date().toISOString().split('T')[0],
-    selectedTimeZone: getUserLocalTimeZone(),
+    selectedTimeZone: '(UTC+00:00) UTC',
     isMiniCalendarOpen: true,
     isSidebarOpen: true,
   },

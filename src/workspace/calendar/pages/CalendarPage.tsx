@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../styles/calendar.css';
 import '../styles/events.css';
 import '../styles/responsive.css';
@@ -14,9 +14,41 @@ import { EventForm } from '../components/EventForm';
 import { EventDetails } from '../components/EventDetails';
 import { DragDropProvider } from '../drag-drop/DragDropProvider';
 import { EventDragLayer } from '../drag-drop/EventDragLayer';
+import { eventService } from '../services/eventService';
+import { calendarService } from '../services/calendarService';
+import { useEventStore } from '../store/eventStore';
+import { useCalendarStore } from '../store/calendarStore';
 
 export const CalendarPage: React.FC = () => {
   const { viewState } = useCalendar();
+  const setEvents = useEventStore((state) => state.setEvents);
+  const setCalendars = useCalendarStore((state) => state.setCalendars);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadBackendData = async () => {
+      try {
+        const [fetchedEvents, fetchedCalendars] = await Promise.all([
+          eventService.fetchEvents(),
+          calendarService.fetchCalendars(),
+        ]);
+        if (isMounted) {
+          if (fetchedEvents && fetchedEvents.length > 0) {
+            setEvents(fetchedEvents);
+          }
+          if (fetchedCalendars && fetchedCalendars.length > 0) {
+            setCalendars(fetchedCalendars);
+          }
+        }
+      } catch (err) {
+        console.warn('[CalendarPage] Failed to fetch backend calendar data:', err);
+      }
+    };
+    void loadBackendData();
+    return () => {
+      isMounted = false;
+    };
+  }, [setEvents, setCalendars]);
 
   const renderActiveView = () => {
     switch (viewState.currentView) {

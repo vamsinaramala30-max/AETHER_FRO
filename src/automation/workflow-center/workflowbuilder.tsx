@@ -40,11 +40,11 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
   };
 
   return (
-    <div className="space-y-6 rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="border-border bg-card space-y-6 rounded-2xl border p-6 shadow-sm backdrop-blur-md transition-colors">
+      <div className="border-border flex items-center justify-between border-b pb-4">
         <div>
-          <h2 className="text-xl font-semibold text-slate-100">Workflow Designer</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-foreground text-xl font-bold">Workflow Designer</h2>
+          <p className="text-muted-foreground text-xs">
             Configure orchestrations, conditional pathways, and direct operational steps.
           </p>
         </div>
@@ -52,14 +52,14 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
           <button
             onClick={onCancel}
             type="button"
-            className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-800"
+            className="border-border bg-secondary/50 text-foreground hover:bg-secondary rounded-xl border px-4 py-2 text-xs font-semibold transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             type="button"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-indigo-500"
+            className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-600/25 transition-all hover:bg-indigo-500 hover:shadow-indigo-600/35"
           >
             Save Blueprint
           </button>
@@ -67,15 +67,15 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="space-y-4 border-r border-slate-800/60 pr-0 md:col-span-1 md:pr-6">
+        <div className="border-border/60 space-y-4 border-r pr-0 md:col-span-1 md:pr-6">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase tracking-wider">
               Blueprint Name
             </label>
             <input
               type="text"
               required
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 transition-colors focus:border-indigo-500 focus:outline-none"
+              className="border-border bg-background text-foreground w-full rounded-xl border px-3 py-2 text-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
@@ -83,11 +83,11 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase tracking-wider">
               Functional Objective
             </label>
             <textarea
-              className="h-24 w-full resize-none rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 transition-colors focus:border-indigo-500 focus:outline-none"
+              className="border-border bg-background text-foreground h-28 w-full resize-none rounded-xl border px-3 py-2 text-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -95,8 +95,8 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
             />
           </div>
 
-          <div className="space-y-2 border-t border-slate-800/40 pt-4">
-            <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="border-border/60 space-y-2 border-t pt-4">
+            <h5 className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
               Append Execution Node
             </h5>
             <div className="grid grid-cols-2 gap-2">
@@ -105,7 +105,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
                 onClick={() => {
                   handleAddNode('condition');
                 }}
-                className="rounded border border-amber-500/20 p-2 text-xs text-amber-400 transition-colors hover:bg-amber-500/10"
+                className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs font-semibold text-amber-600 transition-all hover:bg-amber-500/20 dark:text-amber-400"
               >
                 + Condition
               </button>
@@ -114,7 +114,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
                 onClick={() => {
                   handleAddNode('action');
                 }}
-                className="rounded border border-sky-500/20 p-2 text-xs text-sky-400 transition-colors hover:bg-sky-500/10"
+                className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-2.5 text-xs font-semibold text-sky-600 transition-all hover:bg-sky-500/20 dark:text-sky-400"
               >
                 + Action
               </button>
@@ -122,9 +122,9 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
           </div>
         </div>
 
-        <div className="flex max-h-[500px] min-h-[400px] flex-col items-center justify-start overflow-y-auto rounded-xl border border-slate-800/80 bg-slate-950/40 p-6 md:col-span-2">
+        <div className="border-border bg-background/60 flex max-h-[500px] min-h-[400px] flex-col items-center justify-start overflow-y-auto rounded-2xl border p-6 md:col-span-2">
           {nodes.length === 0 ? (
-            <p className="my-auto text-sm text-slate-500">
+            <p className="text-muted-foreground my-auto text-sm">
               No operational blocks appended to this architectural sequence.
             </p>
           ) : (

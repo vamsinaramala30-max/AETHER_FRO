@@ -6,14 +6,13 @@ import { SidebarTooltip } from './SidebarTooltip';
 interface SidebarFooterControlsProps {
   collapsed: boolean;
   onNotificationsOpen: () => void;
-  unreadCount: number;
+  unreadCount?: number;
   isMobile?: boolean;
 }
 
 export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
   collapsed,
   onNotificationsOpen,
-  unreadCount,
   isMobile = false,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
@@ -28,7 +27,7 @@ export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
     return (
       <div className="flex flex-col items-center gap-1 py-1">
         {/* Notifications Icon Button */}
-        <SidebarTooltip content="Notifications" shortcut={`${unreadCount} unread`}>
+        <SidebarTooltip content="Notifications">
           <button
             type="button"
             onClick={onNotificationsOpen}
@@ -36,11 +35,6 @@ export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
             className="border-aether-border/60 bg-aether-subtle/50 relative flex h-9 w-9 items-center justify-center rounded-xl border text-aether-muted transition-all duration-150 hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Bell className="h-4 w-4" />
-            {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 font-mono text-[9px] font-bold text-white ring-2 ring-aether-surface">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
           </button>
         </SidebarTooltip>
 
@@ -79,11 +73,6 @@ export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
             className="border-aether-border/60 bg-aether-subtle/50 relative flex h-8 w-8 items-center justify-center rounded-lg border text-aether-muted transition-all hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Bell className="h-4 w-4" />
-            {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 font-mono text-[9px] font-bold text-white ring-2 ring-aether-surface">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
           </button>
         </SidebarTooltip>
 

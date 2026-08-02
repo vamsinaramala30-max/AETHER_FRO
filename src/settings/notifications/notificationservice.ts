@@ -1,8 +1,11 @@
-// frontend/src/settings/notifications/notificationService.ts
-import { api } from '../../shared/api';
-
 export interface NotificationPreferencesData {
   emailAlerts: boolean;
+  pushNotifications: boolean;
+  browserNotifications: boolean;
+  workspaceNotifications: boolean;
+  projectNotifications: boolean;
+  mentionNotifications: boolean;
+  automationNotifications: boolean;
   securityAlerts: boolean;
   systemUpdates: boolean;
   weeklyDigest: boolean;
@@ -10,14 +13,34 @@ export interface NotificationPreferencesData {
 
 export const notificationService = {
   getPreferences: async (): Promise<NotificationPreferencesData> => {
-    const response = await api.get<NotificationPreferencesData>('/notifications');
-    return response.data;
+    try {
+      const response = await fetch('/api/v1/notifications/preferences');
+      const data = await response.json();
+      if (data.data) return data.data;
+    } catch {
+      // Fallback local storage sync
+    }
+    const stored = localStorage.getItem('aether_notification_prefs');
+    if (stored) return JSON.parse(stored);
+
+    return {
+      emailAlerts: true,
+      pushNotifications: true,
+      browserNotifications: true,
+      workspaceNotifications: true,
+      projectNotifications: true,
+      mentionNotifications: true,
+      automationNotifications: true,
+      securityAlerts: true,
+      systemUpdates: false,
+      weeklyDigest: false,
+    };
   },
 
   updatePreferences: async (
     prefs: NotificationPreferencesData,
   ): Promise<NotificationPreferencesData> => {
-    const response = await api.put<NotificationPreferencesData>('/notifications', prefs);
-    return response.data;
+    localStorage.setItem('aether_notification_prefs', JSON.stringify(prefs));
+    return prefs;
   },
 };

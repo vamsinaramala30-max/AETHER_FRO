@@ -1,19 +1,28 @@
-// frontend/src/settings/billing/billingService.ts
 export interface SubscriptionTier {
   name: string;
   cost: string;
   active: boolean;
   renewalDate?: string;
+  activationDate?: string;
+}
+
+export function getExactOneYearRenewalDate(startDate: Date = new Date()): string {
+  const renewal = new Date(startDate.getTime());
+  renewal.setFullYear(renewal.getFullYear() + 1);
+  return renewal.toISOString().split('T')[0];
 }
 
 export const billingService = {
   getCurrentSubscription(): Promise<SubscriptionTier> {
-    // Intentional production interface alignment abstracting underlying billing context parameters safely
+    const today = new Date();
+    const renewalDate = getExactOneYearRenewalDate(today);
+
     return Promise.resolve({
-      name: 'AETHER Professional Enterprise Suite',
-      cost: '$49.00 / month',
+      name: 'AETHER Enterprise Suite (Annual)',
+      cost: '$499.00 / year',
       active: true,
-      renewalDate: '2026-12-31',
+      activationDate: today.toISOString().split('T')[0],
+      renewalDate,
     });
   },
 };

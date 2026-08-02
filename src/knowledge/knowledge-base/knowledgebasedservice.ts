@@ -1,10 +1,19 @@
-// frontend/src/knowledge/knowledge-base/knowledgeBaseService.ts
 import { KnowledgeNode } from '../types';
 import { notesService } from '../notes/noteservice';
 import { documentsService } from '../documents/documentservice';
 
 export const knowledgeBaseService = {
   async getGraphData(): Promise<KnowledgeNode[]> {
+    try {
+      const res = await fetch('/api/v1/knowledge/graph');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.nodes) && data.nodes.length > 0) {
+        return data.nodes;
+      }
+    } catch {
+      // Fallback to local computation
+    }
+
     const notes = await notesService.getNotes();
     const docs = await documentsService.getDocuments();
 
@@ -15,7 +24,7 @@ export const knowledgeBaseService = {
         id: note.id,
         label: note.title,
         type: 'note',
-        connections: note.tags, // Connects to tag concepts
+        connections: note.tags,
       });
     });
 
@@ -28,11 +37,10 @@ export const knowledgeBaseService = {
       });
     });
 
-    // Extract unique tags as concept nodes
     const uniqueTags = Array.from(
       new Set([
-        ...notes.flatMap((n: import('../types').Note) => n.tags),
-        ...docs.flatMap((d: import('../types').DocumentItem) => d.tags),
+        ...notes.flatMap((n: import('../types').Note) => n.tags || []),
+        ...docs.flatMap((d: import('../types').DocumentItem) => d.tags || []),
       ]),
     );
 
@@ -41,7 +49,7 @@ export const knowledgeBaseService = {
         id: tag,
         label: `#${tag}`,
         type: 'concept',
-        connections: [], // Filled implicitly by items pointing to it
+        connections: [],
       });
     });
 

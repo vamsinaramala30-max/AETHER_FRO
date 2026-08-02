@@ -18,7 +18,6 @@ export interface Workflow {
   nodes: WorkflowNodeData[];
 }
 
-// Simulated local storage state matching AETHER design principles for local persistence isolation
 let mockWorkflows: Workflow[] = [
   {
     id: 'wf-1',
@@ -81,52 +80,64 @@ let mockWorkflows: Workflow[] = [
   },
 ];
 
+import { apiClient } from '../../api/client';
+
 export const workflowService = {
   async getWorkflows(): Promise<Workflow[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...mockWorkflows]);
-      }, 350);
-    });
+    try {
+      const res = await apiClient.get<any>('/workflows');
+      if (Array.isArray(res)) return res;
+      if (res && Array.isArray(res.data)) return res.data;
+      if (res && Array.isArray(res.automations)) return res.automations;
+      return [...mockWorkflows];
+    } catch {
+      return [...mockWorkflows];
+    }
   },
 
   async toggleWorkflow(id: string): Promise<Workflow> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const index = mockWorkflows.findIndex((w) => w.id === id);
-        if (index === -1) {
-          reject(new Error('Workflow not found'));
-          return;
-        }
-        mockWorkflows[index] = {
-          ...mockWorkflows[index],
-          isActive: !mockWorkflows[index].isActive,
-        };
-        resolve({ ...mockWorkflows[index] });
-      }, 200);
-    });
+    try {
+      const res = await apiClient.patch<any>(`/workflows/${id}/toggle`);
+      return res?.data || res || mockWorkflows[0];
+    } catch {
+      const index = mockWorkflows.findIndex((w) => w.id === id);
+      if (index === -1) {
+        throw new Error('Workflow not found');
+      }
+      mockWorkflows[index] = {
+        ...mockWorkflows[index],
+        isActive: !mockWorkflows[index].isActive,
+      };
+      return { ...mockWorkflows[index] };
+    }
   },
 
   async saveWorkflow(workflow: Workflow): Promise<Workflow> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = mockWorkflows.findIndex((w) => w.id === workflow.id);
-        if (index !== -1) {
-          mockWorkflows[index] = { ...workflow };
-        } else {
-          mockWorkflows.push(workflow);
-        }
-        resolve({ ...workflow });
-      }, 400);
-    });
+    try {
+      if (workflow.id && !workflow.id.startsWith('wf-new-')) {
+        const res = await apiClient.put<any>(`/workflows/${workflow.id}`, workflow);
+        return res?.data || res || workflow;
+      }
+      const res = await apiClient.post<any>('/workflows', workflow);
+      return res?.data || res || workflow;
+    } catch {
+      const index = mockWorkflows.findIndex((w) => w.id === workflow.id);
+      if (index !== -1) {
+        mockWorkflows[index] = { ...workflow };
+      } else {
+        mockWorkflows.push(workflow);
+      }
+      return { ...workflow };
+    }
   },
 
   async deleteWorkflow(id: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        mockWorkflows = mockWorkflows.filter((w) => w.id !== id);
-        resolve(true);
-      }, 200);
-    });
+    try {
+      await apiClient.delete(`/workflows/${id}`);
+      return true;
+    } catch {
+      mockWorkflows = mockWorkflows.filter((w) => w.id !== id);
+      return true;
+    }
   },
 };

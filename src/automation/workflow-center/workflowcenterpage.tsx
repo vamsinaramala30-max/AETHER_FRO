@@ -15,10 +15,11 @@ export const WorkflowCenterPage: React.FC = () => {
     try {
       setLoading(true);
       const data = await workflowService.getWorkflows();
-      setWorkflows(data);
+      setWorkflows(Array.isArray(data) ? data : []);
       setError(null);
     } catch {
       setError('Could not establish synchronization with core automation framework.');
+      setWorkflows([]);
     } finally {
       setLoading(false);
     }
@@ -31,7 +32,9 @@ export const WorkflowCenterPage: React.FC = () => {
   const handleToggle = async (id: string) => {
     try {
       const updated = await workflowService.toggleWorkflow(id);
-      setWorkflows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+      setWorkflows((prev) =>
+        Array.isArray(prev) ? prev.map((w) => (w.id === id ? updated : w)) : [],
+      );
     } catch {
       setError('State transaction failed.');
     }
@@ -90,6 +93,8 @@ export const WorkflowCenterPage: React.FC = () => {
     );
   }
 
+  const safeWorkflows = Array.isArray(workflows) ? workflows : [];
+
   return (
     <PageWrapper>
       {error && (
@@ -108,12 +113,12 @@ export const WorkflowCenterPage: React.FC = () => {
         />
       ) : (
         <div className="space-y-6">
-          <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
+          <div className="border-border flex flex-col justify-between gap-4 border-b pb-5 sm:flex-row sm:items-center">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-foreground text-2xl font-extrabold tracking-tight">
                 Workflow Center
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-muted-foreground text-sm">
                 Design, deploy, and inspect automated reactive orchestration pipelines.
               </p>
             </div>
@@ -125,15 +130,15 @@ export const WorkflowCenterPage: React.FC = () => {
             </button>
           </div>
 
-          {workflows.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          {safeWorkflows.length === 0 ? (
+            <div className="border-border bg-card rounded-2xl border border-dashed p-12 text-center">
+              <p className="text-muted-foreground text-sm font-medium">
                 No active workflows created yet.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {workflows.map((workflow) => (
+              {safeWorkflows.map((workflow) => (
                 <WorkflowCard
                   key={workflow.id}
                   workflow={workflow}

@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from '../../constants/storagekey';
+import { apiClient } from '../../api/client';
 
 export interface Message {
   id: string;
@@ -24,72 +24,46 @@ export interface AssistantConfig {
 }
 
 class AssistantService {
-  private baseRoute = '/api/v1/ai/assistant';
-
-  // Fallback storage key if backend session persistence is not yet established
-  private fallbackKey = 'aether_fallback_messages';
-
-  private async getAuthHeaders(): Promise<HeadersInit> {
-    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: 'Bearer ' + token } : {}),
-    };
-  }
-
   public async sendMessage(
     conversationId: string,
     content: string,
     config?: Partial<AssistantConfig>,
   ): Promise<Message> {
-    try {
-      const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseRoute}/chat`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ conversationId, content, config }),
-      });
+    const rawResponse = await apiClient.post<{ data: any }>('/ai/chat', {
+      conversationId,
+      content,
+      message: content,
+      model: config?.model,
+      temperature: config?.temperature,
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
-      }
+    const data = rawResponse.data || rawResponse;
 
-      return await response.json();
-    } catch (error) {
-      console.warn('Backend endpoint offline. Initiating client-side safe emulation layer.', error);
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const mockResponse: Message = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: `I received your message: "${content}". This is a highly responsive local processing fallback layer. Connect your live streaming or REST pipeline seamlessly to ${this.baseRoute}/chat.`,
-            timestamp: new Date().toISOString(),
-            tokensUsed: content.length / 4 + 20,
-          };
-          resolve(mockResponse);
-        }, 1000);
-      });
-    }
+    return {
+      id: data.id || crypto.randomUUID(),
+      role: data.role || 'assistant',
+      content: data.content || '',
+      timestamp: data.createdAt || new Date().toISOString(),
+      tokensUsed: data.metadata?.totalTokens || Math.ceil((data.content || '').length / 4),
+    };
   }
 
   public async getConversationMessages(conversationId: string): Promise<Message[]> {
     try {
-      const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseRoute}/conversations/${conversationId}/messages`, {
-        method: 'GET',
-        headers,
-      });
+      const res = await apiClient.get<{ data: any }>(`/ai/conversations/${conversationId}`);
+      const data = res.data || res;
+      if (!data || !Array.isArray(data.messages)) return [];
 
-      if (!response.ok) throw new Error('Failed to retrieve messages');
-      return await response.json();
+      return data.messages.map((m: any) => ({
+        id: m.id || crypto.randomUUID(),
+        role: m.role || 'assistant',
+        content: m.content || '',
+        timestamp: m.createdAt || new Date().toISOString(),
+        tokensUsed: m.metadata?.totalTokens,
+      }));
     } catch {
-      const stored = localStorage.getItem(`${this.fallbackKey}_${conversationId}`);
-      return stored ? JSON.parse(stored) : [];
+      return [];
     }
-  }
-
-  public saveFallbackMessages(conversationId: string, messages: Message[]): void {
-    localStorage.setItem(`${this.fallbackKey}_${conversationId}`, JSON.stringify(messages));
   }
 }
 

@@ -57,23 +57,43 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       )}
       {renderToggle(
         'emailAlerts',
-        'Critical Operations Alerts',
-        'Immediate dispatches via email on runtime interruptions.',
+        'Email Notifications',
+        'Receive critical dispatches and activity summaries via email.',
+      )}
+      {renderToggle(
+        'pushNotifications',
+        'Push Notifications',
+        'Receive mobile and desktop push alerts for real-time events.',
+      )}
+      {renderToggle(
+        'browserNotifications',
+        'Browser Notifications',
+        'Display desktop banner alerts when browser tab is active.',
+      )}
+      {renderToggle(
+        'workspaceNotifications',
+        'Workspace Notifications',
+        'Alerts for workspace membership and administrative updates.',
+      )}
+      {renderToggle(
+        'projectNotifications',
+        'Project Notifications',
+        'Track task assignments, milestone changes, and board updates.',
+      )}
+      {renderToggle(
+        'mentionNotifications',
+        'Mention Notifications',
+        'Instant alerts when teammate tags @username in comments or docs.',
+      )}
+      {renderToggle(
+        'automationNotifications',
+        'Automation Notifications',
+        'Alerts when automated workflows run, complete, or encounter errors.',
       )}
       {renderToggle(
         'securityAlerts',
-        'Security Verification Records',
+        'Security Verification Alerts',
         'Notification alerts regarding authentication updates and IP authorization alterations.',
-      )}
-      {renderToggle(
-        'systemUpdates',
-        'Core System Engine Changes',
-        'Summarized reports documenting functional updates to the Aether client base.',
-      )}
-      {renderToggle(
-        'weeklyDigest',
-        'Performance Optimization Summaries',
-        'Aggregated runtime charts delivered at weekly milestones.',
       )}
     </div>
   );

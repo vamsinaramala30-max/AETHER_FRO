@@ -274,8 +274,13 @@ class AssistantStore {
     this.setState({ abortController });
 
     try {
-      await assistantService.sendMessage(activeId, content, { temperature: 0.7, model: 'default' });
-
+      const response = await assistantService.sendMessage(activeId, content, {
+        temperature: 0.7,
+        model: 'default',
+      });
+      if (response && response.content) {
+        this.appendToAssistantMessage(activeId, assistantMessageId, response.content);
+      }
       this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {

@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from './authservice';
 import { AuthLayout } from './authlayout';
+import { Eye, EyeOff } from 'lucide-react';
+import { FaGoogle } from 'react-icons/fa';
 
 export const SignupPage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -13,6 +15,8 @@ export const SignupPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +80,7 @@ export const SignupPage: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Create Architecture Account"
+      title="Create Aether Account"
       subtitle="Register a clean authentication scope within Aether"
     >
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
@@ -161,19 +165,28 @@ export const SignupPage: React.FC = () => {
           <label htmlFor="password" className="block text-sm font-medium text-slate-300">
             Password (minimum 8 characters)
           </label>
-          <div className="mt-1">
+
+          <div className="relative mt-1">
             <input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
               disabled={isLoading}
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+              onChange={(e) => setPassword(e.target.value)}
+              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
             />
+
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
@@ -181,19 +194,28 @@ export const SignupPage: React.FC = () => {
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300">
             Confirm Password
           </label>
-          <div className="mt-1">
+
+          <div className="relative mt-1">
             <input
               id="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
               disabled={isLoading}
               value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-              }}
-              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
             />
+
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
+            >
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
@@ -206,13 +228,42 @@ export const SignupPage: React.FC = () => {
         </button>
       </form>
 
+      <div className="mt-6">
+        <div className="relative flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-800"></div>
+          </div>
+          <span className="relative px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Or
+          </span>
+        </div>
+
+        <div className="mt-4">
+          <button
+            onClick={() => {
+              setErrorMessage(null);
+              try {
+                authService.signInWithGoogle();
+              } catch {
+                setErrorMessage('Google OAuth connection initialization failed.');
+              }
+            }}
+            disabled={isLoading}
+            className="inline-flex w-full items-center justify-center rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900"
+          >
+            <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
+            Sign up with Google
+          </button>
+        </div>
+      </div>
+
       <p className="mt-6 text-center text-sm text-slate-400">
-        Already have a configured profile?{' '}
+        Already have an account?{' '}
         <Link
           to="/login"
           className="font-medium text-cyan-400 underline underline-offset-4 transition-colors hover:text-cyan-300"
         >
-          Sign in instead
+          Sign in
         </Link>
       </p>
     </AuthLayout>

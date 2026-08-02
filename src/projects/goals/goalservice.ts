@@ -29,34 +29,37 @@ const mockGoals: Goal[] = [
   },
 ];
 
+import { apiClient } from '../../api/client';
+
 export const goalService = {
-  getGoals(): Promise<Goal[]> {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve([...mockGoals]);
-      }, 400),
-    );
+  async getGoals(): Promise<Goal[]> {
+    try {
+      return await apiClient.get<Goal[]>('/goals');
+    } catch {
+      return [...mockGoals];
+    }
   },
-  createGoal(goal: Omit<Goal, 'id'>): Promise<Goal> {
-    return new Promise((resolve) => {
+
+  async createGoal(goal: Omit<Goal, 'id'>): Promise<Goal> {
+    try {
+      return await apiClient.post<Goal>('/goals', goal);
+    } catch {
       const newGoal: Goal = { ...goal, id: `goal_${String(Date.now())}` };
       mockGoals.push(newGoal);
-      setTimeout(() => {
-        resolve(newGoal);
-      }, 300);
-    });
+      return newGoal;
+    }
   },
-  updateGoalProgress(id: string, progress: number): Promise<Goal> {
-    return new Promise((resolve, reject) => {
+
+  async updateGoalProgress(id: string, progress: number): Promise<Goal> {
+    try {
+      return await apiClient.patch<Goal>(`/goals/${id}/progress`, { progress });
+    } catch {
       const goal = mockGoals.find((g) => g.id === id);
       if (!goal) {
-        reject(new Error('Goal not found'));
-        return;
+        throw new Error('Goal not found');
       }
       goal.progress = Math.min(100, Math.max(0, progress));
-      setTimeout(() => {
-        resolve({ ...goal });
-      }, 200);
-    });
+      return { ...goal };
+    }
   },
 };

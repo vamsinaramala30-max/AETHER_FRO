@@ -17,6 +17,12 @@ export const NotificationsPage: React.FC = () => {
       .catch(() => {
         setData({
           emailAlerts: true,
+          pushNotifications: true,
+          browserNotifications: true,
+          workspaceNotifications: true,
+          projectNotifications: true,
+          mentionNotifications: true,
+          automationNotifications: true,
           securityAlerts: true,
           systemUpdates: false,
           weeklyDigest: false,

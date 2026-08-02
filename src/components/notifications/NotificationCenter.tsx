@@ -79,17 +79,78 @@ interface NotificationCenterProps {
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [notifications, setNotifications] = React.useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [_loading, setLoading] = React.useState<boolean>(true);
+
+  const fetchNotifications = React.useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/notifications');
+      const data = await res.json();
+      if (data.status === 'success' && data.data?.items) {
+        const mapped = data.data.items.map((item: any) => ({
+          id: item.id,
+          type: item.type || 'system',
+          title: item.title,
+          description: item.message || item.description || '',
+          time: new Date(item.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          read: Boolean(item.isRead),
+        }));
+        setNotifications(mapped);
+        return;
+      }
+    } catch {
+      // ignore offline fallback
+    }
+
+    const stored = localStorage.getItem('aether_notifications');
+    if (stored) {
+      setNotifications(JSON.parse(stored));
+    } else {
+      setNotifications(MOCK_NOTIFICATIONS);
+      localStorage.setItem('aether_notifications', JSON.stringify(MOCK_NOTIFICATIONS));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchNotifications();
+  }, [fetchNotifications]);
+
+  const saveToStorage = (updated: Notification[]) => {
+    setNotifications(updated);
+    localStorage.setItem('aether_notifications', JSON.stringify(updated));
+  };
 
   const unread = notifications.filter((n) => !n.read);
   const read = notifications.filter((n) => n.read);
 
-  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = async () => {
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    saveToStorage(updated);
+  };
 
-  const markRead = (id: string) =>
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const markRead = async (id: string) => {
+    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+    saveToStorage(updated);
+    try {
+      await fetch(`/api/v1/notifications/${id}/read`, { method: 'PATCH' });
+    } catch {
+      // offline silent update
+    }
+  };
 
-  const dismiss = (id: string) => setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const dismiss = async (id: string) => {
+    const updated = notifications.filter((n) => n.id !== id);
+    saveToStorage(updated);
+    try {
+      await fetch(`/api/v1/notifications/${id}`, { method: 'DELETE' });
+    } catch {
+      // offline silent update
+    }
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -113,9 +174,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
           n.read ? 'bg-slate-800/40' : 'bg-slate-700/50'
         }`}
       >
-        {TYPE_ICON[n.type]}
+        {TYPE_ICON[n.type] || <Info className="h-3.5 w-3.5 text-slate-400" />}
       </div>
-      <div className="min-w-0 flex-1" onClick={() => markRead(n.id)} role="button" tabIndex={0}>
+      <div
+        className="min-w-0 flex-1"
+        onClick={() => void markRead(n.id)}
+        role="button"
+        tabIndex={0}
+      >
         <p
           className={`truncate text-xs font-semibold ${n.read ? 'text-slate-400' : 'text-slate-200'}`}
         >
@@ -128,7 +194,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
         {!n.read && (
           <button
             type="button"
-            onClick={() => markRead(n.id)}
+            onClick={() => void markRead(n.id)}
             title="Mark as read"
             className="rounded p-1 text-slate-500 transition-colors hover:text-emerald-400"
           >
@@ -137,7 +203,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
         )}
         <button
           type="button"
-          onClick={() => dismiss(n.id)}
+          onClick={() => void dismiss(n.id)}
           title="Dismiss"
           className="rounded p-1 text-slate-500 transition-colors hover:text-red-400"
         >
@@ -176,7 +242,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
               {unread.length > 0 && (
                 <button
                   type="button"
-                  onClick={markAllRead}
+                  onClick={() => void markAllRead()}
                   className="rounded px-2 py-1 text-[11px] text-slate-500 transition-colors hover:bg-slate-800/60 hover:text-indigo-400"
                 >
                   Mark all read
@@ -231,7 +297,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
             <div className="flex items-center justify-between border-t border-slate-800/60 px-4 py-2.5">
               <button
                 type="button"
-                onClick={() => setNotifications([])}
+                onClick={() => saveToStorage([])}
                 className="flex items-center gap-1.5 text-[11px] text-slate-600 transition-colors hover:text-red-400"
               >
                 <Trash2 className="h-3 w-3" />

@@ -104,7 +104,6 @@ export const navigationGroups: NavGroup[] = [
         href: '/app/settings',
         items: [
           { label: 'Profile', href: '/app/settings/profile' },
-          { label: 'Appearance', href: '/app/settings/appearance' },
           { label: 'Notifications', href: '/app/settings/notifications' },
           { label: 'Security', href: '/app/settings/security' },
           { label: 'Connected Accounts', href: '/app/settings/accounts' },

@@ -26,34 +26,37 @@ const mockSessions: StudySession[] = [
   },
 ];
 
+import { apiClient } from '../../api/client';
+
 export const studyPlannerService = {
-  getSessions(): Promise<StudySession[]> {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve([...mockSessions]);
-      }, 300),
-    );
+  async getSessions(): Promise<StudySession[]> {
+    try {
+      return await apiClient.get<StudySession[]>('/study-planner/sessions');
+    } catch {
+      return [...mockSessions];
+    }
   },
-  addSession(session: Omit<StudySession, 'id'>): Promise<StudySession> {
-    return new Promise((resolve) => {
+
+  async addSession(session: Omit<StudySession, 'id'>): Promise<StudySession> {
+    try {
+      return await apiClient.post<StudySession>('/study-planner/sessions', session);
+    } catch {
       const newSession: StudySession = { ...session, id: `session_${String(Date.now())}` };
       mockSessions.push(newSession);
-      setTimeout(() => {
-        resolve(newSession);
-      }, 250);
-    });
+      return newSession;
+    }
   },
-  toggleComplete(id: string): Promise<StudySession> {
-    return new Promise((resolve, reject) => {
+
+  async toggleComplete(id: string): Promise<StudySession> {
+    try {
+      return await apiClient.patch<StudySession>(`/study-planner/sessions/${id}/toggle`);
+    } catch {
       const session = mockSessions.find((s) => s.id === id);
       if (!session) {
-        reject(new Error('Session not found'));
-        return;
+        throw new Error('Session not found');
       }
       session.completed = !session.completed;
-      setTimeout(() => {
-        resolve({ ...session });
-      }, 200);
-    });
+      return { ...session };
+    }
   },
 };

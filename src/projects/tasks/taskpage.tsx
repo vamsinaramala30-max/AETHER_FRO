@@ -20,9 +20,10 @@ export const TasksPage: React.FC = () => {
     void (async () => {
       try {
         const data = await taskService.getTasks();
-        setTasks(data);
+        setTasks(Array.isArray(data) ? data : []);
       } catch {
         setError('Failed to pull system tasks.');
+        setTasks([]);
       } finally {
         setLoading(false);
       }
@@ -33,7 +34,9 @@ export const TasksPage: React.FC = () => {
     void (async () => {
       try {
         const updated = await taskService.updateTask(id, { status: nextStatus });
-        setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+        setTasks((prev) =>
+          Array.isArray(prev) ? prev.map((t) => (t.id === id ? updated : t)) : [],
+        );
       } catch {
         alert('Failed to transition task state.');
       }
@@ -44,7 +47,7 @@ export const TasksPage: React.FC = () => {
     void (async () => {
       try {
         const created = await taskService.createTask(rawTask);
-        setTasks((prev) => [...prev, created]);
+        setTasks((prev) => [...(Array.isArray(prev) ? prev : []), created]);
       } catch {
         alert('Failed to commit task.');
       }
@@ -52,15 +55,21 @@ export const TasksPage: React.FC = () => {
   };
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
-      const matchSearch =
-        t.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        t.description.toLowerCase().includes(filters.search.toLowerCase());
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    return safeTasks.filter((t) => {
+      const titleMatch = t.title
+        ? t.title.toLowerCase().includes(filters.search.toLowerCase())
+        : false;
+      const descMatch = t.description
+        ? t.description.toLowerCase().includes(filters.search.toLowerCase())
+        : false;
+      const matchSearch = titleMatch || descMatch;
       const matchPriority = filters.priority === 'all' || t.priority === filters.priority;
       const hasFilterTag = typeof filters.tag === 'string' && filters.tag.trim() !== '';
       const matchTag =
         !hasFilterTag ||
-        t.tags.some((tag) => tag.toLowerCase().includes(filters.tag.toLowerCase()));
+        (Array.isArray(t.tags) &&
+          t.tags.some((tag) => tag.toLowerCase().includes(filters.tag.toLowerCase())));
       return matchSearch && matchPriority && matchTag;
     });
   }, [tasks, filters]);
@@ -76,16 +85,16 @@ export const TasksPage: React.FC = () => {
     );
 
   const hasError = typeof error === 'string' && error.trim() !== '';
-  if (hasError)
-    return (
-      <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400">
-        <AlertCircle className="h-4 w-4" />
-        {error}
-      </div>
-    );
 
   return (
     <PageWrapper wide>
+      {hasError && (
+        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
@@ -103,7 +112,7 @@ export const TasksPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="mt-6 space-y-6">
         <TaskForm onSubmit={handleCreateTask} />
         <TaskFilters filters={filters} onChange={setFilters} />
         <TaskBoard tasks={filteredTasks} onStatusChange={handleStatusChange} />

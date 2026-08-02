@@ -19,6 +19,7 @@ import { AgentsPage } from '@/ai/agents/AgentsPage';
 import { ProjectsPage } from '@/projects/projectspage';
 import { TasksPage } from '@/projects/tasks/taskpage';
 import { GoalsPage } from '@/projects/goals/goalpage';
+import { FilesPage } from '@/projects/files/filespage';
 
 // ── Knowledge ─────────────────────────────────────────────────────────────────
 import { KnowledgePage } from '@/knowledge/KnowledgePage';
@@ -35,6 +36,7 @@ import { AutomationPage } from '@/automation/AutomationPage';
 import { WorkflowCenterPage } from '@/automation/workflow-center/workflowcenterpage';
 import { IntegrationsPage } from '@/automation/integrations/integrationpage';
 import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationpage';
+import { AutomationLogsPage } from '@/automation/logs/automationlogspage';
 
 // ── Workspace ─────────────────────────────────────────────────────────────────
 import { WorkspacePage } from '@/workspace/WorkspacePage';
@@ -113,7 +115,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'tasks', element: <TasksPage /> },
           { path: 'goals', element: <GoalsPage /> },
           { path: 'board', element: <ProjectsPage /> },
-          { path: 'files', element: <ProjectsPage /> },
+          { path: 'files', element: <FilesPage /> },
         ],
       },
 
@@ -143,7 +145,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'workflows', element: <WorkflowCenterPage /> },
           { path: 'integrations', element: <IntegrationsPage /> },
           { path: 'schedules', element: <ScheduledAutomationPage /> },
-          { path: 'logs', element: <AutomationPage /> },
+          { path: 'logs', element: <AutomationLogsPage /> },
         ],
       },
 

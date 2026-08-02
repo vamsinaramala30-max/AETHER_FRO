@@ -12,43 +12,39 @@ export const WorkflowNode: React.FC<WorkflowNodeProps> = ({ node, index, onUpdat
   const getTypeStyles = () => {
     switch (node.type) {
       case 'trigger':
-        return 'border-emerald-500/30 bg-emerald-950/20 text-emerald-400';
+        return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400';
       case 'condition':
-        return 'border-amber-500/30 bg-amber-950/20 text-amber-400';
+        return 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400';
       case 'action':
-        return 'border-sky-500/30 bg-sky-950/20 text-sky-400';
+        return 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-400';
       default:
-        return 'border-slate-700 bg-slate-800 text-slate-300';
+        return 'border-border bg-card text-foreground';
     }
   };
 
   return (
     <div className="flex w-full max-w-md flex-col items-center">
-      {index > 0 && (
-        <div className="my-1 h-8 w-0.5 bg-gradient-to-b from-slate-700 to-slate-600 dark:from-slate-800 dark:to-slate-700" />
-      )}
+      {index > 0 && <div className="bg-border my-1.5 h-8 w-0.5" />}
 
       <div
-        className={`w-full rounded-xl border p-4 shadow-sm transition-all duration-200 ${getTypeStyles()}`}
+        className={`w-full rounded-2xl border p-4 shadow-sm transition-all duration-200 ${getTypeStyles()}`}
       >
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
-            {node.type}
-          </span>
-          <span className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-400">
+          <span className="text-xs font-bold uppercase tracking-wider opacity-90">{node.type}</span>
+          <span className="border-border bg-background text-muted-foreground rounded-full border px-2.5 py-0.5 text-xs font-semibold">
             Step {index + 1}
           </span>
         </div>
 
-        <h4 className="mb-2 text-sm font-medium text-slate-200 dark:text-slate-100">{node.name}</h4>
+        <h4 className="text-foreground mb-2 text-sm font-bold">{node.name}</h4>
 
-        <div className="mt-2 space-y-1.5 border-t border-slate-800/60 pt-2">
+        <div className="border-border/60 mt-2 space-y-1.5 border-t pt-2">
           {Object.entries(node.config).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between text-xs">
-              <span className="font-mono text-slate-400">{key}:</span>
+              <span className="text-muted-foreground font-mono">{key}:</span>
               <input
                 type="text"
-                className="max-w-[180px] rounded border border-slate-800 bg-slate-900/60 px-2 py-0.5 text-right font-mono text-slate-200 focus:border-slate-600 focus:outline-none"
+                className="border-border bg-background text-foreground max-w-[180px] rounded-lg border px-2.5 py-1 text-right font-mono text-xs focus:border-indigo-500 focus:outline-none"
                 value={value}
                 onChange={(e) =>
                   onUpdateConfig?.(node.id, { ...node.config, [key]: e.target.value })

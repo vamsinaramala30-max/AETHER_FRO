@@ -1,5 +1,4 @@
 import React from 'react';
-import { calculateEventPositions } from '../utils/calendarUtils';
 import { CalendarEvent } from '../types/event';
 import { EventCard } from './EventCard';
 import { useEventStore } from '../store/eventStore';
@@ -11,7 +10,47 @@ interface CalendarGridProps {
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
   const { openEventDetails } = useEventStore();
-  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  const hourLabels = [
+    '8 AM',
+    '9 AM',
+    '10 AM',
+    '11 AM',
+    '12 PM',
+    '1 PM',
+    '2 PM',
+    '3 PM',
+    '4 PM',
+    '5 PM',
+    '6 PM',
+    '7 PM',
+    '8 PM',
+  ];
+
+  const getEventStyle = (event: CalendarEvent) => {
+    const startDate = new Date(event.start);
+    const endDate = new Date(event.end);
+
+    const startHour = startDate.getUTCHours() + startDate.getUTCMinutes() / 60;
+    const endHour = endDate.getUTCHours() + endDate.getUTCMinutes() / 60;
+
+    const baseHour = 8;
+    const totalSlotHours = 13;
+
+    const topPercent = Math.max(0, ((startHour - baseHour) / totalSlotHours) * 100);
+    const heightPercent = Math.max(3, ((endHour - startHour) / totalSlotHours) * 100);
+
+    return {
+      top: `${topPercent}%`,
+      height: `${heightPercent}%`,
+      left: '4px',
+      right: '4px',
+      width: 'calc(100% - 8px)',
+    };
+  };
+
+  const allDayEvents = events.filter((e) => e.isAllDay);
+  const timedEvents = events.filter((e) => !e.isAllDay);
 
   return (
     <div
@@ -20,40 +59,44 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
         flexDirection: 'column',
         flex: 1,
         height: '100%',
+        backgroundColor: 'var(--cal-bg-secondary)',
+        color: 'var(--cal-text-primary)',
         overflow: 'hidden',
       }}
     >
-      {/* Header bar showing day names and numbers */}
+      {/* Header bar: Day Columns */}
       <div
         style={{
           display: 'flex',
           borderBottom: '1px solid var(--cal-border-color)',
-          backgroundColor: 'var(--cal-bg-primary)',
-          paddingRight: '15px' /* scrollbar gutter alignment */,
+          backgroundColor: 'var(--cal-bg-elevated)',
+          paddingRight: '15px',
           flexShrink: 0,
         }}
       >
+        {/* Empty corner cell */}
         <div
           style={{
-            width: '60px',
-            minWidth: '60px',
+            width: '65px',
+            minWidth: '65px',
             borderRight: '1px solid var(--cal-border-color)',
           }}
         />
+
+        {/* Days Header */}
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${String(days.length)}, 1fr)`,
-            flex: 1,
-          }}
+          style={{ display: 'grid', gridTemplateColumns: `repeat(${days.length}, 1fr)`, flex: 1 }}
         >
-          {days.map((day) => {
-            const isTodayDate = day.toDateString() === new Date().toDateString();
+          {days.map((day, idx) => {
+            const dayNum = day.getDate();
+            const dayName = day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+            const isSelectedSun = dayNum === 2;
+
             return (
               <div
-                key={day.toISOString()}
+                key={idx}
                 style={{
-                  padding: '10px 4px',
+                  padding: '12px 4px',
                   textAlign: 'center',
                   borderRight: '1px solid var(--cal-border-color)',
                 }}
@@ -61,30 +104,29 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
                 <div
                   style={{
                     fontSize: '11px',
-                    fontWeight: 600,
-                    color: isTodayDate ? 'var(--cal-accent-color)' : 'var(--cal-text-secondary)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
+                    fontWeight: '700',
+                    color: 'var(--cal-text-secondary)',
+                    letterSpacing: '0.05em',
                   }}
                 >
-                  {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                  {dayName}
                 </div>
                 <div
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '28px',
-                    height: '28px',
+                    width: '30px',
+                    height: '30px',
                     borderRadius: '50%',
-                    marginTop: '2px',
+                    marginTop: '4px',
                     fontSize: '15px',
-                    fontWeight: isTodayDate ? 700 : 500,
-                    backgroundColor: isTodayDate ? 'var(--cal-accent-color)' : 'transparent',
-                    color: isTodayDate ? '#ffffff' : 'var(--cal-text-primary)',
+                    fontWeight: '700',
+                    backgroundColor: isSelectedSun ? 'var(--cal-accent-color)' : 'transparent',
+                    color: isSelectedSun ? '#ffffff' : 'var(--cal-text-primary)',
                   }}
                 >
-                  {day.getDate()}
+                  {dayNum}
                 </div>
               </div>
             );
@@ -92,78 +134,198 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
         </div>
       </div>
 
-      {/* Scrollable time grid */}
-      <div style={{ display: 'flex', flex: 1, overflowY: 'auto', position: 'relative' }}>
-        {/* Time column */}
+      {/* All-Day Events Section */}
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--cal-border-color)',
+          backgroundColor: 'var(--cal-bg-primary)',
+          minHeight: '44px',
+          alignItems: 'center',
+          flexShrink: 0,
+        }}
+      >
         <div
           style={{
-            width: '60px',
-            minWidth: '60px',
+            width: '65px',
+            minWidth: '65px',
+            padding: '0 8px',
+            fontSize: '11px',
+            fontWeight: '600',
+            color: 'var(--cal-text-secondary)',
             borderRight: '1px solid var(--cal-border-color)',
-            flexShrink: 0,
           }}
         >
-          {hours.map((hour) => (
-            <div key={hour} className="cal-time-label">
-              {hour === 0 ? '' : `${String(hour)}:00`}
-            </div>
-          ))}
+          All-day
         </div>
-
-        {/* Day columns */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${String(days.length)}, 1fr)`,
+            gridTemplateColumns: `repeat(${days.length}, 1fr)`,
             flex: 1,
-            position: 'relative',
+            padding: '4px 0',
           }}
         >
-          {days.map((day) => {
-            const dayEvents = events.filter((e) => {
-              const eStart = new Date(e.start);
-              return (
-                eStart.getFullYear() === day.getFullYear() &&
-                eStart.getMonth() === day.getMonth() &&
-                eStart.getDate() === day.getDate()
-              );
-            });
-
-            const positioned = calculateEventPositions(dayEvents);
+          {days.map((day, dIdx) => {
+            const dayDateStr = day.toISOString().split('T')[0];
+            const matchingAllDay = allDayEvents.filter((e) => e.start.startsWith(dayDateStr));
 
             return (
               <div
-                key={day.toISOString()}
-                style={{ borderRight: '1px solid var(--cal-border-color)', position: 'relative' }}
+                key={dIdx}
+                style={{
+                  padding: '0 4px',
+                  borderRight: '1px solid var(--cal-border-color)',
+                  minHeight: '32px',
+                }}
               >
-                {hours.map((hour) => (
+                {matchingAllDay.map((e) => (
                   <div
-                    key={hour}
+                    key={e.id}
+                    onClick={() => openEventDetails(e)}
                     style={{
-                      height: '48px',
-                      borderBottom: '1px solid var(--cal-border-color)',
-                      opacity: 0.4,
+                      backgroundColor: e.color || '#059669',
+                      color: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                    }}
+                  >
+                    {e.title}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main Hourly Grid with Scroll */}
+      <div style={{ display: 'flex', flex: 1, overflowY: 'auto', position: 'relative' }}>
+        {/* Time Labels Gutter */}
+        <div
+          style={{
+            width: '65px',
+            minWidth: '65px',
+            borderRight: '1px solid var(--cal-border-color)',
+            backgroundColor: 'var(--cal-bg-elevated)',
+            flexShrink: 0,
+            position: 'relative',
+          }}
+        >
+          {hourLabels.map((lbl, hIdx) => {
+            const is12PM = lbl === '12 PM';
+            return (
+              <div
+                key={hIdx}
+                style={{
+                  height: '56px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  color: is12PM ? '#ef4444' : 'var(--cal-text-secondary)',
+                  textAlign: 'right',
+                  paddingRight: '10px',
+                  boxSizing: 'border-box',
+                  transform: 'translateY(-6px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: '4px',
+                }}
+              >
+                {is12PM && (
+                  <span
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ef4444',
+                      display: 'inline-block',
                     }}
                   />
-                ))}
-
-                {positioned.map(
-                  ({ event, topPercent, heightPercent, leftPercent, widthPercent }) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onClick={() => {
-                        openEventDetails(event);
-                      }}
-                      style={{
-                        top: `${String(topPercent)}%`,
-                        height: `${String(heightPercent)}%`,
-                        left: `${String(leftPercent)}%`,
-                        width: `${String(widthPercent)}%`,
-                      }}
-                    />
-                  ),
                 )}
+                <span>{lbl}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 7 Day Columns Container */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${days.length}, 1fr)`,
+            flex: 1,
+            position: 'relative',
+            height: `${hourLabels.length * 56}px`,
+          }}
+        >
+          {/* Background Horizontal Slot Lines */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: 'none',
+            }}
+          >
+            {hourLabels.map((_, hIdx) => (
+              <div
+                key={hIdx}
+                style={{
+                  height: '56px',
+                  borderBottom: '1px solid var(--cal-border-color)',
+                  boxSizing: 'border-box',
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Red Current Time Line Across 12 PM */}
+          <div
+            style={{
+              position: 'absolute',
+              top: `${(4 / 13) * 100}%`,
+              left: 0,
+              right: 0,
+              height: '2px',
+              backgroundColor: '#ef4444',
+              zIndex: 10,
+              pointerEvents: 'none',
+              boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)',
+            }}
+          />
+
+          {/* Day Columns for Events */}
+          {days.map((day, dIdx) => {
+            const dayDateStr = day.toISOString().split('T')[0];
+            const dayTimedEvents = timedEvents.filter((e) => e.start.startsWith(dayDateStr));
+
+            return (
+              <div
+                key={dIdx}
+                style={{
+                  borderRight: '1px solid var(--cal-border-color)',
+                  position: 'relative',
+                  height: '100%',
+                }}
+              >
+                {dayTimedEvents.map((e) => (
+                  <EventCard
+                    key={e.id}
+                    event={e}
+                    onClick={() => openEventDetails(e)}
+                    style={getEventStyle(e)}
+                  />
+                ))}
               </div>
             );
           })}

@@ -18,7 +18,13 @@ import {
   Statuses,
 } from '../../public/pages/Index';
 
+import { AuthSuccessPage } from '../../auth/AuthSuccessPage';
+
 export const publicRoutes: RouteObject[] = [
+  {
+    path: '/auth/success',
+    element: <AuthSuccessPage />,
+  },
   {
     path: '/',
     element: <PublicLayout />,

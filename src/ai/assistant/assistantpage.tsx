@@ -77,7 +77,7 @@ export const AssistantPage: React.FC = () => {
             </div>
           ) : !activeConversationId || (messages.length === 0 && !isLoading) ? (
             <div className="flex flex-1 items-center justify-center p-4">
-              <EmptyState onSelectPrompt={createNewConversation} />
+              <EmptyState onSelectPrompt={(promptText) => sendMessage(promptText)} />
             </div>
           ) : (
             <div className="flex-1 space-y-4 overflow-y-auto p-4 md:p-6">

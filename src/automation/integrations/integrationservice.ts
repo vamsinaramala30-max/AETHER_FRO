@@ -43,33 +43,34 @@ const mockIntegrations: Integration[] = [
   },
 ];
 
+import { apiClient } from '../../api/client';
+
 export const integrationsService = {
   async getIntegrations(): Promise<Integration[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...mockIntegrations]);
-      }, 300);
-    });
+    try {
+      return await apiClient.get<Integration[]>('/integrations');
+    } catch {
+      return [...mockIntegrations];
+    }
   },
 
   async updateIntegrationStatus(
     id: string,
     status: 'connected' | 'disconnected',
   ): Promise<Integration> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const index = mockIntegrations.findIndex((i) => i.id === id);
-        if (index === -1) {
-          reject(new Error('Integration entity not found'));
-          return;
-        }
+    try {
+      return await apiClient.patch<Integration>(`/integrations/${id}`, { status });
+    } catch {
+      const index = mockIntegrations.findIndex((i) => i.id === id);
+      if (index !== -1) {
         mockIntegrations[index] = {
           ...mockIntegrations[index],
           status,
           lastSyncedAt: status === 'connected' ? new Date().toISOString() : undefined,
         };
-        resolve({ ...mockIntegrations[index] });
-      }, 250);
-    });
+        return { ...mockIntegrations[index] };
+      }
+      throw new Error('Integration entity not found');
+    }
   },
 };

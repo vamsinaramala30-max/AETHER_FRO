@@ -40,41 +40,48 @@ const mockTasks: ScheduledTask[] = [
   },
 ];
 
+import { apiClient } from '../../api/client';
+
 export const automationService = {
   async getTasks(): Promise<ScheduledTask[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...mockTasks]);
-      }, 250);
-    });
+    try {
+      const res = await apiClient.get<any>('/automation/tasks');
+      if (Array.isArray(res)) return res;
+      if (res && Array.isArray(res.data)) return res.data;
+      if (res && Array.isArray(res.tasks)) return res.tasks;
+      return [...mockTasks];
+    } catch {
+      return [...mockTasks];
+    }
   },
 
   async toggleTask(id: string): Promise<ScheduledTask> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const idx = mockTasks.findIndex((t) => t.id === id);
-        if (idx === -1) {
-          reject(new Error('Target cron frame task target missing.'));
-          return;
-        }
-        mockTasks[idx] = { ...mockTasks[idx], isActive: !mockTasks[idx].isActive };
-        resolve({ ...mockTasks[idx] });
-      }, 200);
-    });
+    try {
+      const res = await apiClient.patch<any>(`/automation/tasks/${id}/toggle`);
+      return res?.data || res || mockTasks[0];
+    } catch {
+      const idx = mockTasks.findIndex((t) => t.id === id);
+      if (idx === -1) {
+        throw new Error('Target cron frame task target missing.');
+      }
+      mockTasks[idx] = { ...mockTasks[idx], isActive: !mockTasks[idx].isActive };
+      return { ...mockTasks[idx] };
+    }
   },
 
   async createTask(
     task: Omit<ScheduledTask, 'id' | 'lastExecutionStatus' | 'lastRun'>,
   ): Promise<ScheduledTask> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newTask: ScheduledTask = {
-          ...task,
-          id: `sched-${Date.now()}`,
-        };
-        mockTasks.push(newTask);
-        resolve(newTask);
-      }, 300);
-    });
+    try {
+      const res = await apiClient.post<any>('/automation/tasks', task);
+      return res?.data || res;
+    } catch {
+      const newTask: ScheduledTask = {
+        ...task,
+        id: `sched-${Date.now()}`,
+      };
+      mockTasks.push(newTask);
+      return newTask;
+    }
   },
 };

@@ -65,7 +65,7 @@ function getStoredRefreshToken(): string | null {
   return getStoredToken(authConfig.refreshTokenKey);
 }
 
-function setStoredTokens(tokens: AuthApiResult['tokens']): void {
+function setStoredTokens(tokens: { accessToken: string; refreshToken?: string }): void {
   localStorage.setItem(authConfig.tokenKey, tokens.accessToken);
   if (tokens.refreshToken) {
     localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
@@ -229,8 +229,27 @@ export const authService = {
   signInWithGoogle(): void {
     const rawBaseUrl =
       import.meta.env.VITE_API_BASE_URL?.replace(/\/api(\/v\d)?\/?$/, '') ||
-      'http://localhost:5000';
+      'http://localhost:5001';
     window.location.href = `${rawBaseUrl}/api/auth/google`;
+  },
+
+  async handleGoogleCallbackToken(token: string): Promise<AuthResponse> {
+    try {
+      setStoredTokens({ accessToken: token });
+      const user = await authApi.getCurrentUser();
+      const session = createSession(user as AuthUser, token);
+      notifyListeners('SIGNED_IN', session);
+      return { user: user as AuthUser, error: null };
+    } catch (error: unknown) {
+      clearStoredTokens();
+      return {
+        user: null,
+        error:
+          error instanceof Error
+            ? error
+            : new Error('OAuth authentication token resolution failed'),
+      };
+    }
   },
 
   async signOut(): Promise<{ error: Error | null }> {
@@ -259,9 +278,29 @@ export const authService = {
 
   subscribeToAuthChanges(callback: AuthChangeListener) {
     listeners.add(callback);
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === authConfig.tokenKey || e.key === authConfig.refreshTokenKey) {
+        resolveSession().then(({ session }) => {
+          if (session) {
+            notifyListeners('SIGNED_IN', session);
+          } else {
+            notifyListeners('SIGNED_OUT', null);
+          }
+        });
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+    }
+
     return {
       unsubscribe: () => {
         listeners.delete(callback);
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('storage', handleStorageChange);
+        }
       },
     };
   },
