@@ -1,6 +1,7 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/app/providers/authprovider';
+import { normalizeUserProfile } from '@/auth/userProfile';
 import { SidebarTooltip } from './SidebarTooltip';
 
 interface SidebarUserProfileProps {
@@ -14,14 +15,11 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
 }) => {
   const { user, logout } = useAuth();
 
-  const displayName =
-    (user?.firstName
-      ? `${user.firstName} ${user.lastName || ''}`.trim()
-      : user?.name || user?.email?.split('@')[0]) || 'User';
-
-  const userEmail = user?.email || 'user@aether.ai';
-  const initial = displayName[0]?.toUpperCase() || 'U';
-  const userRole = (user as { role?: string })?.role || 'Admin';
+  const normalizedUser = normalizeUserProfile(user as Record<string, unknown> | null | undefined);
+  const displayName = normalizedUser.displayName;
+  const userEmail = normalizedUser.email;
+  const initial = normalizedUser.initials;
+  const userRole = normalizedUser.role || 'USER';
 
   if (collapsed && !isMobile) {
     return (

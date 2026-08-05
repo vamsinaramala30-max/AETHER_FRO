@@ -98,82 +98,193 @@ const QUICK_LINKS: { label: string; href: string; icon: React.ReactNode; shortcu
   },
 ];
 
-// Simulated search — in production replace with real API call
+// Real multi-source search using frontend services
+import { searchService as knowledgeSearch } from '../../knowledge/search/searchservice';
+import { projectService } from '../../services/projectService';
+import { chatService } from '../../services/chatService';
+import { recentFilesService } from '../../workspace/recent-files/recentfilesservices';
+import { taskService } from '../../projects/tasks/taskservice';
+import { useEventStore } from '../../workspace/calendar/store/eventStore';
+import { storageService } from '../../services/storageService';
+
 async function performSearch(query: string): Promise<SearchResult[]> {
-  await new Promise((r) => setTimeout(r, 150));
-  if (!query.trim()) return [];
+  const q = query.trim();
+  if (!q) return [];
 
-  const q = query.toLowerCase();
-  const mock: SearchResult[] = [
-    {
-      id: '1',
-      type: 'conversation',
-      title: 'AI Architecture Discussion',
-      description: '3 messages',
-      href: '/app/ai/conversations',
-      meta: '2h ago',
-    },
-    {
-      id: '2',
-      type: 'project',
-      title: 'AETHER Frontend',
-      description: 'Active · 12 tasks',
-      href: '/app/projects',
-      meta: 'Today',
-    },
-    {
-      id: '3',
-      type: 'document',
-      title: 'Product Requirements',
-      description: 'Knowledge Base',
-      href: '/app/knowledge/documents',
-      meta: '1d ago',
-    },
-    {
-      id: '4',
-      type: 'note',
-      title: 'Meeting Notes - Aug 1',
-      description: 'Architecture review',
-      href: '/app/knowledge/notes',
-      meta: '1d ago',
-    },
-    {
-      id: '5',
-      type: 'task',
-      title: 'Implement GlobalSearch',
-      description: 'AETHER Frontend',
-      href: '/app/projects/tasks',
-      meta: 'Due today',
-    },
-    {
-      id: '6',
-      type: 'prompt',
-      title: 'Code Review Template',
-      description: 'Prompt Library',
-      href: '/app/ai/prompts',
-      meta: '',
-    },
-    {
-      id: '7',
-      type: 'setting',
-      title: 'Profile Settings',
-      description: 'Update your profile',
-      href: '/app/settings/profile',
-      meta: '',
-    },
-    {
-      id: '8',
-      type: 'calendar',
-      title: 'Team Standup',
-      description: '10:00 AM',
-      href: '/app/calendar',
-      meta: 'Tomorrow',
-    },
-  ];
+  try {
+    // Parallel fetch of potential sources (graceful fallback on failure)
+    const [knowledgeResults, projects, chats, files, tasks, events] = await Promise.all([
+      (async () => {
+        try {
+          return await knowledgeSearch.queryAll(q);
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+      (async () => {
+        try {
+          // try to list projects — some implementations accept empty workspace
+          const workspaces = await import('../../services/workspaceService').then((m) => m.workspaceService.getWorkspaces().catch(() => []));
+          const workspaceId = Array.isArray(workspaces) && workspaces[0] ? (workspaces[0] as any).id : '';
+          return (await projectService.listProjects(workspaceId)).slice(0, 20);
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+      (async () => {
+        try {
+          return chatService.getSessions();
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+      (async () => {
+        try {
+          return await recentFilesService.getRecentFiles();
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+      (async () => {
+        try {
+          return await taskService.getTasks();
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+      (async () => {
+        try {
+          // Access event store state directly
+          return useEventStore.getState().events || [];
+        } catch (e) {
+          return [] as any;
+        }
+      })(),
+    ]);
 
-  return mock.filter(
-    (r) => r.title.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q),
-  );
+    // Normalize each source into SearchResult[]
+    const candidates: SearchResult[] = [];
+
+    // Knowledge results (notes, documents)
+    for (const k of knowledgeResults) {
+      candidates.push({
+        id: `knowledge_${k.id}`,
+        type: k.type === 'note' ? 'note' : 'document',
+        title: k.title,
+        description: k.snippet || '',
+        href: `/app/knowledge`,
+        meta: new Date(k.date || Date.now()).toLocaleDateString(),
+      });
+    }
+
+    // Projects
+    for (const p of projects || []) {
+      const title = p.name || p.title || p.displayName || 'Project';
+      candidates.push({
+        id: `project_${p.id}`,
+        type: 'project',
+        title,
+        description: p.description || `Workspace: ${p.workspace || ''}`,
+        href: `/app/projects/${p.id}`,
+        meta: p.updatedAt || '',
+      });
+    }
+
+    // Chats / Conversations
+    for (const c of chats || []) {
+      candidates.push({
+        id: `conv_${c.id}`,
+        type: 'conversation',
+        title: c.title || `Conversation ${c.id}`,
+        description: `${(c.messages || []).length || 0} messages`,
+        href: `/app/ai/conversations/${c.id}`,
+        meta: c.createdAt ? new Date(c.createdAt).toLocaleString() : '',
+      });
+    }
+
+    // Files
+    for (const f of files || []) {
+      candidates.push({
+        id: `file_${f.id}`,
+        type: 'document',
+        title: f.name,
+        description: `${f.type} • ${f.location}`,
+        href: `/app/workspace/files/${f.id}`,
+        meta: new Date(f.lastAccessed).toLocaleDateString(),
+      });
+    }
+
+    // Tasks
+    for (const t of tasks || []) {
+      candidates.push({
+        id: `task_${t.id}`,
+        type: 'task',
+        title: t.title,
+        description: t.description || '',
+        href: `/app/projects/tasks/${t.id}`,
+        meta: t.dueDate ? `Due ${new Date(t.dueDate).toLocaleDateString()}` : '',
+      });
+    }
+
+    // Calendar events
+    for (const e of events || []) {
+      candidates.push({
+        id: `event_${e.id}`,
+        type: 'calendar',
+        title: e.title,
+        description: e.isAllDay ? 'All day' : new Date(e.start).toLocaleTimeString(),
+        href: `/app/calendar/event/${e.id}`,
+        meta: e.start ? new Date(e.start).toLocaleDateString() : '',
+      });
+    }
+
+    // Settings / quick match (profile, preferences)
+    // keep this lightweight — searching common setting labels
+    const settingsCandidates: SearchResult[] = [
+      { id: 'setting_profile', type: 'setting', title: 'Profile Settings', description: 'Update your profile', href: '/app/settings/profile', meta: '' },
+      { id: 'setting_prefs', type: 'setting', title: 'Preferences', description: 'Appearance and behavior', href: '/app/settings/preferences', meta: '' },
+    ];
+    candidates.push(...settingsCandidates);
+
+    // Scoring + fuzzy-ish matching
+    const tokens = q.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
+
+    function scoreItem(item: SearchResult): number {
+      const hay = `${item.title} ${item.description} ${item.meta}`.toLowerCase();
+      let score = 0;
+      for (const tok of tokens) {
+        if (hay.includes(tok)) score += 10;
+        else {
+          // partial or fuzzy check: characters in order
+          let idx = 0;
+          for (const ch of tok) {
+            idx = hay.indexOf(ch, idx);
+            if (idx === -1) {
+              score -= 1;
+              break;
+            }
+            idx++;
+            score += 0.1;
+          }
+        }
+      }
+      // boost title matches
+      if (tokens.some((t) => item.title.toLowerCase().includes(t))) score += 5;
+      return score;
+    }
+
+    const matched = candidates
+      .map((c) => ({ c, score: scoreItem(c) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 50)
+      .map((x) => x.c);
+
+    return matched;
+  } catch (err) {
+    console.error('performSearch error', err);
+    throw err;
+  }
 }
 
 interface GlobalSearchProps {
@@ -184,32 +295,80 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  // Helpers: highlight matches
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const highlight = (text: string, q: string) => {
+    if (!q) return text;
+    try {
+      const tokens = q
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((t) => escapeRegExp(t));
+      if (tokens.length === 0) return text;
+      const rx = new RegExp(`(${tokens.join('|')})`, 'ig');
+      const parts = text.split(rx);
+      return parts.map((part, idx) =>
+        rx.test(part) ? (
+          <mark key={idx} className="bg-yellow-300/20 text-slate-100 font-semibold">
+            {part}
+          </mark>
+        ) : (
+          <span key={idx}>{part}</span>
+        ),
+      );
+    } catch {
+      return text;
+    }
+  };
+
   useEffect(() => {
     inputRef.current?.focus();
+    const stored = storageService.get<string[]>('recent_searches', []);
+    setRecentSearches(Array.isArray(stored) ? stored : []);
   }, []);
 
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
       setLoading(false);
+      setError(null);
+      setSelectedIndex(0);
       return;
     }
     setLoading(true);
+    setError(null);
     const timer = setTimeout(async () => {
-      const res = await performSearch(query);
-      setResults(res);
-      setSelectedIndex(0);
-      setLoading(false);
-    }, 200);
+      try {
+        const res = await performSearch(query);
+        setResults(res);
+        setSelectedIndex(0);
+      } catch (err: any) {
+        setError('Search failed. Try again.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
     return () => clearTimeout(timer);
   }, [query]);
 
+  const saveRecent = (q: string) => {
+    if (!q || !q.trim()) return;
+    const list = storageService.get<string[]>('recent_searches', []);
+    const dedup = [q, ...(list.filter((s) => s !== q))].slice(0, 8);
+    storageService.set('recent_searches', dedup);
+    setRecentSearches(dedup);
+  };
+
   const navigateTo = useCallback(
-    (href: string) => {
+    (href: string, q?: string) => {
+      if (q) saveRecent(q);
       navigate(href);
       onClose();
     },
@@ -217,19 +376,35 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    const list = query ? results : QUICK_LINKS;
+    // if no query, combine recent searches and quick links for navigation
+    const listNoQuery: Array<any> = [];
+    if (!query) {
+      if (recentSearches.length) listNoQuery.push(...recentSearches.map((s) => ({ kind: 'recent', value: s })));
+      listNoQuery.push(...QUICK_LINKS.map((l) => ({ kind: 'quick', value: l })));
+    }
+
+    const maxIndex = query ? Math.max(0, results.length - 1) : Math.max(0, listNoQuery.length - 1);
+
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex((p) => Math.min(p + 1, list.length - 1));
+      setSelectedIndex((p) => Math.min(p + 1, maxIndex));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((p) => Math.max(p - 1, 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (query && results[selectedIndex]) {
-        navigateTo(results[selectedIndex].href);
-      } else if (!query && QUICK_LINKS[selectedIndex]) {
-        navigateTo(QUICK_LINKS[selectedIndex].href);
+        saveRecent(query);
+        navigateTo(results[selectedIndex].href, query);
+      } else if (!query) {
+        const sel = listNoQuery[selectedIndex];
+        if (sel) {
+          if (sel.kind === 'recent') {
+            setQuery(sel.value);
+          } else if (sel.kind === 'quick') {
+            navigateTo(sel.value.href);
+          }
+        }
       }
     } else if (e.key === 'Escape') {
       onClose();
@@ -294,7 +469,11 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               </div>
             )}
 
-            {!loading && query && results.length === 0 && (
+            {error && (
+              <div className="py-6 px-4 text-sm text-rose-400">{error}</div>
+            )}
+
+            {!loading && query && results.length === 0 && !error && (
               <div className="py-10 text-center">
                 <p className="text-sm text-slate-500">No results for "{query}"</p>
                 <p className="mt-1 text-xs text-slate-600">Try a different search term</p>
@@ -309,7 +488,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                     <button
                       key={result.id}
                       type="button"
-                      onClick={() => navigateTo(result.href)}
+                      onClick={() => {
+                        saveRecent(query);
+                        navigateTo(result.href, query);
+                      }}
                       className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
                         i === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
                       }`}
@@ -317,10 +499,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                       <span className={`shrink-0 ${config.color}`}>{config.icon}</span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-slate-200">
-                          {result.title}
+                          {typeof result.title === 'string' ? highlight(result.title, query) : result.title}
                         </p>
                         {result.description && (
-                          <p className="truncate text-xs text-slate-500">{result.description}</p>
+                          <p className="truncate text-xs text-slate-500">
+                            {typeof result.description === 'string'
+                              ? highlight(result.description, query)
+                              : result.description}
+                          </p>
                         )}
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
@@ -336,11 +522,48 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                     </button>
                   );
                 })}
+
+                {/* View all results */}
+                <div className="border-t border-slate-800/60 px-4 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      saveRecent(query);
+                      navigateTo(`/app/search?q=${encodeURIComponent(query)}`, query);
+                    }}
+                    className="w-full rounded-md py-2 text-sm text-slate-300 hover:bg-slate-800/40"
+                  >
+                    View all results for "{query}"
+                  </button>
+                </div>
               </div>
             )}
 
             {!query && (
               <div className="py-2">
+                {recentSearches.length > 0 && (
+                  <>
+                    <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+                      Recent Searches
+                    </p>
+                    {recentSearches.map((s, i) => (
+                      <button
+                        key={`recent_${s}_${i}`}
+                        type="button"
+                        onClick={() => setQuery(s)}
+                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                          i === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
+                        }`}
+                      >
+                        <Search className="h-4 w-4 text-slate-400" />
+                        <span className="flex-1 text-sm text-slate-300">{s}</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
+                      </button>
+                    ))}
+                    <div className="border-t border-slate-800/60" />
+                  </>
+                )}
+
                 <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
                   Quick Navigation
                 </p>
@@ -350,7 +573,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                     type="button"
                     onClick={() => navigateTo(link.href)}
                     className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      i === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
+                      (recentSearches.length + i) === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
                     }`}
                   >
                     {link.icon}

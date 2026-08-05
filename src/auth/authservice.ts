@@ -1,5 +1,6 @@
 import { authApi, AuthApiResult, UserDTO } from '../api/auth.api';
 import { authConfig } from '../config/auth.config';
+import { normalizeUserProfile } from './userProfile';
 
 export interface AuthUser extends UserDTO {
   firstName?: string;
@@ -101,13 +102,37 @@ function createSession(user: AuthUser, accessToken: string, refreshToken?: strin
   };
 }
 
+function normalizeAuthUser(input: unknown): AuthUser {
+  const normalized = normalizeUserProfile(input as Record<string, unknown> | null | undefined);
+
+  return {
+    ...normalized,
+    id: normalized.id,
+    email: normalized.email,
+    name: normalized.name,
+    fullName: normalized.fullName,
+    firstName: normalized.firstName,
+    lastName: normalized.lastName,
+    role: typeof (input as Record<string, unknown> | null | undefined)?.role === 'string'
+      ? ((input as Record<string, unknown>).role as string)
+      : 'USER',
+    avatarUrl: typeof normalized.avatarUrl === 'string' ? normalized.avatarUrl : null,
+    bio: typeof normalized.bio === 'string' ? normalized.bio : null,
+    company: typeof normalized.company === 'string' ? normalized.company : null,
+    timezone: typeof normalized.timezone === 'string' ? normalized.timezone : 'UTC',
+    language: typeof normalized.language === 'string' ? normalized.language : 'en',
+    isEmailVerified:
+      typeof normalized.isEmailVerified === 'boolean' ? normalized.isEmailVerified : false,
+  } as AuthUser;
+}
+
 async function buildUserFromResponse(response: AuthApiResult | UserDTO): Promise<AuthUser> {
   if ('user' in response && response.user) {
-    return response.user as AuthUser;
+    return normalizeAuthUser(response.user);
   }
 
   if ('id' in response && typeof response.id === 'string') {
-    return response as AuthUser;
+    return normalizeAuthUser(response);
   }
 
   throw new Error('Unable to normalize authenticated user');
@@ -144,8 +169,8 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
 
   if (accessToken && !isTokenExpired(accessToken)) {
     try {
-      const user = await authApi.getCurrentUser();
-      const session = createSession(user as AuthUser, accessToken, refreshToken ?? undefined);
+      const user = await buildUserFromResponse(await authApi.getCurrentUser());
+      const session = createSession(user, accessToken, refreshToken ?? undefined);
       currentSession = session;
       return { session, error: null };
     } catch (error: unknown) {
@@ -236,10 +261,10 @@ export const authService = {
   async handleGoogleCallbackToken(token: string): Promise<AuthResponse> {
     try {
       setStoredTokens({ accessToken: token });
-      const user = await authApi.getCurrentUser();
-      const session = createSession(user as AuthUser, token);
+      const user = await buildUserFromResponse(await authApi.getCurrentUser());
+      const session = createSession(user, token);
       notifyListeners('SIGNED_IN', session);
-      return { user: user as AuthUser, error: null };
+      return { user, error: null };
     } catch (error: unknown) {
       clearStoredTokens();
       return {

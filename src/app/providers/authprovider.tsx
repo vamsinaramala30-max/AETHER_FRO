@@ -21,13 +21,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      if (
-        previousUser &&
-        nextUser &&
-        previousUser.id === nextUser.id &&
-        previousUser.email === nextUser.email
-      ) {
-        return previousUser;
+      if (previousUser && nextUser) {
+        const hasSameProfile =
+          previousUser.id === nextUser.id &&
+          previousUser.email === nextUser.email &&
+          previousUser.name === nextUser.name &&
+          previousUser.fullName === nextUser.fullName &&
+          previousUser.firstName === nextUser.firstName &&
+          previousUser.lastName === nextUser.lastName &&
+          previousUser.avatarUrl === nextUser.avatarUrl &&
+          previousUser.bio === nextUser.bio &&
+          previousUser.company === nextUser.company &&
+          previousUser.role === nextUser.role;
+
+        if (hasSameProfile) {
+          return previousUser;
+        }
       }
 
       return nextUser;
@@ -69,6 +78,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
+    const handleProfileUpdated = () => {
+      if (!isMounted) return;
+      void refreshSession();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('aether-profile-updated', handleProfileUpdated);
+    }
+
     const initializeAuth = async () => {
       try {
         const { session } = await authService.initialize();
@@ -90,9 +108,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('aether-profile-updated', handleProfileUpdated);
+      }
       subscription.unsubscribe();
     };
-  }, [updateUser]);
+  }, [refreshSession, updateUser]);
 
   const contextValue = useMemo(
     () => ({

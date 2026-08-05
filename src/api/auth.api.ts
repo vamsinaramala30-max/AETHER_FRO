@@ -10,9 +10,18 @@ export interface AuthTokenResponse {
 export interface UserDTO {
   id: string;
   email: string;
-  name: string;
+  name?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   role: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
+  bio?: string | null;
+  company?: string | null;
+  timezone?: string | null;
+  language?: string | null;
+  isEmailVerified?: boolean;
+  workspaceId?: string;
 }
 
 export interface LoginPayload {
@@ -32,11 +41,29 @@ export interface AuthApiResult {
   tokens: AuthTokenResponse;
 }
 
+function unwrapResponsePayload(response: unknown): Record<string, unknown> {
+  const candidate = (response as Record<string, unknown> | undefined) ?? {};
+  const nestedData = candidate.data;
+
+  if (nestedData && typeof nestedData === 'object' && !Array.isArray(nestedData)) {
+    const nestedRecord = nestedData as Record<string, unknown>;
+    if (
+      'user' in nestedRecord ||
+      'tokens' in nestedRecord ||
+      'id' in nestedRecord ||
+      'email' in nestedRecord
+    ) {
+      return nestedRecord;
+    }
+  }
+
+  return candidate;
+}
+
 function normalizeAuthResponse(response: unknown): AuthApiResult {
-  const payload = (response as any)?.data ?? response;
-  const envelope = (payload as any)?.data ?? payload;
-  const tokens = (envelope as any)?.tokens ?? (payload as any)?.tokens;
-  const user = (envelope as any)?.user ?? (payload as any)?.user;
+  const payload = unwrapResponsePayload(response);
+  const tokens = (payload as any)?.tokens ?? (response as any)?.tokens;
+  const user = (payload as any)?.user ?? (response as any)?.user;
 
   if (!tokens || typeof tokens.accessToken !== 'string') {
     throw new Error('Unexpected auth response format: missing tokens');
@@ -49,7 +76,7 @@ function normalizeAuthResponse(response: unknown): AuthApiResult {
 }
 
 function extractUser(response: unknown): UserDTO {
-  const payload = (response as any)?.data ?? response;
+  const payload = unwrapResponsePayload(response);
   const user = (payload as any)?.user ?? payload;
 
   if (!user || typeof user !== 'object' || typeof user.id !== 'string') {

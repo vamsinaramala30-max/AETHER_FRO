@@ -1,107 +1,157 @@
 // frontend/src/settings/profile/profileService.ts
 import { apiClient } from '../../api/client';
 
+import { normalizeUserProfile } from '../../auth/userProfile';
+
 export interface UserProfile {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   bio?: string;
   company?: string;
 }
 
 const STORAGE_KEY = 'aether_user_profile';
+const LEGACY_USER_STORAGE_KEY = 'aether_user';
+
+function readStoredProfile(): UserProfile | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const value = window.localStorage.getItem(STORAGE_KEY);
+    if (!value) {
+      return null;
+    }
+    const parsed = JSON.parse(value) as Partial<UserProfile>;
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+    return {
+      id: typeof parsed.id === 'string' && parsed.id.trim() ? parsed.id : 'user-unknown',
+      email: typeof parsed.email === 'string' ? parsed.email : '',
+      firstName: typeof parsed.firstName === 'string' ? parsed.firstName : '',
+      lastName: typeof parsed.lastName === 'string' ? parsed.lastName : '',
+      avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : undefined,
+      bio: typeof parsed.bio === 'string' ? parsed.bio : '',
+      company: typeof parsed.company === 'string' ? parsed.company : '',
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredProfile(profile: UserProfile): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+
+  try {
+    const storedUser = window.localStorage.getItem(LEGACY_USER_STORAGE_KEY);
+    if (storedUser) {
+      const userObj = JSON.parse(storedUser) as Record<string, unknown>;
+      userObj.firstName = profile.firstName;
+      userObj.lastName = profile.lastName;
+      userObj.fullName = `${profile.firstName} ${profile.lastName}`.trim();
+      userObj.email = profile.email;
+      userObj.avatarUrl = profile.avatarUrl ?? null;
+      window.localStorage.setItem(LEGACY_USER_STORAGE_KEY, JSON.stringify(userObj));
+    }
+  } catch {
+    // ignore storage write failures and continue with the primary profile cache
+  }
+}
+
+function toUserProfile(payload: Record<string, unknown>, fallback: Partial<UserProfile> = {}): UserProfile {
+  const normalized = normalizeUserProfile({
+    id: fallback.id,
+    email: fallback.email,
+    fullName: typeof payload.fullName === 'string' ? payload.fullName : undefined,
+    name: typeof payload.name === 'string' ? payload.name : undefined,
+    firstName: typeof payload.firstName === 'string' ? payload.firstName : undefined,
+    lastName: typeof payload.lastName === 'string' ? payload.lastName : undefined,
+    avatarUrl: typeof payload.avatarUrl === 'string' ? payload.avatarUrl : undefined,
+    bio: typeof payload.bio === 'string' ? payload.bio : fallback.bio,
+    company: typeof payload.company === 'string' ? payload.company : fallback.company,
+    role: typeof payload.role === 'string' ? payload.role : undefined,
+  });
+
+  return {
+    id: normalized.id || fallback.id || 'user-unknown',
+    email: normalized.email || fallback.email || '',
+    firstName: normalized.firstName || fallback.firstName || '',
+    lastName: normalized.lastName || fallback.lastName || '',
+    avatarUrl: typeof normalized.avatarUrl === 'string' ? normalized.avatarUrl : undefined,
+    bio: typeof normalized.bio === 'string' ? normalized.bio : fallback.bio || '',
+    company: typeof normalized.company === 'string' ? normalized.company : fallback.company || '',
+  };
+}
 
 export const profileService = {
   getCurrentProfile: async (): Promise<UserProfile> => {
     try {
       const response = await apiClient.get<any>('/auth/profile');
-      const payload = response.data?.data || response.data || response;
-      const profile: UserProfile = {
-        id: payload.id || 'usr_default',
-        email: payload.email || 'user@aether.io',
-        firstName:
-          payload.firstName || (payload.fullName ? payload.fullName.split(' ')[0] : 'User'),
-        lastName:
-          payload.lastName ||
-          (payload.fullName ? payload.fullName.split(' ').slice(1).join(' ') : ''),
-        avatarUrl: payload.avatarUrl,
-        bio: payload.bio || '',
-        company: payload.company || '',
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      const payload = response?.data?.data ?? response?.data ?? response;
+      const profile = toUserProfile(payload as Record<string, unknown>);
+      writeStoredProfile(profile);
       return profile;
     } catch {
-      const cached = localStorage.getItem(STORAGE_KEY);
+      const cached = readStoredProfile();
       if (cached) {
-        try {
-          return JSON.parse(cached);
-        } catch {
-          // fallback
-        }
+        return cached;
       }
+
       return {
-        id: 'usr_default',
-        email: 'karthiknaramala9949@gmail.com',
-        firstName: 'Karthik',
-        lastName: 'Naramala',
+        id: 'user-unknown',
+        email: '',
+        firstName: '',
+        lastName: '',
         bio: '',
-        company: 'AETHER Inc.',
+        company: '',
       };
     }
   },
 
   updateProfile: async (data: Partial<UserProfile>): Promise<UserProfile> => {
-    let updatedProfile: UserProfile;
+    const fallbackProfile = readStoredProfile() ?? {
+      id: 'user-unknown',
+      email: '',
+      firstName: '',
+      lastName: '',
+      bio: '',
+      company: '',
+    };
+
     try {
       const response = await apiClient.put<any>('/auth/profile', data);
-      const payload = response.data?.data || response.data || response;
-      updatedProfile = {
-        id: payload.id || data.id || 'usr_default',
-        email: payload.email || data.email || 'karthiknaramala9949@gmail.com',
-        firstName:
-          payload.firstName ||
-          (payload.fullName ? payload.fullName.split(' ')[0] : data.firstName || 'Karthik'),
-        lastName:
-          payload.lastName ||
-          (payload.fullName
-            ? payload.fullName.split(' ').slice(1).join(' ')
-            : data.lastName || 'Naramala'),
-        avatarUrl: payload.avatarUrl || data.avatarUrl,
-        bio: payload.bio !== undefined ? payload.bio : data.bio || '',
-        company: payload.company !== undefined ? payload.company : data.company || '',
-      };
+      const payload = response?.data?.data ?? response?.data ?? response;
+      const updatedProfile = toUserProfile(payload as Record<string, unknown>, {
+        id: data.id || fallbackProfile.id,
+        email: data.email || fallbackProfile.email,
+        firstName: data.firstName || fallbackProfile.firstName,
+        lastName: data.lastName || fallbackProfile.lastName,
+        bio: data.bio ?? fallbackProfile.bio,
+        company: data.company ?? fallbackProfile.company,
+      });
+      writeStoredProfile(updatedProfile);
+      window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updatedProfile }));
+      return updatedProfile;
     } catch {
-      updatedProfile = {
-        id: data.id || 'usr_default',
-        email: data.email || 'karthiknaramala9949@gmail.com',
-        firstName: data.firstName || 'Karthik',
-        lastName: data.lastName || 'Naramala',
-        avatarUrl: data.avatarUrl,
-        bio: data.bio || '',
-        company: data.company || '',
+      const fallbackUpdatedProfile = {
+        ...fallbackProfile,
+        firstName: data.firstName || fallbackProfile.firstName,
+        lastName: data.lastName || fallbackProfile.lastName,
+        bio: data.bio ?? fallbackProfile.bio,
+        company: data.company ?? fallbackProfile.company,
       };
+      writeStoredProfile(fallbackUpdatedProfile);
+      window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: fallbackUpdatedProfile }));
+      return fallbackUpdatedProfile;
     }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProfile));
-
-    // Also update main user state in localStorage
-    try {
-      const storedUser = localStorage.getItem('aether_user');
-      if (storedUser) {
-        const userObj = JSON.parse(storedUser);
-        userObj.firstName = updatedProfile.firstName;
-        userObj.lastName = updatedProfile.lastName;
-        userObj.fullName = `${updatedProfile.firstName} ${updatedProfile.lastName}`.trim();
-        userObj.avatarUrl = updatedProfile.avatarUrl;
-        localStorage.setItem('aether_user', JSON.stringify(userObj));
-      }
-    } catch {
-      // safe fallback
-    }
-
-    window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updatedProfile }));
-    return updatedProfile;
   },
 };
