@@ -1,4 +1,5 @@
-// frontend/src/automation/integrations/integrationsService.ts
+// frontend/src/automation/integrations/integrationservice.ts
+import { apiClient } from '../../api/client';
 
 export interface Integration {
   id: string;
@@ -9,48 +10,14 @@ export interface Integration {
   configSchema: string[];
 }
 
-const mockIntegrations: Integration[] = [
-  {
-    id: 'int-slack',
-    name: 'Slack Workplace Sync',
-    category: 'Communication',
-    status: 'connected',
-    lastSyncedAt: '2026-07-20T21:00:00Z',
-    configSchema: ['Webhook URL', 'Default Channel'],
-  },
-  {
-    id: 'int-aws',
-    name: 'AWS S3 Bucket Gateway',
-    category: 'Cloud Storage',
-    status: 'connected',
-    lastSyncedAt: '2026-07-20T19:44:00Z',
-    configSchema: ['Access Key ID', 'Secret Identifier', 'Target Region'],
-  },
-  {
-    id: 'int-github',
-    name: 'GitHub Action Webhooks',
-    category: 'DevOps',
-    status: 'error',
-    lastSyncedAt: '2026-07-19T08:12:00Z',
-    configSchema: ['OAuth App Token', 'Repository Path'],
-  },
-  {
-    id: 'int-linear',
-    name: 'Linear Issue Tracking',
-    category: 'DevOps',
-    status: 'disconnected',
-    configSchema: ['API Token Key'],
-  },
-];
-
-import { apiClient } from '../../api/client';
-
 export const integrationsService = {
   async getIntegrations(): Promise<Integration[]> {
     try {
-      return await apiClient.get<Integration[]>('/integrations');
+      const res = await apiClient.get<any>('/integrations');
+      const items = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+      return items;
     } catch {
-      return [...mockIntegrations];
+      return [];
     }
   },
 
@@ -58,19 +25,8 @@ export const integrationsService = {
     id: string,
     status: 'connected' | 'disconnected',
   ): Promise<Integration> {
-    try {
-      return await apiClient.patch<Integration>(`/integrations/${id}`, { status });
-    } catch {
-      const index = mockIntegrations.findIndex((i) => i.id === id);
-      if (index !== -1) {
-        mockIntegrations[index] = {
-          ...mockIntegrations[index],
-          status,
-          lastSyncedAt: status === 'connected' ? new Date().toISOString() : undefined,
-        };
-        return { ...mockIntegrations[index] };
-      }
-      throw new Error('Integration entity not found');
-    }
+    const res = await apiClient.patch<any>(`/integrations/${id}`, { status });
+    return res?.data || res;
   },
 };
+

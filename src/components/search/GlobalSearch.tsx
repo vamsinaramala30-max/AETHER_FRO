@@ -106,6 +106,7 @@ import { recentFilesService } from '../../workspace/recent-files/recentfilesserv
 import { taskService } from '../../projects/tasks/taskservice';
 import { useEventStore } from '../../workspace/calendar/store/eventStore';
 import { storageService } from '../../services/storageService';
+import { aiService } from '../../services/aiService';
 
 async function performSearch(query: string): Promise<SearchResult[]> {
   const q = query.trim();
@@ -117,7 +118,7 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       (async () => {
         try {
           return await knowledgeSearch.queryAll(q);
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
@@ -127,28 +128,28 @@ async function performSearch(query: string): Promise<SearchResult[]> {
           const workspaces = await import('../../services/workspaceService').then((m) => m.workspaceService.getWorkspaces().catch(() => []));
           const workspaceId = Array.isArray(workspaces) && workspaces[0] ? (workspaces[0] as any).id : '';
           return (await projectService.listProjects(workspaceId)).slice(0, 20);
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
       (async () => {
         try {
           return chatService.getSessions();
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
       (async () => {
         try {
           return await recentFilesService.getRecentFiles();
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
       (async () => {
         try {
           return await taskService.getTasks();
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
@@ -156,7 +157,7 @@ async function performSearch(query: string): Promise<SearchResult[]> {
         try {
           // Access event store state directly
           return useEventStore.getState().events || [];
-        } catch (e) {
+        } catch {
           return [] as any;
         }
       })(),
@@ -246,7 +247,7 @@ async function performSearch(query: string): Promise<SearchResult[]> {
     ];
     candidates.push(...settingsCandidates);
 
-    // Scoring + fuzzy-ish matching
+    const nlIntent = await aiService.parseNaturalLanguageSearch(q).catch(() => ({ intent: 'all' }));
     const tokens = q.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
 
     function scoreItem(item: SearchResult): number {
@@ -255,7 +256,6 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       for (const tok of tokens) {
         if (hay.includes(tok)) score += 10;
         else {
-          // partial or fuzzy check: characters in order
           let idx = 0;
           for (const ch of tok) {
             idx = hay.indexOf(ch, idx);
@@ -270,6 +270,12 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       }
       // boost title matches
       if (tokens.some((t) => item.title.toLowerCase().includes(t))) score += 5;
+
+      // Intent boost if AI intent recognized
+      if (nlIntent.intent === 'calendar' && item.type === 'calendar') score += 15;
+      if (nlIntent.intent === 'projects' && item.type === 'project') score += 15;
+      if (nlIntent.intent === 'files' && (item.type === 'document' || item.type === 'note')) score += 15;
+
       return score;
     }
 

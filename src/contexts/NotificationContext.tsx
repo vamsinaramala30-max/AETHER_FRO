@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, useState, useCallback, ReactNode, useEffect } from 'react';
+import { aiService } from '../services/aiService';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
@@ -9,11 +10,13 @@ export interface ToastNotification {
   message?: string;
   duration?: number;
   read: boolean;
+  priority?: 'high' | 'normal' | 'low';
 }
 
 export interface NotificationContextValue {
   notifications: ToastNotification[];
   unreadCount: number;
+  urgentSummary: string | null;
   notify: (notification: Omit<ToastNotification, 'id' | 'read'>) => string;
   dismiss: (id: string) => void;
   markAsRead: (id: string) => void;
@@ -24,6 +27,19 @@ const NotificationContext = createContext<NotificationContextValue | undefined>(
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<ToastNotification[]>([]);
+  const [urgentSummary, setUrgentSummary] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (notifications.length > 0 && aiService.isAiEnabled()) {
+      aiService.rankNotifications(notifications).then((res) => {
+        setUrgentSummary(res.urgentSummary);
+      }).catch(() => {
+        setUrgentSummary(null);
+      });
+    } else {
+      setUrgentSummary(null);
+    }
+  }, [notifications]);
 
   const dismiss = useCallback((id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -54,6 +70,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const clearAll = useCallback(() => {
     setNotifications([]);
+    setUrgentSummary(null);
   }, []);
 
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
@@ -62,12 +79,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     () => ({
       notifications,
       unreadCount,
+      urgentSummary,
       notify,
       dismiss,
       markAsRead,
       clearAll,
     }),
-    [notifications, unreadCount, notify, dismiss, markAsRead, clearAll],
+    [notifications, unreadCount, urgentSummary, notify, dismiss, markAsRead, clearAll],
   );
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;

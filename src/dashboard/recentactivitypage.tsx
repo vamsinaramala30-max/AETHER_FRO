@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, GitCommit, FileText, CheckCircle, MessageSquare } from 'lucide-react';
 
 export const RecentActivityPage: React.FC = () => {
-  const activities = [
+  const _activities = [
     {
       icon: <GitCommit className="h-4 w-4 text-purple-400" />,
       title: 'Pushed 4 commits to feature/analytics-dashboard',
@@ -41,22 +41,10 @@ export const RecentActivityPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="divide-y divide-[#192032] rounded-2xl border border-[#192032] bg-[#0D121F] p-5">
-        {activities.map((act, idx) => (
-          <div key={idx} className="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
-            <div className="mt-0.5 shrink-0 rounded-lg border border-[#1E2638] bg-[#141B2D] p-2">
-              {act.icon}
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-slate-200">{act.title}</div>
-              <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
-                <span>By {act.user}</span>
-                <span>•</span>
-                <span>{act.time}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="rounded-2xl border border-[#192032] bg-[#0D121F] p-8 text-center space-y-2">
+        <Activity className="mx-auto h-8 w-8 text-slate-500" />
+        <p className="text-sm font-semibold text-slate-300">No activity logged yet</p>
+        <p className="text-xs text-slate-400">Actions and updates performed in your workspace will appear here.</p>
       </div>
     </div>
   );

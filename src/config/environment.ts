@@ -8,7 +8,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   VITE_APP_NAME: z.string().default('AETHER Platform'),
   VITE_APP_VERSION: z.string().default('1.0.0'),
-  VITE_API_BASE_URL: z.string().pipe(z.string().url()).default('http://localhost:5001/api'),
+  VITE_API_BASE_URL: z.string().pipe(z.string().url()).default('http://localhost:5001/api/v1'),
   VITE_API_TIMEOUT: z.coerce.number().default(30000),
   VITE_SUPABASE_URL: z.string().pipe(z.string().url()).optional(),
   VITE_SUPABASE_ANON_KEY: z.string().optional(),

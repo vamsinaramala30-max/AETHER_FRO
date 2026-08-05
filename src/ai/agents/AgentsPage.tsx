@@ -13,39 +13,6 @@ interface Agent {
   tools: string[];
 }
 
-const MOCK_AGENTS: Agent[] = [
-  {
-    id: '1',
-    name: 'Research Assistant',
-    description: 'Searches the web and summarizes information from your knowledge base.',
-    status: 'active',
-    knowledgeSources: 3,
-    executions: 47,
-    lastRun: '2m ago',
-    tools: ['Web Search', 'Knowledge Base', 'Summarizer'],
-  },
-  {
-    id: '2',
-    name: 'Code Reviewer',
-    description: 'Reviews code changes and provides feedback based on your coding standards.',
-    status: 'paused',
-    knowledgeSources: 1,
-    executions: 12,
-    lastRun: '1d ago',
-    tools: ['Code Analysis', 'GitHub', 'Comments'],
-  },
-  {
-    id: '3',
-    name: 'Meeting Summarizer',
-    description: 'Automatically summarizes meeting transcripts and creates action items.',
-    status: 'active',
-    knowledgeSources: 2,
-    executions: 23,
-    lastRun: '3h ago',
-    tools: ['Transcript', 'Calendar', 'Tasks'],
-  },
-];
-
 const STATUS_CONFIG = {
   active: {
     label: 'Active',
@@ -68,7 +35,7 @@ const STATUS_CONFIG = {
 };
 
 export const AgentsPage: React.FC = () => {
-  const [agents, setAgents] = useState<Agent[]>(MOCK_AGENTS);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAgent, setNewAgent] = useState({
     name: '',

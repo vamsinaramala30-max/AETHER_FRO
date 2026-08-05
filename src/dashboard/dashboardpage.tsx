@@ -49,10 +49,10 @@ export const DashboardPage: React.FC = () => {
       {/* Top Welcome Header */}
       <header className="space-y-1">
         <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-          THURSDAY, JULY 30
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-          Good afternoon, <span className="text-slate-100">{displayName}.</span>
+          {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span className="text-slate-100">{displayName}.</span>
         </h1>
         <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
           <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">

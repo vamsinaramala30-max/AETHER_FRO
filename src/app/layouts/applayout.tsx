@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sparkles, Bell, Search, Sun, Moon, Menu } from 'lucide-react';
 
 import { useTheme } from '../providers/themeprovider';
 import { Sidebar } from '../../components/sidebar/Sidebar';
+
+// Lazy-load modals so they don't bloat the initial bundle
+const GlobalSearch = React.lazy(
+  () => import('../../components/search/GlobalSearch').then((m) => ({ default: m.GlobalSearch })),
+);
+const NotificationCenter = React.lazy(
+  () =>
+    import('../../components/notifications/NotificationCenter').then((m) => ({
+      default: m.NotificationCenter,
+    })),
+);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -152,21 +163,61 @@ const TopHeader: React.FC<TopHeaderProps> = ({
 export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [, setSearchOpen] = useState(false);
-  const [, setNotificationsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased">
-      {/* Sidebar navigation */}
-      <Sidebar
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed((prev) => !prev)}
-        isMobile={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
-        onSearchOpen={() => setSearchOpen(true)}
-        onNotificationsOpen={() => setNotificationsOpen(true)}
-        unreadCount={0}
-      />
+      {/* Mobile sidebar: fixed overlay drawer */}
+      <div
+        className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out md:hidden ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        aria-hidden={!mobileOpen}
+      >
+        <Sidebar
+          collapsed={false}
+          onToggleCollapse={() => {}}
+          isMobile={true}
+          onMobileClose={() => setMobileOpen(false)}
+          onSearchOpen={() => { setMobileOpen(false); setSearchOpen(true); }}
+          onNotificationsOpen={() => { setMobileOpen(false); setNotificationsOpen(true); }}
+          unreadCount={0}
+        />
+      </div>
+
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Desktop sidebar: in-flow layout */}
+      <div className="hidden md:block">
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((prev) => !prev)}
+          isMobile={false}
+          onMobileClose={() => {}}
+          onSearchOpen={() => setSearchOpen(true)}
+          onNotificationsOpen={() => setNotificationsOpen(true)}
+          unreadCount={0}
+        />
+      </div>
 
       {/* Main content container */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -190,6 +241,20 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Global Search Modal — rendered at layout root for correct z-index stacking */}
+      {searchOpen && (
+        <React.Suspense fallback={null}>
+          <GlobalSearch onClose={() => setSearchOpen(false)} />
+        </React.Suspense>
+      )}
+
+      {/* Notification Center — rendered at layout root for correct z-index stacking */}
+      {notificationsOpen && (
+        <React.Suspense fallback={null}>
+          <NotificationCenter onClose={() => setNotificationsOpen(false)} />
+        </React.Suspense>
+      )}
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Calendar as CalendarIcon, Clock, Video, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus } from 'lucide-react';
 
 export const SchedulePage: React.FC = () => {
-  const events = [
+  const _events = [
     { time: '09:00 AM', title: 'Daily Standup & Sync', duration: '30m', location: 'Google Meet' },
     {
       time: '11:00 AM',
@@ -40,36 +40,10 @@ export const SchedulePage: React.FC = () => {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {events.map((event, idx) => (
-          <div
-            key={idx}
-            className="flex flex-col justify-between gap-3 rounded-xl border border-[#192032] bg-[#0D121F] p-4 transition-all hover:border-indigo-500/40 sm:flex-row sm:items-center"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-24 font-mono text-sm font-bold text-indigo-400">{event.time}</div>
-              <div>
-                <h3 className="text-base font-semibold text-white">{event.title}</h3>
-                <div className="mt-1 flex items-center gap-3 text-xs text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 text-slate-500" />
-                    {event.duration}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Video className="h-3.5 w-3.5 text-slate-500" />
-                    {event.location}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="self-start rounded-lg border border-[#242E47] bg-[#161C2E] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:text-white sm:self-center"
-            >
-              Join Session
-            </button>
-          </div>
-        ))}
+      <div className="rounded-2xl border border-[#192032] bg-[#0D121F] p-8 text-center space-y-2">
+        <CalendarIcon className="mx-auto h-8 w-8 text-slate-500" />
+        <p className="text-sm font-semibold text-slate-300">No events scheduled for today</p>
+        <p className="text-xs text-slate-400">Click "Add Event" to schedule meetings, focus sessions, or reminders.</p>
       </div>
     </div>
   );

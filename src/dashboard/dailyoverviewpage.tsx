@@ -21,7 +21,7 @@ export const DailyOverviewPage: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-slate-400">Tasks Completed</div>
-            <div className="text-lg font-bold text-white">12 / 16</div>
+            <div className="text-lg font-bold text-white">0</div>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-[#192032] bg-[#0D121F] p-4">
@@ -30,7 +30,7 @@ export const DailyOverviewPage: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-slate-400">Focus Hours</div>
-            <div className="text-lg font-bold text-white">5.4 hrs</div>
+            <div className="text-lg font-bold text-white">0.0 hrs</div>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-[#192032] bg-[#0D121F] p-4">
@@ -39,7 +39,7 @@ export const DailyOverviewPage: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-slate-400">Productivity Score</div>
-            <div className="text-lg font-bold text-white">94%</div>
+            <div className="text-lg font-bold text-white">0%</div>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-[#192032] bg-[#0D121F] p-4">
@@ -48,40 +48,16 @@ export const DailyOverviewPage: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-slate-400">Meetings Today</div>
-            <div className="text-lg font-bold text-white">3 Scheduled</div>
+            <div className="text-lg font-bold text-white">0 Scheduled</div>
           </div>
         </div>
       </div>
 
       <div className="space-y-4 rounded-2xl border border-[#192032] bg-[#0D121F] p-6">
         <h2 className="text-lg font-semibold text-white">Today's Key Priorities</h2>
-        <div className="space-y-3">
-          {[
-            { title: 'Finalize AETHER API Integration Docs', time: '10:00 AM', status: 'Done' },
-            { title: 'Review Sprint Deliverables with Team', time: '02:00 PM', status: 'Upcoming' },
-            { title: 'Optimize Database Query Indexes', time: '04:30 PM', status: 'Pending' },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between rounded-xl border border-[#1E2638] bg-[#121827] p-3.5"
-            >
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-slate-400">{item.time}</span>
-                <span className="text-sm font-medium text-slate-200">{item.title}</span>
-              </div>
-              <span
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                  item.status === 'Done'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : item.status === 'Upcoming'
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-amber-500/20 text-amber-400'
-                }`}
-              >
-                {item.status}
-              </span>
-            </div>
-          ))}
+        <div className="py-8 text-center space-y-2">
+          <p className="text-sm font-semibold text-slate-300">No priority tasks set for today</p>
+          <p className="text-xs text-slate-400">Create or assign priority tasks to view them on your daily overview.</p>
         </div>
       </div>
     </div>

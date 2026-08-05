@@ -36,6 +36,15 @@ export const SecuritySettings: React.FC = () => {
   return (
     <div className="max-w-2xl space-y-6">
       <form onSubmit={handlePasswordChange} className="space-y-5">
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          className="hidden"
+          aria-hidden="true"
+          readOnly
+          value="authenticated-user"
+        />
         <h3 className="text-base font-bold text-slate-900 dark:text-white">Update Password</h3>
         {status && (
           <div

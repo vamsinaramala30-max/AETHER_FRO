@@ -21,35 +21,14 @@ interface ProjectStats {
   totalCollaborators: number;
 }
 
-const mockProjectsList: Project[] = [
-  {
-    id: 'proj-1',
-    name: 'AETHER AI Engine Core',
-    description: 'Enterprise generative workflow orchestration & RAG system.',
-    category: 'Core AI',
-    progress: 85,
-    membersCount: 8,
-    updatedAt: new Date().toLocaleDateString(),
-  },
-  {
-    id: 'proj-2',
-    name: 'Unified Workspace Platform',
-    description: 'Calendar, Automation & Real-time Session Sync Architecture.',
-    category: 'Frontend Platform',
-    progress: 70,
-    membersCount: 5,
-    updatedAt: new Date().toLocaleDateString(),
-  },
-];
-
 export const ProjectsPage: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>(mockProjectsList);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState<ProjectStats>({
-    totalProjects: 2,
-    totalTasks: 18,
-    completedTasks: 14,
-    avgCompletion: 78,
-    totalCollaborators: 12,
+    totalProjects: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    avgCompletion: 0,
+    totalCollaborators: 0,
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,39 +41,50 @@ export const ProjectsPage: React.FC = () => {
     setError(null);
     try {
       const data = await apiClient.get<any>('/projects');
-      const payload = data.data || data;
+      const payload = data?.data || data;
       const rawProjects = Array.isArray(payload)
         ? payload
-        : payload?.recentProjects || payload?.projects || mockProjectsList;
+        : Array.isArray(payload?.projects)
+        ? payload.projects
+        : Array.isArray(payload?.recentProjects)
+        ? payload.recentProjects
+        : [];
 
-      if (Array.isArray(rawProjects) && rawProjects.length > 0) {
-        setProjects(
-          rawProjects.map((p: any) => ({
-            id: p.id || `proj-${Date.now()}`,
-            name: p.name || 'Untitled Project',
-            description: p.description || 'Workspace Initiative',
-            category: p.category || 'General',
-            progress: p.progress ?? 50,
-            membersCount: p.membersCount || 3,
-            updatedAt: new Date(p.updatedAt || Date.now()).toLocaleDateString(),
-          })),
-        );
+      if (Array.isArray(rawProjects)) {
+        const mapped = rawProjects.map((p: any) => ({
+          id: p.id || `proj-${Date.now()}`,
+          name: p.name || 'Untitled Project',
+          description: p.description || '',
+          category: p.category || 'General',
+          progress: p.progress ?? 0,
+          membersCount: p.membersCount || 1,
+          updatedAt: new Date(p.updatedAt || Date.now()).toLocaleDateString(),
+        }));
+        setProjects(mapped);
 
         if (payload?.stats) {
           const s = payload.stats;
           setStats({
-            totalProjects: s.totalProjects || rawProjects.length,
-            totalTasks: s.totalTasks || 12,
-            completedTasks: s.completedTasks || 8,
-            avgCompletion: s.totalTasks ? Math.round((s.completedTasks / s.totalTasks) * 100) : 75,
-            totalCollaborators: s.totalCollaborators || 5,
+            totalProjects: s.totalProjects ?? mapped.length,
+            totalTasks: s.totalTasks ?? 0,
+            completedTasks: s.completedTasks ?? 0,
+            avgCompletion: s.totalTasks ? Math.round((s.completedTasks / s.totalTasks) * 100) : 0,
+            totalCollaborators: s.totalCollaborators ?? (mapped.length > 0 ? 1 : 0),
+          });
+        } else {
+          setStats({
+            totalProjects: mapped.length,
+            totalTasks: 0,
+            completedTasks: 0,
+            avgCompletion: 0,
+            totalCollaborators: mapped.length > 0 ? 1 : 0,
           });
         }
       } else {
-        setProjects(mockProjectsList);
+        setProjects([]);
       }
     } catch {
-      setProjects(mockProjectsList);
+      setProjects([]);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,8 @@
-import React from 'react';
-import { Cpu, Zap, Eye, Star, CheckCircle, Plus, X, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Cpu, Zap, Star, CheckCircle, Plus, X, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { useAI } from '@/contexts/AIContext';
+import { apiClient } from '@/api/client';
 
 interface AIModel {
   id: string;
@@ -14,87 +16,112 @@ interface AIModel {
   isDefault: boolean;
 }
 
-const MODELS: AIModel[] = [
+const DEFAULT_MODELS: AIModel[] = [
   {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    provider: 'OpenAI',
-    contextWindow: '128K',
-    latency: 'Fast',
-    cost: '$$',
-    capabilities: ['Chat', 'Vision', 'Function Calling', 'JSON Mode'],
+    id: 'llama3.1:8b',
+    name: 'llama3.1:8b',
+    provider: 'Ollama (Local)',
+    contextWindow: '8K',
+    latency: 'Ultra Fast',
+    cost: 'Free',
+    capabilities: ['Chat', 'Code', 'Function Calling'],
     enabled: true,
     isDefault: true,
   },
   {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'Anthropic',
-    contextWindow: '200K',
-    latency: 'Fast',
-    cost: '$$',
-    capabilities: ['Chat', 'Vision', 'Code', 'Long Context'],
-    enabled: true,
-    isDefault: false,
-  },
-  {
-    id: 'gemini-pro',
-    name: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    contextWindow: '1M',
-    latency: 'Medium',
-    cost: '$',
-    capabilities: ['Chat', 'Vision', 'Audio', 'Long Context'],
-    enabled: true,
-    isDefault: false,
-  },
-  {
-    id: 'llama-3-70b',
-    name: 'Llama 3 70B',
-    provider: 'Meta (Open Source)',
+    id: 'llama3.2',
+    name: 'llama3.2',
+    provider: 'Ollama (Local)',
     contextWindow: '128K',
-    latency: 'Variable',
+    latency: 'Fast',
     cost: 'Free',
-    capabilities: ['Chat', 'Code', 'Function Calling'],
-    enabled: false,
+    capabilities: ['Chat', 'Vision', 'Code'],
+    enabled: true,
     isDefault: false,
   },
   {
-    id: 'mistral-large',
-    name: 'Mistral Large',
-    provider: 'Mistral AI',
-    contextWindow: '128K',
+    id: 'qwen2.5:7b',
+    name: 'qwen2.5:7b',
+    provider: 'Ollama (Local)',
+    contextWindow: '32K',
     latency: 'Fast',
-    cost: '$',
+    cost: 'Free',
     capabilities: ['Chat', 'Code', 'Multilingual'],
-    enabled: false,
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: 'mistral',
+    name: 'mistral',
+    provider: 'Ollama (Local)',
+    contextWindow: '32K',
+    latency: 'Fast',
+    cost: 'Free',
+    capabilities: ['Chat', 'Reasoning'],
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: 'deepseek-r1',
+    name: 'deepseek-r1',
+    provider: 'Ollama (Local)',
+    contextWindow: '64K',
+    latency: 'Medium',
+    cost: 'Free',
+    capabilities: ['Reasoning', 'Code', 'Math'],
+    enabled: true,
     isDefault: false,
   },
 ];
 
-const PROVIDER_COLORS: Record<string, string> = {
-  OpenAI:
-    'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20',
-  Anthropic:
-    'text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-500/10 dark:border-orange-500/20',
-  Google:
-    'text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20',
-  'Meta (Open Source)':
-    'text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20',
-  'Mistral AI':
-    'text-cyan-700 bg-cyan-50 border-cyan-200 dark:text-cyan-400 dark:bg-cyan-500/10 dark:border-cyan-500/20',
-};
-
 export const ModelsPage: React.FC = () => {
-  const [models, setModels] = React.useState(MODELS);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [newModel, setNewModel] = React.useState({
+  const { setActiveProvider, updateAIConfig } = useAI();
+  const [models, setModels] = useState<AIModel[]>(DEFAULT_MODELS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [ollamaStatus, setOllamaStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newModel, setNewModel] = useState({
     name: '',
-    provider: 'Custom Endpoint',
-    contextWindow: '128K',
+    provider: 'Ollama Custom',
+    contextWindow: '8K',
     latency: 'Fast',
-    cost: '$$',
+    cost: 'Free',
   });
+
+  const fetchOllamaModels = async () => {
+    setIsLoading(true);
+    try {
+      const res = await apiClient.get<{ success: boolean; data: any }>('/ai/models');
+      const payload = res.data?.data || res.data || [];
+      const modelList = Array.isArray(payload) ? payload : Array.isArray((payload as any).data) ? (payload as any).data : [];
+      
+      if (modelList.length > 0) {
+        const mapped: AIModel[] = modelList.map((m: any, index: number) => ({
+          id: m.id || m.name,
+          name: m.name || m.id,
+          provider: m.providerId || m.provider || 'Ollama',
+          contextWindow: m.capabilities?.maxContextTokens ? `${Math.round(m.capabilities.maxContextTokens / 1024)}K` : '8K',
+          latency: 'Fast',
+          cost: m.costPer1kPromptTokens === 0 ? 'Free' : '$',
+          capabilities: m.capabilities ? Object.keys(m.capabilities).filter(k => (m.capabilities as any)[k] === true) : ['Chat', 'Code'],
+          enabled: true,
+          isDefault: index === 0,
+        }));
+        setModels(mapped);
+        setOllamaStatus('connected');
+      } else {
+        setOllamaStatus('disconnected');
+      }
+    } catch {
+      setOllamaStatus('disconnected');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOllamaModels();
+  }, []);
 
   const toggleEnabled = (id: string) => {
     setModels((prev) => prev.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m)));
@@ -102,6 +129,8 @@ export const ModelsPage: React.FC = () => {
 
   const setDefault = (id: string) => {
     setModels((prev) => prev.map((m) => ({ ...m, isDefault: m.id === id })));
+    updateAIConfig({ modelOverrides: { local: id }, activeProvider: 'local' });
+    setActiveProvider('local');
   };
 
   const handleDeployModel = (e: React.FormEvent) => {
@@ -109,13 +138,13 @@ export const ModelsPage: React.FC = () => {
     if (!newModel.name.trim()) return;
 
     const created: AIModel = {
-      id: `model-${Date.now()}`,
+      id: newModel.name.trim(),
       name: newModel.name.trim(),
-      provider: newModel.provider.trim() || 'Custom',
+      provider: newModel.provider.trim() || 'Ollama',
       contextWindow: newModel.contextWindow,
       latency: newModel.latency,
       cost: newModel.cost,
-      capabilities: ['Chat', 'Fine-Tuned', 'API'],
+      capabilities: ['Chat', 'Custom'],
       enabled: true,
       isDefault: false,
     };
@@ -124,10 +153,10 @@ export const ModelsPage: React.FC = () => {
     setIsModalOpen(false);
     setNewModel({
       name: '',
-      provider: 'Custom Endpoint',
-      contextWindow: '128K',
+      provider: 'Ollama Custom',
+      contextWindow: '8K',
       latency: 'Fast',
-      cost: '$$',
+      cost: 'Free',
     });
   };
 
@@ -141,22 +170,43 @@ export const ModelsPage: React.FC = () => {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Models
+              AI Models (Ollama Default)
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Configure AI providers, parameters, and model preferences
+              Manage dynamic local Ollama models and server connections
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 hover:shadow-indigo-500/20"
-        >
-          <Plus className="h-4 w-4" />
-          Deploy Custom Model
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={fetchOllamaModels}
+            disabled={isLoading}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh Ollama Models
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500"
+          >
+            <Plus className="h-4 w-4" />
+            Add Custom Model
+          </button>
+        </div>
       </div>
+
+      {/* Ollama Status Notice */}
+      {ollamaStatus === 'disconnected' && (
+        <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+          <AlertCircle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div>
+            <span className="font-bold">Ollama is not running locally.</span> Start your Ollama instance at <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">http://localhost:11434</code> to fetch dynamic models automatically. Showing supported default model catalog below.
+          </div>
+        </div>
+      )}
 
       {/* Modal Dialog for Deploy Model */}
       {isModalOpen && (
@@ -166,7 +216,7 @@ export const ModelsPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Deploy Custom Model Endpoint
+                  Add Ollama Model
                 </h3>
               </div>
               <button
@@ -179,56 +229,16 @@ export const ModelsPage: React.FC = () => {
             <form onSubmit={handleDeployModel} className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Model Identifier / Name
+                  Model Tag (e.g. codellama, gemma3)
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. DeepSeek-R1-671B"
+                  placeholder="e.g. llama3.1:8b"
                   value={newModel.name}
                   onChange={(e) => setNewModel({ ...newModel, name: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
                 />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Provider / Server Location
-                </label>
-                <input
-                  type="text"
-                  placeholder="OpenRouter / Local vLLM / Ollama"
-                  value={newModel.provider}
-                  onChange={(e) => setNewModel({ ...newModel, provider: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Context Window
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="128K"
-                    value={newModel.contextWindow}
-                    onChange={(e) => setNewModel({ ...newModel, contextWindow: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Latency Profile
-                  </label>
-                  <select
-                    value={newModel.latency}
-                    onChange={(e) => setNewModel({ ...newModel, latency: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                  >
-                    <option value="Ultra Fast">Ultra Fast</option>
-                    <option value="Fast">Fast</option>
-                    <option value="Medium">Medium</option>
-                  </select>
-                </div>
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
@@ -242,7 +252,7 @@ export const ModelsPage: React.FC = () => {
                   type="submit"
                   className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
                 >
-                  Register & Deploy
+                  Register Model
                 </button>
               </div>
             </form>
@@ -250,118 +260,86 @@ export const ModelsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Models Table Container */}
+      {/* Models List */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/50">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-200">
-            Available AI Models
+            Detected / Supported Models
           </h2>
           <span className="rounded-full bg-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            {models.filter((m) => m.enabled).length} of {models.length} active
+            {models.length} models total
           </span>
         </div>
 
         <div className="divide-y divide-slate-200 dark:divide-slate-800">
-          {models.map((model) => {
-            const providerStyle =
-              PROVIDER_COLORS[model.provider] ||
-              'text-slate-700 bg-slate-100 border-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:border-slate-700';
-            return (
-              <div
-                key={model.id}
-                className={`flex flex-col gap-4 px-6 py-5 transition-colors sm:flex-row sm:items-center ${
-                  model.enabled
-                    ? 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
-                    : 'opacity-60 hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
-                }`}
-              >
-                {/* Model Info */}
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1.5 flex items-center gap-2.5">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      {model.name}
-                    </h3>
-                    {model.isDefault && (
-                      <span className="flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/20 dark:text-indigo-300">
-                        <Star className="h-3 w-3 fill-current" />
-                        Default
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    className={`inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${providerStyle}`}
-                  >
-                    {model.provider}
-                  </span>
-                </div>
-
-                {/* Stats */}
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">
-                      Context:
+          {models.map((model) => (
+            <div
+              key={model.id}
+              className={`flex flex-col gap-4 px-6 py-5 transition-colors sm:flex-row sm:items-center ${
+                model.enabled
+                  ? 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
+                  : 'opacity-60 hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
+              }`}
+            >
+              {/* Model Info */}
+              <div className="min-w-0 flex-1">
+                <div className="mb-1.5 flex items-center gap-2.5">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {model.name}
+                  </h3>
+                  {model.isDefault && (
+                    <span className="flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/20 dark:text-indigo-300">
+                      <Star className="h-3 w-3 fill-current" />
+                      Default
                     </span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">
-                      {model.contextWindow}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
-                    <Zap className="h-3.5 w-3.5 text-amber-500" />
-                    {model.latency}
-                  </span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
-                    {model.cost}
-                  </span>
-                </div>
-
-                {/* Capabilities */}
-                <div className="hidden max-w-xs flex-wrap gap-1.5 lg:flex">
-                  {model.capabilities.map((cap) => (
-                    <span
-                      key={cap}
-                      className="rounded-md border border-slate-200 bg-slate-100/70 px-2 py-0.5 text-[10px] font-medium text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-slate-300"
-                    >
-                      {cap}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Actions */}
-                <div className="flex shrink-0 items-center gap-2">
-                  {!model.isDefault && model.enabled && (
-                    <button
-                      type="button"
-                      onClick={() => setDefault(model.id)}
-                      className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                    >
-                      Set Default
-                    </button>
                   )}
+                </div>
+                <span className="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">
+                  {model.provider}
+                </span>
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-500 dark:text-slate-400">Context:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{model.contextWindow}</span>
+                </span>
+                <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+                  <Zap className="h-3.5 w-3.5 text-amber-500" />
+                  {model.latency}
+                </span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {model.cost}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex shrink-0 items-center gap-2">
+                {!model.isDefault && (
                   <button
                     type="button"
-                    onClick={() => toggleEnabled(model.id)}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                      model.enabled
-                        ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20'
-                        : 'border border-slate-300 bg-slate-100 text-slate-600 hover:text-slate-900 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-slate-400 dark:hover:text-white'
-                    }`}
+                    onClick={() => setDefault(model.id)}
+                    className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                   >
-                    {model.enabled ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        Enabled
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        Enable
-                      </>
-                    )}
+                    Set Default
                   </button>
-                </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => toggleEnabled(model.id)}
+                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                    model.enabled
+                      ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20'
+                      : 'border border-slate-300 bg-slate-100 text-slate-600 hover:text-slate-900 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  Enabled
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </PageWrapper>

@@ -49,11 +49,24 @@ class HttpClient {
       }
 
       try {
-        const token = localStorage.getItem(authConfig.tokenKey);
-        if (token) {
+        let token = localStorage.getItem(authConfig.tokenKey) ||
+          localStorage.getItem('aether-auth-token') ||
+          localStorage.getItem('auth_token');
+
+        if (!token) {
+          const zustandStore = localStorage.getItem('aether-auth-storage');
+          if (zustandStore) {
+            const parsed = JSON.parse(zustandStore);
+            if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+              token = parsed.state.token;
+            }
+          }
+        }
+
+        if (token && typeof token === 'string' && token.trim() !== '') {
           config.headers = {
             ...config.headers,
-            [authConfig.tokenHeader]: `${authConfig.tokenPrefix}${token}`,
+            [authConfig.tokenHeader]: `${authConfig.tokenPrefix}${token.trim()}`,
           };
         }
       } catch {

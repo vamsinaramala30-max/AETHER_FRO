@@ -20,6 +20,9 @@ import {
 import { useAuth } from '@/app/providers/authprovider';
 import { StatsSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { aiService } from '@/services/aiService';
+import { apiClient } from '@/api/client';
+import { ENDPOINTS } from '@/api/endpoints';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Greeting helper
@@ -78,54 +81,79 @@ interface QuickAction {
   color: string;
 }
 
-async function fetchDashboardData(): Promise<{
+async function fetchDashboardData(_workspaceId?: string): Promise<{
   stats: DashboardStats;
   chats: RecentChat[];
   projects: RecentProject[];
   events: CalendarEvent[];
 }> {
-  // Simulate API delay
-  await new Promise((r) => setTimeout(r, 600));
+  let activeProjects = 0;
+  let tasksDue = 0;
+  let knowledgeDocs = 0;
+  let aiChatsToday = 0;
+  let fetchedProjects: RecentProject[] = [];
+  let fetchedChats: RecentChat[] = [];
+  let fetchedEvents: CalendarEvent[] = [];
+
+  try {
+    const res = await apiClient.get<any>(ENDPOINTS.DASHBOARD.BASE);
+    const data = res?.data || res;
+    if (data && data.stats) {
+      activeProjects = data.stats.activeProjects || 0;
+      aiChatsToday = data.stats.aiChatsToday || 0;
+      tasksDue = data.stats.tasksDue || 0;
+      knowledgeDocs = data.stats.knowledgeDocs || 0;
+      fetchedProjects = Array.isArray(data.projects) ? data.projects : [];
+      fetchedChats = Array.isArray(data.chats) ? data.chats : [];
+      fetchedEvents = Array.isArray(data.events) ? data.events : [];
+    }
+  } catch {
+    // Zero state fallback when offline
+  }
+
+  // Combine with local assistant conversations if backend chats are empty
+  if (fetchedChats.length === 0) {
+    try {
+      const storedConvs = localStorage.getItem('aether_assistant_conversations');
+      if (storedConvs) {
+        const convsMap = JSON.parse(storedConvs);
+        const convList = Object.values(convsMap) as any[];
+        if (convList.length > 0) {
+          fetchedChats = convList.map((c) => {
+            const diffMs = Date.now() - (c.updatedAt || Date.now());
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const timeStr =
+              diffHours < 1
+                ? 'Just now'
+                : diffHours < 24
+                  ? `${diffHours}h ago`
+                  : `${Math.floor(diffHours / 24)}d ago`;
+
+            return {
+              id: c.id,
+              title: c.title || 'Untitled Conversation',
+              time: timeStr,
+              messageCount: Array.isArray(c.messages) ? c.messages.length : 0,
+            };
+          });
+          aiChatsToday = Math.max(aiChatsToday, fetchedChats.length);
+        }
+      }
+    } catch {
+      // Ignore parse error
+    }
+  }
+
   return {
     stats: {
-      activeProjects: 4,
-      aiChatsToday: 7,
-      tasksDue: 3,
-      knowledgeDocs: 24,
+      activeProjects,
+      aiChatsToday,
+      tasksDue,
+      knowledgeDocs,
     },
-    chats: [
-      { id: '1', title: 'Architecture Design Review', time: '2h ago', messageCount: 12 },
-      { id: '2', title: 'API Integration Planning', time: '5h ago', messageCount: 8 },
-      { id: '3', title: 'Code Review Assistance', time: '1d ago', messageCount: 23 },
-    ],
-    projects: [
-      {
-        id: '1',
-        name: 'AETHER Frontend',
-        progress: 68,
-        taskCount: 14,
-        color: 'from-indigo-500 to-purple-500',
-      },
-      {
-        id: '2',
-        name: 'API Gateway',
-        progress: 42,
-        taskCount: 9,
-        color: 'from-emerald-500 to-teal-500',
-      },
-      {
-        id: '3',
-        name: 'Knowledge Base v2',
-        progress: 85,
-        taskCount: 5,
-        color: 'from-amber-500 to-orange-500',
-      },
-    ],
-    events: [
-      { id: '1', title: 'Team Standup', time: '10:00 AM', type: 'meeting' },
-      { id: '2', title: 'Submit PR Review', time: '2:00 PM', type: 'task' },
-      { id: '3', title: 'Weekly retrospective', time: '4:30 PM', type: 'meeting' },
-    ],
+    chats: fetchedChats,
+    projects: fetchedProjects,
+    events: fetchedEvents,
   };
 }
 
@@ -188,7 +216,8 @@ export const HomePage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboardData();
+      const workspaceId = typeof user?.workspaceId === 'string' ? user.workspaceId : (user as any)?.currentWorkspaceId;
+      const data = await fetchDashboardData(workspaceId);
       setStats(data.stats);
       setChats(data.chats);
       setProjects(data.projects);
@@ -198,7 +227,7 @@ export const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     void load();
@@ -509,17 +538,20 @@ export const HomePage: React.FC = () => {
           <div className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-600/10 to-purple-600/10 p-5">
             <div className="mb-3 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-400" />
-              <h3 className="text-xs font-semibold text-indigo-300">AI Insight</h3>
+              <h3 className="text-xs font-semibold text-indigo-300">
+                {aiService.isAiEnabled() ? 'AI Insight' : 'Workspace Summary'}
+              </h3>
             </div>
             <p className="text-xs leading-relaxed text-aether-muted">
-              You have 3 tasks due today. Based on your patterns, consider tackling the hardest one
-              first — your focus is typically highest before noon.
+              {stats?.activeProjects || stats?.tasksDue
+                ? `You have ${stats?.tasksDue ?? 0} active tasks and ${stats?.activeProjects ?? 0} active projects.`
+                : 'Welcome to your new workspace! Get started by creating your first project, task, or note.'}
             </p>
             <Link
               to="/app/ai/assistant"
               className="mt-3 flex items-center gap-1.5 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
             >
-              Ask AI for help <ChevronRight className="h-3.5 w-3.5" />
+              {aiService.isAiEnabled() ? 'Ask AI for help' : 'Open Assistant'} <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
@@ -530,9 +562,9 @@ export const HomePage: React.FC = () => {
               {[
                 {
                   label: 'AI Service',
-                  status: 'Operational',
-                  color: 'text-emerald-400',
-                  dot: 'bg-emerald-400',
+                  status: aiService.isAiEnabled() ? 'Operational' : 'Standard Mode (Offline)',
+                  color: aiService.isAiEnabled() ? 'text-emerald-400' : 'text-slate-400',
+                  dot: aiService.isAiEnabled() ? 'bg-emerald-400' : 'bg-slate-400',
                 },
                 {
                   label: 'Knowledge Base',

@@ -70,11 +70,21 @@ export const GoalsPage: React.FC = () => {
 
       <div className="space-y-6">
         <GoalForm onSubmit={handleCreateGoal} />
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {goals.map((goal) => (
-            <GoalCard key={goal.id} goal={goal} onUpdateProgress={handleUpdateProgress} />
-          ))}
-        </div>
+        {Array.isArray(goals) && goals.length > 0 ? (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {goals.map((goal) => (
+              <GoalCard key={goal.id} goal={goal} onUpdateProgress={handleUpdateProgress} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <Target className="mx-auto mb-3 h-10 w-10 text-slate-400 dark:text-slate-600" />
+            <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">No goals created yet</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Define your first macro milestone above to start tracking progress.
+            </p>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

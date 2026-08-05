@@ -16,12 +16,25 @@ export const apiClient = axios.create({
 // Request interceptor for auth tokens
 apiClient.interceptors.request.use(
   (config) => {
-    const token =
+    let token =
       localStorage.getItem('aether_access_token') ||
       localStorage.getItem('aether-auth-token') ||
       localStorage.getItem('auth_token');
+    if (!token) {
+      try {
+        const store = localStorage.getItem('aether-auth-storage');
+        if (store) {
+          const parsed = JSON.parse(store);
+          if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+            token = parsed.state.token;
+          }
+        }
+      } catch {
+        // Ignore JSON parse errors for auth storage fallback
+      }
+    }
     if (typeof token === 'string' && token.trim() !== '') {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token.trim()}`;
     }
     return config;
   },

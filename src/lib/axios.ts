@@ -23,9 +23,25 @@ export const httpClient: AxiosInstance = axios.create({
 // Request Interceptor: Inject Auth Token
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem(authConfig.tokenKey);
+    let token =
+      localStorage.getItem(authConfig.tokenKey) ||
+      localStorage.getItem('aether-auth-token') ||
+      localStorage.getItem('auth_token');
+    if (!token) {
+      try {
+        const store = localStorage.getItem('aether-auth-storage');
+        if (store) {
+          const parsed = JSON.parse(store);
+          if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+            token = parsed.state.token;
+          }
+        }
+      } catch {
+        // Ignore JSON parse errors for fallback auth storage
+      }
+    }
     if (typeof token === 'string' && token.trim() !== '') {
-      config.headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token}`;
+      config.headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token.trim()}`;
     }
     return config;
   },

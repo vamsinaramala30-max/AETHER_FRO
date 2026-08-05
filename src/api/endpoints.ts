@@ -47,4 +47,7 @@ export const ENDPOINTS = {
     MULTIPART: '/uploads/multipart',
     PRESIGNED_URL: '/uploads/presigned-url',
   },
+  DASHBOARD: {
+    BASE: '/dashboard',
+  },
 } as const;

@@ -24,49 +24,6 @@ interface Workflow {
   successRate: number;
 }
 
-const MOCK_WORKFLOWS: Workflow[] = [
-  {
-    id: '1',
-    name: 'Daily Summary',
-    description: 'Summarize all activity and send a daily digest',
-    status: 'active',
-    trigger: 'Schedule · 9:00 AM',
-    lastRun: '8h ago',
-    runs: 42,
-    successRate: 98,
-  },
-  {
-    id: '2',
-    name: 'New Document → Embed',
-    description: 'Auto-embed new documents into the knowledge base',
-    status: 'active',
-    trigger: 'On document upload',
-    lastRun: '2h ago',
-    runs: 117,
-    successRate: 95,
-  },
-  {
-    id: '3',
-    name: 'Task Due Reminder',
-    description: 'Notify 1 hour before task deadline',
-    status: 'paused',
-    trigger: 'Calendar · 1h before',
-    lastRun: '2d ago',
-    runs: 28,
-    successRate: 100,
-  },
-  {
-    id: '4',
-    name: 'Meeting Notes → Tasks',
-    description: 'Extract action items from meeting notes automatically',
-    status: 'failed',
-    trigger: 'On note created with tag: meeting',
-    lastRun: '5h ago',
-    runs: 8,
-    successRate: 62,
-  },
-];
-
 const STATUS_CONFIG = {
   active: {
     label: 'Active',
@@ -89,7 +46,7 @@ const STATUS_CONFIG = {
 };
 
 export const AutomationPage: React.FC = () => {
-  const [workflows, setWorkflows] = useState(MOCK_WORKFLOWS);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newWorkflow, setNewWorkflow] = useState({
     name: '',

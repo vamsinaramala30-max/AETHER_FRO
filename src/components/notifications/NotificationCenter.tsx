@@ -29,49 +29,7 @@ const TYPE_ICON: Record<Notification['type'], React.ReactNode> = {
   system: <Info className="h-3.5 w-3.5 text-slate-400" />,
 };
 
-// Placeholder notifications — replace with real API
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'ai',
-    title: 'AI completed your request',
-    description: 'Architecture review analysis is ready',
-    time: '2m ago',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'project',
-    title: 'Task assigned to you',
-    description: 'Implement GlobalSearch — AETHER Frontend',
-    time: '15m ago',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'calendar',
-    title: 'Upcoming meeting',
-    description: 'Team standup in 30 minutes',
-    time: '30m ago',
-    read: false,
-  },
-  {
-    id: '4',
-    type: 'automation',
-    title: 'Workflow completed',
-    description: 'Daily report automation ran successfully',
-    time: '2h ago',
-    read: true,
-  },
-  {
-    id: '5',
-    type: 'system',
-    title: 'System update',
-    description: 'New features available in the AI module',
-    time: '1d ago',
-    read: true,
-  },
-];
+
 
 interface NotificationCenterProps {
   onClose: () => void;
@@ -99,6 +57,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
           read: Boolean(item.isRead),
         }));
         setNotifications(mapped);
+        setLoading(false);
         return;
       }
     } catch {
@@ -109,8 +68,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
     if (stored) {
       setNotifications(JSON.parse(stored));
     } else {
-      setNotifications(MOCK_NOTIFICATIONS);
-      localStorage.setItem('aether_notifications', JSON.stringify(MOCK_NOTIFICATIONS));
+      setNotifications([]);
     }
     setLoading(false);
   }, []);

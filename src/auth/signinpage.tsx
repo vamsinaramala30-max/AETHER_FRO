@@ -148,6 +148,7 @@ export const SignupPage: React.FC = () => {
           <div className="mt-1">
             <input
               id="email"
+              name="email"
               type="email"
               autoComplete="email"
               required
@@ -169,6 +170,7 @@ export const SignupPage: React.FC = () => {
           <div className="relative mt-1">
             <input
               id="password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
@@ -198,6 +200,7 @@ export const SignupPage: React.FC = () => {
           <div className="relative mt-1">
             <input
               id="confirmPassword"
+              name="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required

@@ -61,36 +61,42 @@ export const GoalProgressPage: React.FC<GoalProgressPageProps> = ({ data, isLoad
             Active Strategic Goals
           </h3>
           <div className="space-y-4">
-            {data.goals.map((goal) => (
-              <div
-                key={goal.id}
-                className="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-700/60 dark:bg-slate-900/40"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
-                    {goal.category}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    Target: {goal.targetDate}
-                  </span>
-                </div>
-                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  {goal.title}
-                </h4>
-                <div className="mt-3">
-                  <div className="mb-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                    <span>Progress</span>
-                    <span>{goal.progress}%</span>
+            {Array.isArray(data.goals) && data.goals.length > 0 ? (
+              data.goals.map((goal) => (
+                <div
+                  key={goal.id}
+                  className="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-700/60 dark:bg-slate-900/40"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                      {goal.category}
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      Target: {goal.targetDate}
+                    </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                    <div
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                      style={{ width: `${goal.progress}%` }}
-                    ></div>
+                  <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    {goal.title}
+                  </h4>
+                  <div className="mt-3">
+                    <div className="mb-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <span>Progress</span>
+                      <span>{goal.progress}%</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                        style={{ width: `${goal.progress}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
+                No active strategic goals recorded.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
