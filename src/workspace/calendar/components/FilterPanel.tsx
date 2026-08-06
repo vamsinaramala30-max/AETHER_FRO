@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFilterStore } from '../store/filterStore';
+import { X, Filter, RotateCcw } from 'lucide-react';
 
 export const FilterPanel: React.FC = () => {
   const { isFilterPanelOpen, toggleFilterPanel, filters, setFilter, resetFilters } =
@@ -8,56 +9,25 @@ export const FilterPanel: React.FC = () => {
   if (!isFilterPanelOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '100%',
-        right: 0,
-        width: '320px',
-        backgroundColor: '#0f172a',
-        border: '1px solid #1e293b',
-        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
-        borderRadius: '12px',
-        padding: '16px',
-        zIndex: 100,
-        marginTop: '8px',
-        color: '#f8fafc',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
-        }}
-      >
-        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Calendar Filters</h4>
+    <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-indigo-500" />
+          <h4 className="text-xs font-bold text-slate-900 dark:text-white">Calendar Filters</h4>
+        </div>
         <button
+          type="button"
           onClick={toggleFilterPanel}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#94a3b8',
-            cursor: 'pointer',
-            fontSize: '14px',
-          }}
+          className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         >
-          ✕
+          <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div className="mt-3 space-y-3">
+        {/* Query */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: '#94a3b8',
-              marginBottom: '4px',
-            }}
-          >
+          <label className="mb-1 block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
             Search Query
           </label>
           <input
@@ -65,105 +35,53 @@ export const FilterPanel: React.FC = () => {
             placeholder="Event title or keyword..."
             value={filters.query || ''}
             onChange={(e) => setFilter('query', e.target.value)}
-            style={{
-              width: '100%',
-              backgroundColor: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: '6px',
-              padding: '6px 10px',
-              color: '#ffffff',
-              fontSize: '12px',
-            }}
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        {/* Start & End Date */}
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: '#94a3b8',
-                marginBottom: '4px',
-              }}
-            >
+            <label className="mb-1 block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               Start Date
             </label>
             <input
               type="date"
               value={filters.startDate || ''}
               onChange={(e) => setFilter('startDate', e.target.value)}
-              style={{
-                width: '100%',
-                backgroundColor: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: '6px',
-                padding: '6px 8px',
-                color: '#ffffff',
-                fontSize: '11px',
-              }}
+              className="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: '#94a3b8',
-                marginBottom: '4px',
-              }}
-            >
+            <label className="mb-1 block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               End Date
             </label>
             <input
               type="date"
               value={filters.endDate || ''}
               onChange={(e) => setFilter('endDate', e.target.value)}
-              style={{
-                width: '100%',
-                backgroundColor: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: '6px',
-                padding: '6px 8px',
-                color: '#ffffff',
-                fontSize: '11px',
-              }}
+              className="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
+        {/* Checkboxes */}
+        <div className="space-y-2 pt-1">
+          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
               checked={filters.hasAttachments === true}
               onChange={(e) => setFilter('hasAttachments', e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             Has attachments
           </label>
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
+          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
               checked={filters.hasLocation === true}
               onChange={(e) => setFilter('hasLocation', e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             Has location
           </label>
@@ -172,19 +90,9 @@ export const FilterPanel: React.FC = () => {
         <button
           type="button"
           onClick={resetFilters}
-          style={{
-            marginTop: '8px',
-            width: '100%',
-            padding: '8px',
-            backgroundColor: '#1e293b',
-            border: '1px solid #334155',
-            borderRadius: '6px',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: '#f8fafc',
-            cursor: 'pointer',
-          }}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
+          <RotateCcw className="h-3.5 w-3.5" />
           Reset All Filters
         </button>
       </div>

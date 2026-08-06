@@ -1,6 +1,6 @@
-// frontend/src/workspace/recent-files/RecentFileCard.tsx
 import React from 'react';
 import { RecentFileData } from './recentfilesservices';
+import { FileCode, FileSpreadsheet, FileText } from 'lucide-react';
 
 interface RecentFileCardProps {
   file: RecentFileData;
@@ -11,41 +11,20 @@ export const RecentFileCard: React.FC<RecentFileCardProps> = ({ file }) => {
     switch (file.type) {
       case 'code':
         return (
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-2 text-blue-400">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-              />
-            </svg>
+          <div className="rounded-xl border border-blue-500/20 bg-blue-50 p-2 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            <FileCode className="h-5 w-5" />
           </div>
         );
       case 'spreadsheet':
         return (
-          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-400">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <FileSpreadsheet className="h-5 w-5" />
           </div>
         );
       default:
         return (
-          <div className="rounded-lg border border-slate-500/20 bg-slate-500/10 p-2 text-slate-400">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M7 21h10a2 2 0 002-2V94a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
+          <div className="rounded-xl border border-slate-300 bg-slate-100 p-2 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+            <FileText className="h-5 w-5" />
           </div>
         );
     }
@@ -57,20 +36,22 @@ export const RecentFileCard: React.FC<RecentFileCardProps> = ({ file }) => {
   });
 
   return (
-    <div className="group flex items-center justify-between gap-4 rounded-xl border border-slate-800/80 bg-slate-900/20 p-4 transition-all hover:bg-slate-800/30">
+    <div className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500/40">
       <div className="flex min-w-0 items-center gap-3">
         {getIcon()}
         <div className="min-w-0">
-          <h4 className="truncate text-sm font-semibold text-slate-100 transition-colors group-hover:text-blue-400">
+          <h4 className="truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
             {file.name}
           </h4>
-          <p className="mt-0.5 truncate font-mono text-xs text-slate-500">{file.location}</p>
+          <p className="mt-0.5 truncate font-mono text-xs text-slate-500 dark:text-slate-400">
+            {file.location}
+          </p>
         </div>
       </div>
 
-      <div className="flex-shrink-0 space-y-0.5 text-right font-mono text-xs text-slate-400">
+      <div className="shrink-0 space-y-0.5 text-right font-mono text-xs text-slate-500 dark:text-slate-400">
         <div>{file.sizeStr}</div>
-        <div className="text-[10px] text-slate-500">Opened {timeString}</div>
+        <div className="text-[10px] text-slate-400 dark:text-slate-500">Opened {timeString}</div>
       </div>
     </div>
   );

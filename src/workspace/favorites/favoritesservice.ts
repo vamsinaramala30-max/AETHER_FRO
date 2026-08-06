@@ -1,60 +1,44 @@
-// frontend/src/workspace/favorites/favoritesService.ts
+import { favoritesApi } from '@/api/favorites.api';
 
 export interface FavoriteItemData {
   id: string;
   title: string;
   category: 'project' | 'file' | 'model';
   starredAt: string;
+  resourceId?: string;
 }
 
-const STORAGE_KEY = 'aether_workspace_favorites';
-
-const getLocalFavorites = (): FavoriteItemData[] => {
-  if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (typeof stored !== 'string' || stored.trim() === '') {
-    const defaults: FavoriteItemData[] = [
-      {
-        id: 'fav1',
-        title: 'AETHER Frontend Runtime core Engine',
-        category: 'project',
-        starredAt: new Date().toISOString(),
-      },
-      {
-        id: 'fav2',
-        title: 'neural_vector_weights_v2.model',
-        category: 'model',
-        starredAt: new Date().toISOString(),
-      },
-    ];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-    return defaults;
-  }
-  try {
-    const parsed = JSON.parse(stored) as FavoriteItemData[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
 export const favoritesService = {
-  getFavorites(): Promise<FavoriteItemData[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getLocalFavorites());
-      }, 200);
-    });
+  async getFavorites(): Promise<FavoriteItemData[]> {
+    const res = await favoritesApi.getAll();
+    const items = res.data || [];
+    return items.map((i) => ({
+      id: i.id,
+      title: i.title,
+      category: (i.resourceType || 'project') as FavoriteItemData['category'],
+      starredAt: i.createdAt,
+      resourceId: i.resourceId,
+    }));
   },
 
-  removeFavorite(id: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const items = getLocalFavorites();
-        const filtered = items.filter((i) => i.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-        resolve(true);
-      }, 150);
+  async addFavorite(item: Omit<FavoriteItemData, 'id' | 'starredAt'>): Promise<FavoriteItemData> {
+    const res = await favoritesApi.add({
+      title: item.title,
+      resourceType: item.category,
+      resourceId: item.resourceId || `res-${Date.now()}`,
     });
+    const created = res.data;
+    return {
+      id: created.id,
+      title: created.title,
+      category: (created.resourceType || item.category) as FavoriteItemData['category'],
+      starredAt: created.createdAt,
+      resourceId: created.resourceId,
+    };
+  },
+
+  async removeFavorite(id: string): Promise<boolean> {
+    const res = await favoritesApi.remove(id);
+    return res.success;
   },
 };

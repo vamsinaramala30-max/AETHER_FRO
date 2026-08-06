@@ -38,67 +38,86 @@ const TYPE_CONFIG: Record<
   { icon: React.ReactNode; label: string; color: string }
 > = {
   conversation: {
-    icon: <MessageSquare className="h-3.5 w-3.5" />,
+    icon: <MessageSquare className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />,
     label: 'Chat',
-    color: 'text-purple-400',
+    color: 'text-purple-600 dark:text-purple-400',
   },
   project: {
-    icon: <FolderOpen className="h-3.5 w-3.5" />,
+    icon: <FolderOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />,
     label: 'Project',
-    color: 'text-blue-400',
+    color: 'text-blue-600 dark:text-blue-400',
   },
-  document: { icon: <FileText className="h-3.5 w-3.5" />, label: 'Doc', color: 'text-emerald-400' },
-  note: { icon: <FileText className="h-3.5 w-3.5" />, label: 'Note', color: 'text-amber-400' },
-  prompt: { icon: <Zap className="h-3.5 w-3.5" />, label: 'Prompt', color: 'text-cyan-400' },
-  agent: { icon: <Zap className="h-3.5 w-3.5" />, label: 'Agent', color: 'text-pink-400' },
+  document: {
+    icon: <FileText className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />,
+    label: 'Doc',
+    color: 'text-emerald-600 dark:text-emerald-400',
+  },
+  note: {
+    icon: <FileText className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />,
+    label: 'Note',
+    color: 'text-amber-600 dark:text-amber-400',
+  },
+  prompt: {
+    icon: <Zap className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />,
+    label: 'Prompt',
+    color: 'text-cyan-600 dark:text-cyan-400',
+  },
+  agent: {
+    icon: <Zap className="h-3.5 w-3.5 text-pink-600 dark:text-pink-400" />,
+    label: 'Agent',
+    color: 'text-pink-600 dark:text-pink-400',
+  },
   calendar: {
-    icon: <Calendar className="h-3.5 w-3.5" />,
+    icon: <Calendar className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />,
     label: 'Event',
-    color: 'text-indigo-400',
+    color: 'text-indigo-600 dark:text-indigo-400',
   },
-  task: { icon: <Target className="h-3.5 w-3.5" />, label: 'Task', color: 'text-orange-400' },
+  task: {
+    icon: <Target className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />,
+    label: 'Task',
+    color: 'text-orange-600 dark:text-orange-400',
+  },
   setting: {
-    icon: <Settings className="h-3.5 w-3.5" />,
+    icon: <Settings className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />,
     label: 'Setting',
-    color: 'text-slate-400',
+    color: 'text-slate-500 dark:text-slate-400',
   },
 };
 
-// Quick nav shortcuts always visible
-const QUICK_LINKS: { label: string; href: string; icon: React.ReactNode; shortcut?: string }[] = [
+// Quick nav shortcuts
+const QUICK_LINKS: { label: string; href: string; icon: React.ReactNode }[] = [
   {
     label: 'AI Assistant',
     href: '/app/ai/assistant',
-    icon: <MessageSquare className="h-4 w-4 text-purple-400" />,
+    icon: <MessageSquare className="h-4 w-4 text-purple-600 dark:text-purple-400" />,
   },
   {
     label: 'Projects',
     href: '/app/projects',
-    icon: <FolderOpen className="h-4 w-4 text-blue-400" />,
+    icon: <FolderOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
   },
   {
     label: 'Knowledge Base',
     href: '/app/knowledge',
-    icon: <BookOpen className="h-4 w-4 text-emerald-400" />,
+    icon: <BookOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />,
   },
   {
     label: 'Calendar',
-    href: '/app/calendar',
-    icon: <Calendar className="h-4 w-4 text-indigo-400" />,
+    href: '/app/workspace/calendar',
+    icon: <Calendar className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />,
   },
   {
     label: 'Automation',
     href: '/app/automation',
-    icon: <Zap className="h-4 w-4 text-amber-400" />,
+    icon: <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />,
   },
   {
     label: 'Settings',
     href: '/app/settings/profile',
-    icon: <Settings className="h-4 w-4 text-slate-400" />,
+    icon: <Settings className="h-4 w-4 text-slate-500 dark:text-slate-400" />,
   },
 ];
 
-// Real multi-source search using frontend services
 import { searchService as knowledgeSearch } from '../../knowledge/search/searchservice';
 import { projectService } from '../../services/projectService';
 import { chatService } from '../../services/chatService';
@@ -113,7 +132,6 @@ async function performSearch(query: string): Promise<SearchResult[]> {
   if (!q) return [];
 
   try {
-    // Parallel fetch of potential sources (graceful fallback on failure)
     const [knowledgeResults, projects, chats, files, tasks, events] = await Promise.all([
       (async () => {
         try {
@@ -124,9 +142,11 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       })(),
       (async () => {
         try {
-          // try to list projects — some implementations accept empty workspace
-          const workspaces = await import('../../services/workspaceService').then((m) => m.workspaceService.getWorkspaces().catch(() => []));
-          const workspaceId = Array.isArray(workspaces) && workspaces[0] ? (workspaces[0] as any).id : '';
+          const workspaces = await import('../../services/workspaceService').then((m) =>
+            m.workspaceService.getWorkspaces().catch(() => []),
+          );
+          const workspaceId =
+            Array.isArray(workspaces) && workspaces[0] ? (workspaces[0] as any).id : '';
           return (await projectService.listProjects(workspaceId)).slice(0, 20);
         } catch {
           return [] as any;
@@ -155,7 +175,6 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       })(),
       (async () => {
         try {
-          // Access event store state directly
           return useEventStore.getState().events || [];
         } catch {
           return [] as any;
@@ -163,10 +182,8 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       })(),
     ]);
 
-    // Normalize each source into SearchResult[]
     const candidates: SearchResult[] = [];
 
-    // Knowledge results (notes, documents)
     for (const k of knowledgeResults) {
       candidates.push({
         id: `knowledge_${k.id}`,
@@ -178,7 +195,6 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       });
     }
 
-    // Projects
     for (const p of projects || []) {
       const title = p.name || p.title || p.displayName || 'Project';
       candidates.push({
@@ -191,7 +207,6 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       });
     }
 
-    // Chats / Conversations
     for (const c of chats || []) {
       candidates.push({
         id: `conv_${c.id}`,
@@ -203,19 +218,17 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       });
     }
 
-    // Files
     for (const f of files || []) {
       candidates.push({
         id: `file_${f.id}`,
         type: 'document',
         title: f.name,
         description: `${f.type} • ${f.location}`,
-        href: `/app/workspace/files/${f.id}`,
+        href: `/app/workspace/recent-files`,
         meta: new Date(f.lastAccessed).toLocaleDateString(),
       });
     }
 
-    // Tasks
     for (const t of tasks || []) {
       candidates.push({
         id: `task_${t.id}`,
@@ -227,23 +240,39 @@ async function performSearch(query: string): Promise<SearchResult[]> {
       });
     }
 
-    // Calendar events
     for (const e of events || []) {
       candidates.push({
         id: `event_${e.id}`,
         type: 'calendar',
         title: e.title,
         description: e.isAllDay ? 'All day' : new Date(e.start).toLocaleTimeString(),
-        href: `/app/calendar/event/${e.id}`,
+        href: `/app/workspace/calendar`,
         meta: e.start ? new Date(e.start).toLocaleDateString() : '',
       });
     }
 
-    // Settings / quick match (profile, preferences)
-    // keep this lightweight — searching common setting labels
     const settingsCandidates: SearchResult[] = [
-      { id: 'setting_profile', type: 'setting', title: 'Profile Settings', description: 'Update your profile', href: '/app/settings/profile', meta: '' },
-      { id: 'setting_prefs', type: 'setting', title: 'Preferences', description: 'Appearance and behavior', href: '/app/settings/preferences', meta: '' },
+      {
+        id: 'setting_profile',
+        type: 'setting',
+        title: 'Profile Settings',
+        description: 'Update your profile metadata and preferences',
+        href: '/app/settings/profile',
+      },
+      {
+        id: 'setting_prefs',
+        type: 'setting',
+        title: 'Preferences',
+        description: 'Appearance, notifications, and dark mode controls',
+        href: '/app/settings/preferences',
+      },
+      {
+        id: 'setting_accounts',
+        type: 'setting',
+        title: 'Connected Accounts',
+        description: 'Single sign-on & OAuth integrations',
+        href: '/app/settings/accounts',
+      },
     ];
     candidates.push(...settingsCandidates);
 
@@ -268,13 +297,12 @@ async function performSearch(query: string): Promise<SearchResult[]> {
           }
         }
       }
-      // boost title matches
       if (tokens.some((t) => item.title.toLowerCase().includes(t))) score += 5;
 
-      // Intent boost if AI intent recognized
       if (nlIntent.intent === 'calendar' && item.type === 'calendar') score += 15;
       if (nlIntent.intent === 'projects' && item.type === 'project') score += 15;
-      if (nlIntent.intent === 'files' && (item.type === 'document' || item.type === 'note')) score += 15;
+      if (nlIntent.intent === 'files' && (item.type === 'document' || item.type === 'note'))
+        score += 15;
 
       return score;
     }
@@ -307,7 +335,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Helpers: highlight matches
   const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const highlight = (text: string, q: string) => {
     if (!q) return text;
@@ -321,7 +348,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
       const parts = text.split(rx);
       return parts.map((part, idx) =>
         rx.test(part) ? (
-          <mark key={idx} className="bg-yellow-300/20 text-slate-100 font-semibold">
+          <mark
+            key={idx}
+            className="bg-indigo-500/20 text-indigo-700 font-bold dark:bg-indigo-500/30 dark:text-indigo-300"
+          >
             {part}
           </mark>
         ) : (
@@ -355,19 +385,19 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
         setResults(res);
         setSelectedIndex(0);
       } catch (err: any) {
-        setError('Search failed. Try again.');
+        setError('Search failed. Please try again.');
         console.error(err);
       } finally {
         setLoading(false);
       }
-    }, 250);
+    }, 200);
     return () => clearTimeout(timer);
   }, [query]);
 
   const saveRecent = (q: string) => {
     if (!q || !q.trim()) return;
     const list = storageService.get<string[]>('recent_searches', []);
-    const dedup = [q, ...(list.filter((s) => s !== q))].slice(0, 8);
+    const dedup = [q, ...list.filter((s) => s !== q)].slice(0, 6);
     storageService.set('recent_searches', dedup);
     setRecentSearches(dedup);
   };
@@ -382,10 +412,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // if no query, combine recent searches and quick links for navigation
     const listNoQuery: Array<any> = [];
     if (!query) {
-      if (recentSearches.length) listNoQuery.push(...recentSearches.map((s) => ({ kind: 'recent', value: s })));
+      if (recentSearches.length)
+        listNoQuery.push(...recentSearches.map((s) => ({ kind: 'recent', value: s })));
       listNoQuery.push(...QUICK_LINKS.map((l) => ({ kind: 'quick', value: l })));
     }
 
@@ -421,22 +451,22 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[1040] bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 z-[1040] bg-slate-900/60 backdrop-blur-sm dark:bg-black/80"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Modal */}
+      {/* Theme-aware Modal */}
       <div
         role="dialog"
         aria-label="Global search"
         aria-modal="true"
-        className="fixed left-1/2 top-[20%] z-[1050] w-full max-w-2xl -translate-x-1/2 px-4"
+        className="fixed left-1/2 top-[15%] z-[1050] w-full max-w-2xl -translate-x-1/2 px-4"
       >
-        <div className="overflow-hidden rounded-2xl border border-slate-700/60 bg-[#111827] shadow-2xl shadow-black/60">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
           {/* Search Input */}
-          <div className="flex items-center gap-3 border-b border-slate-800/60 px-4 py-3.5">
-            <Search className="h-4 w-4 shrink-0 text-slate-500" />
+          <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3.5 dark:border-slate-800">
+            <Search className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
             <input
               ref={inputRef}
               type="text"
@@ -444,14 +474,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none"
+              className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-white dark:placeholder:text-slate-500"
               aria-label="Search"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="text-slate-500 transition-colors hover:text-slate-300"
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -459,30 +489,32 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="ml-1 text-slate-500 transition-colors hover:text-slate-300"
+              className="ml-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
             >
-              <kbd className="inline-flex items-center rounded border border-slate-700 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
+              <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                 ESC
               </kbd>
             </button>
           </div>
 
-          {/* Results / Quick Links */}
+          {/* Results / Quick Links Container */}
           <div className="max-h-[400px] overflow-y-auto">
             {loading && (
-              <div className="flex items-center justify-center py-8">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-500" />
+              <div className="flex items-center justify-center py-10">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
               </div>
             )}
 
-            {error && (
-              <div className="py-6 px-4 text-sm text-rose-400">{error}</div>
-            )}
+            {error && <div className="px-4 py-6 text-sm text-red-600 dark:text-red-400">{error}</div>}
 
             {!loading && query && results.length === 0 && !error && (
-              <div className="py-10 text-center">
-                <p className="text-sm text-slate-500">No results for "{query}"</p>
-                <p className="mt-1 text-xs text-slate-600">Try a different search term</p>
+              <div className="py-12 text-center">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  No results for "{query}"
+                </p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Try searching with different keywords or check spelling.
+                </p>
               </div>
             )}
 
@@ -490,6 +522,8 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               <div className="py-2">
                 {results.map((result, i) => {
                   const config = TYPE_CONFIG[result.type];
+                  const isSelected = i === selectedIndex;
+
                   return (
                     <button
                       key={result.id}
@@ -499,16 +533,20 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                         navigateTo(result.href, query);
                       }}
                       className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
-                        i === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
+                        isSelected
+                          ? 'bg-indigo-50/80 dark:bg-slate-800/80'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
                       }`}
                     >
                       <span className={`shrink-0 ${config.color}`}>{config.icon}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-slate-200">
-                          {typeof result.title === 'string' ? highlight(result.title, query) : result.title}
+                        <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {typeof result.title === 'string'
+                            ? highlight(result.title, query)
+                            : result.title}
                         </p>
                         {result.description && (
-                          <p className="truncate text-xs text-slate-500">
+                          <p className="truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {typeof result.description === 'string'
                               ? highlight(result.description, query)
                               : result.description}
@@ -517,31 +555,17 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
                         {result.meta && (
-                          <span className="text-xs text-slate-600">{result.meta}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                            {result.meta}
+                          </span>
                         )}
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${config.color} bg-slate-800/60`}
-                        >
+                        <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                           {config.label}
                         </span>
                       </div>
                     </button>
                   );
                 })}
-
-                {/* View all results */}
-                <div className="border-t border-slate-800/60 px-4 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      saveRecent(query);
-                      navigateTo(`/app/search?q=${encodeURIComponent(query)}`, query);
-                    }}
-                    className="w-full rounded-md py-2 text-sm text-slate-300 hover:bg-slate-800/40"
-                  >
-                    View all results for "{query}"
-                  </button>
-                </div>
               </div>
             )}
 
@@ -549,7 +573,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               <div className="py-2">
                 {recentSearches.length > 0 && (
                   <>
-                    <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+                    <p className="px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       Recent Searches
                     </p>
                     {recentSearches.map((s, i) => (
@@ -557,53 +581,73 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
                         key={`recent_${s}_${i}`}
                         type="button"
                         onClick={() => setQuery(s)}
-                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                          i === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
+                        className={`flex w-full items-center gap-3 px-4 py-2 text-left transition-colors ${
+                          i === selectedIndex
+                            ? 'bg-indigo-50/80 dark:bg-slate-800/80'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
                         }`}
                       >
-                        <Search className="h-4 w-4 text-slate-400" />
-                        <span className="flex-1 text-sm text-slate-300">{s}</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
+                        <Search className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="flex-1 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {s}
+                        </span>
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                       </button>
                     ))}
-                    <div className="border-t border-slate-800/60" />
+                    <div className="my-1 border-t border-slate-200 dark:border-slate-800" />
                   </>
                 )}
 
-                <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+                <p className="px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Quick Navigation
                 </p>
-                {QUICK_LINKS.map((link, i) => (
-                  <button
-                    key={link.href}
-                    type="button"
-                    onClick={() => navigateTo(link.href)}
-                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      (recentSearches.length + i) === selectedIndex ? 'bg-slate-800/60' : 'hover:bg-slate-800/40'
-                    }`}
-                  >
-                    {link.icon}
-                    <span className="flex-1 text-sm text-slate-300">{link.label}</span>
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
-                  </button>
-                ))}
+                {QUICK_LINKS.map((link, i) => {
+                  const isSelected = recentSearches.length + i === selectedIndex;
+                  return (
+                    <button
+                      key={link.href}
+                      type="button"
+                      onClick={() => navigateTo(link.href)}
+                      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                        isSelected
+                          ? 'bg-indigo-50/80 dark:bg-slate-800/80'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                      }`}
+                    >
+                      {link.icon}
+                      <span className="flex-1 text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {link.label}
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Footer hints */}
-          <div className="flex items-center gap-4 border-t border-slate-800/60 px-4 py-2.5 text-[10px] text-slate-600">
-            <span className="flex items-center gap-1">
-              <kbd className="font-mono">↑↓</kbd> navigate
+          {/* Footer controls hint */}
+          <div className="flex items-center gap-4 border-t border-slate-200 bg-slate-50/50 px-4 py-2.5 text-[10px] text-slate-500 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
+            <span className="flex items-center gap-1 font-medium">
+              <kbd className="rounded border border-slate-300 bg-white px-1 py-0.5 font-mono font-bold dark:border-slate-700 dark:bg-slate-800">
+                ↑↓
+              </kbd>{' '}
+              navigate
             </span>
-            <span className="flex items-center gap-1">
-              <kbd className="font-mono">↵</kbd> open
+            <span className="flex items-center gap-1 font-medium">
+              <kbd className="rounded border border-slate-300 bg-white px-1 py-0.5 font-mono font-bold dark:border-slate-700 dark:bg-slate-800">
+                ↵
+              </kbd>{' '}
+              open
             </span>
-            <span className="flex items-center gap-1">
-              <kbd className="font-mono">ESC</kbd> close
+            <span className="flex items-center gap-1 font-medium">
+              <kbd className="rounded border border-slate-300 bg-white px-1 py-0.5 font-mono font-bold dark:border-slate-700 dark:bg-slate-800">
+                ESC
+              </kbd>{' '}
+              close
             </span>
-            <span className="ml-auto flex items-center gap-1">
-              <Command className="h-3 w-3" /> K to reopen
+            <span className="ml-auto flex items-center gap-1 font-medium">
+              <Command className="h-3 w-3 text-indigo-500" /> K to reopen
             </span>
           </div>
         </div>

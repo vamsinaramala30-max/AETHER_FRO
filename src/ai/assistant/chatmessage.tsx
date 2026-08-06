@@ -12,7 +12,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   if (isSystem) {
     return (
       <div className="my-2 flex justify-center">
-        <span className="rounded-md bg-slate-100 px-3 py-1 font-mono text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+        <span className="rounded-full border border-aether-border bg-aether-subtle px-3 py-1 font-mono text-xs text-aether-muted">
           {message.content}
         </span>
       </div>
@@ -26,18 +26,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const tokenDisplay = tokenCount ? ` • ${Math.round(tokenCount)} tkn` : null;
 
   return (
-    <div className={`my-3 flex w-full ${isAssistant ? 'justify-start' : 'justify-end'}`}>
+    <div className={`my-2.5 flex w-full ${isAssistant ? 'justify-start' : 'justify-end'}`}>
       <div
-        className={`flex max-w-[80%] flex-col rounded-2xl border px-4 py-3 md:max-w-[70%] ${
+        className={`flex max-w-[90%] sm:max-w-[82%] md:max-w-[72%] flex-col rounded-2xl border px-3.5 py-2.5 sm:px-4 sm:py-3 ${
           isAssistant
-            ? 'border-slate-100 bg-white text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
-            : 'border-transparent bg-indigo-600 text-white shadow-sm shadow-indigo-100 dark:shadow-none'
+            ? 'border-aether-border bg-aether-surface text-aether-main shadow-xs'
+            : 'border-transparent bg-indigo-600 text-white shadow-xs'
         }`}
       >
-        <div className="select-text whitespace-pre-wrap text-sm leading-relaxed">
+        <div className="select-text whitespace-pre-wrap break-words text-xs sm:text-sm leading-relaxed overflow-x-auto">
           {message.content}
         </div>
-        <div className="mt-1.5 self-end font-mono text-[10px] opacity-60">
+        <div className="mt-1.5 self-end font-mono text-[10px] opacity-70">
           {displayTime}
           {tokenDisplay}
         </div>
@@ -45,3 +45,4 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     </div>
   );
 };
+

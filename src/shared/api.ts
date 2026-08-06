@@ -1,9 +1,6 @@
-/**
- * Shared API client configuration and base types.
- * This file provides common API infrastructure used across the application.
- */
 import axios from 'axios';
 import { apiConfig } from '../config/api.config';
+import { authConfig } from '../config/auth.config';
 
 export const apiClient = axios.create({
   baseURL: apiConfig.baseUrl,
@@ -17,9 +14,10 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     let token =
-      localStorage.getItem('aether_access_token') ||
+      localStorage.getItem(authConfig.tokenKey) ||
       localStorage.getItem('aether-auth-token') ||
       localStorage.getItem('auth_token');
+
     if (!token) {
       try {
         const store = localStorage.getItem('aether-auth-storage');
@@ -33,6 +31,7 @@ apiClient.interceptors.request.use(
         // Ignore JSON parse errors for auth storage fallback
       }
     }
+
     if (typeof token === 'string' && token.trim() !== '') {
       config.headers.Authorization = `Bearer ${token.trim()}`;
     }
@@ -47,10 +46,13 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: unknown) => {
+  async (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      localStorage.removeItem('aether-auth-token');
-      window.location.href = '/login';
+      const originalRequest = error.config;
+      // Skip auto-logout for auth endpoints themselves to avoid infinite loops
+      if (originalRequest?.url?.includes('/auth/')) {
+        return Promise.reject(error);
+      }
     }
     const err = error instanceof Error ? error : new Error(String(error));
     return Promise.reject(err);

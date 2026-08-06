@@ -8,3 +8,7 @@ export * from './automation.api';
 export * from './workspace.api';
 export * from './settings.api';
 export * from './upload.api';
+export * from './favorites.api';
+export * from './calendar.api';
+export { tasksApi, type TaskDTO, type CreateTaskPayload, type UpdateTaskPayload } from './tasks.api';
+export { goalsApi, type GoalDTO, type CreateGoalPayload, type UpdateGoalPayload } from './goals.api';

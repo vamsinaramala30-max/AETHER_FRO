@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { Calendar, ViewState, CalendarViewType } from '../types/calendar';
+import { calendarService } from '../services/calendarService';
 
 interface CalendarState {
   calendars: Calendar[];
   viewState: ViewState;
   selectedCalendarIds: string[];
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
+  fetchCalendars: () => Promise<void>;
   setCalendars: (calendars: Calendar[]) => void;
   addCalendar: (calendar: Calendar) => void;
   updateCalendar: (id: string, updates: Partial<Calendar>) => void;
@@ -21,74 +25,34 @@ interface CalendarState {
   toggleSidebar: () => void;
 }
 
-const initialCalendars: Calendar[] = [
-  {
-    id: 'cal-personal',
-    title: 'Personal',
-    color: '#38bdf8',
-    isPrimary: true,
-    isVisible: true,
-    isCustom: false,
-    accessLevel: 'owner',
-    timeZone: 'UTC',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ownerId: 'user-1',
-    source: 'local',
-  },
-  {
-    id: 'cal-work',
-    title: 'Work & Projects',
-    color: '#a855f7',
-    isPrimary: false,
-    isVisible: true,
-    isCustom: true,
-    accessLevel: 'owner',
-    timeZone: 'UTC',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ownerId: 'user-1',
-    source: 'local',
-  },
-  {
-    id: 'cal-ai',
-    title: 'AI & Learning',
-    color: '#22c55e',
-    isPrimary: false,
-    isVisible: true,
-    isCustom: true,
-    accessLevel: 'owner',
-    timeZone: 'UTC',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ownerId: 'user-1',
-    source: 'local',
-  },
-  {
-    id: 'cal-reminders',
-    title: 'Reminders',
-    color: '#f97316',
-    isPrimary: false,
-    isVisible: true,
-    isCustom: true,
-    accessLevel: 'owner',
-    timeZone: 'UTC',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ownerId: 'user-1',
-    source: 'local',
-  },
-];
-
-export const useCalendarStore = create<CalendarState>((set) => ({
-  calendars: initialCalendars,
-  selectedCalendarIds: initialCalendars.map((c) => c.id),
+export const useCalendarStore = create<CalendarState>((set, _get) => ({
+  calendars: [],
+  selectedCalendarIds: [],
+  isLoading: false,
+  error: null,
   viewState: {
     currentView: 'week',
     currentDate: new Date().toISOString().split('T')[0],
     selectedTimeZone: '(UTC+00:00) UTC',
     isMiniCalendarOpen: true,
     isSidebarOpen: true,
+  },
+
+  fetchCalendars: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const fetched = await calendarService.fetchCalendars();
+      set({
+        calendars: fetched,
+        selectedCalendarIds: fetched.filter((c) => c.isVisible).map((c) => c.id),
+        isLoading: false,
+      });
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : 'Failed to fetch calendars',
+        isLoading: false,
+      });
+    }
   },
 
   setCalendars: (calendars) => {
@@ -125,9 +89,15 @@ export const useCalendarStore = create<CalendarState>((set) => ({
         ? state.selectedCalendarIds.filter((cId) => cId !== id)
         : [...state.selectedCalendarIds, id];
 
+      const updatedCalendars = state.calendars.map((c) =>
+        c.id === id ? { ...c, isVisible: !isVisible } : c,
+      );
+
+      void calendarService.saveCalendars(updatedCalendars);
+
       return {
         selectedCalendarIds: updatedIds,
-        calendars: state.calendars.map((c) => (c.id === id ? { ...c, isVisible: !isVisible } : c)),
+        calendars: updatedCalendars,
       };
     });
   },

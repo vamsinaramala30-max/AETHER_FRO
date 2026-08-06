@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Bot, FolderOpen, BookOpen, Calendar, Zap, Building2, Settings } from 'lucide-react';
+import { Home, Bot, FolderOpen, BookOpen, Zap, Building2, Settings } from 'lucide-react';
 import { NavGroup } from './types';
 
 export const navigationGroups: NavGroup[] = [
@@ -38,6 +38,20 @@ export const navigationGroups: NavGroup[] = [
     groupLabel: 'WORKSPACE',
     items: [
       {
+        id: 'workspace',
+        label: 'Workspace',
+        icon: React.createElement(Building2, { className: 'h-4 w-4' }),
+        href: '/app/workspace',
+        items: [
+          { label: 'Overview', href: '/app/workspace' },
+          { label: 'Calendar', href: '/app/workspace/calendar' },
+          { label: 'Productivity Hub', href: '/app/workspace/productivity-hub' },
+          { label: 'Recent Files', href: '/app/workspace/recent-files' },
+          { label: 'Favorites', href: '/app/workspace/favorites' },
+          { label: 'Members', href: '/app/workspace/members' },
+        ],
+      },
+      {
         id: 'projects',
         label: 'Projects',
         icon: React.createElement(FolderOpen, { className: 'h-4 w-4' }),
@@ -58,14 +72,7 @@ export const navigationGroups: NavGroup[] = [
           { label: 'Documents', href: '/app/knowledge/documents' },
           { label: 'Notes', href: '/app/knowledge/notes' },
           { label: 'Knowledge Base', href: '/app/knowledge/base' },
-          { label: 'Search', href: '/app/knowledge/search' },
         ],
-      },
-      {
-        id: 'calendar',
-        label: 'Calendar',
-        icon: React.createElement(Calendar, { className: 'h-4 w-4' }),
-        href: '/app/calendar',
       },
     ],
   },
@@ -91,12 +98,6 @@ export const navigationGroups: NavGroup[] = [
     id: 'system-group',
     groupLabel: 'SYSTEM',
     items: [
-      {
-        id: 'workspace',
-        label: 'Members',
-        icon: React.createElement(Building2, { className: 'h-4 w-4' }),
-        href: '/app/workspace/members',
-      },
       {
         id: 'settings',
         label: 'Settings',

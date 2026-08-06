@@ -2,6 +2,8 @@ import React from 'react';
 import { CalendarEvent } from '../types/event';
 import { EventCard } from './EventCard';
 import { useEventStore } from '../store/eventStore';
+import { useCalendar } from '../hooks/useCalendar';
+import { formatYMD } from '../utils/dateUtils';
 
 interface CalendarGridProps {
   days: Date[];
@@ -9,7 +11,8 @@ interface CalendarGridProps {
 }
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
-  const { openEventDetails } = useEventStore();
+  const { openEventDetails, openEventForm } = useEventStore();
+  const { viewState, setCurrentDate } = useCalendar();
 
   const hourLabels = [
     '8 AM',
@@ -31,14 +34,14 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
     const startDate = new Date(event.start);
     const endDate = new Date(event.end);
 
-    const startHour = startDate.getUTCHours() + startDate.getUTCMinutes() / 60;
-    const endHour = endDate.getUTCHours() + endDate.getUTCMinutes() / 60;
+    const startHour = startDate.getHours() + startDate.getMinutes() / 60;
+    const endHour = endDate.getHours() + endDate.getMinutes() / 60;
 
     const baseHour = 8;
     const totalSlotHours = 13;
 
     const topPercent = Math.max(0, ((startHour - baseHour) / totalSlotHours) * 100);
-    const heightPercent = Math.max(3, ((endHour - startHour) / totalSlotHours) * 100);
+    const heightPercent = Math.max(4, ((endHour - startHour) / totalSlotHours) * 100);
 
     return {
       top: `${topPercent}%`,
@@ -52,79 +55,65 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
   const allDayEvents = events.filter((e) => e.isAllDay);
   const timedEvents = events.filter((e) => !e.isAllDay);
 
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        height: '100%',
-        backgroundColor: 'var(--cal-bg-secondary)',
-        color: 'var(--cal-text-primary)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header bar: Day Columns */}
-      <div
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--cal-border-color)',
-          backgroundColor: 'var(--cal-bg-elevated)',
-          paddingRight: '15px',
-          flexShrink: 0,
-        }}
-      >
-        {/* Empty corner cell */}
-        <div
-          style={{
-            width: '65px',
-            minWidth: '65px',
-            borderRight: '1px solid var(--cal-border-color)',
-          }}
-        />
+  const selectedDateStr = viewState.currentDate;
 
-        {/* Days Header */}
-        <div
-          style={{ display: 'grid', gridTemplateColumns: `repeat(${days.length}, 1fr)`, flex: 1 }}
-        >
+  const handleSlotClick = (dayDate: Date, hourIndex: number) => {
+    const dateStr = formatYMD(dayDate);
+
+    const startHour = 8 + hourIndex;
+    const timeStr = `${String(startHour).padStart(2, '0')}:00`;
+    const endHour = startHour + 1;
+    const endTimeStr = `${String(endHour).padStart(2, '0')}:00`;
+
+    const startIso = `${dateStr}T${timeStr}:00.000Z`;
+    const endIso = `${dateStr}T${endTimeStr}:00.000Z`;
+
+    setCurrentDate(dateStr);
+    openEventForm({
+      start: startIso,
+      end: endIso,
+      isAllDay: false,
+    });
+  };
+
+  const handleAllDaySlotClick = (dayDate: Date) => {
+    const dateStr = formatYMD(dayDate);
+
+    setCurrentDate(dateStr);
+    openEventForm({
+      start: `${dateStr}T00:00:00.000Z`,
+      end: `${dateStr}T23:59:59.000Z`,
+      isAllDay: true,
+    });
+  };
+
+  return (
+    <div className="flex flex-1 flex-col h-full w-full overflow-hidden bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      {/* Header Bar: Day Columns */}
+      <div className="flex shrink-0 border-b border-slate-200 bg-slate-50/80 pr-4 dark:border-slate-800 dark:bg-slate-800/50">
+        <div className="w-16 min-w-[64px] border-r border-slate-200 dark:border-slate-800" />
+        <div className="grid flex-1" style={{ gridTemplateColumns: `repeat(${days.length}, 1fr)` }}>
           {days.map((day, idx) => {
             const dayNum = day.getDate();
             const dayName = day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-            const isSelectedSun = dayNum === 2;
+            const dayDateStr = formatYMD(day);
+            const isSelected = dayDateStr === selectedDateStr;
 
             return (
               <div
                 key={idx}
-                style={{
-                  padding: '12px 4px',
-                  textAlign: 'center',
-                  borderRight: '1px solid var(--cal-border-color)',
-                }}
+                onClick={() => setCurrentDate(dayDateStr)}
+                className="cursor-pointer border-r border-slate-200 py-3 text-center transition-colors hover:bg-slate-100/60 dark:border-slate-800 dark:hover:bg-slate-800/80"
               >
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    color: 'var(--cal-text-secondary)',
-                    letterSpacing: '0.05em',
-                  }}
-                >
+                <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                   {dayName}
                 </div>
                 <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '50%',
-                    marginTop: '4px',
-                    fontSize: '15px',
-                    fontWeight: '700',
-                    backgroundColor: isSelectedSun ? 'var(--cal-accent-color)' : 'transparent',
-                    color: isSelectedSun ? '#ffffff' : 'var(--cal-text-primary)',
-                  }}
+                  className={`mx-auto mt-1 flex h-7 w-7 items-center justify-center rounded-full text-sm font-extrabold transition-all ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500'
+                      : 'text-slate-900 dark:text-slate-100'
+                  }`}
                 >
                   {dayNum}
                 </div>
@@ -134,68 +123,34 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
         </div>
       </div>
 
-      {/* All-Day Events Section */}
-      <div
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--cal-border-color)',
-          backgroundColor: 'var(--cal-bg-primary)',
-          minHeight: '44px',
-          alignItems: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            width: '65px',
-            minWidth: '65px',
-            padding: '0 8px',
-            fontSize: '11px',
-            fontWeight: '600',
-            color: 'var(--cal-text-secondary)',
-            borderRight: '1px solid var(--cal-border-color)',
-          }}
-        >
+      {/* All-Day Events Row */}
+      <div className="flex shrink-0 min-h-[44px] items-center border-b border-slate-200 bg-slate-50/40 dark:border-slate-800 dark:bg-slate-900/40">
+        <div className="w-16 min-w-[64px] border-r border-slate-200 px-2 text-[11px] font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
           All-day
         </div>
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${days.length}, 1fr)`,
-            flex: 1,
-            padding: '4px 0',
-          }}
+          className="grid flex-1 py-1"
+          style={{ gridTemplateColumns: `repeat(${days.length}, 1fr)` }}
         >
           {days.map((day, dIdx) => {
-            const dayDateStr = day.toISOString().split('T')[0];
+            const dayDateStr = formatYMD(day);
             const matchingAllDay = allDayEvents.filter((e) => e.start.startsWith(dayDateStr));
 
             return (
               <div
                 key={dIdx}
-                style={{
-                  padding: '0 4px',
-                  borderRight: '1px solid var(--cal-border-color)',
-                  minHeight: '32px',
-                }}
+                onClick={() => handleAllDaySlotClick(day)}
+                className="min-h-[32px] cursor-pointer border-r border-slate-200 px-1 transition-colors hover:bg-indigo-50/30 dark:border-slate-800 dark:hover:bg-indigo-950/20"
               >
                 {matchingAllDay.map((e) => (
                   <div
                     key={e.id}
-                    onClick={() => openEventDetails(e)}
-                    style={{
-                      backgroundColor: e.color || '#059669',
-                      color: '#ffffff',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      openEventDetails(e);
                     }}
+                    className="truncate rounded-lg px-2 py-1 text-xs font-semibold text-white shadow-sm"
+                    style={{ backgroundColor: e.color || '#6366f1' }}
                   >
                     {e.title}
                   </div>
@@ -207,124 +162,62 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ days, events }) => {
       </div>
 
       {/* Main Hourly Grid with Scroll */}
-      <div style={{ display: 'flex', flex: 1, overflowY: 'auto', position: 'relative' }}>
+      <div className="relative flex flex-1 overflow-y-auto">
         {/* Time Labels Gutter */}
-        <div
-          style={{
-            width: '65px',
-            minWidth: '65px',
-            borderRight: '1px solid var(--cal-border-color)',
-            backgroundColor: 'var(--cal-bg-elevated)',
-            flexShrink: 0,
-            position: 'relative',
-          }}
-        >
-          {hourLabels.map((lbl, hIdx) => {
-            const is12PM = lbl === '12 PM';
-            return (
-              <div
-                key={hIdx}
-                style={{
-                  height: '56px',
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  color: is12PM ? '#ef4444' : 'var(--cal-text-secondary)',
-                  textAlign: 'right',
-                  paddingRight: '10px',
-                  boxSizing: 'border-box',
-                  transform: 'translateY(-6px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: '4px',
-                }}
-              >
-                {is12PM && (
-                  <span
-                    style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ef4444',
-                      display: 'inline-block',
-                    }}
-                  />
-                )}
-                <span>{lbl}</span>
-              </div>
-            );
-          })}
+        <div className="relative w-16 min-w-[64px] shrink-0 border-r border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/60">
+          {hourLabels.map((lbl, hIdx) => (
+            <div
+              key={hIdx}
+              className="flex h-14 items-center justify-end pr-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500"
+            >
+              {lbl}
+            </div>
+          ))}
         </div>
 
-        {/* 7 Day Columns Container */}
+        {/* Day Columns Container */}
         <div
+          className="relative grid flex-1"
           style={{
-            display: 'grid',
             gridTemplateColumns: `repeat(${days.length}, 1fr)`,
-            flex: 1,
-            position: 'relative',
             height: `${hourLabels.length * 56}px`,
           }}
         >
           {/* Background Horizontal Slot Lines */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              pointerEvents: 'none',
-            }}
-          >
+          <div className="pointer-events-none absolute inset-0">
             {hourLabels.map((_, hIdx) => (
               <div
                 key={hIdx}
-                style={{
-                  height: '56px',
-                  borderBottom: '1px solid var(--cal-border-color)',
-                  boxSizing: 'border-box',
-                }}
+                className="h-[56px] border-b border-slate-100 dark:border-slate-800/60"
               />
             ))}
           </div>
 
-          {/* Red Current Time Line Across 12 PM */}
-          <div
-            style={{
-              position: 'absolute',
-              top: `${(4 / 13) * 100}%`,
-              left: 0,
-              right: 0,
-              height: '2px',
-              backgroundColor: '#ef4444',
-              zIndex: 10,
-              pointerEvents: 'none',
-              boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)',
-            }}
-          />
-
-          {/* Day Columns for Events */}
+          {/* Day Columns */}
           {days.map((day, dIdx) => {
-            const dayDateStr = day.toISOString().split('T')[0];
+            const dayDateStr = formatYMD(day);
             const dayTimedEvents = timedEvents.filter((e) => e.start.startsWith(dayDateStr));
 
             return (
               <div
                 key={dIdx}
-                style={{
-                  borderRight: '1px solid var(--cal-border-color)',
-                  position: 'relative',
-                  height: '100%',
-                }}
+                className="relative h-full border-r border-slate-200 dark:border-slate-800/80"
               >
-                {dayTimedEvents.map((e) => (
-                  <EventCard
-                    key={e.id}
-                    event={e}
-                    onClick={() => openEventDetails(e)}
-                    style={getEventStyle(e)}
+                {/* Slot click targets */}
+                {hourLabels.map((_, hIdx) => (
+                  <div
+                    key={hIdx}
+                    onClick={() => handleSlotClick(day, hIdx)}
+                    className="h-[56px] cursor-pointer transition-colors hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
+                    title={`Click to add event at ${hourLabels[hIdx]}`}
                   />
+                ))}
+
+                {/* Timed Events Rendered Absolutely */}
+                {dayTimedEvents.map((e) => (
+                  <div key={e.id} className="absolute z-10" style={getEventStyle(e)}>
+                    <EventCard event={e} onClick={() => openEventDetails(e)} style={{}} />
+                  </div>
                 ))}
               </div>
             );

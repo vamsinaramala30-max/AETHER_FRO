@@ -1,4 +1,4 @@
-// frontend/src/workspace/productivity-hub/productivityService.ts
+import { taskService } from '../../projects/tasks/taskservice';
 
 export interface ProductivityStatsData {
   focusTimeToday: number; // in minutes
@@ -13,81 +13,89 @@ export interface ChartDataPoint {
   tasks: number;
 }
 
-const STATS_STORAGE_KEY = 'aether_productivity_stats';
+const STATS_STORAGE_KEY = 'aether_productivity_stats_v2';
 
-const defaultStats: ProductivityStatsData = {
-  focusTimeToday: 145,
-  tasksCompleted: 8,
-  efficiencyScore: 92,
-  weeklyComparison: 14,
-};
 
-const defaultHistory: ChartDataPoint[] = [
-  { day: 'Mon', focusMinutes: 120, tasks: 5 },
-  { day: 'Tue', focusMinutes: 160, tasks: 7 },
-  { day: 'Wed', focusMinutes: 90, tasks: 4 },
-  { day: 'Thu', focusMinutes: 180, tasks: 9 },
-  { day: 'Fri', focusMinutes: 145, tasks: 8 },
-  { day: 'Sat', focusMinutes: 45, tasks: 2 },
+
+const emptyHistory: ChartDataPoint[] = [
+  { day: 'Mon', focusMinutes: 0, tasks: 0 },
+  { day: 'Tue', focusMinutes: 0, tasks: 0 },
+  { day: 'Wed', focusMinutes: 0, tasks: 0 },
+  { day: 'Thu', focusMinutes: 0, tasks: 0 },
+  { day: 'Fri', focusMinutes: 0, tasks: 0 },
+  { day: 'Sat', focusMinutes: 0, tasks: 0 },
   { day: 'Sun', focusMinutes: 0, tasks: 0 },
 ];
 
 export const productivityService = {
-  getStats(): Promise<ProductivityStatsData> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (typeof window === 'undefined') {
-          resolve(defaultStats);
-          return;
-        }
+  async getStats(): Promise<ProductivityStatsData> {
+    let focusMins = 0;
+    try {
+      if (typeof window !== 'undefined') {
         const stored = localStorage.getItem(STATS_STORAGE_KEY);
-        if (typeof stored !== 'string' || stored.trim() === '') {
-          localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(defaultStats));
-          resolve(defaultStats);
-          return;
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          focusMins = typeof parsed.focusTimeToday === 'number' ? parsed.focusTimeToday : 0;
         }
-        try {
-          const parsed = JSON.parse(stored) as ProductivityStatsData;
-          resolve(parsed);
-        } catch {
-          resolve(defaultStats);
-        }
-      }, 250);
-    });
+      }
+    } catch {
+      focusMins = 0;
+    }
+
+    // Fetch real tasks from taskService to calculate actual completed task count
+    let completedTaskCount = 0;
+    try {
+      const realTasks = await taskService.getTasks();
+      if (Array.isArray(realTasks)) {
+        completedTaskCount = realTasks.filter(
+          (t: any) => t.status === 'DONE' || t.status === 'COMPLETED' || t.completed === true,
+        ).length;
+      }
+    } catch {
+      completedTaskCount = 0;
+    }
+
+    const efficiency = focusMins > 0 ? Math.min(100, Math.round((focusMins / 120) * 100)) : 0;
+
+    return {
+      focusTimeToday: focusMins,
+      tasksCompleted: completedTaskCount,
+      efficiencyScore: efficiency,
+      weeklyComparison: 0,
+    };
   },
 
-  getHistory(): Promise<ChartDataPoint[]> {
+  async getHistory(): Promise<ChartDataPoint[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(defaultHistory);
-      }, 250);
+        resolve(emptyHistory);
+      }, 150);
     });
   },
 
-  logFocusSession(minutes: number): Promise<ProductivityStatsData> {
-    return new Promise((resolve) => {
-      if (typeof window === 'undefined') {
-        resolve(defaultStats);
-        return;
-      }
-      const stored = localStorage.getItem(STATS_STORAGE_KEY);
-      let stats: ProductivityStatsData = defaultStats;
-      if (typeof stored === 'string' && stored.trim() !== '') {
-        try {
-          stats = JSON.parse(stored) as ProductivityStatsData;
-        } catch {
-          stats = defaultStats;
+  async logFocusSession(minutes: number): Promise<ProductivityStatsData> {
+    let currentFocus = 0;
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(STATS_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          currentFocus = typeof parsed.focusTimeToday === 'number' ? parsed.focusTimeToday : 0;
         }
       }
+    } catch {
+      currentFocus = 0;
+    }
 
-      const updated = {
-        ...stats,
-        focusTimeToday: stats.focusTimeToday + minutes,
-        tasksCompleted: minutes >= 25 ? stats.tasksCompleted + 1 : stats.tasksCompleted,
-      };
+    const newFocus = currentFocus + minutes;
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify({ focusTimeToday: newFocus }));
+      }
+    } catch {
+      // Ignore
+    }
 
-      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updated));
-      resolve(updated);
-    });
+    return this.getStats();
   },
 };

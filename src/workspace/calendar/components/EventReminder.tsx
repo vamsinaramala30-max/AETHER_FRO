@@ -1,16 +1,19 @@
 import React from 'react';
 import { EventReminder as IReminder } from '../types/reminder';
 import { DEFAULT_REMINDER_OPTIONS } from '../utils/constants';
+import { Bell, Plus, X } from 'lucide-react';
 
 interface EventReminderProps {
   reminders: IReminder[];
   onAddReminder: (reminder: IReminder) => void;
+  onUpdateReminder?: (id: string, minutesBefore: number) => void;
   onRemoveReminder: (id: string) => void;
 }
 
 export const EventReminder: React.FC<EventReminderProps> = ({
   reminders,
   onAddReminder,
+  onUpdateReminder,
   onRemoveReminder,
 }) => {
   const handleAdd = () => {
@@ -23,54 +26,58 @@ export const EventReminder: React.FC<EventReminderProps> = ({
   };
 
   return (
-    <div style={{ marginTop: '12px' }}>
-      <label style={{ fontSize: '13px', fontWeight: '500', color: '#3c4043' }}>Reminders</label>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
-        {reminders.map((r) => (
-          <div key={r.id} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', color: '#5f6368' }}>Notification</span>
-            <select
-              value={r.minutesBefore}
-              onChange={() => {}}
-              style={{
-                padding: '4px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                fontSize: '12px',
-              }}
+    <div className="mt-4 space-y-2">
+      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <Bell className="h-3.5 w-3.5 text-indigo-500" />
+        Reminders & Notifications
+      </label>
+
+      {reminders.length > 0 && (
+        <div className="space-y-2">
+          {reminders.map((r) => (
+            <div
+              key={r.id}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-2 dark:border-slate-800 dark:bg-slate-800/40"
             >
-              {DEFAULT_REMINDER_OPTIONS.map((opt) => (
-                <option key={opt.minutes} value={opt.minutes}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => {
-                onRemoveReminder(r.id);
-              }}
-              style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#5f6368' }}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Notification
+              </span>
+              <select
+                value={r.minutesBefore}
+                onChange={(e) => {
+                  const minutes = Number(e.target.value);
+                  if (onUpdateReminder) {
+                    onUpdateReminder(r.id, minutes);
+                  }
+                }}
+                className="flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              >
+                {DEFAULT_REMINDER_OPTIONS.map((opt) => (
+                  <option key={opt.minutes} value={opt.minutes}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => onRemoveReminder(r.id)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                title="Remove reminder"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <button
         type="button"
         onClick={handleAdd}
-        style={{
-          marginTop: '6px',
-          background: 'none',
-          border: 'none',
-          color: '#1a73e8',
-          fontSize: '12px',
-          cursor: 'pointer',
-          fontWeight: '500',
-        }}
+        className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
       >
-        + Add notification
+        <Plus className="h-3.5 w-3.5" />
+        Add notification
       </button>
     </div>
   );

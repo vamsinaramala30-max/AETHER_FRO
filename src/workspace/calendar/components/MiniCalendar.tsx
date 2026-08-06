@@ -1,156 +1,133 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCalendar } from '../hooks/useCalendar';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { MONTH_NAMES } from '../utils/constants';
 
 export const MiniCalendar: React.FC = () => {
-  const { setCurrentDate } = useCalendar();
+  const { viewState, setCurrentDate } = useCalendar();
 
-  const daysGrid = [
-    { day: 26, isCurrentMonth: false, dateStr: '2026-07-26' },
-    { day: 27, isCurrentMonth: false, dateStr: '2026-07-27' },
-    { day: 28, isCurrentMonth: false, dateStr: '2026-07-28' },
-    { day: 29, isCurrentMonth: false, dateStr: '2026-07-29' },
-    { day: 30, isCurrentMonth: false, dateStr: '2026-07-30' },
-    { day: 31, isCurrentMonth: false, dateStr: '2026-07-31' },
-    { day: 1, isCurrentMonth: true, dateStr: '2026-08-01' },
+  const selectedDate = new Date(viewState.currentDate);
+  const validSelectedDate = isNaN(selectedDate.getTime()) ? new Date() : selectedDate;
 
-    { day: 2, isCurrentMonth: true, isHighlighted: true, dateStr: '2026-08-02' },
-    { day: 3, isCurrentMonth: true, dateStr: '2026-08-03' },
-    { day: 4, isCurrentMonth: true, dateStr: '2026-08-04' },
-    { day: 5, isCurrentMonth: true, dateStr: '2026-08-05' },
-    { day: 6, isCurrentMonth: true, dateStr: '2026-08-06' },
-    { day: 7, isCurrentMonth: true, dateStr: '2026-08-07' },
-    { day: 8, isCurrentMonth: true, dateStr: '2026-08-08' },
+  const [viewYear, setViewYear] = useState(validSelectedDate.getFullYear());
+  const [viewMonth, setViewMonth] = useState(validSelectedDate.getMonth());
 
-    { day: 9, isCurrentMonth: true, dateStr: '2026-08-09' },
-    { day: 10, isCurrentMonth: true, dateStr: '2026-08-10' },
-    { day: 11, isCurrentMonth: true, dateStr: '2026-08-11' },
-    { day: 12, isCurrentMonth: true, dateStr: '2026-08-12' },
-    { day: 13, isCurrentMonth: true, dateStr: '2026-08-13' },
-    { day: 14, isCurrentMonth: true, dateStr: '2026-08-14' },
-    { day: 15, isCurrentMonth: true, dateStr: '2026-08-15' },
+  useEffect(() => {
+    const d = new Date(viewState.currentDate);
+    if (!isNaN(d.getTime())) {
+      setViewYear(d.getFullYear());
+      setViewMonth(d.getMonth());
+    }
+  }, [viewState.currentDate]);
 
-    { day: 16, isCurrentMonth: true, dateStr: '2026-08-16' },
-    { day: 17, isCurrentMonth: true, dateStr: '2026-08-17' },
-    { day: 18, isCurrentMonth: true, dateStr: '2026-08-18' },
-    { day: 19, isCurrentMonth: true, dateStr: '2026-08-19' },
-    { day: 20, isCurrentMonth: true, dateStr: '2026-08-20' },
-    { day: 21, isCurrentMonth: true, dateStr: '2026-08-21' },
-    { day: 22, isCurrentMonth: true, dateStr: '2026-08-22' },
+  const handlePrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((prev) => prev - 1);
+    } else {
+      setViewMonth((prev) => prev - 1);
+    }
+  };
 
-    { day: 23, isCurrentMonth: true, dateStr: '2026-08-23' },
-    { day: 24, isCurrentMonth: true, dateStr: '2026-08-24' },
-    { day: 25, isCurrentMonth: true, dateStr: '2026-08-25' },
-    { day: 26, isCurrentMonth: true, dateStr: '2026-08-26' },
-    { day: 27, isCurrentMonth: true, dateStr: '2026-08-27' },
-    { day: 28, isCurrentMonth: true, dateStr: '2026-08-28' },
-    { day: 29, isCurrentMonth: true, dateStr: '2026-08-29' },
+  const handleNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((prev) => prev + 1);
+    } else {
+      setViewMonth((prev) => prev + 1);
+    }
+  };
 
-    { day: 30, isCurrentMonth: true, dateStr: '2026-08-30' },
-    { day: 31, isCurrentMonth: true, dateStr: '2026-08-31' },
-    { day: 1, isCurrentMonth: false, dateStr: '2026-09-01' },
-    { day: 2, isCurrentMonth: false, dateStr: '2026-09-02' },
-    { day: 3, isCurrentMonth: false, dateStr: '2026-09-03' },
-    { day: 4, isCurrentMonth: false, dateStr: '2026-09-04' },
-    { day: 5, isCurrentMonth: false, dateStr: '2026-09-05' },
-  ];
+  // Generate grid days for viewYear/viewMonth
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const startDayOfWeek = firstDay.getDay(); // 0 for Sun, 1 for Mon, etc.
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  const gridItems: { day: number; dateStr: string; isCurrentMonth: boolean }[] = [];
+
+  // Previous month trailing days
+  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const prevMonthIdx = viewMonth === 0 ? 11 : viewMonth - 1;
+    const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+    const dateStr = `${prevYear}-${String(prevMonthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    gridItems.push({ day, dateStr, isCurrentMonth: false });
+  }
+
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    gridItems.push({ day, dateStr, isCurrentMonth: true });
+  }
+
+  // Next month leading days to complete grid (up to 35 or 42)
+  const remaining = 35 - gridItems.length > 0 ? 35 - gridItems.length : 42 - gridItems.length;
+  for (let day = 1; day <= remaining; day++) {
+    const nextMonthIdx = viewMonth === 11 ? 0 : viewMonth + 1;
+    const nextYear = viewMonth === 11 ? viewYear + 1 : viewYear;
+    const dateStr = `${nextYear}-${String(nextMonthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    gridItems.push({ day, dateStr, isCurrentMonth: false });
+  }
+
+  const selectedDateStr = viewState.currentDate;
 
   return (
-    <div style={{ marginBottom: '20px' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '14px',
-          padding: '0 4px',
-        }}
-      >
-        <span style={{ fontWeight: '600', fontSize: '14px', color: 'var(--cal-text-primary)' }}>
-          August 2026
+    <div className="mb-5 select-none">
+      {/* Month & Navigation Header */}
+      <div className="mb-3 flex items-center justify-between px-1">
+        <span className="text-sm font-bold text-slate-900 dark:text-white">
+          {MONTH_NAMES[viewMonth]} {viewYear}
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="flex items-center gap-1">
           <button
             type="button"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--cal-text-secondary)',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
+            onClick={handlePrevMonth}
+            className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            title="Previous month"
           >
-            ‹
+            <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--cal-text-secondary)',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
+            onClick={handleNextMonth}
+            className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            title="Next month"
           >
-            ›
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Days of week header */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          textAlign: 'center',
-          marginBottom: '8px',
-        }}
-      >
+      {/* Days of week headers */}
+      <div className="mb-1.5 grid grid-cols-7 text-center">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, idx) => (
           <span
             key={idx}
-            style={{ fontSize: '11px', fontWeight: '600', color: 'var(--cal-text-secondary)' }}
+            className="text-[11px] font-bold uppercase text-slate-400 dark:text-slate-500"
           >
             {d}
           </span>
         ))}
       </div>
 
-      {/* Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '4px 0',
-          textAlign: 'center',
-        }}
-      >
-        {daysGrid.map((item, idx) => {
+      {/* Grid Days */}
+      <div className="grid grid-cols-7 gap-y-1 text-center">
+        {gridItems.map((item, idx) => {
+          const isSelected = item.dateStr === selectedDateStr;
+
           return (
             <button
               key={idx}
               type="button"
               onClick={() => setCurrentDate(item.dateStr)}
-              style={{
-                width: '26px',
-                height: '26px',
-                margin: '0 auto',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: item.isHighlighted ? 'var(--cal-accent-color)' : 'transparent',
-                color: item.isHighlighted
-                  ? '#ffffff'
+              className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all ${
+                isSelected
+                  ? 'bg-indigo-600 font-extrabold text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500'
                   : item.isCurrentMonth
-                    ? 'var(--cal-text-primary)'
-                    : 'var(--cal-text-subtle)',
-                fontSize: '12px',
-                fontWeight: item.isHighlighted ? '700' : '400',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s ease',
-              }}
+                    ? 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                    : 'text-slate-400 hover:bg-slate-50 dark:text-slate-600 dark:hover:bg-slate-800/40'
+              }`}
             >
               {item.day}
             </button>

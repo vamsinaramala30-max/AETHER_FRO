@@ -40,6 +40,10 @@ import { AutomationLogsPage } from '@/automation/logs/automationlogspage';
 
 // ── Workspace ─────────────────────────────────────────────────────────────────
 import { WorkspacePage } from '@/workspace/WorkspacePage';
+import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhubpage';
+import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
+import { FavoritesPage } from '@/workspace/favorites/favoritepage';
+import { MembersPage } from '@/workspace/members/MembersPage';
 
 // ── Settings ─────────────────────────────────────────────────────────────────
 import { ProfilePage } from '@/settings/profile/profilepage';
@@ -134,7 +138,7 @@ export const protectedRoutes: RouteObject[] = [
       // ── Calendar ──────────────────────────────────────────────────────────
       {
         path: 'calendar',
-        element: <CalendarPage />,
+        element: <Navigate to="/app/workspace/calendar" replace />,
       },
 
       // ── Automation Module ─────────────────────────────────────────────────
@@ -154,7 +158,11 @@ export const protectedRoutes: RouteObject[] = [
         path: 'workspace',
         children: [
           { index: true, element: <WorkspacePage /> },
-          { path: 'members', element: <WorkspacePage /> },
+          { path: 'calendar', element: <CalendarPage /> },
+          { path: 'productivity-hub', element: <ProductivityHubPage /> },
+          { path: 'recent-files', element: <RecentFilesPage /> },
+          { path: 'favorites', element: <FavoritesPage /> },
+          { path: 'members', element: <MembersPage /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'api-keys', element: <WorkspacePage /> },
           { path: 'audit-logs', element: <WorkspacePage /> },

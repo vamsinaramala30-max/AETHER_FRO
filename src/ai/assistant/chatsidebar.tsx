@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ConversationList } from './conversationlist';
 import { useAssistantState, useAssistantActions } from './assistanthooks';
 import { Plus, Search, X, Pin, Archive, Sparkles } from 'lucide-react';
@@ -16,7 +16,7 @@ export const ChatSidebar: React.FC = () => {
     setSidebarOpen,
   } = useAssistantActions();
 
-  const [activeTab, setActiveTab] = useState<'all' | 'pinned' | 'archived'>('all');
+  const [activeTab, setActiveTab] = React.useState<'all' | 'pinned' | 'archived'>('all');
 
   const allConvs = Object.values(conversations);
 
@@ -29,7 +29,6 @@ export const ChatSidebar: React.FC = () => {
       return !c.metadata?.archived;
     })
     .sort((a, b) => {
-      // Keep pinned items on top when in 'all' view
       if (activeTab === 'all') {
         if (a.metadata?.pinned && !b.metadata?.pinned) return -1;
         if (!a.metadata?.pinned && b.metadata?.pinned) return 1;
@@ -37,28 +36,25 @@ export const ChatSidebar: React.FC = () => {
       return b.updatedAt - a.updatedAt;
     });
 
-  if (!sidebarOpen) return null;
-
   const pinnedCount = allConvs.filter((c) => c.metadata?.pinned && !c.metadata?.archived).length;
   const archivedCount = allConvs.filter((c) => c.metadata?.archived).length;
 
-  return (
-    <aside
-      className="flex h-full w-72 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 backdrop-blur-md transition-all duration-200 dark:border-slate-800 dark:bg-slate-900/90"
-      aria-label="Assistant Conversations"
-    >
+  if (!sidebarOpen) return null;
+
+  const content = (
+    <div className="flex h-full w-72 shrink-0 flex-col border-r border-aether-border bg-aether-surface backdrop-blur-md transition-all duration-200">
       {/* Header & Controls */}
-      <div className="space-y-3 border-b border-slate-200 p-3.5 dark:border-slate-800">
+      <div className="space-y-3 border-b border-aether-border p-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
               <Sparkles className="h-4 w-4" />
             </div>
-            <span className="text-sm font-bold text-slate-900 dark:text-white">Conversations</span>
+            <span className="text-sm font-bold text-aether-main">Conversations</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="rounded-lg p-1 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
             aria-label="Close Sidebar"
           >
             <X className="h-4 w-4" />
@@ -75,24 +71,24 @@ export const ChatSidebar: React.FC = () => {
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-aether-muted" />
           <input
             type="text"
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-8 pr-3 text-xs text-slate-900 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700/70 dark:bg-slate-800/60 dark:text-slate-100"
+            className="w-full rounded-xl border border-aether-border bg-aether-subtle py-2 pl-8 pr-3 text-xs text-aether-main placeholder:text-aether-muted/60 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
         {/* Tabs */}
-        <div className="flex rounded-xl bg-slate-200/70 p-1 text-xs dark:bg-slate-800/80">
+        <div className="flex rounded-xl bg-aether-subtle p-1 text-xs">
           <button
             onClick={() => setActiveTab('all')}
             className={`flex-1 rounded-lg py-1.5 font-medium transition-all ${
               activeTab === 'all'
-                ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-aether-surface text-aether-main shadow-sm'
+                : 'text-aether-muted hover:text-aether-main'
             }`}
           >
             All
@@ -101,8 +97,8 @@ export const ChatSidebar: React.FC = () => {
             onClick={() => setActiveTab('pinned')}
             className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 font-medium transition-all ${
               activeTab === 'pinned'
-                ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-aether-surface text-aether-main shadow-sm'
+                : 'text-aether-muted hover:text-aether-main'
             }`}
           >
             <Pin className="h-3 w-3" />
@@ -112,8 +108,8 @@ export const ChatSidebar: React.FC = () => {
             onClick={() => setActiveTab('archived')}
             className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 font-medium transition-all ${
               activeTab === 'archived'
-                ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-aether-surface text-aether-main shadow-sm'
+                : 'text-aether-muted hover:text-aether-main'
             }`}
           >
             <Archive className="h-3 w-3" />
@@ -126,12 +122,39 @@ export const ChatSidebar: React.FC = () => {
       <ConversationList
         conversations={filteredConversations}
         activeId={activeConversationId}
-        onSelect={setActiveConversation}
+        onSelect={(id) => {
+          setActiveConversation(id);
+          // Close on mobile selection
+          if (window.innerWidth < 768) {
+            setSidebarOpen(false);
+          }
+        }}
         onRename={renameConversation}
         onDelete={deleteConversation}
         onTogglePin={togglePinConversation}
         onToggleArchive={toggleArchiveConversation}
       />
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile drawer version */}
+      <div className="fixed inset-y-0 left-0 z-40 flex md:hidden">
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+          onClick={() => setSidebarOpen(false)}
+        />
+        <aside className="relative z-50 flex h-full max-w-[80vw] shadow-2xl">
+          {content}
+        </aside>
+      </div>
+
+      {/* Desktop in-flow version */}
+      <aside className="hidden md:flex h-full shrink-0">
+        {content}
+      </aside>
+    </>
   );
 };
+

@@ -1,31 +1,36 @@
 import { Calendar } from '../types/calendar';
-import { apiClient } from '../../../api/client';
-
-const STORAGE_KEY = 'enterprise_calendars';
+import { calendarApi } from '../../../api/calendar.api';
 
 export const calendarService = {
   async fetchCalendars(): Promise<Calendar[]> {
-    try {
-      const response = await apiClient.get<any>('/workspace/calendar');
-      const items = Array.isArray(response) ? response : response.data || [];
-      if (Array.isArray(items) && items.length > 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-        return items;
-      }
-    } catch (err) {
-      console.warn('Backend calendar fetch fallback to local cache:', err);
-    }
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (typeof raw !== 'string' || raw.trim() === '') return [];
-    try {
-      const parsed = JSON.parse(raw) as Calendar[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    const response = await calendarApi.getCalendars();
+    const items = response.data || [];
+    return items.map((c) => ({
+      id: c.id,
+      title: c.title,
+      color: c.color,
+      isPrimary: c.isPrimary,
+      isVisible: c.isVisible,
+      isCustom: !c.isPrimary,
+      accessLevel: (c.accessLevel || 'owner') as Calendar['accessLevel'],
+      timeZone: c.timeZone || 'UTC',
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+      ownerId: c.ownerId,
+      source: 'local',
+    }));
   },
 
   async saveCalendars(calendars: Calendar[]): Promise<void> {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(calendars));
+    await Promise.all(
+      calendars.map((c) =>
+        calendarApi.updateCalendar(c.id, {
+          title: c.title,
+          color: c.color,
+          isVisible: c.isVisible,
+          timeZone: c.timeZone,
+        }),
+      ),
+    );
   },
 };

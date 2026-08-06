@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from './themeprovider';
 import { AuthProvider } from './authprovider';
+import { AIProvider } from '../../contexts/AIContext';
 import { VisualEffectsProvider } from '../../providers/VisualEffectsProvider';
 
 interface AppProvidersProps {
@@ -11,7 +12,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <VisualEffectsProvider>{children}</VisualEffectsProvider>
+        <AIProvider>
+          <VisualEffectsProvider>{children}</VisualEffectsProvider>
+        </AIProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { SidebarTooltip } from './SidebarTooltip';
 
 interface SidebarHeaderProps {
@@ -55,8 +55,17 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         </SidebarTooltip>
       )}
 
-      {/* Collapse Toggle Button */}
-      {!isMobile && (
+      {/* Close button for Mobile / Collapse Toggle Button for Desktop */}
+      {isMobile ? (
+        <button
+          type="button"
+          onClick={onMobileClose}
+          aria-label="Close sidebar"
+          className="border-aether-border/60 bg-aether-subtle/50 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : (
         <SidebarTooltip content={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} shortcut="⌘B">
           <button
             type="button"
@@ -71,3 +80,4 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     </div>
   );
 };
+

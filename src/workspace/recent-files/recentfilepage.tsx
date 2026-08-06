@@ -1,4 +1,3 @@
-// frontend/src/workspace/recent-files/RecentFilesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { RecentFileCard } from './recentfilecard';
 import { recentFilesService, RecentFileData } from './recentfilesservices';
@@ -23,30 +22,32 @@ export const RecentFilesPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-7xl space-y-6 p-4 text-slate-100 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 text-slate-900 dark:text-slate-100">
       <div>
-        <h1 className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl">
-          Recent Workspace Blobs
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+          Recent Workspace Files
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Instant hot-reload caching interface mapping all recently structural components.
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Instant cache interface mapping all recently accessed files and documents.
         </p>
       </div>
 
       {typeof error === 'string' && error.trim() !== '' && (
-        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       )}
 
       {loading ? (
         <div className="flex h-48 w-full flex-col items-center justify-center gap-2">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-500 border-t-transparent" />
-          <span className="font-mono text-xs text-slate-500">MAPPING POINTER REGISTERS...</span>
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
+          <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
+            MAPPING FILE REGISTERS...
+          </span>
         </div>
       ) : files.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-800 p-12 text-center text-sm text-slate-500">
-          No recently referenced memory modules available inside current context session.
+        <div className="rounded-2xl border border-dashed border-slate-300 p-12 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          No recently referenced files available in the current workspace.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

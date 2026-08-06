@@ -165,6 +165,24 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const location = useLocation();
+
+  // Auto-close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -178,12 +196,21 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md transition-opacity duration-300 md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Mobile sidebar: fixed overlay drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } max-w-[85vw] w-[280px] shadow-2xl`}
         aria-hidden={!mobileOpen}
       >
         <Sidebar
@@ -196,15 +223,6 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           unreadCount={0}
         />
       </div>
-
-      {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
 
       {/* Desktop sidebar: in-flow layout */}
       <div className="hidden md:block">
@@ -220,7 +238,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       </div>
 
       {/* Main content container */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Mobile header (hidden on desktop) */}
         <TopHeader
           onMobileMenuOpen={() => setMobileOpen(true)}
@@ -237,7 +255,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
         </div>
 
         {/* Dynamic page view content outlet */}
-        <main className="flex-1 overflow-y-auto bg-aether-bg p-6">
+        <main className="flex-1 overflow-y-auto bg-aether-bg p-3 sm:p-4 md:p-6 transition-all duration-200">
           <Outlet />
         </main>
       </div>
@@ -258,3 +276,4 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
     </div>
   );
 };
+

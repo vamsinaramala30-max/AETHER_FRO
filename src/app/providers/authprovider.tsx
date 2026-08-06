@@ -83,8 +83,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       void refreshSession();
     };
 
+    // Fired by the HTTP client when a 401 occurs AND token refresh fails.
+    // This ensures the UI is logged out only when both tokens are invalid.
+    const handleAuthExpired = () => {
+      if (!isMounted) return;
+      void authService.signOut().then(() => {
+        if (isMounted) updateUser(null);
+      });
+    };
+
     if (typeof window !== 'undefined') {
       window.addEventListener('aether-profile-updated', handleProfileUpdated);
+      window.addEventListener('aether-auth-expired', handleAuthExpired);
     }
 
     const initializeAuth = async () => {
@@ -110,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isMounted = false;
       if (typeof window !== 'undefined') {
         window.removeEventListener('aether-profile-updated', handleProfileUpdated);
+        window.removeEventListener('aether-auth-expired', handleAuthExpired);
       }
       subscription.unsubscribe();
     };

@@ -4,8 +4,8 @@
   --aether-bg-app: #f8fafc;
   --aether-bg-surface: #ffffff;
   --aether-bg-surface-elevated: #f1f5f9;
-  --aether-bg-subtle: #f8fafc;
-  --aether-bg-hover: #f1f5f9;
+  --aether-bg-subtle: #f1f5f9;
+  --aether-bg-hover: #e2e8f0;
   --aether-bg-selected: #e0e7ff;
   --aether-bg-disabled: #f1f5f9;
 
@@ -13,8 +13,8 @@
   --aether-border-strong: #cbd5e1;
 
   --aether-text-main: #0f172a;
-  --aether-text-muted: #64748b;
-  --aether-text-subtle: #94a3b8;
+  --aether-text-muted: #475569;
+  --aether-text-subtle: #64748b;
   --aether-text-inverse: #ffffff;
 
   --aether-primary: #4f46e5;
@@ -22,9 +22,9 @@
   --aether-secondary: #0891b2;
   --aether-accent: #7c3aed;
 
-  --aether-overlay: rgba(15, 23, 42, 0.4);
-  --aether-glass-bg: rgba(255, 255, 255, 0.85);
-  --aether-glass-border: rgba(226, 232, 240, 0.8);
+  --aether-overlay: rgba(15, 23, 42, 0.5);
+  --aether-glass-bg: rgba(255, 255, 255, 0.95);
+  --aether-glass-border: rgba(226, 232, 240, 0.9);
   --aether-backdrop-blur: 12px;
   --aether-shadow-glow: 0 0 15px rgba(99, 102, 241, 0.15);
 }
@@ -53,7 +53,7 @@
   --aether-accent: #8b5cf6;
 
   --aether-overlay: rgba(0, 0, 0, 0.7);
-  --aether-glass-bg: rgba(14, 20, 34, 0.85);
+  --aether-glass-bg: rgba(14, 20, 34, 0.95);
   --aether-glass-border: rgba(255, 255, 255, 0.1);
   --aether-shadow-glow: 0 0 20px rgba(129, 140, 248, 0.25);
 }
@@ -83,7 +83,8 @@
     --aether-accent: #8b5cf6;
 
     --aether-overlay: rgba(0, 0, 0, 0.7);
-    --aether-glass-bg: rgba(14, 20, 34, 0.85);
+    --aether-glass-bg: rgba(14, 20, 34, 0.95);
     --aether-glass-border: rgba(255, 255, 255, 0.1);
   }
 }
+

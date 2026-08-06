@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, FileText, StickyNote, Database, Search, ArrowRight } from 'lucide-react';
+import { BookOpen, FileText, StickyNote, Database, ArrowRight } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 
 const KNOWLEDGE_MODULES = [
@@ -36,17 +36,6 @@ const KNOWLEDGE_MODULES = [
     border: 'border-blue-200 dark:border-blue-500/20',
     iconColor: 'text-blue-600 dark:text-blue-400',
     count: '3 bases',
-  },
-  {
-    href: '/app/knowledge/search',
-    icon: Search,
-    label: 'Search',
-    description: 'Semantic search across all your knowledge.',
-    color:
-      'from-purple-500/10 via-pink-500/10 to-transparent dark:from-purple-600/20 dark:to-pink-600/20',
-    border: 'border-purple-200 dark:border-purple-500/20',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    count: 'Search AI',
   },
 ];
 

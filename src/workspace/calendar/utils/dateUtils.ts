@@ -10,15 +10,27 @@ export const formatTwoDigits = (num: number): string => {
   return num < 10 ? `0${String(num)}` : String(num);
 };
 
+export const parseYMD = (ymdString: string): Date => {
+  if (!ymdString) return new Date();
+  const parts = ymdString.split('-').map(Number);
+  if (parts.length < 3 || parts.some(isNaN)) return new Date();
+  return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+};
+
+export const formatYMD = (date: Date): string => {
+  if (isNaN(date.getTime())) return new Date().toISOString().split('T')[0];
+  const yyyy = String(date.getFullYear());
+  const mm = formatTwoDigits(date.getMonth() + 1);
+  const dd = formatTwoDigits(date.getDate());
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export const parseISODate = (isoString: string): Date => {
   return new Date(isoString);
 };
 
 export const toISODateString = (date: Date): string => {
-  const yyyy = String(date.getFullYear());
-  const mm = formatTwoDigits(date.getMonth() + 1);
-  const dd = formatTwoDigits(date.getDate());
-  return `${yyyy}-${mm}-${dd}`;
+  return formatYMD(date);
 };
 
 export const formatTimeString = (date: Date, includeSeconds = false): string => {
@@ -53,19 +65,16 @@ export const isToday = (date: Date): boolean => {
 };
 
 export const getStartOfWeek = (date: Date, startOnMonday = false): Date => {
-  const d = new Date(date);
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
   const day = d.getDay();
   const diff = d.getDate() - day + (startOnMonday ? (day === 0 ? -6 : 1) : 0);
   d.setDate(diff);
-  d.setHours(0, 0, 0, 0);
   return d;
 };
 
 export const getEndOfWeek = (date: Date, startOnMonday = false): Date => {
   const start = getStartOfWeek(date, startOnMonday);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59, 999);
   return end;
 };
 
@@ -84,7 +93,7 @@ export const getMonthGrid = (year: number, month: number, startOnMonday = false)
     }
     grid.push(weekDays);
     if (currentDay.getMonth() !== month && week >= 4) {
-      break; // stop generating trailing extra weeks if month has finished
+      break;
     }
   }
 

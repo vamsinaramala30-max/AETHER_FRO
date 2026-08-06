@@ -4,6 +4,12 @@ import { connectedAccountsService, ConnectedAccount } from './connectedaccountse
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Link2 } from 'lucide-react';
 
+const DEFAULT_PROVIDERS: ConnectedAccount[] = [
+  { provider: 'github', identityName: '' },
+  { provider: 'google', identityName: '' },
+  { provider: 'gitlab', identityName: '' },
+];
+
 export const ConnectedAccountsPage: React.FC = () => {
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,14 +18,14 @@ export const ConnectedAccountsPage: React.FC = () => {
     connectedAccountsService
       .getConnectedAccounts()
       .then((data: ConnectedAccount[]) => {
-        setAccounts(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setAccounts(data);
+        } else {
+          setAccounts(DEFAULT_PROVIDERS);
+        }
       })
       .catch(() => {
-        setAccounts([
-          { provider: 'github', identityName: 'vamsi-naramala' },
-          { provider: 'google', identityName: 'vamsi@example.com' },
-          { provider: 'gitlab', identityName: '' },
-        ]);
+        setAccounts(DEFAULT_PROVIDERS);
       })
       .finally(() => {
         setLoading(false);
@@ -30,9 +36,25 @@ export const ConnectedAccountsPage: React.FC = () => {
     loadData();
   }, []);
 
+  const handleConnect = async (provider: string) => {
+    // Simulate connection or redirect to auth provider
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    setAccounts((prev) =>
+      prev.map((acc) =>
+        acc.provider === provider ? { ...acc, identityName: `user@${provider}.com` } : acc,
+      ),
+    );
+  };
+
   const handleDisconnect = async (provider: string) => {
-    await connectedAccountsService.disconnectAccount(provider);
-    loadData();
+    try {
+      await connectedAccountsService.disconnectAccount(provider);
+    } catch {
+      // Ignore disconnect error for unlinked items
+    }
+    setAccounts((prev) =>
+      prev.map((acc) => (acc.provider === provider ? { ...acc, identityName: '' } : acc)),
+    );
   };
 
   return (
@@ -53,8 +75,9 @@ export const ConnectedAccountsPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="animate-pulse text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-            Loading connected accounts...
+          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
+            <span>Loading connected accounts...</span>
           </div>
         ) : (
           <div className="space-y-4">
@@ -62,6 +85,7 @@ export const ConnectedAccountsPage: React.FC = () => {
               <ConnectedAccountCard
                 key={acc.provider}
                 account={acc}
+                onConnect={handleConnect}
                 onDisconnect={handleDisconnect}
               />
             ))}

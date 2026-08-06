@@ -1,5 +1,52 @@
 import { authConfig } from '../config/auth.config';
 
+// ---- Token refresh state (module-level singleton) ----
+let _refreshPromise: Promise<string | null> | null = null;
+
+async function _performTokenRefresh(): Promise<string | null> {
+  try {
+    const refreshToken = localStorage.getItem(authConfig.refreshTokenKey);
+    if (!refreshToken) return null;
+
+    const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const refreshUrl = rawBase.replace(/\/+$/, '') + '/auth/refresh';
+
+    const res = await fetch(refreshUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) return null;
+
+    const body = await res.json();
+    // Support both flat and nested response shapes
+    const tokens = body?.data?.tokens ?? body?.tokens ?? body?.data;
+    const accessToken: string | undefined =
+      tokens?.accessToken ?? body?.accessToken;
+
+    if (typeof accessToken !== 'string' || !accessToken) return null;
+
+    localStorage.setItem(authConfig.tokenKey, accessToken);
+    if (tokens?.refreshToken) {
+      localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
+    }
+    return accessToken;
+  } catch {
+    return null;
+  }
+}
+
+/** Returns an in-flight refresh promise or starts a new one (singleton pattern). */
+function getOrStartRefresh(): Promise<string | null> {
+  if (!_refreshPromise) {
+    _refreshPromise = _performTokenRefresh().finally(() => {
+      _refreshPromise = null;
+    });
+  }
+  return _refreshPromise;
+}
+
 export interface RequestConfig extends RequestInit {
   timeout?: number;
   retries?: number;
@@ -104,6 +151,14 @@ class HttpClient {
   }
 
   public async request<T>(endpoint: string, config: RequestConfig = {}): Promise<T> {
+    return this._requestWithAutoRefresh<T>(endpoint, config, false);
+  }
+
+  private async _requestWithAutoRefresh<T>(
+    endpoint: string,
+    config: RequestConfig,
+    isRetryAfterRefresh: boolean,
+  ): Promise<T> {
     let currentConfig: RequestConfig = {
       timeout: this.defaultTimeout,
       retries: 0,
@@ -153,6 +208,21 @@ class HttpClient {
 
         for (const interceptor of this.responseInterceptors) {
           response = await interceptor(response);
+        }
+
+        // ---- 401 Auto-Refresh Logic ----
+        if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
+          const newToken = await getOrStartRefresh();
+          if (newToken) {
+            // Retry the original request exactly once with the fresh token
+            return this._requestWithAutoRefresh<T>(endpoint, config, true);
+          } else {
+            // Refresh failed – sign the user out
+            localStorage.removeItem(authConfig.tokenKey);
+            localStorage.removeItem(authConfig.refreshTokenKey);
+            localStorage.removeItem('aether_auth_user');
+            window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+          }
         }
 
         if (!response.ok) {

@@ -27,35 +27,8 @@ interface FileItem {
   status: string;
 }
 
-const mockFilesList: FileItem[] = [
-  {
-    id: 'file-1',
-    filename: 'AETHER_Architecture_Overview.pdf',
-    mimeType: 'application/pdf',
-    size: 2450000,
-    createdAt: '2026-08-01T10:00:00Z',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'file-2',
-    filename: 'System_Telemetry_Log.json',
-    mimeType: 'application/json',
-    size: 142000,
-    createdAt: '2026-08-02T14:30:00Z',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'file-3',
-    filename: 'Dashboard_Mockup_v2.png',
-    mimeType: 'image/png',
-    size: 1850000,
-    createdAt: '2026-08-02T16:00:00Z',
-    status: 'COMPLETED',
-  },
-];
-
 export const FilesPage: React.FC = () => {
-  const [files, setFiles] = useState<FileItem[]>(mockFilesList);
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<string>('');
@@ -77,9 +50,9 @@ export const FilesPage: React.FC = () => {
       const payload = data.data || data;
       const rawFiles = Array.isArray(payload)
         ? payload
-        : payload?.files || payload?.data || mockFilesList;
+        : payload?.files || payload?.data || [];
 
-      if (Array.isArray(rawFiles) && rawFiles.length > 0) {
+      if (Array.isArray(rawFiles)) {
         setFiles(
           rawFiles.map((f: any) => ({
             id: f.id || `file-${Date.now()}`,
@@ -94,10 +67,10 @@ export const FilesPage: React.FC = () => {
           setTotalPages(payload.pagination.totalPages || 1);
         }
       } else {
-        setFiles(mockFilesList);
+        setFiles([]);
       }
     } catch {
-      setFiles(mockFilesList);
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -283,7 +256,7 @@ export const FilesPage: React.FC = () => {
       {/* File List / Table */}
       {loading ? (
         <div className="flex h-48 w-full items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
         </div>
       ) : files.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-900">
