@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ProductivityStats } from './productivitystats';
 import { ProductivityChart } from './productivitychart';
-import  FocusTimer from './Focustimer';
+import  FocusTimer from './focustimer';
 import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityservice';
 
 export const ProductivityHubPage: React.FC = () => {
