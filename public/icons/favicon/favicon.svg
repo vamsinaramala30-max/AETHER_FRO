@@ -1,29 +1,109 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#020617" />
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a1128" />
+      <stop offset="100%" stop-color="#030611" />
+    </radialGradient>
+
+    <!-- Letter A Gradient -->
+    <linearGradient id="aGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#00d2ff" />
+      <stop offset="45%" stop-color="#3a7bd5" />
+      <stop offset="100%" stop-color="#8a23f1" />
     </linearGradient>
-    <linearGradient id="core" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" />
-      <stop offset="50%" stop-color="#6366F1" />
-      <stop offset="100%" stop-color="#A855F7" />
+
+    <!-- Swoosh Trail Gradient -->
+    <linearGradient id="swooshGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.2" />
+      <stop offset="40%" stop-color="#2a9df4" stop-opacity="0.8" />
+      <stop offset="80%" stop-color="#00d2ff" stop-opacity="1" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
+
+    <!-- Star Glow / Sparkle Gradient -->
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#00d2ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#00d2ff" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Shadow Overlay Gradient for A Depth -->
+    <linearGradient id="shadowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </linearGradient>
   </defs>
-  <!-- Background with dark mode fill -->
-  <rect width="512" height="512" rx="112" fill="url(#bg)" />
-  <!-- High-contrast crisp border -->
-  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="#38BDF8" stroke-width="12" stroke-opacity="0.3" />
-  <g filter="url(#glow)">
-    <!-- Stylized dynamic 'A' lettermark -->
-    <path d="M256 80 L390 390 L318 390 L256 240 L194 390 L122 390 Z" fill="url(#core)" />
-    <!-- Bright core pulse dot -->
-    <circle cx="256" cy="180" r="34" fill="#00F0FF" />
-    <!-- High-visibility accent beam -->
-    <path d="M160 320 L352 320" stroke="#00F0FF" stroke-width="24" stroke-linecap="round" />
+
+  <!-- Dark Circular Background -->
+  <circle cx="256" cy="256" r="232" fill="url(#bgGrad)" />
+
+  <!-- Letter 'A' Base Structure -->
+  <g id="letter-A">
+    <!-- Main Styled 'A' Path -->
+    <path d="
+      M 256,110 
+      C 268,110 276,118 283,132 
+      L 388,348 
+      C 394,360 392,374 380,374 
+      L 342,374 
+      C 334,374 327,369 322,358 
+      L 298,308 
+      L 214,308 
+      L 190,358 
+      C 185,369 178,374 170,374 
+      L 132,374 
+      C 120,374 118,360 124,348 
+      L 229,132 
+      C 236,118 244,110 256,110 Z
+      M 256,192 
+      L 230,254 
+      L 282,254 
+      Z
+    " fill="url(#aGrad)" />
+
+    <!-- Right Leg Depth Shadow Overlay -->
+    <path d="
+      M 256,110 
+      L 388,348 
+      C 394,360 392,374 380,374 
+      L 342,374 
+      C 334,374 327,369 322,358 
+      L 282,254 
+      Z
+    " fill="url(#shadowGrad)" opacity="0.4" />
   </g>
+
+  <!-- Orbital Swoosh Arc -->
+  <path d="
+    M 115,348 
+    C 85,320 90,260 140,285 
+    C 200,315 280,300 370,240 
+    C 410,213 428,175 390,132 
+    C 385,126 388,120 395,123 
+    C 445,145 440,220 360,265 
+    C 270,316 180,335 125,298 
+    C 100,281 98,330 115,348 Z
+  " fill="url(#swooshGrad)" />
+
+  <!-- Sparkle Star Background Glow -->
+  <circle cx="366" cy="132" r="28" fill="url(#starGlow)" opacity="0.8" />
+
+  <!-- 4-Point Star -->
+  <path d="
+    M 366,102 
+    Q 366,132 396,132 
+    Q 366,132 366,162 
+    Q 366,132 336,132 
+    Q 366,132 366,102 Z
+  " fill="#ffffff" />
+
+  <!-- Inner Sparkle Highlight -->
+  <path d="
+    M 366,118 
+    Q 366,132 380,132 
+    Q 366,132 366,146 
+    Q 366,132 352,132 
+    Q 366,132 366,118 Z
+  " fill="#e0f7ff" />
 </svg>
