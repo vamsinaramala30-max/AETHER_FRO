@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type TimerStatus = "idle" | "running" | "paused" | "finished";
 
@@ -74,7 +74,13 @@ function notifyCompletion(): void {
   window.alert(`${title}\n${body}`);
 }
 
-export default function FocusTimer(): JSX.Element {
+interface FocusTimerProps {
+  onSessionComplete?: (minutes: number) => void;
+}
+
+export default function FocusTimer({
+  onSessionComplete,
+}: FocusTimerProps): React.ReactElement {
   const [selectedMinutes, setSelectedMinutes] = useState<number>(DEFAULT_MINUTES);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(
     DEFAULT_MINUTES * 60
@@ -100,11 +106,12 @@ export default function FocusTimer(): JSX.Element {
 
     playCompletionSound();
     notifyCompletion();
+    onSessionComplete?.(selectedMinutes);
 
     setStatus("idle");
     setRemainingSeconds(selectedMinutes * 60);
     remainingAtPauseRef.current = selectedMinutes * 60;
-  }, [clearTick, selectedMinutes]);
+  }, [clearTick, selectedMinutes, onSessionComplete]);
 
   const tick = useCallback(() => {
     if (endTimestampRef.current === null) {
@@ -299,4 +306,4 @@ export default function FocusTimer(): JSX.Element {
       </div>
     </div>
   );
-}
+  }
