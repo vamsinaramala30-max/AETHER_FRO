@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ProductivityStats } from './productivitystats';
 import { ProductivityChart } from './productivitychart';
-<<<<<<< HEAD
-=======
-import  FocusTimer from './focustimer';
->>>>>>> 9308c5be905713d84b74953b5e6b17b4a53f1de9
 import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityservice';
 
 export const ProductivityHubPage: React.FC = () => {
