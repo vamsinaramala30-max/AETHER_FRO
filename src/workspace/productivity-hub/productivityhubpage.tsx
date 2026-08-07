@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ProductivityStats } from './productivitystats';
 import { ProductivityChart } from './productivitychart';
-import { FocusTimer } from './focustimer';
 import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityservice';
 
 export const ProductivityHubPage: React.FC = () => {
@@ -73,10 +72,7 @@ export const ProductivityHubPage: React.FC = () => {
             <div className="lg:col-span-2">
               <ProductivityChart data={chartData} />
             </div>
-            <div>
-              <FocusTimer onSessionComplete={handleSessionComplete} />
-            </div>
-          </div>
+                     </div>
         </div>
       )}
     </div>

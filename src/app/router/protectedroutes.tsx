@@ -44,6 +44,7 @@ import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhu
 import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
 import { MembersPage } from '@/workspace/members/MembersPage';
+import FocusTimer from '@/workspace/timer/focustimer';
 
 // ── Settings ─────────────────────────────────────────────────────────────────
 import { ProfilePage } from '@/settings/profile/profilepage';
@@ -166,6 +167,8 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'billing', element: <BillingPage /> },
           { path: 'api-keys', element: <WorkspacePage /> },
           { path: 'audit-logs', element: <WorkspacePage /> },
+          { path: 'focustimer', element: <FocusTimer /> },
+
         ],
       },
 
