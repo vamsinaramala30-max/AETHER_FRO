@@ -1,5 +1,6 @@
 import React from 'react';
-import { SidebarProps } from './types';
+
+import type { SidebarProps } from './types';
 import { navigationGroups } from './navConfig';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarSearch } from './SidebarSearch';
@@ -15,18 +16,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSearchOpen,
   onNotificationsOpen,
   onWeatherOpen,
-  unreadCount,
+  unreadCount = 0,
 }) => {
   const isCollapsed = collapsed && !isMobile;
 
   return (
     <aside
       aria-label="Sidebar Navigation"
-      className={`relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r border-aether-border bg-aether-surface shadow-xl transition-all duration-300 ease-in-out select-none md:shadow-sm ${
-        isMobile ? 'w-[280px]' : collapsed ? 'w-[72px]' : 'w-[280px]'
+      className={`relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r border-aether-border bg-aether-surface shadow-xl select-none transition-all duration-300 ease-in-out md:shadow-sm ${
+        isMobile
+          ? 'w-[280px]'
+          : isCollapsed
+            ? 'w-[72px]'
+            : 'w-[280px]'
       }`}
     >
-      {/* Header with logo & workspace selector */}
       <SidebarHeader
         collapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
@@ -34,17 +38,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isMobile={isMobile}
       />
 
-      {/* Global Command Palette Launcher */}
       <SidebarSearch
         collapsed={isCollapsed}
         onSearchOpen={onSearchOpen}
         isMobile={isMobile}
       />
 
-      {/* Scrollable Navigation Area */}
       <nav
-        className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-2 py-2 transition-all duration-150"
         aria-label="Main Navigation"
+        className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-2 py-2 transition-all duration-150"
       >
         {navigationGroups.map((group, index) => (
           <SidebarNavGroup
@@ -57,7 +59,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </nav>
 
-      {/* Footer Controls */}
       <SidebarFooterControls
         collapsed={isCollapsed}
         onWeatherOpen={onWeatherOpen}
@@ -66,7 +67,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isMobile={isMobile}
       />
 
-      {/* User Profile Card with Integrated Logout */}
       <SidebarUserProfile
         collapsed={isCollapsed}
         isMobile={isMobile}
@@ -74,3 +74,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
+
+export default Sidebar;
