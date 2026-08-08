@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { PageWrapper } from "@/components/layout/PageWrapper";
 
 type TimerStatus = "idle" | "running" | "paused" | "finished";
 
@@ -256,8 +257,8 @@ export default function FocusTimer({
   const isIdle = status === "idle";
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 px-4 py-10 dark:bg-gray-900">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg transition-colors dark:bg-gray-800 sm:p-8">
+    <PageWrapper>
+      <div className="mx-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-lg transition-colors dark:bg-gray-800 sm:p-8">
         <h1 className="mb-6 text-center text-xl font-semibold text-gray-800 dark:text-gray-100 sm:text-2xl">
           Focus Timer
         </h1>
@@ -338,6 +339,6 @@ export default function FocusTimer({
           {isIdle && "Set your focus time and press Start."}
         </p>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

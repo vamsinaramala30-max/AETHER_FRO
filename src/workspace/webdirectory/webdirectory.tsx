@@ -1,4 +1,5 @@
 import React,{ useMemo, useState } from "react";
+import { PageWrapper } from "@/components/layout/PageWrapper";
 
 import { TRUSTED_WEBSITES } from "./trusted-websites";
 import { CATEGORY_FILTER_ALL, WEBSITE_CATEGORIES } from "./web-directory-constants";
@@ -99,7 +100,7 @@ export default function WebDirectory(): React.ReactElement {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <PageWrapper>
       <div className="mb-6">
         <h2 className="mb-1 text-xl font-semibold text-slate-900 dark:text-slate-50">
           Web Directory
@@ -180,6 +181,6 @@ export default function WebDirectory(): React.ReactElement {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

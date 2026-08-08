@@ -4,6 +4,7 @@ import { Sparkles, Bell, Search, Sun, Moon, Menu } from 'lucide-react';
 
 import { useTheme } from '../providers/themeprovider';
 import { Sidebar } from '../../components/sidebar/Sidebar';
+import { useNotificationStore } from '../../state/notificationStore';
 
 // Lazy-load modals so they don't bloat the initial bundle
 const GlobalSearch = React.lazy(
@@ -41,9 +42,10 @@ function formatBreadcrumbs(pathname: string): { label: string; isLast: boolean }
 interface HeaderProps {
   onSearchOpen: () => void;
   onNotificationsOpen: () => void;
+  unreadCount?: number;
 }
 
-const DesktopHeader: React.FC<HeaderProps> = ({ onSearchOpen, onNotificationsOpen }) => {
+const DesktopHeader: React.FC<HeaderProps> = ({ onSearchOpen, onNotificationsOpen, unreadCount = 0 }) => {
   const location = useLocation();
   const breadcrumbs = formatBreadcrumbs(location.pathname);
   const { resolvedTheme, setTheme } = useTheme();
@@ -95,6 +97,11 @@ const DesktopHeader: React.FC<HeaderProps> = ({ onSearchOpen, onNotificationsOpe
           title="Notifications"
         >
           <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
 
         <button
@@ -122,12 +129,11 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   onMobileMenuOpen,
   onSearchOpen,
   onNotificationsOpen,
+  unreadCount = 0,
 }) => (
   <header className="flex shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-4 py-3 md:hidden">
     <div className="flex items-center gap-2.5">
-      <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500">
-        <Sparkles className="h-3.5 w-3.5 text-white" />
-      </div>
+      <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
       <span className="text-base font-extrabold text-aether-main">Aether OS</span>
     </div>
     <div className="flex items-center gap-1">
@@ -144,6 +150,11 @@ const TopHeader: React.FC<TopHeaderProps> = ({
         className="relative rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
       >
         <Bell className="h-4 w-4" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
       <button
         type="button"
@@ -166,6 +177,8 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
+
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
 
   // Auto-close mobile sidebar on route change
   useEffect(() => {
@@ -220,7 +233,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           onMobileClose={() => setMobileOpen(false)}
           onSearchOpen={() => { setMobileOpen(false); setSearchOpen(true); }}
           onNotificationsOpen={() => { setMobileOpen(false); setNotificationsOpen(true); }}
-          unreadCount={0}
+          unreadCount={unreadCount}
         />
       </div>
 
@@ -233,7 +246,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           onMobileClose={() => {}}
           onSearchOpen={() => setSearchOpen(true)}
           onNotificationsOpen={() => setNotificationsOpen(true)}
-          unreadCount={0}
+          unreadCount={unreadCount}
         />
       </div>
 
@@ -244,6 +257,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           onMobileMenuOpen={() => setMobileOpen(true)}
           onSearchOpen={() => setSearchOpen(true)}
           onNotificationsOpen={() => setNotificationsOpen(true)}
+          unreadCount={unreadCount}
         />
 
         {/* Desktop header (hidden on mobile) */}
@@ -251,11 +265,18 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           <DesktopHeader
             onSearchOpen={() => setSearchOpen(true)}
             onNotificationsOpen={() => setNotificationsOpen(true)}
+            unreadCount={unreadCount}
           />
         </div>
 
         {/* Dynamic page view content outlet */}
-        <main className="flex-1 overflow-y-auto bg-aether-bg p-3 sm:p-4 md:p-6 transition-all duration-200">
+        <main
+          className={`flex-1 min-h-0 min-w-0 w-full bg-aether-bg transition-all duration-200 ${
+            location.pathname.startsWith('/app/ai/assistant')
+              ? 'flex flex-col p-0 overflow-hidden w-[95%] md:w-full mx-auto'
+              : 'overflow-y-auto p-0'
+          }`}
+        >
           <Outlet />
         </main>
       </div>

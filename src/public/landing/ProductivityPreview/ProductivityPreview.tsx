@@ -3,7 +3,7 @@ import React from 'react';
 export const ProductivityPreview: React.FC = () => {
   return (
     <section
-      className="border-b border-zinc-900 bg-[#0D0F16] py-20"
+      className="border-b border-zinc-800/50 bg-zinc-950/40 py-16 sm:py-20 lg:py-24"
       aria-labelledby="productivity-heading"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

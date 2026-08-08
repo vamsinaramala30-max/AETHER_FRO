@@ -46,7 +46,7 @@ export const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
       <div className="mt-auto space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
         <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-          <span>{workflow.nodes.length} steps</span>
+          <span>{Array.isArray(workflow.nodes) ? workflow.nodes.length : 0} steps</span>
           <span>
             {workflow.lastTriggeredAt
               ? `Executed: ${new Date(workflow.lastTriggeredAt).toLocaleDateString()}`

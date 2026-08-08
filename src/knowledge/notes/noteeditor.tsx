@@ -1,6 +1,6 @@
-// frontend/src/knowledge/notes/NoteEditor.tsx
 import React, { useState, useEffect } from 'react';
 import { Note } from '../types';
+import { useNotificationStore } from '@/state/notificationStore';
 
 interface NoteEditorProps {
   note: Note | null;
@@ -37,6 +37,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onCancel }
       title,
       content,
       tags,
+    });
+    useNotificationStore.getState().addNotification({
+      title: note ? 'Note Updated' : 'Note Created',
+      description: `Note "${title || 'Untitled'}" was saved successfully.`,
+      type: 'info',
     });
   };
 

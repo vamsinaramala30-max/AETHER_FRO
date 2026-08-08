@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Goal } from './goalservice';
 import { Target, Plus } from 'lucide-react';
+import { useNotificationStore } from '@/state/notificationStore';
 
 interface GoalFormProps {
   onSubmit: (goal: Omit<Goal, 'id' | 'progress'>) => void;
@@ -18,6 +19,11 @@ export const GoalForm: React.FC<GoalFormProps> = ({ onSubmit }) => {
     e.preventDefault();
     if (title.trim() === '' || targetDate.trim() === '') return;
     onSubmit({ title, description, targetDate, category, metrics });
+    useNotificationStore.getState().addNotification({
+      title: 'Goal Created',
+      description: `New goal "${title}" was added to project roadmap.`,
+      type: 'project',
+    });
     setTitle('');
     setDescription('');
     setTargetDate('');

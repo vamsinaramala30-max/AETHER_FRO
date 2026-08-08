@@ -13,6 +13,7 @@ interface SidebarFooterControlsProps {
 export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
   collapsed,
   onNotificationsOpen,
+  unreadCount = 0,
   isMobile = false,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
@@ -35,6 +36,11 @@ export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
             className="border-aether-border/60 bg-aether-subtle/50 relative flex h-9 w-9 items-center justify-center rounded-xl border text-aether-muted transition-all duration-150 hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
         </SidebarTooltip>
 
@@ -73,6 +79,11 @@ export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
             className="border-aether-border/60 bg-aether-subtle/50 relative flex h-8 w-8 items-center justify-center rounded-lg border text-aether-muted transition-all hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
         </SidebarTooltip>
 

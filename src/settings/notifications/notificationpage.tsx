@@ -37,9 +37,7 @@ export const NotificationsPage: React.FC = () => {
     <PageWrapper>
       <div className="space-y-6">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20">
-            <Bell className="h-5 w-5" />
-          </div>
+          <Bell className="h-7 w-7 text-amber-500 dark:text-amber-400 shrink-0" />
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Notification Preferences

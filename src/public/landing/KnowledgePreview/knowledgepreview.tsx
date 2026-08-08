@@ -3,7 +3,7 @@ import React from 'react';
 export const KnowledgePreview: React.FC = () => {
   return (
     <section
-      className="border-b border-zinc-900 bg-[#0D0F16] py-20"
+      className="border-b border-zinc-800/50 bg-zinc-900/20 py-16 sm:py-20 lg:py-24"
       aria-labelledby="knowledge-heading"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

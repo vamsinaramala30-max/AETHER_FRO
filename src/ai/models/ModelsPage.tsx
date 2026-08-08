@@ -126,9 +126,7 @@ export const ModelsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-lg shadow-emerald-500/20">
-            <Cpu className="h-5 w-5 text-white" />
-          </div>
+          <Cpu className="h-7 w-7 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               AI Models

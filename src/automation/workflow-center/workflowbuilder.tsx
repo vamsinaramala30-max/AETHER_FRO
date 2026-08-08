@@ -1,7 +1,7 @@
-// frontend/src/automation/workflow-center/WorkflowBuilder.tsx
 import React, { useState } from 'react';
 import { Workflow, WorkflowNodeData } from './workflowservice';
 import { WorkflowNode } from './workflownode';
+import { useNotificationStore } from '@/state/notificationStore';
 
 interface WorkflowBuilderProps {
   workflow: Workflow;
@@ -37,29 +37,34 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
       description,
       nodes,
     });
+    useNotificationStore.getState().addNotification({
+      title: 'Workflow Saved',
+      description: `Automation workflow "${name}" was updated with ${nodes.length} nodes.`,
+      type: 'automation',
+    });
   };
 
   return (
-    <div className="border-border bg-card space-y-6 rounded-2xl border p-6 shadow-sm backdrop-blur-md transition-colors">
-      <div className="border-border flex items-center justify-between border-b pb-4">
+    <div className="border-border bg-card space-y-6 rounded-2xl border p-4 sm:p-6 shadow-sm backdrop-blur-md transition-colors">
+      <div className="border-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
         <div>
-          <h2 className="text-foreground text-xl font-bold">Workflow Designer</h2>
-          <p className="text-muted-foreground text-xs">
+          <h2 className="text-foreground text-lg sm:text-xl font-bold">Workflow Designer</h2>
+          <p className="text-muted-foreground text-xs mt-0.5">
             Configure orchestrations, conditional pathways, and direct operational steps.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={onCancel}
             type="button"
-            className="border-border bg-secondary/50 text-foreground hover:bg-secondary rounded-xl border px-4 py-2 text-xs font-semibold transition-colors"
+            className="border-border bg-secondary/50 text-foreground hover:bg-secondary rounded-xl border px-3.5 py-2 text-xs font-semibold transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             type="button"
-            className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-600/25 transition-all hover:bg-indigo-500 hover:shadow-indigo-600/35"
+            className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-600/25 transition-all hover:bg-indigo-500 hover:shadow-indigo-600/35"
           >
             Save Blueprint
           </button>
@@ -67,7 +72,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="border-border/60 space-y-4 border-r pr-0 md:col-span-1 md:pr-6">
+        <div className="border-border/60 space-y-4 border-b pb-6 md:border-b-0 md:border-r md:pb-0 md:pr-6 md:col-span-1">
           <div>
             <label className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase tracking-wider">
               Blueprint Name
@@ -122,7 +127,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
           </div>
         </div>
 
-        <div className="border-border bg-background/60 flex max-h-[500px] min-h-[400px] flex-col items-center justify-start overflow-y-auto rounded-2xl border p-6 md:col-span-2">
+        <div className="border-border bg-background/60 flex max-h-[600px] min-h-[350px] w-full flex-col items-center justify-start overflow-y-auto rounded-2xl border p-3 sm:p-6 md:col-span-2 space-y-2">
           {nodes.length === 0 ? (
             <p className="text-muted-foreground my-auto text-sm">
               No operational blocks appended to this architectural sequence.

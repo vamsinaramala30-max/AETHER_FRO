@@ -28,10 +28,10 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({ prompt, onSave, onCa
   };
 
   return (
-    <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+    <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-3 sm:p-4 backdrop-blur-sm">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-xl space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
       >
         <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
           {prompt ? 'Edit System Blueprint' : 'Construct System Blueprint'}

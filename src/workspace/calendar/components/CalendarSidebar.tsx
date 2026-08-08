@@ -3,49 +3,22 @@ import { MiniCalendar } from './MiniCalendar';
 import { CalendarList } from './CalendarList';
 import { TimeZoneSelector } from './TimeZoneSelector';
 import { useEventStore } from '../store/eventStore';
+import { Plus } from 'lucide-react';
 
 export const CalendarSidebar: React.FC = () => {
   const { openEventForm } = useEventStore();
 
   return (
-    <aside
-      style={{
-        width: '260px',
-        minWidth: '260px',
-        backgroundColor: 'var(--cal-bg-secondary)',
-        borderRight: '1px solid var(--cal-border-color)',
-        color: 'var(--cal-text-primary)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '16px',
-        boxSizing: 'border-box',
-        overflowY: 'auto',
-      }}
-    >
+    <aside className="hidden lg:flex flex-col w-[260px] min-w-[260px] border-r border-slate-200 bg-white p-4 overflow-y-auto shrink-0 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <MiniCalendar />
 
       <button
         type="button"
         onClick={() => openEventForm()}
-        style={{
-          width: '100%',
-          padding: '10px',
-          borderRadius: '8px',
-          border: '1px solid rgba(99, 102, 241, 0.3)',
-          backgroundColor: 'rgba(99, 102, 241, 0.12)',
-          color: 'var(--cal-accent-color)',
-          fontSize: '13px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          transition: 'all 0.15s ease',
-          marginBottom: '8px',
-        }}
+        className="my-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/60 p-2.5 text-xs font-bold text-indigo-700 shadow-2xs transition-all hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-950/80"
       >
-        <span style={{ fontSize: '16px' }}>+</span> Create Event
+        <Plus className="h-4 w-4" />
+        <span>Create Event</span>
       </button>
 
       <CalendarList />

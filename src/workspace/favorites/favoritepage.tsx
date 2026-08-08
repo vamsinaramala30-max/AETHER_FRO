@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Star, BookmarkPlus, AlertCircle } from 'lucide-react';
 import { FavoriteCard } from './favoritecard';
 import { favoritesService, FavoriteItemData } from './favoritesservice';
@@ -39,11 +40,9 @@ export const FavoritesPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-6 text-slate-900 dark:text-slate-100">
+    <PageWrapper>
       <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 shadow-lg shadow-amber-500/20">
-          <Star className="h-5 w-5 text-white" />
-        </div>
+        <Star className="h-7 w-7 text-amber-500 fill-amber-500 shrink-0" />
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Favorites
@@ -85,6 +84,6 @@ export const FavoritesPage: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };

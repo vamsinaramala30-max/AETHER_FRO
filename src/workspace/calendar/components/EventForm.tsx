@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEventStore } from '../store/eventStore';
 import { useCalendarStore } from '../store/calendarStore';
+import { useNotificationStore } from '@/state/notificationStore';
 import { CalendarEvent } from '../types/event';
 import { validateCalendarEvent } from '../utils/validation';
 import { EventColorPicker } from './EventColorPicker';
@@ -162,8 +163,18 @@ export const EventForm: React.FC = () => {
 
     if (typeof editingEvent?.id === 'string' && editingEvent.id.trim() !== '') {
       updateEvent(editingEvent.id, payload);
+      useNotificationStore.getState().addNotification({
+        title: 'Calendar Event Updated',
+        description: `Event "${payload.title}" was updated.`,
+        type: 'calendar',
+      });
     } else {
       addEvent({ ...payload, id: `evt_${String(Date.now())}` } as CalendarEvent);
+      useNotificationStore.getState().addNotification({
+        title: 'Calendar Event Created',
+        description: `Event "${payload.title}" scheduled for ${startDate}.`,
+        type: 'calendar',
+      });
     }
 
     closeEventForm();
@@ -171,13 +182,14 @@ export const EventForm: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs"
       onClick={closeEventForm}
     >
       <div
-        className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+        className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="sm:hidden mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700" />
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             {typeof editingEvent?.id === 'string' && editingEvent.id.trim() !== ''

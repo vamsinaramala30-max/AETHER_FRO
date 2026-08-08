@@ -23,7 +23,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({
   wide = false,
 }) => (
   <div
-    className={`mx-auto w-full space-y-6 p-5 sm:p-6 lg:p-8 ${
+    className={`mx-auto w-[95%] md:w-full space-y-6 p-4 sm:p-6 lg:p-8 ${
       wide ? 'max-w-screen-2xl' : 'max-w-7xl'
     } ${className}`}
   >

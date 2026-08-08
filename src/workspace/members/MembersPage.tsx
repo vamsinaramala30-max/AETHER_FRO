@@ -119,9 +119,7 @@ export const MembersPage: React.FC = () => {
       {/* Header — Direct page header without full Workspace banner or sub-tabs */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20">
-            <Users className="h-5 w-5 text-white" />
-          </div>
+          <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400 shrink-0" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Team Members

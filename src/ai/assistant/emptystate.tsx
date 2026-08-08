@@ -25,12 +25,12 @@ const SUGGESTIONS = [
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 text-center">
+    <div className="mx-auto flex min-h-[50vh] max-w-2xl flex-col items-center justify-center px-3 py-4 text-center sm:px-4 sm:py-6">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600/10 text-3xl font-bold text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400"
+        className="mb-4 sm:mb-6 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-blue-600/10 text-2xl sm:text-3xl font-bold text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400"
       >
         A
       </motion.div>
@@ -39,7 +39,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.3 }}
-        className="mb-2 text-2xl font-bold text-gray-900 dark:text-white"
+        className="mb-2 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl"
       >
         How can AETHER assist you today?
       </motion.h2>
@@ -48,7 +48,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.3 }}
-        className="mb-8 max-w-md text-sm text-gray-500 dark:text-gray-400"
+        className="mb-6 sm:mb-8 max-w-md text-xs text-gray-500 dark:text-gray-400 sm:text-sm"
       >
         Ask questions, refactor complex systems, or explore technical strategies with your personal
         engineering copilot.

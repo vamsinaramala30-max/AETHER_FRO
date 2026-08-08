@@ -82,27 +82,27 @@ export const ProductPreview: React.FC = () => {
       {/* Main Glass Container */}
       <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/90 shadow-2xl backdrop-blur-sm">
         {/* Window Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800/60 bg-zinc-900/40 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="mr-2 flex items-center gap-1.5">
-              <span className="inline-block h-3 w-3 rounded-full border border-rose-600/40 bg-rose-500/80" />
-              <span className="inline-block h-3 w-3 rounded-full border border-amber-600/40 bg-amber-500/80" />
-              <span className="inline-block h-3 w-3 rounded-full border border-emerald-600/40 bg-emerald-500/80" />
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/60 bg-zinc-900/40 px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="mr-1 flex shrink-0 items-center gap-1.5 sm:mr-2">
+              <span className="inline-block h-2.5 w-2.5 rounded-full border border-rose-600/40 bg-rose-500/80 sm:h-3 sm:w-3" />
+              <span className="inline-block h-2.5 w-2.5 rounded-full border border-amber-600/40 bg-amber-500/80 sm:h-3 sm:w-3" />
+              <span className="inline-block h-2.5 w-2.5 rounded-full border border-emerald-600/40 bg-emerald-500/80 sm:h-3 sm:w-3" />
             </div>
-            <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-zinc-400">
-              <Cpu className="h-3.5 w-3.5 text-indigo-400" />
-              aether://workspace/v2.4
+            <span className="flex items-center gap-1.5 truncate font-mono text-[11px] font-medium text-zinc-400 sm:text-xs">
+              <Cpu className="h-3.5 w-3.5 shrink-0 text-indigo-400" />
+              <span className="truncate">aether://workspace/v2.4</span>
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-            <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[11px] font-medium text-indigo-300">
-              <ShieldCheck className="h-3 w-3" /> Enterprise Tier
+          <div className="flex shrink-0 items-center gap-1.5 text-xs text-zinc-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-300 sm:text-[11px]">
+              <ShieldCheck className="h-3 w-3 shrink-0" /> <span className="hidden xs:inline">Enterprise Tier</span><span className="xs:hidden">Enterprise</span>
             </span>
           </div>
         </div>
 
         {/* Tab Navigation Toolbar */}
-        <div className="no-scrollbar flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2 text-xs">
+        <div className="flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2 text-xs scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab('ai')}

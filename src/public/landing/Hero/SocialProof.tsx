@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, Cpu, Sparkles } from 'lucide-react';
 
 export const SocialProof: React.FC = () => {
   return (
-    <section className="relative overflow-hidden border-y border-zinc-800/60 bg-zinc-950/40 py-12">
+    <section className="relative overflow-hidden border-b border-zinc-800/50 bg-zinc-950/40 py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
           {/* Trust Statement */}

@@ -62,9 +62,7 @@ export const AIModulePage: React.FC = () => {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 shadow-lg shadow-purple-500/20">
-            <Bot className="h-5 w-5 text-white" />
-          </div>
+          <Bot className="h-7 w-7 text-purple-600 dark:text-purple-400 shrink-0" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               AI
@@ -86,11 +84,7 @@ export const AIModulePage: React.FC = () => {
               to={mod.href}
               className={`group flex flex-col gap-4 rounded-2xl bg-white bg-gradient-to-br p-5 dark:bg-slate-900 ${mod.color} border ${mod.border} shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md`}
             >
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800/80 ${mod.iconColor}`}
-              >
-                <Icon className="h-5 w-5" />
-              </div>
+              <Icon className={`h-6 w-6 ${mod.iconColor} shrink-0`} />
               <div>
                 <h3 className="mb-1 text-base font-semibold text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
                   {mod.label}
