@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-type TimerStatus = "idle" | "running" | "paused" | "finished";
+type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
 const MIN_MINUTES = 1;
 const MAX_MINUTES = 180;
@@ -10,15 +10,14 @@ function formatTime(totalSeconds: number): string {
   const safeSeconds = Math.max(0, totalSeconds);
   const minutes = Math.floor(safeSeconds / 60);
   const seconds = safeSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 function playCompletionSound(): void {
   try {
     const AudioContextClass =
       window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const audioContext = new AudioContextClass();
 
     const tones = [
@@ -31,7 +30,7 @@ function playCompletionSound(): void {
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
-      oscillator.type = "sine";
+      oscillator.type = 'sine';
       oscillator.frequency.value = frequency;
 
       const startTime = audioContext.currentTime + startOffset;
@@ -48,8 +47,7 @@ function playCompletionSound(): void {
       oscillator.stop(endTime + 0.05);
     });
 
-    const totalDuration =
-      Math.max(...tones.map((t) => t.startOffset + t.duration)) + 0.2;
+    const totalDuration = Math.max(...tones.map((t) => t.startOffset + t.duration)) + 0.2;
     window.setTimeout(() => {
       void audioContext.close();
     }, totalDuration * 1000);
@@ -59,10 +57,10 @@ function playCompletionSound(): void {
 }
 
 function notifyCompletion(): void {
-  const title = "🎉 Focus session completed!";
-  const body = "Great work!";
+  const title = '🎉 Focus session completed!';
+  const body = 'Great work!';
 
-  if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     try {
       new Notification(title, { body });
       return;
@@ -78,14 +76,10 @@ interface FocusTimerProps {
   onSessionComplete?: (minutes: number) => void;
 }
 
-export default function FocusTimer({
-  onSessionComplete,
-}: FocusTimerProps): React.ReactElement {
+export default function FocusTimer({ onSessionComplete }: FocusTimerProps): React.ReactElement {
   const [selectedMinutes, setSelectedMinutes] = useState<number>(DEFAULT_MINUTES);
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(
-    DEFAULT_MINUTES * 60
-  );
-  const [status, setStatus] = useState<TimerStatus>("idle");
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(DEFAULT_MINUTES * 60);
+  const [status, setStatus] = useState<TimerStatus>('idle');
 
   const endTimestampRef = useRef<number | null>(null);
   const remainingAtPauseRef = useRef<number>(DEFAULT_MINUTES * 60);
@@ -101,14 +95,14 @@ export default function FocusTimer({
   const finishTimer = useCallback(() => {
     clearTick();
     endTimestampRef.current = null;
-    setStatus("finished");
+    setStatus('finished');
     setRemainingSeconds(0);
 
     playCompletionSound();
     notifyCompletion();
     onSessionComplete?.(selectedMinutes);
 
-    setStatus("idle");
+    setStatus('idle');
     setRemainingSeconds(selectedMinutes * 60);
     remainingAtPauseRef.current = selectedMinutes * 60;
   }, [clearTick, selectedMinutes, onSessionComplete]);
@@ -128,7 +122,7 @@ export default function FocusTimer({
   }, [finishTimer]);
 
   useEffect(() => {
-    if (status !== "running") {
+    if (status !== 'running') {
       return;
     }
     intervalRef.current = window.setInterval(tick, 250);
@@ -138,16 +132,13 @@ export default function FocusTimer({
   }, [status, tick, clearTick]);
 
   useEffect(() => {
-    if (
-      typeof Notification !== "undefined" &&
-      Notification.permission === "default"
-    ) {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       void Notification.requestPermission();
     }
   }, []);
 
   useEffect(() => {
-    if (status === "idle") {
+    if (status === 'idle') {
       setRemainingSeconds(selectedMinutes * 60);
       remainingAtPauseRef.current = selectedMinutes * 60;
     }
@@ -163,18 +154,17 @@ export default function FocusTimer({
   };
 
   const handleStart = () => {
-    if (status === "running") {
+    if (status === 'running') {
       return;
     }
-    const startSeconds =
-      status === "paused" ? remainingAtPauseRef.current : selectedMinutes * 60;
+    const startSeconds = status === 'paused' ? remainingAtPauseRef.current : selectedMinutes * 60;
     endTimestampRef.current = Date.now() + startSeconds * 1000;
     setRemainingSeconds(startSeconds);
-    setStatus("running");
+    setStatus('running');
   };
 
   const handlePause = () => {
-    if (status !== "running") {
+    if (status !== 'running') {
       return;
     }
     clearTick();
@@ -184,21 +174,21 @@ export default function FocusTimer({
       setRemainingSeconds(remainingAtPauseRef.current);
     }
     endTimestampRef.current = null;
-    setStatus("paused");
+    setStatus('paused');
   };
 
   const handleResume = () => {
-    if (status !== "paused") {
+    if (status !== 'paused') {
       return;
     }
     endTimestampRef.current = Date.now() + remainingAtPauseRef.current * 1000;
-    setStatus("running");
+    setStatus('running');
   };
 
   const handleStop = () => {
     clearTick();
     endTimestampRef.current = null;
-    setStatus("idle");
+    setStatus('idle');
     setRemainingSeconds(selectedMinutes * 60);
     remainingAtPauseRef.current = selectedMinutes * 60;
   };
@@ -206,7 +196,7 @@ export default function FocusTimer({
   const handleReset = () => {
     clearTick();
     endTimestampRef.current = null;
-    setStatus("idle");
+    setStatus('idle');
     setRemainingSeconds(selectedMinutes * 60);
     remainingAtPauseRef.current = selectedMinutes * 60;
   };
@@ -217,9 +207,9 @@ export default function FocusTimer({
     };
   }, [clearTick]);
 
-  const isRunning = status === "running";
-  const isPaused = status === "paused";
-  const isIdle = status === "idle";
+  const isRunning = status === 'running';
+  const isPaused = status === 'paused';
+  const isIdle = status === 'idle';
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 px-4 py-10 dark:bg-gray-900">
@@ -299,11 +289,11 @@ export default function FocusTimer({
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-          {isRunning && "Focus session in progress…"}
-          {isPaused && "Paused — resume when ready."}
-          {isIdle && "Set your focus time and press Start."}
+          {isRunning && 'Focus session in progress…'}
+          {isPaused && 'Paused — resume when ready.'}
+          {isIdle && 'Set your focus time and press Start.'}
         </p>
       </div>
     </div>
   );
-  }
+}

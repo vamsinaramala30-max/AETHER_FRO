@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 import { RecentFileCard } from './recentfilecard';
 import { recentFilesService, RecentFileData } from './recentfilesservices';
 
@@ -22,7 +23,7 @@ export const RecentFilesPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full space-y-6 text-slate-900 dark:text-slate-100">
+    <PageWrapper>
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           Recent Workspace Files
@@ -56,6 +57,6 @@ export const RecentFilesPage: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };

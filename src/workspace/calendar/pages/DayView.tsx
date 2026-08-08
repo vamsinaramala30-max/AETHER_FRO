@@ -9,7 +9,15 @@ export const DayView: React.FC = () => {
   const current = parseYMD(viewState.currentDate);
 
   const start = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 0, 0, 0, 0);
-  const end = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 23, 59, 59, 999);
+  const end = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
 
   const { events } = useEvents(start, end);
 

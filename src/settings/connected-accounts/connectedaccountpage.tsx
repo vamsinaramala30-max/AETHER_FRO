@@ -61,9 +61,7 @@ export const ConnectedAccountsPage: React.FC = () => {
     <PageWrapper>
       <div className="space-y-6">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
-            <Link2 className="h-5 w-5" />
-          </div>
+          <Link2 className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Connected Accounts & SSO Providers

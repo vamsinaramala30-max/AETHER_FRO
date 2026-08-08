@@ -13,7 +13,9 @@ import {
 
 import { useTheme } from '../providers/themeprovider';
 import { Sidebar } from '../../components/sidebar/Sidebar';
+import { useNotificationStore } from '../../state/notificationStore';
 
+<<<<<<< HEAD
 // ---------------------------------------------------------------------------
 // Lazy-loaded modals/components
 // ---------------------------------------------------------------------------
@@ -42,6 +44,16 @@ const Weather = React.lazy(
     import('../../components/weather/weather').then((module) => ({
       default: module.default,
     })),
+=======
+// Lazy-load modals so they don't bloat the initial bundle
+const GlobalSearch = React.lazy(() =>
+  import('../../components/search/GlobalSearch').then((m) => ({ default: m.GlobalSearch })),
+);
+const NotificationCenter = React.lazy(() =>
+  import('../../components/notifications/NotificationCenter').then((m) => ({
+    default: m.NotificationCenter,
+  })),
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 );
 
 // ---------------------------------------------------------------------------
@@ -79,6 +91,7 @@ function formatBreadcrumbs(
 interface HeaderProps {
   onSearchOpen: () => void;
   onNotificationsOpen: () => void;
+<<<<<<< HEAD
   onWeatherOpen: () => void;
 }
 
@@ -94,6 +107,15 @@ const DesktopHeader: React.FC<HeaderProps> = ({
   onSearchOpen,
   onNotificationsOpen,
   onWeatherOpen,
+=======
+  unreadCount?: number;
+}
+
+const DesktopHeader: React.FC<HeaderProps> = ({
+  onSearchOpen,
+  onNotificationsOpen,
+  unreadCount = 0,
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 }) => {
   const location = useLocation();
   const breadcrumbs = formatBreadcrumbs(location.pathname);
@@ -182,6 +204,11 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           className="relative rounded-xl border border-aether-border bg-aether-subtle p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
         >
           <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* --------------------------------------------------------------- */}
@@ -216,6 +243,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   onMobileMenuOpen,
   onSearchOpen,
   onNotificationsOpen,
+<<<<<<< HEAD
   onWeatherOpen,
 }) => {
   return (
@@ -351,6 +379,45 @@ const WeatherOverlay: React.FC<WeatherOverlayProps> = ({ onClose }) => {
     </div>
   );
 };
+=======
+  unreadCount = 0,
+}) => (
+  <header className="flex shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-4 py-3 md:hidden">
+    <div className="flex items-center gap-2.5">
+      <Sparkles className="h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-400" />
+      <span className="text-base font-extrabold text-aether-main">Aether OS</span>
+    </div>
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={onSearchOpen}
+        className="rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Search className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onNotificationsOpen}
+        className="relative rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={onMobileMenuOpen}
+        className="rounded-lg p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+    </div>
+  </header>
+);
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 
 // ---------------------------------------------------------------------------
 // AppLayout
@@ -365,10 +432,16 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
 
   const location = useLocation();
 
+<<<<<<< HEAD
   // -------------------------------------------------------------------------
   // Automatically close mobile sidebar when route changes
   // -------------------------------------------------------------------------
 
+=======
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+
+  // Auto-close mobile sidebar on route change
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -423,11 +496,16 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   // -------------------------------------------------------------------------
 
   return (
+<<<<<<< HEAD
     <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {/* ================================================================= */}
       {/* Mobile Backdrop                                                    */}
       {/* ================================================================= */}
 
+=======
+    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] font-sans text-aether-main antialiased">
+      {/* Mobile backdrop */}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
       {mobileOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md transition-opacity duration-300 md:hidden"
@@ -443,7 +521,11 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       <div
         className={`fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] transform shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
+<<<<<<< HEAD
         }`}
+=======
+        } w-[280px] max-w-[85vw] shadow-2xl`}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
         aria-hidden={!mobileOpen}
       >
         <Sidebar
@@ -459,7 +541,11 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
             setMobileOpen(false);
             setNotificationsOpen(true);
           }}
+<<<<<<< HEAD
           unreadCount={0}
+=======
+          unreadCount={unreadCount}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
         />
       </div>
 
@@ -477,21 +563,31 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           onMobileClose={() => {}}
           onSearchOpen={() => setSearchOpen(true)}
           onNotificationsOpen={() => setNotificationsOpen(true)}
-          unreadCount={0}
+          unreadCount={unreadCount}
         />
       </div>
 
+<<<<<<< HEAD
       {/* ================================================================= */}
       {/* Main Content                                                       */}
       {/* ================================================================= */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile Header */}
+=======
+      {/* Main content container */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Mobile header (hidden on desktop) */}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
         <TopHeader
           onMobileMenuOpen={() => setMobileOpen(true)}
           onSearchOpen={() => setSearchOpen(true)}
           onNotificationsOpen={() => setNotificationsOpen(true)}
+<<<<<<< HEAD
           onWeatherOpen={() => setWeatherOpen(true)}
+=======
+          unreadCount={unreadCount}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
         />
 
         {/* Desktop Header */}
@@ -499,12 +595,27 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           <DesktopHeader
             onSearchOpen={() => setSearchOpen(true)}
             onNotificationsOpen={() => setNotificationsOpen(true)}
+<<<<<<< HEAD
             onWeatherOpen={() => setWeatherOpen(true)}
           />
         </div>
 
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto bg-aether-bg p-3 transition-all duration-200 sm:p-4 md:p-6">
+=======
+            unreadCount={unreadCount}
+          />
+        </div>
+
+        {/* Dynamic page view content outlet */}
+        <main
+          className={`min-h-0 w-full min-w-0 flex-1 bg-aether-bg transition-all duration-200 ${
+            location.pathname.startsWith('/app/ai/assistant')
+              ? 'mx-auto flex w-[95%] flex-col overflow-hidden p-0 md:w-full'
+              : 'overflow-y-auto p-0'
+          }`}
+        >
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
           <Outlet />
         </main>
       </div>
@@ -540,4 +651,8 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       )}
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3

@@ -65,4 +65,3 @@ export const fetchGoalAnalytics = async (): Promise<GoalAnalyticsSummary> => {
     progressTrend: [],
   };
 };
-

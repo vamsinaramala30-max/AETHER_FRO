@@ -15,7 +15,10 @@ const PREVIEW_EXAMPLES: PromptExample[] = [
 
 export const IntelligencePreview: React.FC = () => {
   return (
-    <section className="border-b border-zinc-900 py-20" aria-labelledby="intelligence-heading">
+    <section
+      className="border-b border-zinc-800/50 bg-zinc-900/20 py-16 sm:py-20 lg:py-24"
+      aria-labelledby="intelligence-heading"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <h2

@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Activity, GitCommit, CheckCircle, FileText, MessageSquare, Zap, AlertCircle } from 'lucide-react';
+import {
+  Activity,
+  GitCommit,
+  CheckCircle,
+  FileText,
+  MessageSquare,
+  Zap,
+  AlertCircle,
+} from 'lucide-react';
 import { apiClient } from '@/api/client';
 
 interface ActivityEntry {
@@ -22,11 +30,16 @@ function timeAgo(dateStr: string): string {
 
 function getActivityIcon(action: string) {
   const lower = action.toLowerCase();
-  if (lower.includes('commit') || lower.includes('push')) return <GitCommit className="h-4 w-4 text-purple-500" />;
-  if (lower.includes('complete') || lower.includes('done')) return <CheckCircle className="h-4 w-4 text-emerald-500" />;
-  if (lower.includes('file') || lower.includes('upload') || lower.includes('document')) return <FileText className="h-4 w-4 text-blue-500" />;
-  if (lower.includes('ai') || lower.includes('chat') || lower.includes('message')) return <MessageSquare className="h-4 w-4 text-indigo-500" />;
-  if (lower.includes('auto') || lower.includes('workflow')) return <Zap className="h-4 w-4 text-amber-500" />;
+  if (lower.includes('commit') || lower.includes('push'))
+    return <GitCommit className="h-4 w-4 text-purple-500" />;
+  if (lower.includes('complete') || lower.includes('done'))
+    return <CheckCircle className="h-4 w-4 text-emerald-500" />;
+  if (lower.includes('file') || lower.includes('upload') || lower.includes('document'))
+    return <FileText className="h-4 w-4 text-blue-500" />;
+  if (lower.includes('ai') || lower.includes('chat') || lower.includes('message'))
+    return <MessageSquare className="h-4 w-4 text-indigo-500" />;
+  if (lower.includes('auto') || lower.includes('workflow'))
+    return <Zap className="h-4 w-4 text-amber-500" />;
   return <Activity className="h-4 w-4 text-slate-400" />;
 }
 
@@ -81,7 +94,9 @@ export const RecentActivityPage: React.FC = () => {
       ) : activities.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Activity className="mb-3 h-10 w-10 text-slate-400 dark:text-slate-500" />
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">No activity logged yet</p>
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            No activity logged yet
+          </p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Actions and updates performed in your workspace will appear here.
           </p>
@@ -90,12 +105,17 @@ export const RecentActivityPage: React.FC = () => {
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {activities.map((entry) => (
-              <div key={entry.id} className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/30">
+              <div
+                key={entry.id}
+                className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/30"
+              >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
                   {getActivityIcon(entry.action)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">{entry.action}</p>
+                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                    {entry.action}
+                  </p>
                   {entry.entityType && (
                     <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                       {entry.entityType}

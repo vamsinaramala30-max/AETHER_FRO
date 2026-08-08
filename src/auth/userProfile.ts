@@ -17,7 +17,9 @@ export interface NormalizedUserProfile {
   [key: string]: unknown;
 }
 
-function normalizeDisplayName(input: Partial<NormalizedUserProfile> | Record<string, unknown>): string {
+function normalizeDisplayName(
+  input: Partial<NormalizedUserProfile> | Record<string, unknown>,
+): string {
   const fullName =
     typeof input.fullName === 'string' && input.fullName.trim() !== ''
       ? input.fullName.trim()
@@ -45,7 +47,9 @@ function normalizeEmail(input: Partial<NormalizedUserProfile> | Record<string, u
   return email;
 }
 
-function normalizeInitials(input: Partial<NormalizedUserProfile> | Record<string, unknown>): string {
+function normalizeInitials(
+  input: Partial<NormalizedUserProfile> | Record<string, unknown>,
+): string {
   const fullName = normalizeDisplayName(input);
   if (fullName && fullName !== 'User') {
     const words = fullName.trim().split(/\s+/).filter(Boolean);
@@ -74,13 +78,21 @@ export function normalizeUserProfile<T extends Record<string, unknown> = Record<
             .trim();
 
   const fullNameParts = (fullName || '').split(/\s+/).filter(Boolean);
-  const firstName = typeof source.firstName === 'string' && source.firstName.trim() !== ''
-    ? source.firstName.trim()
-    : fullNameParts[0] || '';
-  const lastName = typeof source.lastName === 'string' && source.lastName.trim() !== ''
-    ? source.lastName.trim()
-    : fullNameParts.slice(1).join(' ') || '';
-  const displayName = normalizeDisplayName({ ...source, firstName, lastName, fullName, name: fullName });
+  const firstName =
+    typeof source.firstName === 'string' && source.firstName.trim() !== ''
+      ? source.firstName.trim()
+      : fullNameParts[0] || '';
+  const lastName =
+    typeof source.lastName === 'string' && source.lastName.trim() !== ''
+      ? source.lastName.trim()
+      : fullNameParts.slice(1).join(' ') || '';
+  const displayName = normalizeDisplayName({
+    ...source,
+    firstName,
+    lastName,
+    fullName,
+    name: fullName,
+  });
   const email = normalizeEmail(source);
 
   return {
@@ -98,6 +110,7 @@ export function normalizeUserProfile<T extends Record<string, unknown> = Record<
     role: typeof source.role === 'string' ? source.role : undefined,
     timezone: typeof source.timezone === 'string' ? source.timezone : undefined,
     language: typeof source.language === 'string' ? source.language : undefined,
-    isEmailVerified: typeof source.isEmailVerified === 'boolean' ? source.isEmailVerified : undefined,
+    isEmailVerified:
+      typeof source.isEmailVerified === 'boolean' ? source.isEmailVerified : undefined,
   };
 }

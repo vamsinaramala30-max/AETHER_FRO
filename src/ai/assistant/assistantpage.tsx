@@ -61,26 +61,26 @@ export const AssistantPage: React.FC = () => {
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
   return (
-    <div className="bg-background relative flex h-full w-full flex-col overflow-hidden">
+    <div className="bg-background relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
       <AssistantHeader
         title={activeConversation?.title || 'AI Assistant'}
         onClearSession={createNewConversation}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         <ChatSidebar />
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {error ? (
-            <div className="flex flex-1 items-center justify-center p-4">
+            <div className="flex flex-1 items-center justify-center overflow-y-auto p-4">
               <ErrorState message={error} onRetry={retryLastMessage} onDismiss={clearError} />
             </div>
           ) : !activeConversationId || (messages.length === 0 && !isLoading) ? (
-            <div className="flex flex-1 items-center justify-center p-4">
+            <div className="flex flex-1 items-center justify-center overflow-y-auto p-3 sm:p-4">
               <EmptyState onSelectPrompt={(promptText) => sendMessage(promptText)} />
             </div>
           ) : (
-            <div className="flex-1 space-y-4 overflow-y-auto p-4 md:p-6">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3 sm:p-4 md:p-6">
               <ChatWindow messages={messages} isLoading={isLoading} />
               {isStreaming && (
                 <div className="pt-2">
@@ -91,7 +91,7 @@ export const AssistantPage: React.FC = () => {
             </div>
           )}
 
-          <div className="border-border/40 bg-background/95 support-[backdrop-filter]:bg-background/60 border-t p-4 backdrop-blur">
+          <div className="shrink-0 border-t border-slate-200 bg-white/95 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:p-4">
             <ChatInput onSendMessage={sendMessage} disabled={isLoading || isStreaming} />
           </div>
         </div>

@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useMemo, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  ReactNode,
+  useEffect,
+} from 'react';
 import { aiService, AIProviderConfig, AIProviderId } from '../services/aiService';
 
 export interface Assistant {
@@ -68,7 +76,12 @@ export const AIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [availableAssistants] = useState<Assistant[]>([
     { id: 'aether-core-1', name: 'Aether Core AI', model: 'aether-v4-turbo', isAvailable: true },
     { id: 'aether-code-1', name: 'Aether Code Engine', model: 'aether-code-v2', isAvailable: true },
-    { id: 'aether-doc-1', name: 'Aether Document Analyst', model: 'aether-doc-v1', isAvailable: true },
+    {
+      id: 'aether-doc-1',
+      name: 'Aether Document Analyst',
+      model: 'aether-doc-v1',
+      isAvailable: true,
+    },
   ]);
 
   const [uiPreferences, setUiPreferences] = useState<AIUIPreferences>({

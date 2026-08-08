@@ -16,13 +16,19 @@ export interface TaskFiltersState {
   tag: string;
 }
 
-const mapStatusToApi = (status?: Task['status']): 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | undefined => {
+const mapStatusToApi = (
+  status?: Task['status'],
+): 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | undefined => {
   if (!status) return undefined;
   switch (status) {
-    case 'todo': return 'TODO';
-    case 'in_progress': return 'IN_PROGRESS';
-    case 'review': return 'IN_REVIEW';
-    case 'done': return 'DONE';
+    case 'todo':
+      return 'TODO';
+    case 'in_progress':
+      return 'IN_PROGRESS';
+    case 'review':
+      return 'IN_REVIEW';
+    case 'done':
+      return 'DONE';
   }
 };
 
@@ -51,7 +57,7 @@ const mapPriorityFromApi = (priority?: string): Task['priority'] => {
 export const taskService = {
   async getTasks(): Promise<Task[]> {
     const res = await tasksApi.getAll();
-    const raw = res.data || [];
+    const raw = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
     return raw.map((item) => ({
       id: item.id,
       title: item.title || 'Untitled Task',

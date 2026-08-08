@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   X,
   Bell,
@@ -10,23 +10,18 @@ import {
   Check,
   Trash2,
 } from 'lucide-react';
-import { apiClient } from '@/api/client';
+import { useNotificationStore } from '@/state/notificationStore';
 
-interface NotificationItem {
-  id: string;
-  type: 'ai' | 'project' | 'calendar' | 'automation' | 'system';
-  title: string;
-  description: string;
-  time: string;
-  read: boolean;
-}
-
-const TYPE_ICON: Record<NotificationItem['type'], React.ReactNode> = {
+const TYPE_ICON: Record<string, React.ReactNode> = {
   ai: <MessageSquare className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />,
   project: <FolderOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />,
   calendar: <Calendar className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />,
   automation: <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />,
   system: <Info className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />,
+  info: <Info className="h-3.5 w-3.5 text-blue-500" />,
+  success: <Check className="h-3.5 w-3.5 text-emerald-500" />,
+  warning: <Info className="h-3.5 w-3.5 text-amber-500" />,
+  error: <X className="h-3.5 w-3.5 text-red-500" />,
 };
 
 interface NotificationCenterProps {
@@ -35,81 +30,26 @@ interface NotificationCenterProps {
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchNotifications = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await apiClient.get<any>('/notifications');
-      const items = Array.isArray(data) ? data : data?.data?.items || data?.items || [];
-      if (Array.isArray(items)) {
-        const mapped: NotificationItem[] = items.map((item: any) => ({
-          id: item.id || `notif_${Date.now()}`,
-          type: item.type || 'system',
-          title: item.title || 'System Notification',
-          description: item.message || item.description || '',
-          time: item.createdAt
-            ? new Date(item.createdAt).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-            : 'Just now',
-          read: Boolean(item.isRead || item.read),
-        }));
-        setNotifications(mapped);
-        setLoading(false);
-        return;
-      }
-    } catch {
-      // Backend not returning notifications list, fallback to local storage
-    }
-
-    try {
-      const stored = localStorage.getItem('aether_notifications');
-      if (stored) {
-        setNotifications(JSON.parse(stored));
-      } else {
-        setNotifications([]);
-      }
-    } catch {
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchNotifications();
-  }, [fetchNotifications]);
-
-  const saveToStorage = (updated: NotificationItem[]) => {
-    setNotifications(updated);
-    try {
-      localStorage.setItem('aether_notifications', JSON.stringify(updated));
-    } catch {
-      // Ignore
-    }
-  };
+  const notifications = useNotificationStore((state) => state.notifications);
+  const markAsRead = useNotificationStore((state) => state.markAsRead);
+  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
+  const dismissNotification = useNotificationStore((state) => state.dismissNotification);
+  const clearAll = useNotificationStore((state) => state.clearAll);
 
   const unread = notifications.filter((n) => !n.read);
   const read = notifications.filter((n) => n.read);
 
   const markAllRead = () => {
-    const updated = notifications.map((n) => ({ ...n, read: true }));
-    saveToStorage(updated);
+    markAllAsRead();
   };
 
   const markRead = (id: string) => {
-    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
-    saveToStorage(updated);
-    void apiClient.patch(`/notifications/${id}/read`).catch(() => {});
+    markAsRead(id);
   };
 
   const dismiss = (id: string) => {
-    const updated = notifications.filter((n) => n.id !== id);
-    saveToStorage(updated);
-    void apiClient.delete(`/notifications/${id}`).catch(() => {});
+    dismissNotification(id);
   };
 
   useEffect(() => {
@@ -168,12 +108,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
 
           {/* List Content */}
           <div className="max-h-[420px] overflow-y-auto">
-            {loading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+            {notifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
                 <Bell className="mb-2 h-8 w-8 text-slate-300 dark:text-slate-600" />
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   All caught up!
@@ -207,9 +143,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {n.description}
                           </p>
-                          <p className="mt-1 text-[10px] font-semibold text-slate-400">
-                            {n.time}
-                          </p>
+                          <p className="mt-1 text-[10px] font-semibold text-slate-400">{n.time}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                           <button
@@ -277,7 +211,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
             <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-800/40">
               <button
                 type="button"
-                onClick={() => saveToStorage([])}
+                onClick={clearAll}
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition-colors hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
               >
                 <Trash2 className="h-3.5 w-3.5" />

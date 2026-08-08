@@ -1,3 +1,5 @@
+import { apiClient } from '../../api/client';
+
 export interface WeeklyReviewData {
   weekEnding: string;
   tasksCompleted: number;
@@ -7,24 +9,30 @@ export interface WeeklyReviewData {
   blockers: string[];
 }
 
-const mockReviewData: WeeklyReviewData = {
-  weekEnding: '2026-07-19',
-  tasksCompleted: 14,
-  hoursFocused: 38.5,
-  goalsAdvanced: 3,
-  insights: [
-    'Webpack-to-Vite migration cut HMR delay by 85%.',
-    'Morning execution blocks yield 40% higher structural code clarity than evening stretches.',
-  ],
-  blockers: ['Upstream API schema synchronization delay slowed down task integration.'],
-};
-
 export const weeklyReviewService = {
   async getLatestReview(): Promise<WeeklyReviewData> {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({ ...mockReviewData });
-      }, 500),
-    );
+    try {
+      const res = await apiClient.get<any>('/analytics/weekly-review');
+      return (
+        res?.data ||
+        res || {
+          weekEnding: new Date().toISOString().split('T')[0],
+          tasksCompleted: 0,
+          hoursFocused: 0,
+          goalsAdvanced: 0,
+          insights: [],
+          blockers: [],
+        }
+      );
+    } catch {
+      return {
+        weekEnding: new Date().toISOString().split('T')[0],
+        tasksCompleted: 0,
+        hoursFocused: 0,
+        goalsAdvanced: 0,
+        insights: [],
+        blockers: [],
+      };
+    }
   },
 };

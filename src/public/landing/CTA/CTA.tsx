@@ -5,7 +5,10 @@ import { useAuth } from '../../../app/providers/authprovider';
 export const CTA: React.FC = () => {
   const { isAuthenticated } = useAuth();
   return (
-    <section className="relative border-b border-zinc-900 py-20" aria-labelledby="cta-heading">
+    <section
+      className="relative overflow-hidden bg-zinc-950/40 py-20 sm:py-24"
+      aria-labelledby="cta-heading"
+    >
       <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <h2 id="cta-heading" className="text-3xl font-semibold tracking-tight text-zinc-100">
           Begin your deployment configuration.

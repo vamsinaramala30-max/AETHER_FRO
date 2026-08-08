@@ -17,6 +17,10 @@ export const SidebarFooterControls: React.FC<
   onWeatherOpen,
   onNotificationsOpen,
   unreadCount = 0,
+<<<<<<< HEAD
+=======
+  isMobile = false,
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -44,6 +48,16 @@ export const SidebarFooterControls: React.FC<
             className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-aether-border bg-aether-subtle text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
           >
             <Bell className="h-4 w-4" />
+<<<<<<< HEAD
+=======
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </SidebarTooltip>
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 
             {unreadCount > 0 && (
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
@@ -78,6 +92,7 @@ export const SidebarFooterControls: React.FC<
         Controls
       </div>
 
+<<<<<<< HEAD
       {/* Controls */}
       <div className="flex items-center justify-end gap-2">
         {/* Weather */}
@@ -90,6 +105,25 @@ export const SidebarFooterControls: React.FC<
         >
           <Thermometer className="h-5 w-5 text-cyan-400" />
         </button>
+=======
+      <div className="flex items-center gap-1.5">
+        {/* Notifications Icon Button */}
+        <SidebarTooltip content="Notifications">
+          <button
+            type="button"
+            onClick={onNotificationsOpen}
+            aria-label="Open notifications"
+            className="border-aether-border/60 bg-aether-subtle/50 relative flex h-8 w-8 items-center justify-center rounded-lg border text-aether-muted transition-all hover:bg-aether-hover hover:text-aether-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </SidebarTooltip>
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 
         {/* Notifications */}
         <button

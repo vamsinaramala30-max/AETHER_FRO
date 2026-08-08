@@ -29,4 +29,3 @@ export const integrationsService = {
     return res?.data || res;
   },
 };
-

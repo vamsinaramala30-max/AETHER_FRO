@@ -15,8 +15,6 @@ export interface ChartDataPoint {
 
 const STATS_STORAGE_KEY = 'aether_productivity_stats_v2';
 
-
-
 const emptyHistory: ChartDataPoint[] = [
   { day: 'Mon', focusMinutes: 0, tasks: 0 },
   { day: 'Tue', focusMinutes: 0, tasks: 0 },

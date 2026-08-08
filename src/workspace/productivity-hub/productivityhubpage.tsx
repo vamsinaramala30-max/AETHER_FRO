@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 import { ProductivityStats } from './productivitystats';
 import { ProductivityChart } from './productivitychart';
 import { productivityService, ProductivityStatsData, ChartDataPoint } from './productivityservice';
@@ -12,12 +13,22 @@ export const ProductivityHubPage: React.FC = () => {
   const fetchHubData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const [fetchedStats, fetchedHistory] = await Promise.all([
+      setError(null);
+      const [statsResult, historyResult] = await Promise.allSettled([
         productivityService.getStats(),
         productivityService.getHistory(),
       ]);
-      setStats(fetchedStats);
-      setChartData(fetchedHistory);
+
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value);
+      }
+      if (historyResult.status === 'fulfilled') {
+        setChartData(historyResult.value);
+      }
+
+      if (statsResult.status === 'rejected' && historyResult.status === 'rejected') {
+        setError('Failed to instantiate analytical core telemetry models.');
+      }
     } catch {
       setError('Failed to instantiate analytical core telemetry models.');
     } finally {
@@ -29,7 +40,7 @@ export const ProductivityHubPage: React.FC = () => {
     void fetchHubData();
   }, [fetchHubData]);
 
-  const handleSessionComplete = (minutes: number) => {
+  const _handleSessionComplete = (minutes: number) => {
     void (async () => {
       try {
         const updatedStats = await productivityService.logFocusSession(minutes);
@@ -41,7 +52,7 @@ export const ProductivityHubPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-6 text-slate-900 dark:text-slate-100">
+    <PageWrapper>
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           Productivity Telemetry Control
@@ -72,9 +83,9 @@ export const ProductivityHubPage: React.FC = () => {
             <div className="lg:col-span-2">
               <ProductivityChart data={chartData} />
             </div>
-                     </div>
+          </div>
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };

@@ -14,9 +14,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onDelet
       <div>
         <div className="mb-2 flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-              <FileText className="h-4 w-4" />
-            </div>
+            <FileText className="h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-400" />
             <h3
               className="line-clamp-1 text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400"
               title={doc.name}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Star, BookmarkPlus, AlertCircle } from 'lucide-react';
 import { FavoriteCard } from './favoritecard';
 import { favoritesService, FavoriteItemData } from './favoritesservice';
@@ -39,11 +40,9 @@ export const FavoritesPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-6 text-slate-900 dark:text-slate-100">
+    <PageWrapper>
       <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 shadow-lg shadow-amber-500/20">
-          <Star className="h-5 w-5 text-white" />
-        </div>
+        <Star className="h-7 w-7 shrink-0 fill-amber-500 text-amber-500" />
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Favorites
@@ -64,16 +63,12 @@ export const FavoritesPage: React.FC = () => {
       {loading ? (
         <div className="flex h-48 w-full flex-col items-center justify-center gap-2">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            Loading favorites...
-          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">Loading favorites...</span>
         </div>
       ) : favorites.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <BookmarkPlus className="mb-3 h-10 w-10 text-slate-400 dark:text-slate-500" />
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-            No favorites yet
-          </p>
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">No favorites yet</p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Star projects, files, or resources to pin them here for quick access.
           </p>
@@ -85,6 +80,6 @@ export const FavoritesPage: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 };

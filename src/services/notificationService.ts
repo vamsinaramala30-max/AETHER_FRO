@@ -1,3 +1,5 @@
+import { useNotificationStore } from '@/state/notificationStore';
+
 export interface AppNotification {
   id: string;
   type: 'info' | 'success' | 'warning' | 'error';
@@ -16,11 +18,20 @@ export class NotificationService {
     return () => this.listeners.delete(listener);
   }
 
-  public notify(type: AppNotification['type'], message: string): void {
+  public notify(type: AppNotification['type'], message: string, title?: string): void {
     const item: AppNotification = { id: crypto.randomUUID(), type, message };
     this.notifications = [...this.notifications, item];
     this.listeners.forEach((fn) => {
       fn(this.notifications);
+    });
+
+    useNotificationStore.getState().addNotification({
+      title: title || type.charAt(0).toUpperCase() + type.slice(1) + ' Action',
+      description: message,
+      type:
+        type === 'info' || type === 'success' || type === 'warning' || type === 'error'
+          ? type
+          : 'system',
     });
   }
 

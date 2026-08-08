@@ -109,8 +109,18 @@ const ROLE_CONFIG: Record<string, string> = {
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/app/workspace' },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon, path: '/app/workspace/calendar' },
-  { id: 'productivity-hub', label: 'Productivity Hub', icon: Zap, path: '/app/workspace/productivity-hub' },
-  { id: 'recent-files', label: 'Recent Files', icon: FileText, path: '/app/workspace/recent-files' },
+  {
+    id: 'productivity-hub',
+    label: 'Productivity Hub',
+    icon: Zap,
+    path: '/app/workspace/productivity-hub',
+  },
+  {
+    id: 'recent-files',
+    label: 'Recent Files',
+    icon: FileText,
+    path: '/app/workspace/recent-files',
+  },
   { id: 'favorites', label: 'Favorites', icon: Star, path: '/app/workspace/favorites' },
   { id: 'members', label: 'Members', icon: Users, path: '/app/workspace/members' },
 ];
@@ -134,13 +144,21 @@ export const WorkspacePage: React.FC = () => {
   useEffect(() => {
     const initials = (
       user?.name
-        ? user.name.split(' ').map((p) => p[0]).join('').substring(0, 2)
-        : user?.email ? user.email.substring(0, 2) : 'US'
+        ? user.name
+            .split(' ')
+            .map((p) => p[0])
+            .join('')
+            .substring(0, 2)
+        : user?.email
+          ? user.email.substring(0, 2)
+          : 'US'
     ).toUpperCase();
 
     const currentUserObj: MemberItem = {
       id: user?.id || 'usr_current',
-      name: user?.name || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
+      name:
+        user?.name ||
+        (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
       email: user?.email || 'user@aether.os',
       role: 'Owner',
       initials,
@@ -192,9 +210,7 @@ export const WorkspacePage: React.FC = () => {
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-4 dark:border-slate-800">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
+            <Building2 className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Workspace
@@ -207,8 +223,8 @@ export const WorkspacePage: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex scrollbar-thin overflow-x-auto border-b border-slate-200 dark:border-slate-800">
-          <div className="flex gap-2 min-w-max pb-1">
+        <div className="scrollbar-thin flex overflow-x-auto border-b border-slate-200 dark:border-slate-800">
+          <div className="flex min-w-max gap-2 pb-1">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -270,7 +286,8 @@ export const WorkspacePage: React.FC = () => {
                   Pro Plan Workspace
                 </p>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  {membersList.length} active seat{membersList.length === 1 ? '' : 's'} · Auto-renews Aug 15
+                  {membersList.length} active seat{membersList.length === 1 ? '' : 's'} ·
+                  Auto-renews Aug 15
                 </p>
               </div>
             </div>
@@ -324,9 +341,7 @@ export const WorkspacePage: React.FC = () => {
           {/* Members Quick View */}
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/50">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-200">
-                Team Members
-              </h2>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-200">Team Members</h2>
               <Link
                 to="/app/workspace/members"
                 className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"

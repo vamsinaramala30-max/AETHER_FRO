@@ -71,9 +71,7 @@ export const ScheduledAutomationPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20">
-              <Clock className="h-5 w-5 text-white" />
-            </div>
+            <Clock className="h-7 w-7 shrink-0 text-amber-500 dark:text-amber-400" />
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Scheduled Automation

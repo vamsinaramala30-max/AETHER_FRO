@@ -104,7 +104,8 @@ export class AiService {
         id: 'fallback-' + Date.now(),
         message: {
           role: 'assistant',
-          content: 'AI Service is currently disabled or unconfigured. Please enable a provider in AI Models settings.',
+          content:
+            'AI Service is currently disabled or unconfigured. Please enable a provider in AI Models settings.',
         },
         usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
       };
@@ -117,7 +118,8 @@ export class AiService {
         id: 'fallback-' + Date.now(),
         message: {
           role: 'assistant',
-          content: 'I encountered an issue connecting to the AI provider. Operating in standard mode.',
+          content:
+            'I encountered an issue connecting to the AI provider. Operating in standard mode.',
         },
         usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
       };
@@ -143,7 +145,12 @@ export class AiService {
     } catch {
       return [
         { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', contextWindow: 128000 },
-        { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', contextWindow: 200000 },
+        {
+          id: 'claude-3-5-sonnet',
+          name: 'Claude 3.5 Sonnet',
+          provider: 'Anthropic',
+          contextWindow: 200000,
+        },
         { id: 'gemini-pro', name: 'Gemini 1.5 Pro', provider: 'Google', contextWindow: 1000000 },
       ];
     }
@@ -153,7 +160,12 @@ export class AiService {
   // HIGH-LEVEL OPTIONAL AI CAPABILITIES WITH SILENT FALLBACK
   // --------------------------------------------------------------------------
 
-  public async generateProjectSummary(project: { name: string; description?: string; tasksCount?: number; lastUpdated?: string }): Promise<string> {
+  public async generateProjectSummary(project: {
+    name: string;
+    description?: string;
+    tasksCount?: number;
+    lastUpdated?: string;
+  }): Promise<string> {
     const cacheKey = `proj_summary_${project.name}`;
     const cached = this.getCached<string>(cacheKey);
     if (cached) return cached;
@@ -163,7 +175,10 @@ export class AiService {
         const response = await this.sendMessage({
           model: this.getConfig().modelOverrides[this.getConfig().activeProvider] || 'default',
           messages: [
-            { role: 'system', content: 'Generate a concise 2-sentence executive summary for the project.' },
+            {
+              role: 'system',
+              content: 'Generate a concise 2-sentence executive summary for the project.',
+            },
             { role: 'user', content: JSON.stringify(project) },
           ],
         });
@@ -180,7 +195,11 @@ export class AiService {
     return fallback;
   }
 
-  public async detectProjectRisks(project: { tasksCount?: number; overdueCount?: number; lastUpdatedDaysAgo?: number }): Promise<{ level: 'low' | 'medium' | 'high'; reason: string }> {
+  public async detectProjectRisks(project: {
+    tasksCount?: number;
+    overdueCount?: number;
+    lastUpdatedDaysAgo?: number;
+  }): Promise<{ level: 'low' | 'medium' | 'high'; reason: string }> {
     if (this.isAiEnabled()) {
       try {
         // AI assessment attempt
@@ -194,7 +213,10 @@ export class AiService {
     const inactiveDays = project.lastUpdatedDaysAgo ?? 0;
 
     if (overdue > 3 || inactiveDays > 14) {
-      return { level: 'high', reason: `${overdue} overdue items & no activity for ${inactiveDays} days` };
+      return {
+        level: 'high',
+        reason: `${overdue} overdue items & no activity for ${inactiveDays} days`,
+      };
     }
     if (overdue > 0 || inactiveDays > 7) {
       return { level: 'medium', reason: `${overdue} overdue task requiring attention` };
@@ -202,7 +224,9 @@ export class AiService {
     return { level: 'low', reason: 'Project is progressing on schedule' };
   }
 
-  public async generateAgendaSummary(events: Array<{ title: string; time: string }>): Promise<string> {
+  public async generateAgendaSummary(
+    events: Array<{ title: string; time: string }>,
+  ): Promise<string> {
     if (events.length === 0) return 'No scheduled meetings or events today.';
 
     if (this.isAiEnabled()) {
@@ -210,7 +234,10 @@ export class AiService {
         const response = await this.sendMessage({
           model: 'default',
           messages: [
-            { role: 'system', content: 'Summarize today agenda into 1 punchy line highlighting priorities.' },
+            {
+              role: 'system',
+              content: 'Summarize today agenda into 1 punchy line highlighting priorities.',
+            },
             { role: 'user', content: JSON.stringify(events) },
           ],
         });
@@ -225,7 +252,7 @@ export class AiService {
   }
 
   public async rankNotifications<T extends { id: string; title: string; createdAt?: string }>(
-    notifications: T[]
+    notifications: T[],
   ): Promise<{ prioritized: T[]; urgentSummary: string | null }> {
     if (notifications.length === 0) {
       return { prioritized: [], urgentSummary: null };
@@ -251,7 +278,9 @@ export class AiService {
     };
   }
 
-  public async parseNaturalLanguageSearch(query: string): Promise<{ intent: string; filters?: Record<string, string> }> {
+  public async parseNaturalLanguageSearch(
+    query: string,
+  ): Promise<{ intent: string; filters?: Record<string, string> }> {
     const q = query.toLowerCase().trim();
     if (this.isAiEnabled()) {
       try {

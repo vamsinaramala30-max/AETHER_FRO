@@ -32,14 +32,16 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
             Required Config Keys:
           </p>
           <div className="flex flex-wrap gap-1">
-            {integration.configSchema.map((field) => (
-              <span
-                key={field}
-                className="rounded-md border border-slate-200 bg-slate-100/80 px-2 py-0.5 font-mono text-[10px] font-medium text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300"
-              >
-                {field}
-              </span>
-            ))}
+            {Array.isArray(integration.configSchema)
+              ? integration.configSchema.map((field) => (
+                  <span
+                    key={field}
+                    className="rounded-md border border-slate-200 bg-slate-100/80 px-2 py-0.5 font-mono text-[10px] font-medium text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300"
+                  >
+                    {field}
+                  </span>
+                ))
+              : null}
           </div>
         </div>
       </div>

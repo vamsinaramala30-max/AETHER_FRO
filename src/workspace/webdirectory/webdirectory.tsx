@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { TRUSTED_WEBSITES } from "./trusted-websites";
@@ -8,6 +9,14 @@ import type {
   WebDirectoryViewMode,
   WebsiteCategory,
 } from "./web-directory-types";
+=======
+import React, { useMemo, useState } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+
+import { TRUSTED_WEBSITES } from './trusted-websites';
+import { CATEGORY_FILTER_ALL, WEBSITE_CATEGORIES } from './web-directory-constants';
+import type { TrustedWebsite, WebsiteCategory } from './web-directory-types';
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
 import {
   applyWebDirectoryFilters,
   buildCountryWebsiteGroups,
@@ -21,7 +30,7 @@ import {
   searchCountries,
   toggleFavorite,
   withFavoriteMeta,
-} from "./web-directory-utils";
+} from './web-directory-utils';
 
 /**
  * Design tokens for the "verified archive" identity: a dark ledger shell
@@ -93,6 +102,7 @@ function WebsiteListRow({
   onOpen: (website: TrustedWebsite) => void;
 }): React.ReactElement {
   return (
+<<<<<<< HEAD
     <li className="flex flex-col gap-2 px-4 py-4 transition-colors hover:bg-[#141B33] sm:flex-row sm:items-center sm:gap-4 sm:px-6">
       <span className="font-mono text-[10px] uppercase tracking-widest text-[#C7A34C] sm:w-36 sm:shrink-0">
         {website.category}
@@ -101,6 +111,38 @@ function WebsiteListRow({
         <div className="flex items-center gap-2">
           <h3 className="truncate font-serif text-base text-[#F4EEDD]">{website.name}</h3>
           {website.verified && <VerifiedMark />}
+=======
+    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div>
+        <div className="mb-1 flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-50">{website.name}</h3>
+          <button
+            type="button"
+            onClick={() => onToggleFavorite(website.id)}
+            aria-pressed={isFavorite}
+            aria-label={
+              isFavorite
+                ? `Remove ${website.name} from favorites`
+                : `Add ${website.name} to favorites`
+            }
+            className={`shrink-0 text-lg leading-none ${
+              isFavorite ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'
+            }`}
+          >
+            {isFavorite ? '★' : '☆'}
+          </button>
+        </div>
+        <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">{website.description}</p>
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            {website.category}
+          </span>
+          {website.verified && (
+            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              ✓ Verified
+            </span>
+          )}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
         </div>
         <p className="truncate text-xs text-[#8B96BE]">{website.description}</p>
       </div>
@@ -231,9 +273,14 @@ function EmptyState({ label }: { label: string }): React.ReactElement {
 }
 
 export default function WebDirectory(): React.ReactElement {
+<<<<<<< HEAD
   const [viewMode, setViewMode] = useState<WebDirectoryViewMode>(() => loadViewMode() ?? "category");
   const [query, setQuery] = useState<string>("");
   const [category, setCategory] = useState<WebsiteCategory | "All">(CATEGORY_FILTER_ALL);
+=======
+  const [query, setQuery] = useState<string>('');
+  const [category, setCategory] = useState<WebsiteCategory | 'All'>(CATEGORY_FILTER_ALL);
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => loadFavoriteIds());
   const [recentEntries, setRecentEntries] = useState(() => loadRecentEntries());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
@@ -305,6 +352,7 @@ export default function WebDirectory(): React.ReactElement {
   };
 
   return (
+<<<<<<< HEAD
     <div className="mx-auto w-full max-w-6xl rounded-3xl border border-[#2A3350] bg-[#0B1120] p-5 sm:p-8">
       {/* Hero / header — the "cover page" of the ledger */}
       <div className="relative overflow-hidden rounded-2xl border border-[#2A3350] bg-gradient-to-b from-[#161D36] to-[#0F1526] px-6 py-8 sm:px-10 sm:py-10">
@@ -312,6 +360,11 @@ export default function WebDirectory(): React.ReactElement {
           Directory · Verified Sources Only
         </p>
         <h2 className="mt-3 font-serif text-3xl font-semibold text-[#F4EEDD] sm:text-4xl">
+=======
+    <PageWrapper>
+      <div className="mb-6">
+        <h2 className="mb-1 text-xl font-semibold text-slate-900 dark:text-slate-50">
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
           Web Directory
         </h2>
         <p className="mt-2 max-w-xl text-sm text-[#B7C0DE]">
@@ -374,6 +427,7 @@ export default function WebDirectory(): React.ReactElement {
           className="flex-1 border-b-2 border-[#2A3350] bg-transparent px-1 py-2 font-serif text-base text-[#F4EEDD] outline-none placeholder:text-[#4B5580] focus:border-[#C7A34C]"
           aria-label={viewMode === "category" ? "Search websites" : "Search countries"}
         />
+<<<<<<< HEAD
         {viewMode === "category" && (
           <select
             value={category}
@@ -383,6 +437,18 @@ export default function WebDirectory(): React.ReactElement {
           >
             <option className="bg-[#0F1526]" value={CATEGORY_FILTER_ALL}>
               All categories
+=======
+        <select
+          value={category}
+          onChange={(event) => setCategory(event.target.value as WebsiteCategory | 'All')}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50"
+          aria-label="Filter by category"
+        >
+          <option value={CATEGORY_FILTER_ALL}>All categories</option>
+          {WEBSITE_CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
             </option>
             {WEBSITE_CATEGORIES.map((cat) => (
               <option className="bg-[#0F1526]" key={cat} value={cat}>
@@ -435,6 +501,7 @@ export default function WebDirectory(): React.ReactElement {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Results */}
       <div className="mt-8">
         {viewMode === "category" ? (
@@ -472,5 +539,25 @@ export default function WebDirectory(): React.ReactElement {
         )}
       </div>
     </div>
+=======
+      {websitesWithMeta.length === 0 ? (
+        <p className="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+          No websites match your search.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {websitesWithMeta.map((website) => (
+            <WebsiteCard
+              key={website.id}
+              website={website}
+              isFavorite={website.isFavorite}
+              onToggleFavorite={handleToggleFavorite}
+              onOpen={handleOpen}
+            />
+          ))}
+        </div>
+      )}
+    </PageWrapper>
+>>>>>>> bdf16a88761c687982aac221abf41ecee12202e3
   );
 }

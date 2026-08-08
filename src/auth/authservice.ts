@@ -1,6 +1,7 @@
 import { authApi, AuthApiResult, UserDTO } from '../api/auth.api';
 import { authConfig } from '../config/auth.config';
 import { normalizeUserProfile } from './userProfile';
+import { ApiError } from '../api/client';
 
 export interface AuthUser extends UserDTO {
   firstName?: string;
@@ -24,7 +25,8 @@ type AuthChangeListener = (event: AuthChangeEvent, session: AuthSession | null) 
 
 const listeners = new Set<AuthChangeListener>();
 let currentSession: AuthSession | null = null;
-let initializationPromise: Promise<{ session: AuthSession | null; error: Error | null }> | null = null;
+let initializationPromise: Promise<{ session: AuthSession | null; error: Error | null }> | null =
+  null;
 
 const USER_CACHE_KEY = 'aether_auth_user';
 
@@ -77,13 +79,20 @@ function getStoredUser(): AuthUser | null {
   }
 }
 
-function setStoredTokens(tokens: { accessToken: string; refreshToken?: string }, user?: AuthUser): void {
+function setStoredTokens(
+  tokens: { accessToken: string; refreshToken?: string },
+  user?: AuthUser,
+): void {
   try {
     localStorage.setItem(authConfig.tokenKey, tokens.accessToken);
     if (tokens.refreshToken) {
       localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
     } else {
-      localStorage.removeItem(authConfig.refreshTokenKey);
+      try {
+        localStorage.removeItem(authConfig.refreshTokenKey);
+      } catch {
+        /* ignore */
+      }
     }
     if (user) {
       localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
@@ -96,10 +105,18 @@ function setStoredTokens(tokens: { accessToken: string; refreshToken?: string },
 function clearStoredTokens(): void {
   try {
     localStorage.removeItem(authConfig.tokenKey);
+  } catch {
+    /* ignore */
+  }
+  try {
     localStorage.removeItem(authConfig.refreshTokenKey);
+  } catch {
+    /* ignore */
+  }
+  try {
     localStorage.removeItem(USER_CACHE_KEY);
-  } catch (err) {
-    console.error('[AuthService] Error clearing tokens:', err);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -137,9 +154,10 @@ function normalizeAuthUser(input: unknown): AuthUser {
     fullName: normalized.fullName,
     firstName: normalized.firstName,
     lastName: normalized.lastName,
-    role: typeof (input as Record<string, unknown> | null | undefined)?.role === 'string'
-      ? ((input as Record<string, unknown>).role as string)
-      : 'USER',
+    role:
+      typeof (input as Record<string, unknown> | null | undefined)?.role === 'string'
+        ? ((input as Record<string, unknown>).role as string)
+        : 'USER',
     avatarUrl: typeof normalized.avatarUrl === 'string' ? normalized.avatarUrl : null,
     bio: typeof normalized.bio === 'string' ? normalized.bio : null,
     company: typeof normalized.company === 'string' ? normalized.company : null,
@@ -165,6 +183,7 @@ async function buildUserFromResponse(response: AuthApiResult | UserDTO): Promise
 async function refreshSessionUsingRefreshToken(
   refreshToken: string,
 ): Promise<{ session: AuthSession | null; error: Error | null }> {
+  console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED (authservice)');
   try {
     const result = await authApi.refreshToken(refreshToken, { skipAuth: true });
     if (!result.tokens?.accessToken) {
@@ -176,8 +195,23 @@ async function refreshSessionUsingRefreshToken(
 
     const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
     notifyListeners('TOKEN_REFRESHED', session);
+    console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS (authservice)');
     return { session, error: null };
   } catch (error: unknown) {
+    const cachedUser = getStoredUser();
+    const isAuthError = error instanceof ApiError && (error.status === 401 || error.status === 403);
+
+    if (!isAuthError && cachedUser) {
+      console.warn(
+        '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving cached user session',
+      );
+      const accessToken = getStoredAccessToken() || 'cached_token';
+      const session = createSession(cachedUser, accessToken, refreshToken);
+      currentSession = session;
+      return { session, error: null };
+    }
+
+    console.error('[AUTH_DIAG] TOKEN_REFRESH_FAILED - Clearing stored auth tokens (authservice)');
     clearStoredTokens();
     currentSession = null;
     return {
@@ -188,6 +222,7 @@ async function refreshSessionUsingRefreshToken(
 }
 
 async function resolveSession(): Promise<{ session: AuthSession | null; error: Error | null }> {
+  console.warn('[AUTH_DIAG] AUTH_INIT - Resolving session...');
   const accessToken = getStoredAccessToken();
   const refreshToken = getStoredRefreshToken();
   const cachedUser = getStoredUser();
@@ -198,10 +233,13 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
       setStoredTokens({ accessToken, refreshToken: refreshToken || undefined }, user);
       const session = createSession(user, accessToken, refreshToken ?? undefined);
       currentSession = session;
+      console.warn('[AUTH_DIAG] AUTH_RESTORED - Session active with valid access token');
       return { session, error: null };
     } catch (error: unknown) {
-      // If network error occurred but cached user and valid token exist, preserve session!
       if (cachedUser) {
+        console.warn(
+          '[AUTH_DIAG] NETWORK_ERROR/API_5XX on getCurrentUser - Restoring session from cached profile',
+        );
         const session = createSession(cachedUser, accessToken, refreshToken ?? undefined);
         currentSession = session;
         return { session, error: null };
@@ -224,11 +262,13 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
 
   // If cached user exists and token isn't invalid, try using cached user session
   if (cachedUser && accessToken) {
+    console.warn('[AUTH_DIAG] AUTH_RESTORED - Restoring session from cached user & access token');
     const session = createSession(cachedUser, accessToken, refreshToken ?? undefined);
     currentSession = session;
     return { session, error: null };
   }
 
+  console.warn('[AUTH_DIAG] SESSION_INVALID - No valid tokens or user session found');
   clearStoredTokens();
   currentSession = null;
   return { session: null, error: null };
@@ -345,7 +385,11 @@ export const authService = {
     listeners.add(callback);
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === authConfig.tokenKey || e.key === authConfig.refreshTokenKey || e.key === USER_CACHE_KEY) {
+      if (
+        e.key === authConfig.tokenKey ||
+        e.key === authConfig.refreshTokenKey ||
+        e.key === USER_CACHE_KEY
+      ) {
         resolveSession().then(({ session }) => {
           if (session) {
             notifyListeners('SIGNED_IN', session);

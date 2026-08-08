@@ -29,9 +29,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           onClick={onMobileClose}
           className="hover:bg-aether-hover/60 group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-cyan-500 shadow-md shadow-indigo-500/20 ring-1 ring-white/20">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
+          <Sparkles className="h-6 w-6 shrink-0 text-indigo-600 dark:text-indigo-400" />
 
           <div className="min-w-0 flex-1">
             <span className="block truncate text-base font-semibold tracking-tight text-aether-main">
@@ -47,10 +45,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         <SidebarTooltip content="Aether OS — AI Operating System">
           <Link
             to="/app"
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-cyan-500 shadow-md shadow-indigo-500/20 ring-1 ring-white/20 transition-transform hover:scale-105"
+            className="flex items-center justify-center transition-transform hover:scale-105"
             onClick={onMobileClose}
           >
-            <Sparkles className="h-4 w-4 text-white" />
+            <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </Link>
         </SidebarTooltip>
       )}
@@ -80,4 +78,3 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     </div>
   );
 };
-

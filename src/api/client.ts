@@ -1,12 +1,19 @@
 import { authConfig } from '../config/auth.config';
 
 // ---- Token refresh state (module-level singleton) ----
-let _refreshPromise: Promise<string | null> | null = null;
+let _refreshPromise: Promise<{ accessToken: string | null; isAuthError: boolean }> | null = null;
 
-async function _performTokenRefresh(): Promise<string | null> {
+async function _performTokenRefresh(): Promise<{
+  accessToken: string | null;
+  isAuthError: boolean;
+}> {
+  console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED');
   try {
     const refreshToken = localStorage.getItem(authConfig.refreshTokenKey);
-    if (!refreshToken) return null;
+    if (!refreshToken) {
+      console.warn('[AUTH_DIAG] TOKEN_REFRESH_FAILED - No refresh token in storage');
+      return { accessToken: null, isAuthError: true };
+    }
 
     const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
     const refreshUrl = rawBase.replace(/\/+$/, '') + '/auth/refresh';
@@ -17,28 +24,48 @@ async function _performTokenRefresh(): Promise<string | null> {
       body: JSON.stringify({ refreshToken }),
     });
 
-    if (!res.ok) return null;
+    if (res.status === 401 || res.status === 403) {
+      console.error(
+        `[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked (HTTP ${res.status})`,
+      );
+      return { accessToken: null, isAuthError: true };
+    }
+
+    if (!res.ok) {
+      console.warn(
+        `[AUTH_DIAG] API_5XX - Refresh endpoint returned temporary error (HTTP ${res.status})`,
+      );
+      return { accessToken: null, isAuthError: false };
+    }
 
     const body = await res.json();
-    // Support both flat and nested response shapes
     const tokens = body?.data?.tokens ?? body?.tokens ?? body?.data;
-    const accessToken: string | undefined =
-      tokens?.accessToken ?? body?.accessToken;
+    const accessToken: string | undefined = tokens?.accessToken ?? body?.accessToken;
 
-    if (typeof accessToken !== 'string' || !accessToken) return null;
+    if (typeof accessToken !== 'string' || !accessToken) {
+      console.error(
+        '[AUTH_DIAG] TOKEN_REFRESH_FAILED - Invalid payload structure from refresh response',
+      );
+      return { accessToken: null, isAuthError: true };
+    }
 
+    console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS');
     localStorage.setItem(authConfig.tokenKey, accessToken);
     if (tokens?.refreshToken) {
       localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
     }
-    return accessToken;
-  } catch {
-    return null;
+    return { accessToken, isAuthError: false };
+  } catch (err) {
+    console.warn(
+      '[AUTH_DIAG] NETWORK_ERROR - Refresh token request network failure:',
+      err instanceof Error ? err.message : err,
+    );
+    return { accessToken: null, isAuthError: false };
   }
 }
 
 /** Returns an in-flight refresh promise or starts a new one (singleton pattern). */
-function getOrStartRefresh(): Promise<string | null> {
+function getOrStartRefresh(): Promise<{ accessToken: string | null; isAuthError: boolean }> {
   if (!_refreshPromise) {
     _refreshPromise = _performTokenRefresh().finally(() => {
       _refreshPromise = null;
@@ -59,12 +86,18 @@ export interface ApiErrorPayload {
   message: string;
   code?: string;
   status?: number;
+  endpoint?: string;
+  method?: string;
+  requestId?: string;
   details?: Record<string, unknown>;
 }
 
 export class ApiError extends Error {
   public readonly status: number;
   public readonly code?: string;
+  public readonly endpoint?: string;
+  public readonly method?: string;
+  public readonly requestId?: string;
   public readonly details?: Record<string, unknown>;
 
   constructor(payload: ApiErrorPayload) {
@@ -72,6 +105,9 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = payload.status || 500;
     this.code = payload.code;
+    this.endpoint = payload.endpoint;
+    this.method = payload.method;
+    this.requestId = payload.requestId;
     this.details = payload.details;
   }
 }
@@ -96,7 +132,8 @@ class HttpClient {
       }
 
       try {
-        let token = localStorage.getItem(authConfig.tokenKey) ||
+        let token =
+          localStorage.getItem(authConfig.tokenKey) ||
           localStorage.getItem('aether-auth-token') ||
           localStorage.getItem('auth_token');
 
@@ -138,8 +175,36 @@ class HttpClient {
   ): string {
     const cleanBaseUrl = this.baseUrl.replace(/\/+$/, '');
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const fullPath = endpoint.startsWith('http') ? endpoint : `${cleanBaseUrl}${cleanEndpoint}`;
-    const url = new URL(fullPath, window.location.origin);
+
+    let fullUrlString: string;
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      fullUrlString = endpoint;
+    } else if (cleanBaseUrl.startsWith('http://') || cleanBaseUrl.startsWith('https://')) {
+      fullUrlString = `${cleanBaseUrl}${cleanEndpoint}`;
+    } else {
+      fullUrlString = `${cleanBaseUrl}${cleanEndpoint}`;
+    }
+
+    // Resolve URL host
+    let url: URL;
+    try {
+      url = new URL(fullUrlString);
+    } catch {
+      url = new URL(fullUrlString, window.location.origin);
+    }
+
+    // If running in browser and pointing to localhost, but accessing via IP/hostname (e.g. mobile testing), resolve host dynamically
+    if (
+      typeof window !== 'undefined' &&
+      window.location &&
+      window.location.hostname &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1' &&
+      (url.hostname === 'localhost' || url.hostname === '127.0.0.1')
+    ) {
+      url.hostname = window.location.hostname;
+    }
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -212,35 +277,62 @@ class HttpClient {
 
         // ---- 401 Auto-Refresh Logic ----
         if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
-          const newToken = await getOrStartRefresh();
-          if (newToken) {
+          console.warn(
+            `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
+          );
+          const refreshResult = await getOrStartRefresh();
+          if (refreshResult.accessToken) {
             // Retry the original request exactly once with the fresh token
             return this._requestWithAutoRefresh<T>(endpoint, config, true);
-          } else {
-            // Refresh failed – sign the user out
+          } else if (refreshResult.isAuthError) {
+            // Genuine authentication failure: refresh token is invalid or revoked
+            console.error(
+              '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+            );
             localStorage.removeItem(authConfig.tokenKey);
             localStorage.removeItem(authConfig.refreshTokenKey);
             localStorage.removeItem('aether_auth_user');
             window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+          } else {
+            console.warn(
+              '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving authenticated state.',
+            );
           }
         }
+
+        const correlationId =
+          response.headers.get('x-request-id') ||
+          response.headers.get('x-correlation-id') ||
+          undefined;
 
         if (!response.ok) {
           let errorData: ApiErrorPayload = {
             message: `HTTP Error ${response.status}: ${response.statusText}`,
             status: response.status,
+            endpoint,
+            method: fetchOptions.method || 'GET',
+            requestId: correlationId,
           };
           try {
             const body = await response.json();
             errorData = {
-              message: body.message || errorData.message,
+              message: body.message || body.error || errorData.message,
               code: body.code,
               status: response.status,
+              endpoint,
+              method: fetchOptions.method || 'GET',
+              requestId: correlationId,
               details: body.details,
             };
           } catch {
-            // Non-JSON response body
+            // Non-JSON response body (e.g. HTML 404/500 page)
           }
+
+          // Safe diagnostic logging (sanitized, no secrets)
+          console.error(
+            `[API Error] Endpoint: ${endpoint} | Method: ${fetchOptions.method || 'GET'} | Status: ${response.status} | Request ID: ${correlationId || 'N/A'} | Code: ${errorData.code || 'UNKNOWN'} | Message: ${errorData.message}`,
+          );
+
           throw new ApiError(errorData);
         }
 
@@ -248,7 +340,28 @@ class HttpClient {
           return {} as T;
         }
 
-        return (await response.json()) as T;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          return (await response.json()) as T;
+        }
+
+        // Handle case where endpoint returns text/html or non-JSON when expected JSON
+        const rawText = await response.text();
+        try {
+          return JSON.parse(rawText) as T;
+        } catch {
+          console.error(
+            `[API Error] Endpoint: ${endpoint} returned non-JSON response format (${contentType || 'unknown'}).`,
+          );
+          throw new ApiError({
+            message: `Endpoint ${endpoint} returned invalid non-JSON response payload`,
+            code: 'INVALID_RESPONSE',
+            status: response.status,
+            endpoint,
+            method: fetchOptions.method || 'GET',
+            requestId: correlationId,
+          });
+        }
       } catch (error) {
         clearTimeout(timeoutId);
 

@@ -55,9 +55,11 @@ export const DailyOverviewPage: React.FC = () => {
 
       <div className="space-y-4 rounded-2xl border border-[#192032] bg-[#0D121F] p-6">
         <h2 className="text-lg font-semibold text-white">Today's Key Priorities</h2>
-        <div className="py-8 text-center space-y-2">
+        <div className="space-y-2 py-8 text-center">
           <p className="text-sm font-semibold text-slate-300">No priority tasks set for today</p>
-          <p className="text-xs text-slate-400">Create or assign priority tasks to view them on your daily overview.</p>
+          <p className="text-xs text-slate-400">
+            Create or assign priority tasks to view them on your daily overview.
+          </p>
         </div>
       </div>
     </div>

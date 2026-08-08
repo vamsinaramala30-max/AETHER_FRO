@@ -32,7 +32,8 @@
 .calendar-page-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  flex: 1;
   width: 100%;
   overflow: hidden;
   background-color: var(--cal-bg-primary);

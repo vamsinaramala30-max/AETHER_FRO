@@ -44,7 +44,8 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({ data }) =>
         <div className="flex h-[200px] w-full flex-col justify-between pt-4">
           <div className="flex flex-1 items-end justify-between gap-3 border-b border-slate-200 pb-2 dark:border-slate-800">
             {data.map((point) => {
-              const heightPct = point.focusMinutes > 0 ? (point.focusMinutes / maxMinutes) * 100 : 0;
+              const heightPct =
+                point.focusMinutes > 0 ? (point.focusMinutes / maxMinutes) * 100 : 0;
               return (
                 <div
                   key={point.day}

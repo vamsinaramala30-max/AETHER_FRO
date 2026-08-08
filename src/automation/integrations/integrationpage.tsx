@@ -54,9 +54,7 @@ export const IntegrationsPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 shadow-lg shadow-cyan-500/20">
-              <Cpu className="h-5 w-5 text-white" />
-            </div>
+            <Cpu className="h-7 w-7 shrink-0 text-cyan-600 dark:text-cyan-400" />
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Integration Network

@@ -169,7 +169,6 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'audit-logs', element: <WorkspacePage /> },
           { path: 'focustimer', element: <FocusTimer /> },
           { path: 'webdirectory', element: <WebDirectory /> },
-
         ],
       },
 

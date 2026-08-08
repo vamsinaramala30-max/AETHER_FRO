@@ -38,9 +38,7 @@ export const EmptyState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 shadow-lg shadow-indigo-500/5">
-      <Inbox className="h-8 w-8" />
-    </div>
+    <Inbox className="mb-4 h-12 w-12 text-indigo-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-400">{description}</p>
     {actionLabel && onAction && (
@@ -91,9 +89,7 @@ export const ErrorState: React.FC<StateViewProps & { errorDetails?: string }> = 
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-red-500/20 bg-red-950/20 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 shadow-lg shadow-red-500/5">
-      <AlertTriangle className="h-8 w-8" />
-    </div>
+    <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-4 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {errorDetails && (
@@ -125,9 +121,7 @@ export const NoInternetState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-950/10 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-lg shadow-amber-500/5">
-      <WifiOff className="h-8 w-8" />
-    </div>
+    <WifiOff className="mb-4 h-12 w-12 text-amber-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {actionLabel && onAction && (
@@ -154,9 +148,7 @@ export const SlowNetworkState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-yellow-500/20 bg-yellow-950/10 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 shadow-lg shadow-yellow-500/5">
-      <Gauge className="h-8 w-8" />
-    </div>
+    <Gauge className="mb-4 h-12 w-12 text-yellow-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {actionLabel && onAction && (
@@ -184,9 +176,7 @@ export const NoSearchFoundState: React.FC<StateViewProps & { searchQuery?: strin
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/40 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-lg shadow-cyan-500/5">
-      <SearchX className="h-8 w-8" />
-    </div>
+    <SearchX className="mb-4 h-12 w-12 text-cyan-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     {searchQuery && (
       <p className="mb-3 rounded-md border border-cyan-800/40 bg-cyan-950/50 px-3 py-1 font-mono text-xs text-cyan-300">
@@ -218,9 +208,7 @@ export const PermissionDeniedState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-purple-500/20 bg-purple-950/10 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-500/10 text-purple-400 shadow-lg shadow-purple-500/5">
-      <ShieldAlert className="h-8 w-8" />
-    </div>
+    <ShieldAlert className="mb-4 h-12 w-12 text-purple-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {actionLabel && onAction && (
@@ -247,9 +235,7 @@ export const SessionExpiredState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-950/10 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-orange-500/30 bg-orange-500/10 text-orange-400 shadow-lg shadow-orange-500/5">
-      <LogOut className="h-8 w-8" />
-    </div>
+    <LogOut className="mb-4 h-12 w-12 text-orange-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {actionLabel && onAction && (
@@ -281,9 +267,7 @@ export const FormValidationState: React.FC<{
     className={`flex w-full flex-col items-start rounded-2xl border border-rose-500/30 bg-rose-950/20 p-8 backdrop-blur-sm ${className}`}
   >
     <div className="mb-3 flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400">
-        <FileSpreadsheet className="h-5 w-5" />
-      </div>
+      <FileSpreadsheet className="h-6 w-6 shrink-0 text-rose-400" />
       <div>
         <h3 className="text-base font-semibold text-white">{title}</h3>
         <p className="text-xs text-rose-200">{description}</p>
@@ -310,9 +294,7 @@ export const SuccessState: React.FC<StateViewProps> = ({
   <div
     className={`flex w-full flex-col items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/10 p-10 text-center backdrop-blur-sm ${className}`}
   >
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/5">
-      <CheckCircle2 className="h-8 w-8" />
-    </div>
+    <CheckCircle2 className="mb-4 h-12 w-12 text-emerald-400" />
     <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
     <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-300">{description}</p>
     {actionLabel && onAction && (

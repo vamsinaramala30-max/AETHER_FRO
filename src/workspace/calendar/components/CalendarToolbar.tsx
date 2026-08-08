@@ -70,88 +70,95 @@ export const CalendarToolbar: React.FC = () => {
   const dateLabel = formatToolbarDateLabel(viewState.currentDate, viewState.currentView);
 
   return (
-    <header className="flex flex-col gap-3 border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
-      {/* Left Section: Title & Controls */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-500/50 dark:bg-indigo-400" />
-          <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+    <header className="flex flex-col gap-2 border-b border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900 sm:gap-3 sm:p-4">
+      {/* Top Header Row */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-indigo-600 shadow-sm shadow-indigo-500/50 dark:bg-indigo-400" />
+          <h1 className="truncate text-base font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-xl">
             Calendar
           </h1>
-        </div>
-
-        {/* Navigation Strip */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCurrentDate(todayYmd)}
-            className={`rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 ${
-              isToday ? 'opacity-60' : ''
-            }`}
-          >
-            Today
-          </button>
-
-          <div className="flex items-center rounded-xl border border-slate-300 bg-slate-50 p-0.5 dark:border-slate-700 dark:bg-slate-800">
-            <button
-              type="button"
-              onClick={() => handleNavigate(-1)}
-              className="rounded-lg p-1 text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-              title="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-700" />
-            <button
-              type="button"
-              onClick={() => handleNavigate(1)}
-              className="rounded-lg p-1 text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-              title="Next"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100">
+          <div className="xs:flex hidden whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100">
             {dateLabel}
           </div>
         </div>
-      </div>
 
-      {/* Right Section: Actions & View Switcher */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative">
+        <div className="flex shrink-0 items-center gap-1.5">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={toggleFilterPanel}
+              className="flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              <Filter className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Filters</span>
+            </button>
+            <FilterPanel />
+          </div>
+
           <button
             type="button"
-            onClick={toggleFilterPanel}
-            className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            onClick={() => importExportService.downloadICS(events)}
+            className="flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
-            <Filter className="h-3.5 w-3.5" />
-            <span>Filters</span>
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export</span>
           </button>
-          <FilterPanel />
+
+          <button
+            type="button"
+            onClick={() => openEventForm()}
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Event</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Navigation & View Switcher Row */}
+      <div className="flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
+        {/* Date & Navigation Controls */}
+        <div className="flex items-center justify-between gap-2 sm:justify-start">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setCurrentDate(todayYmd)}
+              className={`rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 ${
+                isToday ? 'opacity-60' : ''
+              }`}
+            >
+              Today
+            </button>
+
+            <div className="flex items-center rounded-xl border border-slate-300 bg-slate-50 p-0.5 dark:border-slate-700 dark:bg-slate-800">
+              <button
+                type="button"
+                onClick={() => handleNavigate(-1)}
+                className="rounded-lg p-1 text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                title="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-700" />
+              <button
+                type="button"
+                onClick={() => handleNavigate(1)}
+                className="rounded-lg p-1 text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                title="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="xs:hidden max-w-[140px] truncate text-xs font-bold text-slate-900 dark:text-slate-100">
+            {dateLabel}
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => importExportService.downloadICS(events)}
-          className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-        >
-          <Download className="h-3.5 w-3.5" />
-          <span>Export</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => openEventForm()}
-          className="flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Create Event</span>
-        </button>
-
-        {/* View Switcher Pill */}
-        <div className="flex rounded-xl border border-slate-300 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
+        {/* View Switcher Tabs */}
+        <div className="flex overflow-x-auto rounded-xl border border-slate-300 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
           {(['day', 'week', 'month', 'agenda'] as CalendarViewType[]).map((v) => {
             const isActive = viewState.currentView === v;
             return (
@@ -159,9 +166,9 @@ export const CalendarToolbar: React.FC = () => {
                 key={v}
                 type="button"
                 onClick={() => setCurrentView(v)}
-                className={`rounded-lg px-3 py-1 text-xs font-semibold capitalize transition-all ${
+                className={`flex-1 whitespace-nowrap rounded-lg px-3 py-1.5 text-center text-xs font-semibold capitalize transition-all sm:flex-initial ${
                   isActive
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
+                    ? 'bg-white font-bold text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >

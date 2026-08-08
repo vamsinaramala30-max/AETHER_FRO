@@ -40,11 +40,14 @@ export const WorkflowNode: React.FC<WorkflowNodeProps> = ({ node, index, onUpdat
 
         <div className="border-border/60 mt-2 space-y-1.5 border-t pt-2">
           {Object.entries(node.config).map(([key, value]) => (
-            <div key={key} className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground font-mono">{key}:</span>
+            <div
+              key={key}
+              className="flex flex-col justify-between gap-1 text-xs sm:flex-row sm:items-center"
+            >
+              <span className="text-muted-foreground font-mono text-[11px]">{key}:</span>
               <input
                 type="text"
-                className="border-border bg-background text-foreground max-w-[180px] rounded-lg border px-2.5 py-1 text-right font-mono text-xs focus:border-indigo-500 focus:outline-none"
+                className="border-border bg-background text-foreground w-full rounded-lg border px-2.5 py-1 text-left font-mono text-xs focus:border-indigo-500 focus:outline-none sm:w-auto sm:max-w-[180px] sm:text-right"
                 value={value}
                 onChange={(e) =>
                   onUpdateConfig?.(node.id, { ...node.config, [key]: e.target.value })

@@ -8,7 +8,7 @@ export const PublicLayout: React.FC = () => {
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col tracking-tight antialiased">
       <PublicNavbar />
-      <main id="main-content" className="w-full flex-grow focus:outline-none" tabIndex={-1}>
+      <main id="main-content" className="w-full flex-grow pt-16 focus:outline-none" tabIndex={-1}>
         <Outlet />
       </main>
       <Footer />

@@ -2,7 +2,10 @@ import React from 'react';
 
 export const TrustCenterPreview: React.FC = () => {
   return (
-    <section className="border-b border-zinc-900 py-20" aria-labelledby="trust-heading">
+    <section
+      className="border-b border-zinc-800/50 bg-zinc-900/20 py-16 sm:py-20 lg:py-24"
+      aria-labelledby="trust-heading"
+    >
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
         <h2
           id="trust-heading"
