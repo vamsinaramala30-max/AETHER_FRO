@@ -18,10 +18,10 @@ import {
   Star,
   Clock,
   Activity,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/authprovider';
 import { StatsSkeleton } from '@/components/ui/LoadingSkeleton';
-import { ErrorState } from '@/components/ui/ErrorState';
 import { aiService } from '@/services/aiService';
 import { apiClient } from '@/api/client';
 
@@ -32,7 +32,7 @@ import { favoritesService } from '@/workspace/favorites/favoritesservice';
 import { productivityService } from '@/workspace/productivity-hub/productivityservice';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Greeting helper
+// Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -50,20 +50,12 @@ function formatDate(): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Dashboard Stats Interfaces
+// Interfaces & Types
 // ─────────────────────────────────────────────────────────────────────────────
-interface ComprehensiveDashboardStats {
-  activeProjects: number;
-  aiChatsToday: number;
-  completedTasks: number;
-  pendingTasks: number;
-  totalEvents: number;
-  todaysEventsCount: number;
-  upcomingEventsCount: number;
-  filesCount: number;
-  favoritesCount: number;
-  focusMinutesToday: number;
-  productivityScore: number;
+export interface SectionState<T> {
+  status: 'loading' | 'success' | 'error';
+  data: T | null;
+  error?: string;
 }
 
 interface RecentChat {
@@ -102,32 +94,76 @@ const StatCard: React.FC<{
   icon: React.ReactNode;
   iconBg: string;
   href: string;
-}> = ({ label, value, subtitle, icon, iconBg, href }) => (
+  isError?: boolean;
+  onRetry?: () => void;
+}> = ({ label, value, subtitle, icon, iconBg, href, isError, onRetry }) => (
   <Link
     to={href}
-    className="group flex flex-col justify-between gap-3 rounded-2xl border border-aether-border bg-aether-surface p-4 transition-all duration-200 hover:border-indigo-400/50 hover:shadow-lg"
+    className={`group flex flex-col justify-between gap-3 rounded-2xl border p-4 transition-all duration-200 hover:border-indigo-400/50 hover:shadow-lg ${
+      isError ? 'border-amber-500/30 bg-amber-500/5' : 'border-aether-border bg-aether-surface'
+    }`}
   >
     <div className="flex items-center justify-between">
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconBg}`}>{icon}</div>
-      <ChevronRight className="h-4 w-4 text-aether-muted transition-transform group-hover:translate-x-0.5 group-hover:text-aether-main" />
+      {isError && onRetry ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRetry();
+          }}
+          className="rounded-lg p-1 text-amber-400 transition-colors hover:bg-amber-500/20 hover:text-amber-300"
+          title="Retry loading this metric"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </button>
+      ) : (
+        <ChevronRight className="h-4 w-4 text-aether-muted transition-transform group-hover:translate-x-0.5 group-hover:text-aether-main" />
+      )}
     </div>
     <div>
-      <p className="text-2xl font-extrabold text-aether-main">{value}</p>
+      <p className={`text-2xl font-extrabold ${isError ? 'text-sm font-semibold text-amber-400' : 'text-aether-main'}`}>
+        {isError ? 'Unavailable' : value}
+      </p>
       <p className="mt-0.5 text-xs font-medium text-aether-muted">{label}</p>
       {subtitle && <p className="mt-1 text-[10px] text-aether-muted/70">{subtitle}</p>}
     </div>
   </Link>
 );
 
-const SectionHeader: React.FC<{ title: string; href: string }> = ({ title, href }) => (
+const SectionHeader: React.FC<{ title: string; href: string; isError?: boolean; onRetry?: () => void }> = ({
+  title,
+  href,
+  isError,
+  onRetry,
+}) => (
   <div className="mb-3 flex items-center justify-between">
-    <h2 className="text-sm font-semibold text-aether-main">{title}</h2>
-    <Link
-      to={href}
-      className="flex items-center gap-1 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
-    >
-      View all <ChevronRight className="h-3.5 w-3.5" />
-    </Link>
+    <div className="flex items-center gap-2">
+      <h2 className="text-sm font-semibold text-aether-main">{title}</h2>
+      {isError && (
+        <span className="flex items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
+          <AlertTriangle className="h-3 w-3" /> Unavailable
+        </span>
+      )}
+    </div>
+    <div className="flex items-center gap-2">
+      {isError && onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="flex items-center gap-1 text-xs text-amber-400 transition-colors hover:text-amber-300"
+        >
+          <RefreshCw className="h-3 w-3" /> Retry
+        </button>
+      )}
+      <Link
+        to={href}
+        className="flex items-center gap-1 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
+      >
+        View all <ChevronRight className="h-3.5 w-3.5" />
+      </Link>
+    </div>
   </div>
 );
 
@@ -136,11 +172,31 @@ export const HomePage: React.FC = () => {
   const calendarEvents = useEventStore((state) => state.events);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<ComprehensiveDashboardStats | null>(null);
-  const [chats, setChats] = useState<RecentChat[]>([]);
-  const [projects, setProjects] = useState<RecentProject[]>([]);
-  const [todaysSchedule, setTodaysSchedule] = useState<DisplayEvent[]>([]);
+
+  // Independent section states
+  const [tasksState, setTasksState] = useState<SectionState<{ completed: number; pending: number }>>({
+    status: 'loading',
+    data: null,
+  });
+  const [filesState, setFilesState] = useState<SectionState<number>>({ status: 'loading', data: null });
+  const [favoritesState, setFavoritesState] = useState<SectionState<number>>({ status: 'loading', data: null });
+  const [prodState, setProdState] = useState<SectionState<{ focusMinutesToday: number; productivityScore: number }>>({
+    status: 'loading',
+    data: null,
+  });
+  const [projectsState, setProjectsState] = useState<SectionState<RecentProject[]>>({ status: 'loading', data: null });
+  const [chatsState, setChatsState] = useState<SectionState<{ count: number; chats: RecentChat[] }>>({
+    status: 'loading',
+    data: null,
+  });
+  const [calendarState, setCalendarState] = useState<
+    SectionState<{
+      totalEvents: number;
+      todaysEventsCount: number;
+      upcomingEventsCount: number;
+      todaysSchedule: DisplayEvent[];
+    }>
+  >({ status: 'loading', data: null });
 
   const displayName = user?.firstName
     ? user.firstName
@@ -150,36 +206,108 @@ export const HomePage: React.FC = () => {
         ? user.email.split('@')[0]
         : 'there';
 
+  // Individual section fetchers for retry granularity
+  const fetchTasks = useCallback(async () => {
+    setTasksState((prev) => ({ ...prev, status: 'loading' }));
+    try {
+      const tasks = await taskService.getTasks();
+      const safeTasks = Array.isArray(tasks) ? tasks : [];
+      const completed = safeTasks.filter((t) => t.status === 'done').length;
+      const pending = safeTasks.filter((t) => t.status !== 'done').length;
+      setTasksState({ status: 'success', data: { completed, pending } });
+    } catch (err) {
+      console.error('[HomePage] Tasks service request failed:', err);
+      setTasksState({ status: 'error', data: null, error: 'Failed to load tasks' });
+    }
+  }, []);
+
+  const fetchFiles = useCallback(async () => {
+    setFilesState((prev) => ({ ...prev, status: 'loading' }));
+    try {
+      const recentFiles = await recentFilesService.getRecentFiles();
+      const safeFiles = Array.isArray(recentFiles) ? recentFiles : [];
+      setFilesState({ status: 'success', data: safeFiles.length });
+    } catch (err) {
+      console.error('[HomePage] Recent files request failed:', err);
+      setFilesState({ status: 'error', data: null, error: 'Failed to load files' });
+    }
+  }, []);
+
+  const fetchFavorites = useCallback(async () => {
+    setFavoritesState((prev) => ({ ...prev, status: 'loading' }));
+    try {
+      const favs = await favoritesService.getFavorites();
+      const safeFavs = Array.isArray(favs) ? favs : [];
+      setFavoritesState({ status: 'success', data: safeFavs.length });
+    } catch (err) {
+      console.error('[HomePage] Favorites service request failed:', err);
+      setFavoritesState({ status: 'error', data: null, error: 'Failed to load favorites' });
+    }
+  }, []);
+
+  const fetchProductivity = useCallback(async () => {
+    setProdState((prev) => ({ ...prev, status: 'loading' }));
+    try {
+      const prodStats = await productivityService.getStats();
+      setProdState({
+        status: 'success',
+        data: {
+          focusMinutesToday: prodStats?.focusTimeToday || 0,
+          productivityScore: prodStats?.efficiencyScore || 0,
+        },
+      });
+    } catch (err) {
+      console.error('[HomePage] Productivity service request failed:', err);
+      setProdState({ status: 'error', data: null, error: 'Failed to load productivity stats' });
+    }
+  }, []);
+
+  const fetchProjects = useCallback(async () => {
+    setProjectsState((prev) => ({ ...prev, status: 'loading' }));
+    try {
+      const projRes = await apiClient.get<any>('/projects');
+      const projData = Array.isArray(projRes) ? projRes : projRes?.data || projRes?.projects || [];
+      const fetchedProjects: RecentProject[] = Array.isArray(projData)
+        ? projData.map((p: any) => ({
+            id: p.id || `proj_${Date.now()}`,
+            name: p.name || p.title || 'Untitled Project',
+            progress: typeof p.progress === 'number' ? p.progress : 0,
+            taskCount: typeof p.taskCount === 'number' ? p.taskCount : 0,
+            color: 'from-blue-600 to-indigo-600',
+          }))
+        : [];
+      setProjectsState({ status: 'success', data: fetchedProjects });
+    } catch (err) {
+      console.error('[HomePage] Projects API request failed:', err);
+      setProjectsState({ status: 'error', data: null, error: 'Failed to load projects' });
+    }
+  }, []);
+
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
-    setError(null);
+
+    // Concurrently settle all remote dependencies independently
+    await Promise.allSettled([
+      fetchTasks(),
+      fetchFiles(),
+      fetchFavorites(),
+      fetchProductivity(),
+      fetchProjects(),
+    ]);
+
+    // Local Calendar Calculation
     try {
-      // 1. Tasks live data
-      const tasks = await taskService.getTasks();
-      const completedTasks = tasks.filter((t) => t.status === 'done').length;
-      const pendingTasks = tasks.filter((t) => t.status !== 'done').length;
-
-      // 2. Files live data
-      const recentFiles = await recentFilesService.getRecentFiles();
-
-      // 3. Favorites live data
-      const favorites = await favoritesService.getFavorites();
-
-      // 4. Productivity live data
-      const prodStats = await productivityService.getStats();
-
-      // 5. Calendar events live calculation
+      const safeCalendarEvents = Array.isArray(calendarEvents) ? calendarEvents : [];
       const todayStr = new Date().toISOString().substring(0, 10);
-      const totalEvents = calendarEvents.length;
-      const todaysEvts = calendarEvents.filter(
+      const totalEvents = safeCalendarEvents.length;
+      const todaysEvts = safeCalendarEvents.filter(
         (e) => typeof e.start === 'string' && e.start.startsWith(todayStr),
       );
       const todaysEventsCount = todaysEvts.length;
-      const upcomingEventsCount = calendarEvents.filter(
+      const upcomingEventsCount = safeCalendarEvents.filter(
         (e) => typeof e.start === 'string' && e.start.substring(0, 10) > todayStr,
       ).length;
 
-      // Build todays schedule display
       const scheduleList: DisplayEvent[] = todaysEvts.map((e) => {
         const timePart = e.isAllDay ? 'All Day' : e.start ? e.start.substring(11, 16) : '09:00';
         return {
@@ -190,80 +318,58 @@ export const HomePage: React.FC = () => {
         };
       });
 
-      // 6. AI chats live calculation
-      let aiChatsToday = 0;
-      let fetchedChats: RecentChat[] = [];
-      try {
-        const storedConvs = localStorage.getItem('aether_assistant_conversations');
-        if (storedConvs) {
-          const convsMap = JSON.parse(storedConvs);
-          const convList = Object.values(convsMap) as any[];
-          if (convList.length > 0) {
-            fetchedChats = convList.map((c) => {
-              const diffMs = Date.now() - (c.updatedAt || Date.now());
-              const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-              const timeStr =
-                diffHours < 1
-                  ? 'Just now'
-                  : diffHours < 24
-                    ? `${diffHours}h ago`
-                    : `${Math.floor(diffHours / 24)}d ago`;
-
-              return {
-                id: c.id,
-                title: c.title || 'Untitled Conversation',
-                time: timeStr,
-                messageCount: Array.isArray(c.messages) ? c.messages.length : 0,
-              };
-            });
-            aiChatsToday = fetchedChats.length;
-          }
-        }
-      } catch {
-        // Ignore parse error
-      }
-
-      // Fetch active projects from backend API or empty state
-      let fetchedProjects: RecentProject[] = [];
-      try {
-        const projRes = await apiClient.get<any>('/projects');
-        const projData = Array.isArray(projRes) ? projRes : projRes?.data || projRes?.projects || [];
-        if (Array.isArray(projData)) {
-          fetchedProjects = projData.map((p: any) => ({
-            id: p.id || `proj_${Date.now()}`,
-            name: p.name || p.title || 'Untitled Project',
-            progress: typeof p.progress === 'number' ? p.progress : 0,
-            taskCount: typeof p.taskCount === 'number' ? p.taskCount : 0,
-            color: 'from-blue-600 to-indigo-600',
-          }));
-        }
-      } catch {
-        fetchedProjects = [];
-      }
-
-      setStats({
-        activeProjects: fetchedProjects.length,
-        aiChatsToday,
-        completedTasks,
-        pendingTasks,
-        totalEvents,
-        todaysEventsCount,
-        upcomingEventsCount,
-        filesCount: recentFiles.length,
-        favoritesCount: favorites.length,
-        focusMinutesToday: prodStats.focusTimeToday || 0,
-        productivityScore: prodStats.efficiencyScore || 0,
+      setCalendarState({
+        status: 'success',
+        data: {
+          totalEvents,
+          todaysEventsCount,
+          upcomingEventsCount,
+          todaysSchedule: scheduleList,
+        },
       });
-
-      setChats(fetchedChats);
-      setProjects(fetchedProjects);
-      setTodaysSchedule(scheduleList);
-    } catch {
-      setError('Failed to aggregate workspace statistics.');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('[HomePage] Calendar calculation error:', err);
+      setCalendarState({ status: 'error', data: null, error: 'Failed to compute calendar events' });
     }
-  }, [calendarEvents]);
+
+    // Local AI Conversations Storage
+    try {
+      let fetchedChats: RecentChat[] = [];
+      const storedConvs = localStorage.getItem('aether_assistant_conversations');
+      if (storedConvs) {
+        const convsMap = JSON.parse(storedConvs);
+        const convList = Object.values(convsMap) as any[];
+        if (Array.isArray(convList) && convList.length > 0) {
+          fetchedChats = convList.map((c) => {
+            const diffMs = Date.now() - (c.updatedAt || Date.now());
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const timeStr =
+              diffHours < 1
+                ? 'Just now'
+                : diffHours < 24
+                  ? `${diffHours}h ago`
+                  : `${Math.floor(diffHours / 24)}d ago`;
+
+            return {
+              id: c.id,
+              title: c.title || 'Untitled Conversation',
+              time: timeStr,
+              messageCount: Array.isArray(c.messages) ? c.messages.length : 0,
+            };
+          });
+        }
+      }
+      setChatsState({
+        status: 'success',
+        data: { count: fetchedChats.length, chats: fetchedChats },
+      });
+    } catch (err) {
+      console.error('[HomePage] AI conversations calculation error:', err);
+      setChatsState({ status: 'error', data: null, error: 'Failed to load conversations' });
+    }
+
+    setLoading(false);
+  }, [calendarEvents, fetchTasks, fetchFiles, fetchFavorites, fetchProductivity, fetchProjects]);
 
   useEffect(() => {
     void loadDashboardData();
@@ -326,6 +432,13 @@ export const HomePage: React.FC = () => {
     },
   };
 
+  const hasAnySectionError =
+    tasksState.status === 'error' ||
+    filesState.status === 'error' ||
+    favoritesState.status === 'error' ||
+    prodState.status === 'error' ||
+    projectsState.status === 'error';
+
   return (
     <PageWrapper wide>
       {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -350,7 +463,7 @@ export const HomePage: React.FC = () => {
             onClick={() => void loadDashboardData()}
             disabled={loading}
             className="rounded-xl p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main disabled:opacity-40"
-            title="Refresh dashboard"
+            title="Refresh dashboard telemetry"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -364,79 +477,115 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {error && <ErrorState message={error} onRetry={() => void loadDashboardData()} />}
+      {hasAnySectionError && (
+        <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-300">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <span>Some dashboard statistics could not be loaded from remote services.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void loadDashboardData()}
+            className="font-semibold underline hover:text-amber-200"
+          >
+            Retry Failed
+          </button>
+        </div>
+      )}
 
-      {/* ── All Real Live Stats Cards ──────────────────────────────────────────────────────── */}
+      {/* ── Stat Cards Grid ─────────────────────────────────────────────────── */}
       {loading ? (
         <StatsSkeleton count={8} />
-      ) : stats ? (
+      ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
           <StatCard
             label="Total Events"
-            value={stats.totalEvents}
-            subtitle={`${stats.todaysEventsCount} today · ${stats.upcomingEventsCount} upcoming`}
+            value={calendarState.data?.totalEvents ?? 0}
+            subtitle={
+              calendarState.status === 'success'
+                ? `${calendarState.data?.todaysEventsCount ?? 0} today · ${calendarState.data?.upcomingEventsCount ?? 0} upcoming`
+                : undefined
+            }
             icon={<Calendar className="h-4 w-4 text-indigo-400" />}
             iconBg="bg-indigo-500/10"
             href="/app/workspace/calendar"
+            isError={calendarState.status === 'error'}
           />
           <StatCard
             label="Pending Tasks"
-            value={stats.pendingTasks}
-            subtitle={`${stats.completedTasks} tasks completed`}
+            value={tasksState.data?.pending ?? 0}
+            subtitle={
+              tasksState.status === 'success'
+                ? `${tasksState.data?.completed ?? 0} tasks completed`
+                : undefined
+            }
             icon={<Target className="h-4 w-4 text-amber-400" />}
             iconBg="bg-amber-500/10"
             href="/app/projects/tasks"
+            isError={tasksState.status === 'error'}
+            onRetry={fetchTasks}
           />
           <StatCard
             label="Recent Files"
-            value={stats.filesCount}
-            subtitle="Indexed memory blobs"
+            value={filesState.data ?? 0}
+            subtitle={filesState.status === 'success' ? 'Indexed memory blobs' : undefined}
             icon={<FileText className="h-4 w-4 text-cyan-400" />}
             iconBg="bg-cyan-500/10"
             href="/app/workspace/recent-files"
+            isError={filesState.status === 'error'}
+            onRetry={fetchFiles}
           />
           <StatCard
             label="Starred Favorites"
-            value={stats.favoritesCount}
-            subtitle="Pinned system nodes"
+            value={favoritesState.data ?? 0}
+            subtitle={favoritesState.status === 'success' ? 'Pinned system nodes' : undefined}
             icon={<Star className="h-4 w-4 text-yellow-400" />}
             iconBg="bg-yellow-500/10"
             href="/app/workspace/favorites"
+            isError={favoritesState.status === 'error'}
+            onRetry={fetchFavorites}
           />
           <StatCard
             label="AI Conversations"
-            value={stats.aiChatsToday}
-            subtitle="Active agent sessions"
+            value={chatsState.data?.count ?? 0}
+            subtitle={chatsState.status === 'success' ? 'Active agent sessions' : undefined}
             icon={<MessageSquare className="h-4 w-4 text-purple-400" />}
             iconBg="bg-purple-500/10"
             href="/app/ai/assistant"
+            isError={chatsState.status === 'error'}
           />
           <StatCard
             label="Active Projects"
-            value={stats.activeProjects}
-            subtitle="Projects in progress"
+            value={projectsState.data?.length ?? 0}
+            subtitle={projectsState.status === 'success' ? 'Projects in progress' : undefined}
             icon={<FolderOpen className="h-4 w-4 text-blue-400" />}
             iconBg="bg-blue-500/10"
             href="/app/projects"
+            isError={projectsState.status === 'error'}
+            onRetry={fetchProjects}
           />
           <StatCard
             label="Focus Time Today"
-            value={`${stats.focusMinutesToday}m`}
-            subtitle="Attentional telemetry"
+            value={`${prodState.data?.focusMinutesToday ?? 0}m`}
+            subtitle={prodState.status === 'success' ? 'Attentional telemetry' : undefined}
             icon={<Clock className="h-4 w-4 text-emerald-400" />}
             iconBg="bg-emerald-500/10"
             href="/app/workspace/productivity-hub"
+            isError={prodState.status === 'error'}
+            onRetry={fetchProductivity}
           />
           <StatCard
             label="Productivity Efficiency"
-            value={`${stats.productivityScore}%`}
-            subtitle="System block performance"
+            value={`${prodState.data?.productivityScore ?? 0}%`}
+            subtitle={prodState.status === 'success' ? 'System block performance' : undefined}
             icon={<Activity className="h-4 w-4 text-rose-400" />}
             iconBg="bg-rose-500/10"
             href="/app/workspace/productivity-hub"
+            isError={prodState.status === 'error'}
+            onRetry={fetchProductivity}
           />
         </div>
-      ) : null}
+      )}
 
       {/* ── Quick Actions ──────────────────────────────────────────────────── */}
       <div>
@@ -466,13 +615,13 @@ export const HomePage: React.FC = () => {
           {/* Recent AI Chats */}
           <div className="rounded-2xl border border-aether-border bg-aether-surface p-5">
             <SectionHeader title="Recent AI Conversations" href="/app/ai/assistant" />
-            {loading ? (
+            {chatsState.status === 'loading' ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-14 animate-pulse rounded-xl bg-aether-subtle" />
                 ))}
               </div>
-            ) : chats.length === 0 ? (
+            ) : !chatsState.data || chatsState.data.chats.length === 0 ? (
               <div className="py-8 text-center">
                 <MessageSquare className="mx-auto mb-2 h-8 w-8 text-aether-muted" />
                 <p className="text-xs text-aether-muted">No agent conversations yet</p>
@@ -485,7 +634,7 @@ export const HomePage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-1.5">
-                {chats.slice(0, 4).map((chat) => (
+                {chatsState.data.chats.slice(0, 4).map((chat) => (
                   <Link
                     key={chat.id}
                     to="/app/ai/assistant"
@@ -507,18 +656,46 @@ export const HomePage: React.FC = () => {
             )}
           </div>
 
-          {/* Recent Projects */}
+          {/* Active Projects */}
           <div className="rounded-2xl border border-aether-border bg-aether-surface p-5">
-            <SectionHeader title="Active Projects" href="/app/projects" />
-            {loading ? (
+            <SectionHeader
+              title="Active Projects"
+              href="/app/projects"
+              isError={projectsState.status === 'error'}
+              onRetry={fetchProjects}
+            />
+            {projectsState.status === 'loading' ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-16 animate-pulse rounded-xl bg-aether-subtle" />
                 ))}
               </div>
+            ) : projectsState.status === 'error' ? (
+              <div className="py-8 text-center">
+                <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-amber-400" />
+                <p className="text-xs text-aether-muted">Unable to load projects from remote service.</p>
+                <button
+                  type="button"
+                  onClick={fetchProjects}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Retry Projects
+                </button>
+              </div>
+            ) : !projectsState.data || projectsState.data.length === 0 ? (
+              <div className="py-8 text-center">
+                <FolderOpen className="mx-auto mb-2 h-8 w-8 text-aether-muted" />
+                <p className="text-xs text-aether-muted">No active projects found</p>
+                <Link
+                  to="/app/projects"
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Create a project
+                </Link>
+              </div>
             ) : (
               <div className="space-y-2">
-                {projects.map((project) => (
+                {projectsState.data.map((project) => (
                   <Link
                     key={project.id}
                     to="/app/projects"
@@ -558,13 +735,13 @@ export const HomePage: React.FC = () => {
           {/* Today's Schedule */}
           <div className="rounded-2xl border border-aether-border bg-aether-surface p-5">
             <SectionHeader title="Today's Schedule" href="/app/workspace/calendar" />
-            {loading ? (
+            {calendarState.status === 'loading' ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-12 animate-pulse rounded-xl bg-aether-subtle" />
                 ))}
               </div>
-            ) : todaysSchedule.length === 0 ? (
+            ) : !calendarState.data || calendarState.data.todaysSchedule.length === 0 ? (
               <div className="py-8 text-center">
                 <Calendar className="mx-auto mb-2 h-8 w-8 text-aether-muted" />
                 <p className="text-xs text-aether-muted">No events scheduled for today</p>
@@ -577,7 +754,7 @@ export const HomePage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {todaysSchedule.map((event) => {
+                {calendarState.data.todaysSchedule.map((event) => {
                   const config = EVENT_TYPE_CONFIG[event.type];
                   return (
                     <Link
@@ -612,9 +789,9 @@ export const HomePage: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs leading-relaxed text-aether-muted">
-              {stats?.pendingTasks || stats?.totalEvents
-                ? `You have ${stats?.pendingTasks ?? 0} pending tasks and ${stats?.totalEvents ?? 0} total events scheduled.`
-                : 'Welcome to your new workspace! Get started by creating your first project, task, or note.'}
+              {tasksState.data?.pending || calendarState.data?.totalEvents
+                ? `You have ${tasksState.data?.pending ?? 0} pending tasks and ${calendarState.data?.totalEvents ?? 0} total events scheduled.`
+                : 'Welcome to your workspace! Get started by creating your first project, task, or note.'}
             </p>
             <Link
               to="/app/ai/assistant"

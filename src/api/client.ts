@@ -74,12 +74,18 @@ export interface ApiErrorPayload {
   message: string;
   code?: string;
   status?: number;
+  endpoint?: string;
+  method?: string;
+  requestId?: string;
   details?: Record<string, unknown>;
 }
 
 export class ApiError extends Error {
   public readonly status: number;
   public readonly code?: string;
+  public readonly endpoint?: string;
+  public readonly method?: string;
+  public readonly requestId?: string;
   public readonly details?: Record<string, unknown>;
 
   constructor(payload: ApiErrorPayload) {
@@ -87,6 +93,9 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = payload.status || 500;
     this.code = payload.code;
+    this.endpoint = payload.endpoint;
+    this.method = payload.method;
+    this.requestId = payload.requestId;
     this.details = payload.details;
   }
 }
@@ -272,26 +281,38 @@ class HttpClient {
           }
         }
 
+        const correlationId =
+          response.headers.get('x-request-id') ||
+          response.headers.get('x-correlation-id') ||
+          undefined;
+
         if (!response.ok) {
           let errorData: ApiErrorPayload = {
             message: `HTTP Error ${response.status}: ${response.statusText}`,
             status: response.status,
+            endpoint,
+            method: fetchOptions.method || 'GET',
+            requestId: correlationId,
           };
           try {
             const body = await response.json();
             errorData = {
-              message: body.message || errorData.message,
+              message: body.message || body.error || errorData.message,
               code: body.code,
               status: response.status,
+              endpoint,
+              method: fetchOptions.method || 'GET',
+              requestId: correlationId,
               details: body.details,
             };
           } catch {
-            // Non-JSON response body
+            // Non-JSON response body (e.g. HTML 404/500 page)
           }
 
-          // Safe diagnostic logging (Req 6)
-          const correlationId = response.headers.get('x-request-id') || response.headers.get('x-correlation-id') || 'N/A';
-          console.error(`[API Error] Endpoint: ${endpoint} | Method: ${fetchOptions.method || 'GET'} | Status: ${response.status} | Request ID: ${correlationId} | Code: ${errorData.code || 'UNKNOWN'} | Message: ${errorData.message}`);
+          // Safe diagnostic logging (sanitized, no secrets)
+          console.error(
+            `[API Error] Endpoint: ${endpoint} | Method: ${fetchOptions.method || 'GET'} | Status: ${response.status} | Request ID: ${correlationId || 'N/A'} | Code: ${errorData.code || 'UNKNOWN'} | Message: ${errorData.message}`,
+          );
 
           throw new ApiError(errorData);
         }
@@ -300,7 +321,28 @@ class HttpClient {
           return {} as T;
         }
 
-        return (await response.json()) as T;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          return (await response.json()) as T;
+        }
+
+        // Handle case where endpoint returns text/html or non-JSON when expected JSON
+        const rawText = await response.text();
+        try {
+          return JSON.parse(rawText) as T;
+        } catch {
+          console.error(
+            `[API Error] Endpoint: ${endpoint} returned non-JSON response format (${contentType || 'unknown'}).`,
+          );
+          throw new ApiError({
+            message: `Endpoint ${endpoint} returned invalid non-JSON response payload`,
+            code: 'INVALID_RESPONSE',
+            status: response.status,
+            endpoint,
+            method: fetchOptions.method || 'GET',
+            requestId: correlationId,
+          });
+        }
       } catch (error) {
         clearTimeout(timeoutId);
 

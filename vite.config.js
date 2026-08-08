@@ -8,6 +8,16 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             includeAssets: ['favicon.svg', 'manifest.webmanifest'],
+            workbox: {
+                navigateFallbackDenylist: [/^\/api\//, /^\/ws/, /^\/health/],
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+                runtimeCaching: [
+                    {
+                        urlPattern: /^\/api\//,
+                        handler: 'NetworkOnly',
+                    },
+                ],
+            },
             manifest: {
                 name: 'AETHER Enterprise AI Platform',
                 short_name: 'AETHER',

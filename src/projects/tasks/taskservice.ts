@@ -51,7 +51,7 @@ const mapPriorityFromApi = (priority?: string): Task['priority'] => {
 export const taskService = {
   async getTasks(): Promise<Task[]> {
     const res = await tasksApi.getAll();
-    const raw = res.data || [];
+    const raw = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
     return raw.map((item) => ({
       id: item.id,
       title: item.title || 'Untitled Task',

@@ -11,7 +11,7 @@ export interface FavoriteItemData {
 export const favoritesService = {
   async getFavorites(): Promise<FavoriteItemData[]> {
     const res = await favoritesApi.getAll();
-    const items = res.data || [];
+    const items = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
     return items.map((i) => ({
       id: i.id,
       title: i.title,

@@ -13,12 +13,22 @@ export const ProductivityHubPage: React.FC = () => {
   const fetchHubData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const [fetchedStats, fetchedHistory] = await Promise.all([
+      setError(null);
+      const [statsResult, historyResult] = await Promise.allSettled([
         productivityService.getStats(),
         productivityService.getHistory(),
       ]);
-      setStats(fetchedStats);
-      setChartData(fetchedHistory);
+
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value);
+      }
+      if (historyResult.status === 'fulfilled') {
+        setChartData(historyResult.value);
+      }
+
+      if (statsResult.status === 'rejected' && historyResult.status === 'rejected') {
+        setError('Failed to instantiate analytical core telemetry models.');
+      }
     } catch {
       setError('Failed to instantiate analytical core telemetry models.');
     } finally {
