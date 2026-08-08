@@ -50,6 +50,7 @@ export const navigationGroups: NavGroup[] = [
           { label: 'Favorites', href: '/app/workspace/favorites' },
           { label: 'Members', href: '/app/workspace/members' },
           { label: 'Timer', href: '/app/workspace/focustimer' },
+          { label: 'WebDirectory', href: '/app/workspace/webdirectory' },
         ],
       },
       {

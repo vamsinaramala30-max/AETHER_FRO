@@ -45,7 +45,7 @@ import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
 import { MembersPage } from '@/workspace/members/MembersPage';
 import FocusTimer from '@/workspace/timer/focustimer';
-
+import { WebDirectory } from '@/workspace/webdirectory/webdirectory';
 // ── Settings ─────────────────────────────────────────────────────────────────
 import { ProfilePage } from '@/settings/profile/profilepage';
 import { AppearancePage } from '@/settings/appearance/apperancepage';
@@ -168,6 +168,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'api-keys', element: <WorkspacePage /> },
           { path: 'audit-logs', element: <WorkspacePage /> },
           { path: 'focustimer', element: <FocusTimer /> },
+          { path: 'webdirectory', element: <WebDirectory /> },
 
         ],
       },
