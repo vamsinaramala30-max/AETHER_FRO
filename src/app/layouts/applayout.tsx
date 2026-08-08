@@ -39,7 +39,7 @@ const NotificationCenter = React.lazy(
 // export default function Weather() { ... }
 const Weather = React.lazy(
   () =>
-    import('../../components/weather/Weather').then((module) => ({
+    import('../../components/weather/weather').then((module) => ({
       default: module.default,
     })),
 );

@@ -27,7 +27,10 @@ export interface SidebarProps {
   onToggleCollapse: () => void;
   onMobileClose?: () => void;
   isMobile?: boolean;
+
   onSearchOpen: () => void;
   onNotificationsOpen: () => void;
+  onWeatherOpen?: () => void;
+
   unreadCount: number;
 }
