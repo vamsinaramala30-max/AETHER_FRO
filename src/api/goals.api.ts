@@ -69,11 +69,7 @@ export const goalsApi = {
     progress: number,
     config?: RequestConfig,
   ): Promise<ApiDataResponse<GoalDTO>> =>
-    apiClient.patch<ApiDataResponse<GoalDTO>>(
-      ENDPOINTS.GOALS.PROGRESS(id),
-      { progress },
-      config,
-    ),
+    apiClient.patch<ApiDataResponse<GoalDTO>>(ENDPOINTS.GOALS.PROGRESS(id), { progress }, config),
 
   delete: (id: string, config?: RequestConfig): Promise<void> =>
     apiClient.delete<void>(ENDPOINTS.GOALS.BY_ID(id), config),

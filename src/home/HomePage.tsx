@@ -123,21 +123,23 @@ const StatCard: React.FC<{
       )}
     </div>
     <div>
-      <p className={`text-2xl font-extrabold ${isError ? 'text-sm font-semibold text-amber-400' : 'text-aether-main'}`}>
+      <p
+        className={`text-2xl font-extrabold ${isError ? 'text-sm font-semibold text-amber-400' : 'text-aether-main'}`}
+      >
         {isError ? 'Unavailable' : value}
       </p>
       <p className="mt-0.5 text-xs font-medium text-aether-muted">{label}</p>
-      {subtitle && <p className="mt-1 text-[10px] text-aether-muted/70">{subtitle}</p>}
+      {subtitle && <p className="text-aether-muted/70 mt-1 text-[10px]">{subtitle}</p>}
     </div>
   </Link>
 );
 
-const SectionHeader: React.FC<{ title: string; href: string; isError?: boolean; onRetry?: () => void }> = ({
-  title,
-  href,
-  isError,
-  onRetry,
-}) => (
+const SectionHeader: React.FC<{
+  title: string;
+  href: string;
+  isError?: boolean;
+  onRetry?: () => void;
+}> = ({ title, href, isError, onRetry }) => (
   <div className="mb-3 flex items-center justify-between">
     <div className="flex items-center gap-2">
       <h2 className="text-sm font-semibold text-aether-main">{title}</h2>
@@ -174,18 +176,33 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Independent section states
-  const [tasksState, setTasksState] = useState<SectionState<{ completed: number; pending: number }>>({
+  const [tasksState, setTasksState] = useState<
+    SectionState<{ completed: number; pending: number }>
+  >({
     status: 'loading',
     data: null,
   });
-  const [filesState, setFilesState] = useState<SectionState<number>>({ status: 'loading', data: null });
-  const [favoritesState, setFavoritesState] = useState<SectionState<number>>({ status: 'loading', data: null });
-  const [prodState, setProdState] = useState<SectionState<{ focusMinutesToday: number; productivityScore: number }>>({
+  const [filesState, setFilesState] = useState<SectionState<number>>({
     status: 'loading',
     data: null,
   });
-  const [projectsState, setProjectsState] = useState<SectionState<RecentProject[]>>({ status: 'loading', data: null });
-  const [chatsState, setChatsState] = useState<SectionState<{ count: number; chats: RecentChat[] }>>({
+  const [favoritesState, setFavoritesState] = useState<SectionState<number>>({
+    status: 'loading',
+    data: null,
+  });
+  const [prodState, setProdState] = useState<
+    SectionState<{ focusMinutesToday: number; productivityScore: number }>
+  >({
+    status: 'loading',
+    data: null,
+  });
+  const [projectsState, setProjectsState] = useState<SectionState<RecentProject[]>>({
+    status: 'loading',
+    data: null,
+  });
+  const [chatsState, setChatsState] = useState<
+    SectionState<{ count: number; chats: RecentChat[] }>
+  >({
     status: 'loading',
     data: null,
   });
@@ -592,7 +609,7 @@ export const HomePage: React.FC = () => {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-aether-muted">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {QUICK_ACTIONS.map((action) => (
             <Link
               key={action.href}
@@ -673,7 +690,9 @@ export const HomePage: React.FC = () => {
             ) : projectsState.status === 'error' ? (
               <div className="py-8 text-center">
                 <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-amber-400" />
-                <p className="text-xs text-aether-muted">Unable to load projects from remote service.</p>
+                <p className="text-xs text-aether-muted">
+                  Unable to load projects from remote service.
+                </p>
                 <button
                   type="button"
                   onClick={fetchProjects}
@@ -797,7 +816,8 @@ export const HomePage: React.FC = () => {
               to="/app/ai/assistant"
               className="mt-3 flex items-center gap-1.5 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
             >
-              {aiService.isAiEnabled() ? 'Ask AI for help' : 'Open Assistant'} <ChevronRight className="h-3.5 w-3.5" />
+              {aiService.isAiEnabled() ? 'Ask AI for help' : 'Open Assistant'}{' '}
+              <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 

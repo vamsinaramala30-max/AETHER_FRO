@@ -36,7 +36,10 @@ export const favoritesApi = {
   getAll: (config?: RequestConfig): Promise<ApiListResponse<FavoriteDTO>> =>
     apiClient.get<ApiListResponse<FavoriteDTO>>(ENDPOINTS.FAVORITES.BASE, config),
 
-  add: (payload: AddFavoritePayload, config?: RequestConfig): Promise<ApiItemResponse<FavoriteDTO>> =>
+  add: (
+    payload: AddFavoritePayload,
+    config?: RequestConfig,
+  ): Promise<ApiItemResponse<FavoriteDTO>> =>
     apiClient.post<ApiItemResponse<FavoriteDTO>>(ENDPOINTS.FAVORITES.BASE, payload, config),
 
   remove: (id: string, config?: RequestConfig): Promise<{ success: boolean; message: string }> =>
@@ -52,7 +55,10 @@ export const favoritesApi = {
       config,
     ),
 
-  reorder: (orderedIds: string[], config?: RequestConfig): Promise<{ success: boolean; message: string }> =>
+  reorder: (
+    orderedIds: string[],
+    config?: RequestConfig,
+  ): Promise<{ success: boolean; message: string }> =>
     apiClient.patch<{ success: boolean; message: string }>(
       ENDPOINTS.FAVORITES.REORDER,
       { orderedIds },

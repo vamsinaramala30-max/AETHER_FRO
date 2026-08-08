@@ -1,9 +1,9 @@
-import React,{ useMemo, useState } from "react";
-import { PageWrapper } from "@/components/layout/PageWrapper";
+import React, { useMemo, useState } from 'react';
+import { PageWrapper } from '@/components/layout/PageWrapper';
 
-import { TRUSTED_WEBSITES } from "./trusted-websites";
-import { CATEGORY_FILTER_ALL, WEBSITE_CATEGORIES } from "./web-directory-constants";
-import type { TrustedWebsite, WebsiteCategory } from "./web-directory-types";
+import { TRUSTED_WEBSITES } from './trusted-websites';
+import { CATEGORY_FILTER_ALL, WEBSITE_CATEGORIES } from './web-directory-constants';
+import type { TrustedWebsite, WebsiteCategory } from './web-directory-types';
 import {
   applyWebDirectoryFilters,
   loadFavoriteIds,
@@ -12,7 +12,7 @@ import {
   resolveRecentWebsites,
   toggleFavorite,
   withFavoriteMeta,
-} from "./web-directory-utils";
+} from './web-directory-utils';
 
 function WebsiteCard({
   website,
@@ -34,12 +34,16 @@ function WebsiteCard({
             type="button"
             onClick={() => onToggleFavorite(website.id)}
             aria-pressed={isFavorite}
-            aria-label={isFavorite ? `Remove ${website.name} from favorites` : `Add ${website.name} to favorites`}
+            aria-label={
+              isFavorite
+                ? `Remove ${website.name} from favorites`
+                : `Add ${website.name} to favorites`
+            }
             className={`shrink-0 text-lg leading-none ${
-              isFavorite ? "text-amber-400" : "text-slate-300 dark:text-slate-600"
+              isFavorite ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'
             }`}
           >
-            {isFavorite ? "★" : "☆"}
+            {isFavorite ? '★' : '☆'}
           </button>
         </div>
         <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">{website.description}</p>
@@ -68,8 +72,8 @@ function WebsiteCard({
 }
 
 export default function WebDirectory(): React.ReactElement {
-  const [query, setQuery] = useState<string>("");
-  const [category, setCategory] = useState<WebsiteCategory | "All">(CATEGORY_FILTER_ALL);
+  const [query, setQuery] = useState<string>('');
+  const [category, setCategory] = useState<WebsiteCategory | 'All'>(CATEGORY_FILTER_ALL);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => loadFavoriteIds());
   const [recentEntries, setRecentEntries] = useState(() => loadRecentEntries());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
@@ -121,7 +125,7 @@ export default function WebDirectory(): React.ReactElement {
         />
         <select
           value={category}
-          onChange={(event) => setCategory(event.target.value as WebsiteCategory | "All")}
+          onChange={(event) => setCategory(event.target.value as WebsiteCategory | 'All')}
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50"
           aria-label="Filter by category"
         >

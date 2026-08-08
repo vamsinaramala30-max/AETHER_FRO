@@ -26,9 +26,12 @@ export class NotificationService {
     });
 
     useNotificationStore.getState().addNotification({
-      title: title || (type.charAt(0).toUpperCase() + type.slice(1) + ' Action'),
+      title: title || type.charAt(0).toUpperCase() + type.slice(1) + ' Action',
       description: message,
-      type: type === 'info' || type === 'success' || type === 'warning' || type === 'error' ? type : 'system',
+      type:
+        type === 'info' || type === 'success' || type === 'warning' || type === 'error'
+          ? type
+          : 'system',
     });
   }
 
@@ -41,4 +44,3 @@ export class NotificationService {
 }
 
 export const notificationService = new NotificationService();
-

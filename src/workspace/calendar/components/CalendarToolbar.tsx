@@ -70,20 +70,20 @@ export const CalendarToolbar: React.FC = () => {
   const dateLabel = formatToolbarDateLabel(viewState.currentDate, viewState.currentView);
 
   return (
-    <header className="flex flex-col gap-2 sm:gap-3 border-b border-slate-200 bg-white p-2.5 sm:p-4 dark:border-slate-800 dark:bg-slate-900">
+    <header className="flex flex-col gap-2 border-b border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900 sm:gap-3 sm:p-4">
       {/* Top Header Row */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="h-2.5 w-2.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-500/50 dark:bg-indigo-400 shrink-0" />
-          <h1 className="text-base sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white truncate">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-indigo-600 shadow-sm shadow-indigo-500/50 dark:bg-indigo-400" />
+          <h1 className="truncate text-base font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-xl">
             Calendar
           </h1>
-          <div className="hidden xs:flex rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 whitespace-nowrap">
+          <div className="xs:flex hidden whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100">
             {dateLabel}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex shrink-0 items-center gap-1.5">
           <div className="relative">
             <button
               type="button"
@@ -117,9 +117,9 @@ export const CalendarToolbar: React.FC = () => {
       </div>
 
       {/* Navigation & View Switcher Row */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+      <div className="flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
         {/* Date & Navigation Controls */}
-        <div className="flex items-center justify-between sm:justify-start gap-2">
+        <div className="flex items-center justify-between gap-2 sm:justify-start">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -152,13 +152,13 @@ export const CalendarToolbar: React.FC = () => {
             </div>
           </div>
 
-          <div className="xs:hidden text-xs font-bold text-slate-900 dark:text-slate-100 truncate max-w-[140px]">
+          <div className="xs:hidden max-w-[140px] truncate text-xs font-bold text-slate-900 dark:text-slate-100">
             {dateLabel}
           </div>
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex rounded-xl border border-slate-300 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800 overflow-x-auto">
+        <div className="flex overflow-x-auto rounded-xl border border-slate-300 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
           {(['day', 'week', 'month', 'agenda'] as CalendarViewType[]).map((v) => {
             const isActive = viewState.currentView === v;
             return (
@@ -166,9 +166,9 @@ export const CalendarToolbar: React.FC = () => {
                 key={v}
                 type="button"
                 onClick={() => setCurrentView(v)}
-                className={`flex-1 sm:flex-initial rounded-lg px-3 py-1.5 text-center text-xs font-semibold capitalize transition-all whitespace-nowrap ${
+                className={`flex-1 whitespace-nowrap rounded-lg px-3 py-1.5 text-center text-xs font-semibold capitalize transition-all sm:flex-initial ${
                   isActive
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400 font-bold'
+                    ? 'bg-white font-bold text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >

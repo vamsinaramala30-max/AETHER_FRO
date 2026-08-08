@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Cpu, Zap, Star, CheckCircle, Plus, X, Sparkles, RefreshCw, AlertCircle, Server } from 'lucide-react';
+import {
+  Cpu,
+  Zap,
+  Star,
+  CheckCircle,
+  Plus,
+  X,
+  Sparkles,
+  RefreshCw,
+  AlertCircle,
+  Server,
+} from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useAI } from '@/contexts/AIContext';
 import { apiClient } from '@/api/client';
@@ -20,7 +31,9 @@ export const ModelsPage: React.FC = () => {
   const { setActiveProvider, updateAIConfig } = useAI();
   const [models, setModels] = useState<AIModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [ollamaStatus, setOllamaStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [ollamaStatus, setOllamaStatus] = useState<'connected' | 'disconnected' | 'checking'>(
+    'checking',
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newModel, setNewModel] = useState({
     name: '',
@@ -36,7 +49,11 @@ export const ModelsPage: React.FC = () => {
     try {
       const res = await apiClient.get<any>('/ai/models');
       const payload = res.data?.data || res.data || [];
-      const modelList = Array.isArray(payload) ? payload : Array.isArray((payload as any).data) ? (payload as any).data : [];
+      const modelList = Array.isArray(payload)
+        ? payload
+        : Array.isArray((payload as any).data)
+          ? (payload as any).data
+          : [];
 
       if (modelList.length > 0) {
         const mapped: AIModel[] = modelList.map((m: any, index: number) => ({
@@ -126,7 +143,7 @@ export const ModelsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <Cpu className="h-7 w-7 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <Cpu className="h-7 w-7 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               AI Models
@@ -162,7 +179,8 @@ export const ModelsPage: React.FC = () => {
         <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
           <AlertCircle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
           <div>
-            <span className="font-bold">Ollama / Backend AI Service offline.</span> Ensure your backend server or local Ollama instance is running to automatically sync dynamic models.
+            <span className="font-bold">Ollama / Backend AI Service offline.</span> Ensure your
+            backend server or local Ollama instance is running to automatically sync dynamic models.
           </div>
         </div>
       )}
@@ -228,7 +246,9 @@ export const ModelsPage: React.FC = () => {
       ) : models.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <Server className="mb-3 h-10 w-10 text-slate-400 dark:text-slate-500" />
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">No AI Models Registered</p>
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            No AI Models Registered
+          </p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Connect your local Ollama server or register a custom model provider to begin.
           </p>
@@ -281,8 +301,12 @@ export const ModelsPage: React.FC = () => {
 
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
                   <span className="flex items-center gap-1.5">
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">Context:</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{model.contextWindow}</span>
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      Context:
+                    </span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {model.contextWindow}
+                    </span>
                   </span>
                   <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
                     <Zap className="h-3.5 w-3.5 text-amber-500" />

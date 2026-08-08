@@ -9,7 +9,10 @@ export const buildUrlWithParams = (
   try {
     url = new URL(baseUrl);
   } catch {
-    url = new URL(baseUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    url = new URL(
+      baseUrl,
+      typeof window !== 'undefined' ? window.location.origin : 'http://localhost',
+    );
   }
 
   Object.entries(params).forEach(([key, val]) => {

@@ -61,26 +61,26 @@ export const AssistantPage: React.FC = () => {
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
   return (
-    <div className="bg-background relative flex h-full w-full flex-1 flex-col overflow-hidden min-h-0">
+    <div className="bg-background relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
       <AssistantHeader
         title={activeConversation?.title || 'AI Assistant'}
         onClearSession={createNewConversation}
       />
 
-      <div className="flex flex-1 flex-col md:flex-row overflow-hidden min-h-0">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         <ChatSidebar />
 
-        <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {error ? (
-            <div className="flex flex-1 items-center justify-center p-4 overflow-y-auto">
+            <div className="flex flex-1 items-center justify-center overflow-y-auto p-4">
               <ErrorState message={error} onRetry={retryLastMessage} onDismiss={clearError} />
             </div>
           ) : !activeConversationId || (messages.length === 0 && !isLoading) ? (
-            <div className="flex flex-1 items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="flex flex-1 items-center justify-center overflow-y-auto p-3 sm:p-4">
               <EmptyState onSelectPrompt={(promptText) => sendMessage(promptText)} />
             </div>
           ) : (
-            <div className="flex-1 space-y-4 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3 sm:p-4 md:p-6">
               <ChatWindow messages={messages} isLoading={isLoading} />
               {isStreaming && (
                 <div className="pt-2">

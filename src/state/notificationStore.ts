@@ -2,7 +2,16 @@ import { create } from 'zustand';
 
 export interface Notification {
   id: string;
-  type: 'ai' | 'project' | 'calendar' | 'automation' | 'system' | 'info' | 'success' | 'warning' | 'error';
+  type:
+    | 'ai'
+    | 'project'
+    | 'calendar'
+    | 'automation'
+    | 'system'
+    | 'info'
+    | 'success'
+    | 'warning'
+    | 'error';
   title: string;
   description: string;
   time: string;
@@ -102,9 +111,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 
   markAsRead: (id) => {
     set((state) => {
-      const updated = state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      );
+      const updated = state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
       saveNotifications(updated);
       return {
         notifications: updated,
@@ -143,4 +150,3 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     });
   },
 }));
-

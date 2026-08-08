@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useMemo, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  ReactNode,
+  useEffect,
+} from 'react';
 import { aiService } from '../services/aiService';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
@@ -31,11 +39,14 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   useEffect(() => {
     if (notifications.length > 0 && aiService.isAiEnabled()) {
-      aiService.rankNotifications(notifications).then((res) => {
-        setUrgentSummary(res.urgentSummary);
-      }).catch(() => {
-        setUrgentSummary(null);
-      });
+      aiService
+        .rankNotifications(notifications)
+        .then((res) => {
+          setUrgentSummary(res.urgentSummary);
+        })
+        .catch(() => {
+          setUrgentSummary(null);
+        });
     } else {
       setUrgentSummary(null);
     }

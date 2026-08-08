@@ -67,7 +67,7 @@ export const FilterPanel: React.FC = () => {
 
         {/* Checkboxes */}
         <div className="space-y-2 pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300">
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
               checked={filters.hasAttachments === true}
@@ -76,7 +76,7 @@ export const FilterPanel: React.FC = () => {
             />
             Has attachments
           </label>
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300">
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
               checked={filters.hasLocation === true}

@@ -30,7 +30,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="mb-4 sm:mb-6 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-blue-600/10 text-2xl sm:text-3xl font-bold text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400"
+        className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/10 text-2xl font-bold text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400 sm:mb-6 sm:h-16 sm:w-16 sm:text-3xl"
       >
         A
       </motion.div>
@@ -48,7 +48,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPrompt }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.3 }}
-        className="mb-6 sm:mb-8 max-w-md text-xs text-gray-500 dark:text-gray-400 sm:text-sm"
+        className="mb-6 max-w-md text-xs text-gray-500 dark:text-gray-400 sm:mb-8 sm:text-sm"
       >
         Ask questions, refactor complex systems, or explore technical strategies with your personal
         engineering copilot.

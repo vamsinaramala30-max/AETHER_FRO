@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Zap, Search, Filter, Download, AlertTriangle, CheckCircle2, Clock, User, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Zap,
+  Search,
+  Filter,
+  Download,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  User,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { apiClient } from '@/api/client';
 
 interface AutomationLog {
   id: string;
@@ -20,41 +33,37 @@ export const AutomationLogsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
+    setErrorMsg(null);
     try {
-      const res = await fetch(`/api/v1/automations/logs?search=${encodeURIComponent(search)}&status=${statusFilter}&page=${page}&limit=10`);
-      const data = await res.json();
-      if (data.success && data.logs) {
-        setLogs(data.logs);
-        if (data.pagination) {
-          setTotalPages(data.pagination.totalPages || 1);
+      const res = await apiClient.get<any>('/automations/logs', {
+        params: {
+          search,
+          status: statusFilter !== 'ALL' ? statusFilter : undefined,
+          page,
+          limit: 10,
+        },
+      });
+      const payload = res.data || res;
+      if (payload && Array.isArray(payload.logs)) {
+        setLogs(payload.logs);
+        if (payload.pagination) {
+          setTotalPages(payload.pagination.totalPages || 1);
         }
+      } else if (Array.isArray(payload)) {
+        setLogs(payload);
+      } else {
+        setLogs([]);
       }
-    } catch {
-      // Fallback structured logs if network unavailable
-      setLogs([
-        {
-          id: 'log_1',
-          timestamp: new Date().toISOString(),
-          automationName: 'Daily Workspace Slack Sync',
-          trigger: 'Scheduled (Cron)',
-          status: 'SUCCESS',
-          duration: '1.2s',
-          executedBy: 'System Scheduler',
-        },
-        {
-          id: 'log_2',
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          automationName: 'PDF Embedding Extractor',
-          trigger: 'File Upload',
-          status: 'FAILED',
-          duration: '3.4s',
-          executedBy: 'Knowledge Base Worker',
-          errorMessage: 'Memory allocation limit exceeded during parsing.',
-        },
-      ]);
+    } catch (err: any) {
+      console.error('[AutomationLogsPage] API request failed:', err);
+      setErrorMsg(
+        err?.message || 'Failed to pull automation execution logs from production server.',
+      );
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -66,7 +75,15 @@ export const AutomationLogsPage: React.FC = () => {
 
   const handleExportCSV = () => {
     if (logs.length === 0) return;
-    const headers = ['Timestamp', 'Automation Name', 'Trigger', 'Status', 'Duration', 'Executed By', 'Error Message'];
+    const headers = [
+      'Timestamp',
+      'Automation Name',
+      'Trigger',
+      'Status',
+      'Duration',
+      'Executed By',
+      'Error Message',
+    ];
     const rows = logs.map((l) => [
       `"${l.timestamp}"`,
       `"${l.automationName}"`,
@@ -76,7 +93,9 @@ export const AutomationLogsPage: React.FC = () => {
       `"${l.executedBy}"`,
       `"${l.errorMessage || ''}"`,
     ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -91,13 +110,14 @@ export const AutomationLogsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <Zap className="h-7 w-7 text-amber-500 dark:text-amber-400 shrink-0" />
+          <Zap className="h-7 w-7 shrink-0 text-amber-500 dark:text-amber-400" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Automation Execution Logs
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Audit isolated workflow triggers, runtime durations, status codes, and execution errors.
+              Audit isolated workflow triggers, runtime durations, status codes, and execution
+              errors.
             </p>
           </div>
         </div>
@@ -110,6 +130,14 @@ export const AutomationLogsPage: React.FC = () => {
           Export CSV Logs
         </button>
       </div>
+
+      {/* Error Banner */}
+      {errorMsg && (
+        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -162,8 +190,12 @@ export const AutomationLogsPage: React.FC = () => {
       ) : logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-900">
           <Zap className="mb-3 h-10 w-10 text-slate-400" />
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No automation logs found</p>
-          <p className="text-xs text-slate-400">All workflow execution events will record here in real-time.</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            No automation logs found
+          </p>
+          <p className="text-xs text-slate-400">
+            All workflow execution events will record here in real-time.
+          </p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -181,8 +213,11 @@ export const AutomationLogsPage: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {logs.map((log) => (
-                <tr key={log.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                  <td className="px-5 py-3 font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                <tr
+                  key={log.id}
+                  className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                >
+                  <td className="whitespace-nowrap px-5 py-3 font-medium text-slate-500 dark:text-slate-400">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
                   <td className="px-5 py-3 font-bold text-slate-900 dark:text-white">
@@ -216,7 +251,10 @@ export const AutomationLogsPage: React.FC = () => {
                   </td>
                   <td className="px-5 py-3">
                     {log.errorMessage ? (
-                      <span className="font-mono text-[11px] text-red-500 dark:text-red-400 truncate max-w-[200px] block" title={log.errorMessage}>
+                      <span
+                        className="block max-w-[200px] truncate font-mono text-[11px] text-red-500 dark:text-red-400"
+                        title={log.errorMessage}
+                      >
                         {log.errorMessage}
                       </span>
                     ) : (

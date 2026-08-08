@@ -11,7 +11,10 @@ export interface UserProfile {
   company?: string;
 }
 
-function toUserProfile(payload: Record<string, unknown>, fallback: Partial<UserProfile> = {}): UserProfile {
+function toUserProfile(
+  payload: Record<string, unknown>,
+  fallback: Partial<UserProfile> = {},
+): UserProfile {
   const normalized = normalizeUserProfile({
     id: fallback.id,
     email: fallback.email,

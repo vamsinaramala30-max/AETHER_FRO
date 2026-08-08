@@ -182,14 +182,14 @@ export const EventForm: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs"
+      className="backdrop-blur-xs fixed inset-0 z-[1100] flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4"
       onClick={closeEventForm}
     >
       <div
-        className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 sm:rounded-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sm:hidden mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700" />
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700 sm:hidden" />
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             {typeof editingEvent?.id === 'string' && editingEvent.id.trim() !== ''
@@ -244,7 +244,7 @@ export const EventForm: React.FC = () => {
               </select>
             </div>
 
-            <label className="flex items-center gap-2 pt-4 sm:pt-6 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="flex cursor-pointer items-center gap-2 pt-4 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:pt-6">
               <input
                 type="checkbox"
                 checked={isAllDay}
@@ -333,7 +333,7 @@ export const EventForm: React.FC = () => {
                 placeholder="Add location or link..."
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3.5 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
@@ -350,7 +350,7 @@ export const EventForm: React.FC = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3.5 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3.5 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>

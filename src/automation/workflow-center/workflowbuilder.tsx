@@ -45,15 +45,15 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
   };
 
   return (
-    <div className="border-border bg-card space-y-6 rounded-2xl border p-4 sm:p-6 shadow-sm backdrop-blur-md transition-colors">
-      <div className="border-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
+    <div className="border-border bg-card space-y-6 rounded-2xl border p-4 shadow-sm backdrop-blur-md transition-colors sm:p-6">
+      <div className="border-border flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-foreground text-lg sm:text-xl font-bold">Workflow Designer</h2>
-          <p className="text-muted-foreground text-xs mt-0.5">
+          <h2 className="text-foreground text-lg font-bold sm:text-xl">Workflow Designer</h2>
+          <p className="text-muted-foreground mt-0.5 text-xs">
             Configure orchestrations, conditional pathways, and direct operational steps.
           </p>
         </div>
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex shrink-0 items-center gap-2.5">
           <button
             onClick={onCancel}
             type="button"
@@ -72,7 +72,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="border-border/60 space-y-4 border-b pb-6 md:border-b-0 md:border-r md:pb-0 md:pr-6 md:col-span-1">
+        <div className="border-border/60 space-y-4 border-b pb-6 md:col-span-1 md:border-b-0 md:border-r md:pb-0 md:pr-6">
           <div>
             <label className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase tracking-wider">
               Blueprint Name
@@ -127,7 +127,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({ workflow, onSa
           </div>
         </div>
 
-        <div className="border-border bg-background/60 flex max-h-[600px] min-h-[350px] w-full flex-col items-center justify-start overflow-y-auto rounded-2xl border p-3 sm:p-6 md:col-span-2 space-y-2">
+        <div className="border-border bg-background/60 flex max-h-[600px] min-h-[350px] w-full flex-col items-center justify-start space-y-2 overflow-y-auto rounded-2xl border p-3 sm:p-6 md:col-span-2">
           {nodes.length === 0 ? (
             <p className="text-muted-foreground my-auto text-sm">
               No operational blocks appended to this architectural sequence.

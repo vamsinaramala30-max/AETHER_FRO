@@ -19,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       aria-label="Sidebar Navigation"
-      className={`bg-aether-surface relative flex h-full flex-col overflow-hidden border-r border-aether-border transition-all duration-300 ease-in-out ${
+      className={`relative flex h-full flex-col overflow-hidden border-r border-aether-border bg-aether-surface transition-all duration-300 ease-in-out ${
         isMobile ? 'w-[280px]' : collapsed ? 'w-[72px]' : 'w-[280px]'
       } z-30 shrink-0 select-none shadow-xl md:shadow-sm`}
     >

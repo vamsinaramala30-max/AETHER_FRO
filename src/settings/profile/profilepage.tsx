@@ -64,7 +64,7 @@ export const ProfilePage: React.FC = () => {
     <PageWrapper>
       <div className="space-y-6">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
-          <User className="h-7 w-7 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <User className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Account Profile

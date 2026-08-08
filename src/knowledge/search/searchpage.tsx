@@ -44,7 +44,7 @@ export const SearchPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <Search className="h-7 w-7 text-purple-600 dark:text-purple-400 shrink-0" />
+          <Search className="h-7 w-7 shrink-0 text-purple-600 dark:text-purple-400" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Semantic Search Engine

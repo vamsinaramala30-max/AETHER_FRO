@@ -99,8 +99,8 @@ export const ConnectedAccountCard: React.FC<ConnectedAccountCardProps> = ({
             statusType === 'success'
               ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-950/20 dark:text-emerald-300'
               : statusType === 'error'
-              ? 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-950/20 dark:text-rose-300'
-              : 'border border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-950/20 dark:text-indigo-300'
+                ? 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-950/20 dark:text-rose-300'
+                : 'border border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-950/20 dark:text-indigo-300'
           }`}
         >
           {statusType === 'success' ? (

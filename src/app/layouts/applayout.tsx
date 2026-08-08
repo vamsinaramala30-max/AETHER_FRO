@@ -7,14 +7,13 @@ import { Sidebar } from '../../components/sidebar/Sidebar';
 import { useNotificationStore } from '../../state/notificationStore';
 
 // Lazy-load modals so they don't bloat the initial bundle
-const GlobalSearch = React.lazy(
-  () => import('../../components/search/GlobalSearch').then((m) => ({ default: m.GlobalSearch })),
+const GlobalSearch = React.lazy(() =>
+  import('../../components/search/GlobalSearch').then((m) => ({ default: m.GlobalSearch })),
 );
-const NotificationCenter = React.lazy(
-  () =>
-    import('../../components/notifications/NotificationCenter').then((m) => ({
-      default: m.NotificationCenter,
-    })),
+const NotificationCenter = React.lazy(() =>
+  import('../../components/notifications/NotificationCenter').then((m) => ({
+    default: m.NotificationCenter,
+  })),
 );
 
 // ---------------------------------------------------------------------------
@@ -45,7 +44,11 @@ interface HeaderProps {
   unreadCount?: number;
 }
 
-const DesktopHeader: React.FC<HeaderProps> = ({ onSearchOpen, onNotificationsOpen, unreadCount = 0 }) => {
+const DesktopHeader: React.FC<HeaderProps> = ({
+  onSearchOpen,
+  onNotificationsOpen,
+  unreadCount = 0,
+}) => {
   const location = useLocation();
   const breadcrumbs = formatBreadcrumbs(location.pathname);
   const { resolvedTheme, setTheme } = useTheme();
@@ -98,7 +101,7 @@ const DesktopHeader: React.FC<HeaderProps> = ({ onSearchOpen, onNotificationsOpe
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
@@ -133,7 +136,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
 }) => (
   <header className="flex shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-4 py-3 md:hidden">
     <div className="flex items-center gap-2.5">
-      <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+      <Sparkles className="h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-400" />
       <span className="text-base font-extrabold text-aether-main">Aether OS</span>
     </div>
     <div className="flex items-center gap-1">
@@ -151,7 +154,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-aether-surface">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -209,7 +212,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] font-sans text-aether-main antialiased">
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
@@ -223,7 +226,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       <div
         className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        } max-w-[85vw] w-[280px] shadow-2xl`}
+        } w-[280px] max-w-[85vw] shadow-2xl`}
         aria-hidden={!mobileOpen}
       >
         <Sidebar
@@ -231,8 +234,14 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
           onToggleCollapse={() => {}}
           isMobile={true}
           onMobileClose={() => setMobileOpen(false)}
-          onSearchOpen={() => { setMobileOpen(false); setSearchOpen(true); }}
-          onNotificationsOpen={() => { setMobileOpen(false); setNotificationsOpen(true); }}
+          onSearchOpen={() => {
+            setMobileOpen(false);
+            setSearchOpen(true);
+          }}
+          onNotificationsOpen={() => {
+            setMobileOpen(false);
+            setNotificationsOpen(true);
+          }}
           unreadCount={unreadCount}
         />
       </div>
@@ -251,7 +260,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       </div>
 
       {/* Main content container */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile header (hidden on desktop) */}
         <TopHeader
           onMobileMenuOpen={() => setMobileOpen(true)}
@@ -271,9 +280,9 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
 
         {/* Dynamic page view content outlet */}
         <main
-          className={`flex-1 min-h-0 min-w-0 w-full bg-aether-bg transition-all duration-200 ${
+          className={`min-h-0 w-full min-w-0 flex-1 bg-aether-bg transition-all duration-200 ${
             location.pathname.startsWith('/app/ai/assistant')
-              ? 'flex flex-col p-0 overflow-hidden w-[95%] md:w-full mx-auto'
+              ? 'mx-auto flex w-[95%] flex-col overflow-hidden p-0 md:w-full'
               : 'overflow-y-auto p-0'
           }`}
         >
@@ -297,4 +306,3 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
     </div>
   );
 };
-

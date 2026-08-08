@@ -267,7 +267,7 @@ export const FormValidationState: React.FC<{
     className={`flex w-full flex-col items-start rounded-2xl border border-rose-500/30 bg-rose-950/20 p-8 backdrop-blur-sm ${className}`}
   >
     <div className="mb-3 flex items-center gap-3">
-      <FileSpreadsheet className="h-6 w-6 text-rose-400 shrink-0" />
+      <FileSpreadsheet className="h-6 w-6 shrink-0 text-rose-400" />
       <div>
         <h3 className="text-base font-semibold text-white">{title}</h3>
         <p className="text-xs text-rose-200">{description}</p>

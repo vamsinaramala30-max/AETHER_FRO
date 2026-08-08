@@ -31,4 +31,3 @@ export const studyPlannerService = {
     return res?.data || res;
   },
 };
-

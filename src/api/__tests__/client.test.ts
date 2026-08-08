@@ -1,7 +1,11 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { apiClient } from '../client';
 
 describe('HttpClient API Client & Mobile URL Resolution', () => {
+  beforeEach(() => {
+    (apiClient as any).baseUrl = 'http://localhost:5001/api/v1';
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });

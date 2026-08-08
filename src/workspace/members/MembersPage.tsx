@@ -47,11 +47,17 @@ export const MembersPage: React.FC = () => {
   // Build currentUser member entry dynamically from useAuth() session
   const currentUserMember: Member = {
     id: user?.id || 'usr_current',
-    name: user?.name || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
+    name:
+      user?.name ||
+      (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
     email: user?.email || 'user@aether.os',
     role: 'Owner',
     status: 'active',
-    initials: getInitials(user?.name || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : undefined), user?.email),
+    initials: getInitials(
+      user?.name ||
+        (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : undefined),
+      user?.email,
+    ),
     color: 'from-indigo-600 to-purple-600',
   };
 
@@ -119,7 +125,7 @@ export const MembersPage: React.FC = () => {
       {/* Header — Direct page header without full Workspace banner or sub-tabs */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <Users className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Team Members
@@ -144,19 +150,21 @@ export const MembersPage: React.FC = () => {
       <div className="mt-6 space-y-4">
         {/* Search & Stats Bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search members by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+              className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
             <UserCheck className="h-4 w-4 text-indigo-500" />
-            <span>{allMembers.length} active seat{allMembers.length === 1 ? '' : 's'}</span>
+            <span>
+              {allMembers.length} active seat{allMembers.length === 1 ? '' : 's'}
+            </span>
           </div>
         </div>
 
@@ -173,7 +181,7 @@ export const MembersPage: React.FC = () => {
                   key={m.id}
                   className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex min-w-0 items-center gap-3.5">
                     <div
                       className={`h-10 w-10 rounded-full bg-gradient-to-tr ${m.color} flex shrink-0 items-center justify-center text-xs font-extrabold text-white shadow-sm`}
                     >

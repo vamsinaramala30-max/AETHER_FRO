@@ -51,21 +51,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
           onKeyDown={handleKeyDown}
           placeholder="Ask AETHER assistant..."
           disabled={disabled}
-          className="max-h-36 sm:max-h-48 min-h-[40px] sm:min-h-[44px] w-full resize-none bg-transparent py-2.5 pl-3 pr-10 text-xs sm:py-3 sm:pl-4 sm:pr-12 sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none disabled:opacity-50 dark:text-slate-100"
+          className="max-h-36 min-h-[40px] w-full resize-none bg-transparent py-2.5 pl-3 pr-10 text-xs text-slate-800 placeholder-slate-400 focus:outline-none disabled:opacity-50 dark:text-slate-100 sm:max-h-48 sm:min-h-[44px] sm:py-3 sm:pl-4 sm:pr-12 sm:text-sm"
         />
-        <div className="absolute bottom-1 sm:bottom-1.5 right-1.5 sm:right-2">
+        <div className="absolute bottom-1 right-1.5 sm:bottom-1.5 sm:right-2">
           <button
             type="submit"
             disabled={!content.trim() || disabled}
             className="flex cursor-pointer items-center justify-center rounded-lg bg-indigo-600 p-2 text-white transition-colors hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600"
             aria-label="Send message"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

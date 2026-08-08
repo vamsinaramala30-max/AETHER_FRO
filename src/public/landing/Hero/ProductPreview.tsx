@@ -96,13 +96,15 @@ export const ProductPreview: React.FC = () => {
           </div>
           <div className="flex shrink-0 items-center gap-1.5 text-xs text-zinc-400">
             <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-300 sm:text-[11px]">
-              <ShieldCheck className="h-3 w-3 shrink-0" /> <span className="hidden xs:inline">Enterprise Tier</span><span className="xs:hidden">Enterprise</span>
+              <ShieldCheck className="h-3 w-3 shrink-0" />{' '}
+              <span className="xs:inline hidden">Enterprise Tier</span>
+              <span className="xs:hidden">Enterprise</span>
             </span>
           </div>
         </div>
 
         {/* Tab Navigation Toolbar */}
-        <div className="flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2 text-xs scrollbar-none">
+        <div className="scrollbar-none flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2 text-xs">
           <button
             type="button"
             onClick={() => setActiveTab('ai')}

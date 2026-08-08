@@ -2,7 +2,7 @@ import {
   CATEGORY_FILTER_ALL,
   MAX_RECENT_WEBSITES,
   WEB_DIRECTORY_STORAGE_KEYS,
-} from "./web-directory-constants";
+} from './web-directory-constants';
 import type {
   FavoriteWebsiteIds,
   RecentWebsiteEntry,
@@ -11,10 +11,10 @@ import type {
   WebDirectoryFilters,
   WebsiteCategory,
   WebsiteWithMeta,
-} from "./web-directory-types";
+} from './web-directory-types';
 
 function isLocalStorageAvailable(): boolean {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
 /**
@@ -23,15 +23,15 @@ function isLocalStorageAvailable(): boolean {
 export function validateWebsiteUrl(url: string): UrlValidationResult {
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      return { isValid: false, reason: "URL must use the http or https protocol." };
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return { isValid: false, reason: 'URL must use the http or https protocol.' };
     }
     if (!parsed.hostname || parsed.hostname.length === 0) {
-      return { isValid: false, reason: "URL is missing a hostname." };
+      return { isValid: false, reason: 'URL is missing a hostname.' };
     }
     return { isValid: true };
   } catch {
-    return { isValid: false, reason: "URL is not well-formed." };
+    return { isValid: false, reason: 'URL is not well-formed.' };
   }
 }
 
@@ -58,7 +58,7 @@ export function searchWebsites(websites: TrustedWebsite[], query: string): Trust
  */
 export function filterWebsitesByCategory(
   websites: TrustedWebsite[],
-  category: WebsiteCategory | "All",
+  category: WebsiteCategory | 'All',
 ): TrustedWebsite[] {
   if (category === CATEGORY_FILTER_ALL) {
     return websites;
@@ -100,7 +100,7 @@ export function loadFavoriteIds(): FavoriteWebsiteIds {
     const raw = window.localStorage.getItem(WEB_DIRECTORY_STORAGE_KEYS.favorites);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
   } catch {
     return [];
   }
@@ -121,7 +121,10 @@ export function saveFavoriteIds(favoriteIds: FavoriteWebsiteIds): void {
 /**
  * Toggles a website's favorite status and returns the updated ID list.
  */
-export function toggleFavorite(favoriteIds: FavoriteWebsiteIds, websiteId: string): FavoriteWebsiteIds {
+export function toggleFavorite(
+  favoriteIds: FavoriteWebsiteIds,
+  websiteId: string,
+): FavoriteWebsiteIds {
   const isFavorited = favoriteIds.includes(websiteId);
   const updated = isFavorited
     ? favoriteIds.filter((id) => id !== websiteId)
@@ -143,10 +146,10 @@ export function loadRecentEntries(): RecentWebsiteEntry[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
       (entry): entry is RecentWebsiteEntry =>
-        typeof entry === "object" &&
+        typeof entry === 'object' &&
         entry !== null &&
-        typeof (entry as RecentWebsiteEntry).id === "string" &&
-        typeof (entry as RecentWebsiteEntry).visitedAt === "string",
+        typeof (entry as RecentWebsiteEntry).id === 'string' &&
+        typeof (entry as RecentWebsiteEntry).visitedAt === 'string',
     );
   } catch {
     return [];

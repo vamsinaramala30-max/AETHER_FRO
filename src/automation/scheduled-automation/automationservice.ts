@@ -24,7 +24,10 @@ export const automationService = {
         name: item.name,
         cronExpression: item.cronExpression || item.schedule || '0 * * * *',
         targetEndpoint: item.targetEndpoint || item.target || '/v1/tasks',
-        isActive: item.isActive !== undefined ? Boolean(item.isActive) : item.status === 'active' || Boolean(item.isEnabled),
+        isActive:
+          item.isActive !== undefined
+            ? Boolean(item.isActive)
+            : item.status === 'active' || Boolean(item.isEnabled),
         lastExecutionStatus: item.lastExecutionStatus || 'success',
         lastRun: item.lastRun || item.lastRunAt,
       }));
@@ -45,4 +48,3 @@ export const automationService = {
     return res?.data || res;
   },
 };
-

@@ -19,19 +19,19 @@ export const Hero: React.FC = () => {
 
   return (
     <section
-      className="relative overflow-hidden border-b border-zinc-800/50 bg-[#0B0D12] pt-6 sm:pt-12 lg:pt-16 pb-12 sm:pb-20 lg:pb-24"
+      className="relative overflow-hidden border-b border-zinc-800/50 bg-[#0B0D12] pb-12 pt-6 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-16"
       aria-labelledby="hero-heading"
     >
       {/* Background Gradient Mesh & Spotlights */}
       <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-full max-w-7xl -translate-x-1/2 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl" />
-      <div className="pointer-events-none absolute left-4 sm:left-10 top-1/4 h-56 w-56 sm:h-72 sm:w-72 rounded-full bg-indigo-600/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-4 sm:right-10 top-1/3 h-60 w-60 sm:h-80 sm:w-80 rounded-full bg-cyan-600/10 blur-3xl" />
+      <div className="pointer-events-none absolute left-4 top-1/4 h-56 w-56 rounded-full bg-indigo-600/10 blur-3xl sm:left-10 sm:h-72 sm:w-72" />
+      <div className="pointer-events-none absolute right-4 top-1/3 h-60 w-60 rounded-full bg-cyan-600/10 blur-3xl sm:right-10 sm:h-80 sm:w-80" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* 2-Column Responsive Layout: Left 55%, Right 45% */}
         <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-12 lg:gap-8">
           {/* Left Column: Copy & Actions (55% / 7 cols on lg) */}
-          <div className="flex flex-col items-start space-y-4 sm:space-y-6 text-left lg:col-span-7">
+          <div className="flex flex-col items-start space-y-4 text-left sm:space-y-6 lg:col-span-7">
             {/* Enterprise Announcement Badge */}
             {isAuthenticated ? (
               <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400 backdrop-blur-md">
@@ -41,7 +41,7 @@ export const Hero: React.FC = () => {
             ) : (
               <Link
                 to="/signup"
-                className="group inline-flex max-w-full items-center gap-1.5 sm:gap-2 rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs font-medium text-zinc-300 shadow-sm transition-all hover:border-zinc-700"
+                className="group inline-flex max-w-full items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs font-medium text-zinc-300 shadow-sm transition-all hover:border-zinc-700 sm:gap-2"
               >
                 <span className="flex shrink-0 items-center gap-1 font-semibold text-indigo-400">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -58,7 +58,7 @@ export const Hero: React.FC = () => {
             {/* High-Impact Headline */}
             <h1
               id="hero-heading"
-              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] tracking-tight text-zinc-100"
+              className="text-2xl font-bold leading-[1.15] tracking-tight text-zinc-100 sm:text-4xl md:text-5xl lg:text-6xl"
             >
               {isAuthenticated ? (
                 <>
@@ -79,7 +79,7 @@ export const Hero: React.FC = () => {
             </h1>
 
             {/* Subheadline Description */}
-            <p className="max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed text-zinc-400">
+            <p className="max-w-xl text-xs leading-relaxed text-zinc-400 sm:text-base lg:text-lg">
               {isAuthenticated
                 ? 'Your cognitive memory graph and local vector indexes are active. Access your workspace, review recent sprint tasks, or interact with AI assistant.'
                 : 'Aether orchestrates tasks, durable knowledge, cognitive memory support, and custom contextual automation. Engineered for maximum speed and zero cloud data leaks.'}
@@ -134,7 +134,7 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Trust Indicators below CTAs */}
-            <div className="flex w-full max-w-xl flex-wrap items-center gap-x-4 gap-y-2 border-t border-zinc-900/80 pt-3 sm:gap-x-6 sm:pt-4 text-xs text-zinc-400">
+            <div className="flex w-full max-w-xl flex-wrap items-center gap-x-4 gap-y-2 border-t border-zinc-900/80 pt-3 text-xs text-zinc-400 sm:gap-x-6 sm:pt-4">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 sm:h-4 sm:w-4" />
                 Local-first Security

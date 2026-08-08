@@ -30,7 +30,7 @@ interface NotificationCenterProps {
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  
+
   const notifications = useNotificationStore((state) => state.notifications);
   const markAsRead = useNotificationStore((state) => state.markAsRead);
   const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
@@ -109,7 +109,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
           {/* List Content */}
           <div className="max-h-[420px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
                 <Bell className="mb-2 h-8 w-8 text-slate-300 dark:text-slate-600" />
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   All caught up!
@@ -143,9 +143,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {n.description}
                           </p>
-                          <p className="mt-1 text-[10px] font-semibold text-slate-400">
-                            {n.time}
-                          </p>
+                          <p className="mt-1 text-[10px] font-semibold text-slate-400">{n.time}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                           <button

@@ -3,7 +3,10 @@ import { authConfig } from '../config/auth.config';
 // ---- Token refresh state (module-level singleton) ----
 let _refreshPromise: Promise<{ accessToken: string | null; isAuthError: boolean }> | null = null;
 
-async function _performTokenRefresh(): Promise<{ accessToken: string | null; isAuthError: boolean }> {
+async function _performTokenRefresh(): Promise<{
+  accessToken: string | null;
+  isAuthError: boolean;
+}> {
   console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED');
   try {
     const refreshToken = localStorage.getItem(authConfig.refreshTokenKey);
@@ -22,12 +25,16 @@ async function _performTokenRefresh(): Promise<{ accessToken: string | null; isA
     });
 
     if (res.status === 401 || res.status === 403) {
-      console.error(`[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked (HTTP ${res.status})`);
+      console.error(
+        `[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked (HTTP ${res.status})`,
+      );
       return { accessToken: null, isAuthError: true };
     }
 
     if (!res.ok) {
-      console.warn(`[AUTH_DIAG] API_5XX - Refresh endpoint returned temporary error (HTTP ${res.status})`);
+      console.warn(
+        `[AUTH_DIAG] API_5XX - Refresh endpoint returned temporary error (HTTP ${res.status})`,
+      );
       return { accessToken: null, isAuthError: false };
     }
 
@@ -36,7 +43,9 @@ async function _performTokenRefresh(): Promise<{ accessToken: string | null; isA
     const accessToken: string | undefined = tokens?.accessToken ?? body?.accessToken;
 
     if (typeof accessToken !== 'string' || !accessToken) {
-      console.error('[AUTH_DIAG] TOKEN_REFRESH_FAILED - Invalid payload structure from refresh response');
+      console.error(
+        '[AUTH_DIAG] TOKEN_REFRESH_FAILED - Invalid payload structure from refresh response',
+      );
       return { accessToken: null, isAuthError: true };
     }
 
@@ -47,7 +56,10 @@ async function _performTokenRefresh(): Promise<{ accessToken: string | null; isA
     }
     return { accessToken, isAuthError: false };
   } catch (err) {
-    console.warn('[AUTH_DIAG] NETWORK_ERROR - Refresh token request network failure:', err instanceof Error ? err.message : err);
+    console.warn(
+      '[AUTH_DIAG] NETWORK_ERROR - Refresh token request network failure:',
+      err instanceof Error ? err.message : err,
+    );
     return { accessToken: null, isAuthError: false };
   }
 }
@@ -120,7 +132,8 @@ class HttpClient {
       }
 
       try {
-        let token = localStorage.getItem(authConfig.tokenKey) ||
+        let token =
+          localStorage.getItem(authConfig.tokenKey) ||
           localStorage.getItem('aether-auth-token') ||
           localStorage.getItem('auth_token');
 
@@ -264,20 +277,26 @@ class HttpClient {
 
         // ---- 401 Auto-Refresh Logic ----
         if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
-          console.warn(`[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`);
+          console.warn(
+            `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
+          );
           const refreshResult = await getOrStartRefresh();
           if (refreshResult.accessToken) {
             // Retry the original request exactly once with the fresh token
             return this._requestWithAutoRefresh<T>(endpoint, config, true);
           } else if (refreshResult.isAuthError) {
             // Genuine authentication failure: refresh token is invalid or revoked
-            console.error('[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...');
+            console.error(
+              '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+            );
             localStorage.removeItem(authConfig.tokenKey);
             localStorage.removeItem(authConfig.refreshTokenKey);
             localStorage.removeItem('aether_auth_user');
             window.dispatchEvent(new CustomEvent('aether-auth-expired'));
           } else {
-            console.warn('[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving authenticated state.');
+            console.warn(
+              '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving authenticated state.',
+            );
           }
         }
 

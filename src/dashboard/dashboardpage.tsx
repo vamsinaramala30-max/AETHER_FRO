@@ -76,7 +76,10 @@ export const DashboardPage: React.FC = () => {
           <div className="h-24 rounded-2xl border border-aether-border bg-aether-surface" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-2xl border border-aether-border bg-aether-surface" />
+              <div
+                key={i}
+                className="h-28 rounded-2xl border border-aether-border bg-aether-surface"
+              />
             ))}
           </div>
           <div className="h-64 rounded-2xl border border-aether-border bg-aether-surface" />
@@ -95,15 +98,19 @@ export const DashboardPage: React.FC = () => {
   return (
     <PageWrapper wide>
       {/* Top Welcome Header */}
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/60 pb-6">
+      <header className="flex flex-col gap-2 border-b border-slate-800/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-[11px] font-bold uppercase tracking-widest text-indigo-400">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
             {getGreeting()}, <span className="text-indigo-200">{displayName}.</span>
           </h1>
-          <h2 className="text-lg font-bold sm:text-2xl mt-0.5">
+          <h2 className="mt-0.5 text-lg font-bold sm:text-2xl">
             <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
               Let’s make today count.
             </span>
@@ -129,13 +136,15 @@ export const DashboardPage: React.FC = () => {
           className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 backdrop-blur-md transition-all hover:border-purple-500/40 hover:bg-slate-900/90 sm:p-5"
         >
           <div className="mb-3 flex items-center justify-between">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-purple-500/30 bg-purple-950/60 text-purple-400 group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-purple-500/30 bg-purple-950/60 text-purple-400 transition-transform group-hover:scale-105">
               <Compass className="h-4 w-4" />
             </div>
-            <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
+            <ArrowUpRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-purple-400" />
           </div>
           <div>
-            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">{stats.activeProjects}</div>
+            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">
+              {stats.activeProjects}
+            </div>
             <div className="text-xs font-semibold text-slate-400">Active Projects</div>
           </div>
         </Link>
@@ -146,10 +155,10 @@ export const DashboardPage: React.FC = () => {
           className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 backdrop-blur-md transition-all hover:border-cyan-500/40 hover:bg-slate-900/90 sm:p-5"
         >
           <div className="mb-3 flex items-center justify-between">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400 group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400 transition-transform group-hover:scale-105">
               <Zap className="h-4 w-4" />
             </div>
-            <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+            <ArrowUpRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-cyan-400" />
           </div>
           <div>
             <div className="mb-1 text-2xl font-black text-white sm:text-3xl">{stats.tasksDue}</div>
@@ -163,13 +172,15 @@ export const DashboardPage: React.FC = () => {
           className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 backdrop-blur-md transition-all hover:border-emerald-500/40 hover:bg-slate-900/90 sm:p-5"
         >
           <div className="mb-3 flex items-center justify-between">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-950/60 text-emerald-400 group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-950/60 text-emerald-400 transition-transform group-hover:scale-105">
               <Bot className="h-4 w-4" />
             </div>
-            <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+            <ArrowUpRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-emerald-400" />
           </div>
           <div>
-            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">{stats.aiChatsToday}</div>
+            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">
+              {stats.aiChatsToday}
+            </div>
             <div className="text-xs font-semibold text-slate-400">AI Chats Today</div>
           </div>
         </Link>
@@ -180,32 +191,34 @@ export const DashboardPage: React.FC = () => {
           className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 backdrop-blur-md transition-all hover:border-indigo-500/40 hover:bg-slate-900/90 sm:p-5"
         >
           <div className="mb-3 flex items-center justify-between">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 transition-transform group-hover:scale-105">
               <FileText className="h-4 w-4" />
             </div>
-            <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+            <ArrowUpRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-indigo-400" />
           </div>
           <div>
-            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">{stats.knowledgeDocs}</div>
+            <div className="mb-1 text-2xl font-black text-white sm:text-3xl">
+              {stats.knowledgeDocs}
+            </div>
             <div className="text-xs font-semibold text-slate-400">Knowledge Docs</div>
           </div>
         </Link>
-
       </div>
 
       {/* Smart Suggestions Card */}
-      <div className="rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900/60 p-5 sm:p-6 backdrop-blur-md space-y-3">
+      <div className="space-y-3 rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900/60 p-5 backdrop-blur-md sm:p-6">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-300">
-          <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+          <Sparkles className="h-4 w-4 animate-pulse text-purple-400" />
           <span>AI Intelligence Recommendation</span>
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-indigo-900/40 bg-slate-950/60 p-4">
+        <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-indigo-900/40 bg-slate-950/60 p-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-purple-500/40 bg-purple-950/80 text-purple-300">
               <Target className="h-4 w-4" />
             </div>
             <p className="text-xs text-slate-200 sm:text-sm">
-              Define your high-level objective — AETHER AI will auto-generate structured execution milestones.
+              Define your high-level objective — AETHER AI will auto-generate structured execution
+              milestones.
             </p>
           </div>
           <Link
@@ -221,7 +234,7 @@ export const DashboardPage: React.FC = () => {
       <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         <Link
           to="/app/projects/goals"
-          className="inline-flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-950/20 px-3.5 sm:px-4 py-2.5 text-xs font-medium text-purple-200 transition-all hover:bg-purple-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-950/20 px-3.5 py-2.5 text-xs font-medium text-purple-200 transition-all hover:bg-purple-950/40 sm:px-4"
         >
           <Plus className="h-4 w-4 text-purple-400" />
           <span>New Goal</span>
@@ -229,7 +242,7 @@ export const DashboardPage: React.FC = () => {
 
         <Link
           to="/app/projects/tasks"
-          className="inline-flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-950/20 px-3.5 sm:px-4 py-2.5 text-xs font-medium text-indigo-200 transition-all hover:bg-indigo-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-950/20 px-3.5 py-2.5 text-xs font-medium text-indigo-200 transition-all hover:bg-indigo-950/40 sm:px-4"
         >
           <Plus className="h-4 w-4 text-indigo-400" />
           <span>New Task</span>
@@ -237,7 +250,7 @@ export const DashboardPage: React.FC = () => {
 
         <Link
           to="/app/ai/assistant"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 sm:px-4 py-2.5 text-xs font-medium text-slate-200 transition-all hover:bg-slate-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2.5 text-xs font-medium text-slate-200 transition-all hover:bg-slate-800 sm:px-4"
         >
           <Bot className="h-4 w-4 text-cyan-400" />
           <span>Ask AI Assistant</span>
@@ -245,7 +258,7 @@ export const DashboardPage: React.FC = () => {
 
         <Link
           to="/app/knowledge/notes"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 sm:px-4 py-2.5 text-xs font-medium text-slate-200 transition-all hover:bg-slate-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2.5 text-xs font-medium text-slate-200 transition-all hover:bg-slate-800 sm:px-4"
         >
           <FileText className="h-4 w-4 text-emerald-400" />
           <span>Capture Quick Note</span>
@@ -255,7 +268,7 @@ export const DashboardPage: React.FC = () => {
       {/* Main Content Grid Sections */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Today's Focus Box */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 sm:p-6 backdrop-blur-md flex flex-col justify-between space-y-4">
+        <div className="flex flex-col justify-between space-y-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md sm:p-6">
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
             <div>
               <h3 className="text-base font-bold text-white">Today's Focus</h3>
@@ -270,13 +283,15 @@ export const DashboardPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="py-8 text-center space-y-3">
+          <div className="space-y-3 py-8 text-center">
             <p className="text-sm font-semibold text-slate-300">No active focus tasks queued</p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">Select up to 3 priority items from your tasks catalog to focus on today.</p>
+            <p className="mx-auto max-w-sm text-xs text-slate-400">
+              Select up to 3 priority items from your tasks catalog to focus on today.
+            </p>
             <div>
               <Link
                 to="/app/projects/tasks"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500"
               >
                 <span>Choose Tasks</span>
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -286,7 +301,7 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Active Goals Box */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 sm:p-6 backdrop-blur-md flex flex-col justify-between space-y-4">
+        <div className="flex flex-col justify-between space-y-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md sm:p-6">
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
             <div>
               <h3 className="text-base font-bold text-white">Strategic Goals</h3>
@@ -301,9 +316,11 @@ export const DashboardPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="py-8 text-center space-y-3">
+          <div className="space-y-3 py-8 text-center">
             <p className="text-sm font-semibold text-slate-300">No strategic goals defined</p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">Create your objective to automatically track progress and team milestones.</p>
+            <p className="mx-auto max-w-sm text-xs text-slate-400">
+              Create your objective to automatically track progress and team milestones.
+            </p>
             <div>
               <Link
                 to="/app/projects/goals"
@@ -317,7 +334,7 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Today's Schedule Box */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 sm:p-6 backdrop-blur-md flex flex-col justify-between space-y-4">
+        <div className="flex flex-col justify-between space-y-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md sm:p-6">
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
             <div>
               <h3 className="text-base font-bold text-white">Calendar Schedule</h3>
@@ -332,14 +349,14 @@ export const DashboardPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="py-8 text-center space-y-1">
+          <div className="space-y-1 py-8 text-center">
             <p className="text-sm font-semibold text-slate-300">You're clear for today</p>
             <p className="text-xs text-slate-400">No scheduled calendar events due today.</p>
           </div>
         </div>
 
         {/* Recent Notes Box */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 sm:p-6 backdrop-blur-md flex flex-col justify-between space-y-4">
+        <div className="flex flex-col justify-between space-y-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md sm:p-6">
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
             <div>
               <h3 className="text-base font-bold text-white">Recent Knowledge Notes</h3>
@@ -354,9 +371,11 @@ export const DashboardPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="py-8 text-center space-y-3">
+          <div className="space-y-3 py-8 text-center">
             <p className="text-sm font-semibold text-slate-300">No notes captured yet</p>
-            <p className="text-xs text-slate-400">Create notes to store research, ideas, and specs.</p>
+            <p className="text-xs text-slate-400">
+              Create notes to store research, ideas, and specs.
+            </p>
             <div>
               <Link
                 to="/app/knowledge/notes"

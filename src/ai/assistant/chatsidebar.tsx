@@ -77,7 +77,7 @@ export const ChatSidebar: React.FC = () => {
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-aether-border bg-aether-subtle py-2 pl-8 pr-3 text-xs text-aether-main placeholder:text-aether-muted/60 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="placeholder:text-aether-muted/60 w-full rounded-xl border border-aether-border bg-aether-subtle py-2 pl-8 pr-3 text-xs text-aether-main transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
@@ -142,19 +142,14 @@ export const ChatSidebar: React.FC = () => {
       {/* Mobile drawer version */}
       <div className="fixed inset-y-0 left-0 z-40 flex md:hidden">
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+          className="backdrop-blur-xs fixed inset-0 bg-black/50"
           onClick={() => setSidebarOpen(false)}
         />
-        <aside className="relative z-50 flex h-full max-w-[80vw] shadow-2xl">
-          {content}
-        </aside>
+        <aside className="relative z-50 flex h-full max-w-[80vw] shadow-2xl">{content}</aside>
       </div>
 
       {/* Desktop in-flow version */}
-      <aside className="hidden md:flex h-full shrink-0">
-        {content}
-      </aside>
+      <aside className="hidden h-full shrink-0 md:flex">{content}</aside>
     </>
   );
 };
-

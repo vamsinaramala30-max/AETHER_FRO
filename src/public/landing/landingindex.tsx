@@ -57,4 +57,3 @@ export const LandingIndex: React.FC = () => {
     </PublicPageLayout>
   );
 };
-

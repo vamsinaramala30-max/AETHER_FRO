@@ -277,7 +277,10 @@ async function performSearch(query: string): Promise<SearchResult[]> {
     candidates.push(...settingsCandidates);
 
     const nlIntent = await aiService.parseNaturalLanguageSearch(q).catch(() => ({ intent: 'all' }));
-    const tokens = q.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
+    const tokens = q
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((t) => t.toLowerCase());
 
     function scoreItem(item: SearchResult): number {
       const hay = `${item.title} ${item.description} ${item.meta}`.toLowerCase();
@@ -350,7 +353,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
         rx.test(part) ? (
           <mark
             key={idx}
-            className="bg-indigo-500/20 text-indigo-700 font-bold dark:bg-indigo-500/30 dark:text-indigo-300"
+            className="bg-indigo-500/20 font-bold text-indigo-700 dark:bg-indigo-500/30 dark:text-indigo-300"
           >
             {part}
           </mark>
@@ -505,7 +508,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               </div>
             )}
 
-            {error && <div className="px-4 py-6 text-sm text-red-600 dark:text-red-400">{error}</div>}
+            {error && (
+              <div className="px-4 py-6 text-sm text-red-600 dark:text-red-400">{error}</div>
+            )}
 
             {!loading && query && results.length === 0 && !error && (
               <div className="py-12 text-center">

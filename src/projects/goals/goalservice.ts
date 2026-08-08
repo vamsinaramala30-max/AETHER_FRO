@@ -37,7 +37,9 @@ export const goalService = {
       id: created.id,
       title: created.title,
       description: created.description || '',
-      targetDate: created.targetDate ? new Date(created.targetDate).toISOString().split('T')[0] : '',
+      targetDate: created.targetDate
+        ? new Date(created.targetDate).toISOString().split('T')[0]
+        : '',
       progress: created.progress || 0,
       category: (created.category as Goal['category']) || goal.category,
     };
@@ -50,7 +52,9 @@ export const goalService = {
       id: updated.id,
       title: updated.title,
       description: updated.description || '',
-      targetDate: updated.targetDate ? new Date(updated.targetDate).toISOString().split('T')[0] : '',
+      targetDate: updated.targetDate
+        ? new Date(updated.targetDate).toISOString().split('T')[0]
+        : '',
       progress: updated.progress || progress,
       category: (updated.category as Goal['category']) || 'personal',
     };
