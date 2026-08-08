@@ -14,18 +14,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile = false,
   onSearchOpen,
   onNotificationsOpen,
+  onWeatherOpen,
   unreadCount,
 }) => {
+  const isCollapsed = collapsed && !isMobile;
+
   return (
     <aside
       aria-label="Sidebar Navigation"
-      className={`bg-aether-surface relative flex h-full flex-col overflow-hidden border-r border-aether-border transition-all duration-300 ease-in-out ${
+      className={`relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r border-aether-border bg-aether-surface shadow-xl transition-all duration-300 ease-in-out select-none md:shadow-sm ${
         isMobile ? 'w-[280px]' : collapsed ? 'w-[72px]' : 'w-[280px]'
-      } z-30 shrink-0 select-none shadow-xl md:shadow-sm`}
+      }`}
     >
       {/* Header with logo & workspace selector */}
       <SidebarHeader
-        collapsed={collapsed && !isMobile}
+        collapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
         onMobileClose={onMobileClose}
         isMobile={isMobile}
@@ -33,37 +36,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Global Command Palette Launcher */}
       <SidebarSearch
-        collapsed={collapsed && !isMobile}
+        collapsed={isCollapsed}
         onSearchOpen={onSearchOpen}
         isMobile={isMobile}
       />
 
       {/* Scrollable Navigation Area */}
       <nav
-        className="scrollbar-thin flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 transition-all duration-150"
+        className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-2 py-2 transition-all duration-150"
         aria-label="Main Navigation"
       >
         {navigationGroups.map((group, index) => (
           <SidebarNavGroup
             key={group.id}
             group={group}
-            collapsed={collapsed && !isMobile}
+            collapsed={isCollapsed}
             onMobileClose={onMobileClose}
             isFirst={index === 0}
           />
         ))}
       </nav>
 
-      {/* Footer Controls (Notifications & Theme Toggle) */}
+      {/* Footer Controls */}
       <SidebarFooterControls
-        collapsed={collapsed && !isMobile}
+        collapsed={isCollapsed}
+        onWeatherOpen={onWeatherOpen}
         onNotificationsOpen={onNotificationsOpen}
         unreadCount={unreadCount}
         isMobile={isMobile}
       />
 
       {/* User Profile Card with Integrated Logout */}
-      <SidebarUserProfile collapsed={collapsed && !isMobile} isMobile={isMobile} />
+      <SidebarUserProfile
+        collapsed={isCollapsed}
+        isMobile={isMobile}
+      />
     </aside>
   );
 };

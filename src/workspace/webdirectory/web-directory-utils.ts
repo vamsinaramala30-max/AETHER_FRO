@@ -1,14 +1,19 @@
 import {
   CATEGORY_FILTER_ALL,
+  COUNTRIES,
   MAX_RECENT_WEBSITES,
   WEB_DIRECTORY_STORAGE_KEYS,
 } from "./web-directory-constants";
 import type {
+  CountryCode,
+  CountryInfo,
+  CountryWebsiteGroup,
   FavoriteWebsiteIds,
   RecentWebsiteEntry,
   TrustedWebsite,
   UrlValidationResult,
   WebDirectoryFilters,
+  WebDirectoryViewMode,
   WebsiteCategory,
   WebsiteWithMeta,
 } from "./web-directory-types";
@@ -205,4 +210,84 @@ export function groupWebsitesByCategory(
     }
   }
   return grouped;
+}
+
+/**
+ * Looks up a country's display metadata (name + flag) by its code.
+ */
+export function getCountryInfo(code: CountryCode): CountryInfo | undefined {
+  return COUNTRIES.find((country) => country.code === code);
+}
+
+/**
+ * Filters the country list by a case-insensitive name search.
+ */
+export function searchCountries(countries: CountryInfo[], query: string): CountryInfo[] {
+  const trimmed = query.trim().toLowerCase();
+  if (trimmed.length === 0) {
+    return countries;
+  }
+  return countries.filter((country) => country.name.toLowerCase().includes(trimmed));
+}
+
+/**
+ * Builds one group per country, pairing each country's metadata with the
+ * trusted websites tagged for it, sorted alphabetically by country name.
+ * Countries with no matching websites are omitted.
+ */
+export function buildCountryWebsiteGroups(
+  websites: TrustedWebsite[],
+  countries: CountryInfo[] = COUNTRIES,
+): CountryWebsiteGroup[] {
+  const byCountry = new Map<CountryCode, TrustedWebsite[]>();
+  for (const website of websites) {
+    if (!website.countryCode) continue;
+    const existing = byCountry.get(website.countryCode);
+    if (existing) {
+      existing.push(website);
+    } else {
+      byCountry.set(website.countryCode, [website]);
+    }
+  }
+
+  return countries
+    .map((country) => ({ country, websites: byCountry.get(country.code) ?? [] }))
+    .filter((group) => group.websites.length > 0)
+    .sort((a, b) => a.country.name.localeCompare(b.country.name));
+}
+
+/**
+ * Picks a random country from a list — used to power a "surprise me"
+ * shortcut in the country browser.
+ */
+export function pickRandomCountry(countries: CountryInfo[]): CountryInfo | null {
+  if (countries.length === 0) return null;
+  const index = Math.floor(Math.random() * countries.length);
+  return countries[index];
+}
+
+/**
+ * Persists the selected directory view mode ("category" or "country") to
+ * localStorage.
+ */
+export function saveViewMode(mode: WebDirectoryViewMode): void {
+  if (!isLocalStorageAvailable()) return;
+  try {
+    window.localStorage.setItem(WEB_DIRECTORY_STORAGE_KEYS.viewMode, mode);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
+/**
+ * Reads the previously saved directory view mode from localStorage, if any.
+ */
+export function loadViewMode(): WebDirectoryViewMode | null {
+  if (!isLocalStorageAvailable()) return null;
+  try {
+    const raw = window.localStorage.getItem(WEB_DIRECTORY_STORAGE_KEYS.viewMode);
+    return raw === "category" || raw === "country" ? raw : null;
+  } catch {
+    return null;
+  }
 }
