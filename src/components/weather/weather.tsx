@@ -1,537 +1,1046 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+/**
+ * Weather.tsx
+ * Weather Details screen (current conditions + hourly/daily forecast +
+ * details + air quality, one scrollable page) and the City Management
+ * screen. Real device location + real Open-Meteo data only — no mock values.
+ */
 
 import {
-  fetchWeatherData,
-  geocodingResultToLocation,
-  getBrowserCoordinates,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  ArrowLeft,
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudMoon,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Droplets,
+  Eye,
+  Gauge,
+  HelpCircle,
+  MapPin,
+  Moon,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  SunMedium,
+  Sun,
+  Trash2,
+  Wind,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+
+import {
+  fetchWeatherBundle,
+  getCurrentPosition,
+  reverseGeocode,
   searchLocations,
 } from "./weather-api";
-import { GEOLOCATION_OPTIONS, TEMPERATURE_TREND_CHART } from "./weather-constants";
+import { STORAGE_KEYS, TIMINGS } from "./weather-constants";
 import type {
+  AirQuality,
+  CurrentWeather,
+  DailyWeatherPoint,
   GeocodingResult,
-  GeolocationPermissionState,
-  TemperatureTrendPoint,
+  HourlyWeatherPoint,
+  LocationPermissionState,
+  SavedLocation,
   TemperatureUnit,
   WeatherData,
-  WeatherErrorInfo,
   WeatherLocation,
-  WeatherRequestStatus,
+  WeatherState,
+  WeatherView,
 } from "./weather-types";
 import {
-  buildDailyTemperatureTrend,
-  buildLineChartGeometry,
-  buildWeatherReportSummary,
-  formatClockTime,
-  formatDayLabel,
-  formatHourLabel,
-  formatLocationName,
+  buildSmoothPath,
+  formatHumidity,
+  formatPressure,
+  formatShortDate,
   formatTemperature,
-  formatWindSpeed,
-  getWeatherDescription,
-  loadStoredPreferences,
-  plotTrendCoordinates,
-  saveLocationPreference,
-  saveUnitPreference,
+  formatVisibility,
+  getAqiCategory,
+  getBeaufortForce,
+  getHourlySlotLabel,
+  getRelativeDayLabel,
+  getWeatherAriaLabel,
+  getWeatherCondition,
+  getWeatherIconKey,
+  getWindDirectionLabel,
+  mapValuesToPoints,
+  safeGetStorage,
+  safeSetStorage,
+  type WeatherIconKey,
 } from "./weather-utils";
 
-/**
- * Renders a dependency-free inline SVG line graph comparing daily high and
- * low temperatures across the forecast window.
- */
-function TemperatureTrendGraph({
-  high,
-  low,
-  minValue,
-  maxValue,
-  unit,
-}: {
-  high: TemperatureTrendPoint[];
-  low: TemperatureTrendPoint[];
-  minValue: number;
-  maxValue: number;
-  unit: TemperatureUnit;
-}): React.ReactElement | null {
-  if (high.length === 0) {
-    return null;
-  }
+import "./weather.css";
 
-  const highCoordinates = plotTrendCoordinates(high, minValue, maxValue);
-  const lowCoordinates = plotTrendCoordinates(low, minValue, maxValue);
-  const highGeometry = buildLineChartGeometry(highCoordinates);
-  const lowGeometry = buildLineChartGeometry(lowCoordinates);
-  const { viewBoxWidth, viewBoxHeight, pointRadius } = TEMPERATURE_TREND_CHART;
+/* ============================================================================
+ * Weather icon
+ * ========================================================================== */
+
+const WEATHER_ICON_COMPONENTS: Record<WeatherIconKey, LucideIcon> = {
+  sun: Sun,
+  moon: Moon,
+  "cloud-sun": CloudSun,
+  "cloud-moon": CloudMoon,
+  cloud: Cloud,
+  "cloud-fog": CloudFog,
+  "cloud-drizzle": CloudDrizzle,
+  "cloud-rain": CloudRain,
+  "cloud-snow": CloudSnow,
+  "cloud-lightning": CloudLightning,
+  "help-circle": HelpCircle,
+};
+
+function WeatherIcon({
+  code,
+  isDay,
+  size = 26,
+}: {
+  code: number;
+  isDay: boolean;
+  size?: number;
+}) {
+  const Icon = WEATHER_ICON_COMPONENTS[getWeatherIconKey(code, isDay)];
+  return (
+    <span role="img" aria-label={getWeatherAriaLabel(code, isDay)} style={{ color: "var(--accent-cyan)" }}>
+      <Icon size={size} />
+    </span>
+  );
+}
+
+/* ============================================================================
+ * Small building blocks
+ * ========================================================================== */
+
+function Skeleton({ width, height, radius = 8 }: { width: string; height: string; radius?: number }) {
+  return (
+    <div
+      className="skeleton"
+      style={{ width, height, borderRadius: radius }}
+      aria-hidden="true"
+    />
+  );
+}
+
+function IconButton({
+  label,
+  onClick,
+  children,
+  variant,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+  variant?: "text";
+}) {
+  return (
+    <button
+      type="button"
+      className={variant === "text" ? "icon-btn icon-btn--text" : "icon-btn"}
+      aria-label={label}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ============================================================================
+ * Hooks
+ * ========================================================================== */
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
+function useSavedLocations() {
+  const [locations, setLocations] = useState<SavedLocation[]>(() =>
+    safeGetStorage<SavedLocation[]>(STORAGE_KEYS.SAVED_LOCATIONS, [])
+  );
+
+  const addLocation = useCallback((location: WeatherLocation) => {
+    setLocations((prev) => {
+      const isDuplicate = prev.some(
+        (item) =>
+          Math.abs(item.latitude - location.latitude) < 0.05 &&
+          Math.abs(item.longitude - location.longitude) < 0.05
+      );
+      if (isDuplicate) return prev;
+      const next: SavedLocation[] = [
+        ...prev,
+        {
+          ...location,
+          id: `${location.latitude.toFixed(3)}-${location.longitude.toFixed(3)}-${Date.now()}`,
+          isCurrentLocation: false,
+          savedAt: Date.now(),
+        },
+      ];
+      safeSetStorage(STORAGE_KEYS.SAVED_LOCATIONS, next);
+      return next;
+    });
+  }, []);
+
+  const removeLocation = useCallback((id: string) => {
+    setLocations((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      safeSetStorage(STORAGE_KEYS.SAVED_LOCATIONS, next);
+      return next;
+    });
+  }, []);
+
+  return { locations, addLocation, removeLocation };
+}
+
+/** Lightweight per-card weather summary, used by City Management list items. */
+function useLocationSummary(location: WeatherLocation) {
+  const [summary, setSummary] = useState<{
+    current: CurrentWeather;
+    daily: DailyWeatherPoint | null;
+  } | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setStatus("loading");
+    fetchWeatherBundle(location, controller.signal).then((result) => {
+      if (controller.signal.aborted) return;
+      if (result.ok) {
+        setSummary({ current: result.data.current, daily: result.data.daily[0] ?? null });
+        setStatus("ready");
+      } else if (!result.aborted) {
+        setStatus("error");
+      }
+    });
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.latitude, location.longitude]);
+
+  return { summary, status };
+}
+
+/* ============================================================================
+ * Weather Details subsections
+ * ========================================================================== */
+
+function CurrentWeatherHero({
+  location,
+  current,
+  unit,
+  weatherState,
+}: {
+  location: WeatherLocation | null;
+  current: CurrentWeather | null;
+  unit: TemperatureUnit;
+  weatherState: WeatherState;
+}) {
+  const isLoading = weatherState === "locating" || weatherState === "loading-weather";
+  const condition = current ? getWeatherCondition(current.weatherCode) : null;
 
   return (
-    <div className="w-full">
-      <svg
-        viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-        role="img"
-        aria-label="Temperature trend graph showing daily highs and lows"
-        className="h-auto w-full"
-      >
-        {highGeometry.areaPath && (
-          <path d={highGeometry.areaPath} className="fill-orange-100 dark:fill-orange-950/40" />
-        )}
-        {highGeometry.linePath && (
-          <path
-            d={highGeometry.linePath}
-            fill="none"
-            className="stroke-orange-500"
-            strokeWidth={TEMPERATURE_TREND_CHART.highStrokeWidth}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-        {lowGeometry.linePath && (
-          <path
-            d={lowGeometry.linePath}
-            fill="none"
-            className="stroke-sky-400"
-            strokeWidth={TEMPERATURE_TREND_CHART.lowStrokeWidth}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray="4 3"
-          />
-        )}
-        {highGeometry.coordinates.map((coord, index) => (
-          <circle
-            // eslint-disable-next-line react/no-array-index-key
-            key={`high-${high[index]?.isoTime ?? index}`}
-            cx={coord.x}
-            cy={coord.y}
-            r={pointRadius}
-            className="fill-orange-500"
-          />
-        ))}
-        {lowGeometry.coordinates.map((coord, index) => (
-          <circle
-            // eslint-disable-next-line react/no-array-index-key
-            key={`low-${low[index]?.isoTime ?? index}`}
-            cx={coord.x}
-            cy={coord.y}
-            r={pointRadius}
-            className="fill-sky-400"
-          />
-        ))}
-      </svg>
-      <div className="mt-1 flex justify-between text-xs text-slate-400 dark:text-slate-500">
-        {high.map((point) => (
-          <span key={point.isoTime}>{point.label}</span>
-        ))}
+    <div className="weather-hero">
+      {isLoading || !current ? (
+        <>
+          <div className="weather-hero__temp-row">
+            <Skeleton width="200px" height="100px" radius={20} />
+          </div>
+          <div style={{ marginTop: 18, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <Skeleton width="120px" height="20px" />
+            <Skeleton width="160px" height="16px" />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="weather-hero__temp-row">
+            <span className="weather-hero__temp">{formatTemperature(current.temperature, unit)}</span>
+            <span className="weather-hero__unit">°{unit === "fahrenheit" ? "F" : "C"}</span>
+          </div>
+          <div className="weather-hero__condition">
+            {condition?.label ?? "Unavailable"}
+          </div>
+          <div className="weather-hero__range">
+            {location ? (
+              <>
+                Feels like {formatTemperature(current.apparentTemperature, unit, { withUnit: true })}
+              </>
+            ) : (
+              "Unavailable"
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function HourlyForecastSection({
+  hourly,
+  timezone,
+  unit,
+  isLoading,
+}: {
+  hourly: HourlyWeatherPoint[];
+  timezone: string;
+  unit: TemperatureUnit;
+  isLoading: boolean;
+}) {
+  return (
+    <section className="weather-section" aria-label="Hourly forecast">
+      <h2 className="weather-section__heading">Hourly Forecast</h2>
+      <div className="hourly-scroll">
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div className="hourly-item" key={i}>
+                <Skeleton width="34px" height="12px" />
+                <Skeleton width="26px" height="26px" radius={13} />
+                <Skeleton width="30px" height="14px" />
+              </div>
+            ))
+          : hourly.map((hour, index) => (
+              <div className="hourly-item" key={hour.time}>
+                <span className={`hourly-item__label${index === 0 ? " hourly-item__label--now" : ""}`}>
+                  {getHourlySlotLabel(hour.time, timezone, index === 0)}
+                </span>
+                <WeatherIcon code={hour.weatherCode} isDay={hour.isDay} size={24} />
+                <span className="hourly-item__temp">{formatTemperature(hour.temperature, unit, { withUnit: true })}</span>
+              </div>
+            ))}
       </div>
-      <div className="mt-3 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-orange-500" aria-hidden="true" />
-          High ({unit === "fahrenheit" ? "°F" : "°C"})
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-sky-400" aria-hidden="true" />
-          Low ({unit === "fahrenheit" ? "°F" : "°C"})
-        </span>
+    </section>
+  );
+}
+
+function TemperatureChart({
+  hourly,
+  unit,
+}: {
+  hourly: HourlyWeatherPoint[];
+  unit: TemperatureUnit;
+}) {
+  const width = 600;
+  const height = 120;
+
+  const { path, firstPoint, maxY } = useMemo(() => {
+    const temps = hourly.map((h) => h.temperature);
+    const points = mapValuesToPoints(temps, width, height, 24);
+    return {
+      path: buildSmoothPath(points),
+      firstPoint: points[0] ?? null,
+      maxY: points.length ? Math.min(...points.map((p) => p.y)) : 24,
+    };
+  }, [hourly]);
+
+  if (hourly.length < 2) return null;
+
+  const currentLabel = formatTemperature(hourly[0].temperature, unit, { withUnit: true });
+
+  return (
+    <div className="chart-wrap" aria-hidden="true">
+      <svg viewBox={`0 0 ${width} ${height + 40}`} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="tempLineGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#ffb454" />
+            <stop offset="55%" stopColor="#eab308" />
+            <stop offset="100%" stopColor="#6ee7a8" />
+          </linearGradient>
+        </defs>
+
+        {/* Reference dashed line at the peak level */}
+        <line
+          x1={0}
+          y1={maxY}
+          x2={width}
+          y2={maxY}
+          stroke="rgba(255,255,255,0.18)"
+          strokeDasharray="4 6"
+          strokeWidth={1}
+        />
+
+        {path && <path d={path} fill="none" stroke="url(#tempLineGradient)" strokeWidth={3} strokeLinecap="round" />}
+
+        {firstPoint && (
+          <>
+            <line
+              x1={firstPoint.x}
+              y1={firstPoint.y}
+              x2={firstPoint.x}
+              y2={height + 30}
+              stroke="rgba(255,255,255,0.18)"
+              strokeDasharray="2 5"
+              strokeWidth={1}
+            />
+            <circle cx={firstPoint.x} cy={firstPoint.y} r={7} fill="#0b1226" stroke="#ffb454" strokeWidth={3} />
+            <text
+              x={Math.min(Math.max(firstPoint.x, 26), width - 26)}
+              y={firstPoint.y - 16}
+              fill="#ffffff"
+              fontSize="18"
+              fontWeight={700}
+              textAnchor="middle"
+            >
+              {currentLabel}
+            </text>
+          </>
+        )}
+      </svg>
+    </div>
+  );
+}
+
+function DailyForecastSection({
+  daily,
+  timezone,
+  unit,
+  isLoading,
+}: {
+  daily: DailyWeatherPoint[];
+  timezone: string;
+  unit: TemperatureUnit;
+  isLoading: boolean;
+}) {
+  return (
+    <section className="weather-section" aria-label="Daily forecast">
+      <h2 className="weather-section__heading">7-Day Forecast</h2>
+      <div className="daily-list">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div className="daily-row" key={i}>
+                <Skeleton width="40px" height="12px" />
+                <Skeleton width="70px" height="14px" />
+                <Skeleton width="24px" height="24px" radius={12} />
+                <Skeleton width="24px" height="14px" />
+                <Skeleton width="28px" height="14px" />
+              </div>
+            ))
+          : daily.map((day) => (
+              <div className="daily-row" key={day.date}>
+                <span className="daily-row__date">{formatShortDate(day.date, timezone)}</span>
+                <span className="daily-row__label">{getRelativeDayLabel(day.date, timezone)}</span>
+                <WeatherIcon code={day.weatherCode} isDay size={22} />
+                <span className="daily-row__min">{formatTemperature(day.temperatureMin, unit)}°</span>
+                <span className="daily-row__max">{formatTemperature(day.temperatureMax, unit)}°</span>
+              </div>
+            ))}
+      </div>
+    </section>
+  );
+}
+
+function WeatherDetailsCard({
+  current,
+  unit,
+  isLoading,
+}: {
+  current: CurrentWeather | null;
+  unit: TemperatureUnit;
+  isLoading: boolean;
+}) {
+  const items: Array<{ label: string; value: string; icon: LucideIcon }> = current
+    ? [
+        {
+          label: "Feels like",
+          value: formatTemperature(current.apparentTemperature, unit, { withUnit: true }),
+          icon: SunMedium,
+        },
+        {
+          label: getWindDirectionLabel(current.windDirectionDeg),
+          value: current.windSpeedKmh !== null ? getBeaufortForce(current.windSpeedKmh) : "Unavailable",
+          icon: Wind,
+        },
+        { label: "Humidity", value: formatHumidity(current.humidity), icon: Droplets },
+        { label: "UV", value: formatUvLabel(current.uvIndex), icon: SunMedium },
+        { label: "Visibility", value: formatVisibility(current.visibilityMeters), icon: Eye },
+        { label: "Pressure", value: formatPressure(current.pressureHpa), icon: Gauge },
+      ]
+    : [];
+
+  return (
+    <section className="weather-section" aria-label="Weather details">
+      <div className="card">
+        <div className="details-grid">
+          {isLoading || !current
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div className="details-grid__item" key={i}>
+                  <Skeleton width="22px" height="22px" radius={11} />
+                  <Skeleton width="50px" height="10px" />
+                  <Skeleton width="40px" height="14px" />
+                </div>
+              ))
+            : items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div className="details-grid__item" key={item.label}>
+                    <Icon size={22} />
+                    <span className="details-grid__label">{item.label}</span>
+                    <span className="details-grid__value">{item.value}</span>
+                  </div>
+                );
+              })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function formatUvLabel(uv: number | null): string {
+  if (uv === null || Number.isNaN(uv)) return "Unavailable";
+  const descriptor =
+    uv < 3 ? "Weaker" : uv < 6 ? "Moderate" : uv < 8 ? "High" : uv < 11 ? "Very High" : "Extreme";
+  return descriptor;
+}
+
+function AirQualitySection({
+  airQuality,
+  isLoading,
+}: {
+  airQuality: AirQuality | null;
+  isLoading: boolean;
+}) {
+  const category = airQuality ? getAqiCategory(airQuality.europeanAqi) : null;
+  const aqiValue = airQuality?.europeanAqi ?? null;
+  const barPosition = aqiValue !== null ? Math.min(100, (aqiValue / 100) * 100) : null;
+
+  const pollutants: Array<{ label: string; value: number | null; unit: string; max: number }> = airQuality
+    ? [
+        { label: "PM2.5", value: airQuality.pm2_5, unit: "", max: 75 },
+        { label: "PM10", value: airQuality.pm10, unit: "", max: 150 },
+        { label: "CO", value: airQuality.carbonMonoxide, unit: "", max: 100 },
+        { label: "SO2", value: airQuality.sulphurDioxide, unit: "", max: 100 },
+      ]
+    : [];
+
+  return (
+    <section className="weather-section" aria-label="Air quality">
+      <h2 className="weather-section__heading">Air Quality</h2>
+      <div className="card">
+        {isLoading ? (
+          <>
+            <Skeleton width="100px" height="34px" />
+            <div style={{ marginTop: 16 }}>
+              <Skeleton width="100%" height="8px" radius={999} />
+            </div>
+          </>
+        ) : !airQuality || aqiValue === null || !category ? (
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem" }}>Air quality unavailable</p>
+        ) : (
+          <>
+            <div className="aqi-headline">
+              <span className="aqi-value">{Math.round(aqiValue)}</span>
+              <span className="aqi-label">{category.label}</span>
+            </div>
+            <div className="aqi-bar-track" role="img" aria-label={`Air quality index ${Math.round(aqiValue)}, ${category.label}`}>
+              {barPosition !== null && (
+                <span className="aqi-bar-thumb" style={{ left: `${barPosition}%` }} />
+              )}
+            </div>
+            <div className="aqi-bar-endpoints">
+              <span>I</span>
+              <span>VI</span>
+            </div>
+            <div className="aqi-pollutants">
+              {pollutants.map((pollutant) => (
+                <div className="aqi-pollutant" key={pollutant.label}>
+                  <div className="aqi-pollutant__label">{pollutant.label}</div>
+                  <div className="aqi-pollutant__value">
+                    {pollutant.value === null ? "--" : Math.round(pollutant.value)}
+                  </div>
+                  <div className="aqi-pollutant__bar">
+                    <div
+                      className="aqi-pollutant__bar-fill"
+                      style={{
+                        width:
+                          pollutant.value === null
+                            ? "0%"
+                            : `${Math.min(100, (pollutant.value / pollutant.max) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================================
+ * Permission / error states
+ * ========================================================================== */
+
+function LocationStateCard({
+  weatherState,
+  permissionState,
+  errorMessage,
+  onRetryLocation,
+  onSearchCity,
+}: {
+  weatherState: WeatherState;
+  permissionState: LocationPermissionState;
+  errorMessage: string | null;
+  onRetryLocation: () => void;
+  onSearchCity: () => void;
+}) {
+  const copy: Record<string, { title: string; body: string }> = {
+    denied: {
+      title: "Location permission needed",
+      body: "Allow location access to see automatic weather for where you are, or search for a city instead.",
+    },
+    unavailable: {
+      title: "Unable to access your location",
+      body: "We couldn't determine your position. You can try again or search for a city.",
+    },
+    unsupported: {
+      title: "Location isn't supported here",
+      body: "Your browser doesn't support location services. Search for a city to see its weather.",
+    },
+    error: {
+      title: "Something went wrong",
+      body: errorMessage || "Weather data is currently unavailable. Please try again.",
+    },
+  };
+
+  let key: keyof typeof copy | null = null;
+  if (weatherState === "location-denied") key = "denied";
+  else if (weatherState === "location-unavailable") key = "unavailable";
+  else if (weatherState === "geolocation-unsupported") key = "unsupported";
+  else if (weatherState === "weather-error") key = "error";
+
+  if (!key) return null;
+  const content = copy[key];
+  const canRetryLocation = permissionState !== "unsupported";
+
+  return (
+    <div className="state-card">
+      <MapPin size={28} />
+      <p className="state-card__title">{content.title}</p>
+      <p className="state-card__body">{content.body}</p>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+        {canRetryLocation && (
+          <button type="button" className="btn-primary" onClick={onRetryLocation}>
+            Try again
+          </button>
+        )}
+        <button type="button" className="btn-secondary" onClick={onSearchCity}>
+          Search for a city
+        </button>
       </div>
     </div>
   );
 }
 
-function reverseGeocodeName(latitude: number, longitude: number): string {
-  return `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°`;
+/* ============================================================================
+ * City Management screen
+ * ========================================================================== */
+
+function CityCard({
+  location,
+  unit,
+  editMode,
+  onSelect,
+  onDelete,
+}: {
+  location: SavedLocation;
+  unit: TemperatureUnit;
+  editMode: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+}) {
+  const { summary, status } = useLocationSummary(location);
+  const condition = summary ? getWeatherCondition(summary.current.weatherCode) : null;
+
+  return (
+    <div className="city-card">
+      <button type="button" className="city-card__button" onClick={onSelect} disabled={editMode}>
+        <div style={{ minWidth: 0 }}>
+          <div className="city-card__name">{location.name}</div>
+          <div className="city-card__meta">
+            {status === "loading" && "Loading…"}
+            {status === "error" && "Weather unavailable"}
+            {status === "ready" && summary && (
+              <>
+                {condition?.label ?? "Unavailable"}
+                {"  "}
+                {formatTemperature(summary.daily?.temperatureMin ?? null, unit)}
+                {" ~ "}
+                {formatTemperature(summary.daily?.temperatureMax ?? null, unit, { withUnit: true })}
+              </>
+            )}
+          </div>
+        </div>
+        <div className="city-card__temp">
+          {status === "ready" && summary ? (
+            <>
+              {formatTemperature(summary.current.temperature, unit)}
+              <span className="city-card__temp-unit">°{unit === "fahrenheit" ? "F" : "C"}</span>
+            </>
+          ) : (
+            <Skeleton width="46px" height="34px" />
+          )}
+        </div>
+      </button>
+      {editMode && (
+        <button type="button" className="city-card__delete" aria-label={`Remove ${location.name}`} onClick={onDelete}>
+          <Trash2 size={18} />
+        </button>
+      )}
+    </div>
+  );
 }
 
-export default function Weather(): React.ReactElement {
-  const stored = useMemo(() => loadStoredPreferences(), []);
+function CityManagementScreen({
+  savedLocations,
+  unit,
+  onBack,
+  onSelectLocation,
+  onDeleteLocation,
+  onAddLocation,
+}: {
+  savedLocations: SavedLocation[];
+  unit: TemperatureUnit;
+  onBack: () => void;
+  onSelectLocation: (location: WeatherLocation) => void;
+  onDeleteLocation: (id: string) => void;
+  onAddLocation: (location: WeatherLocation) => void;
+}) {
+  const [editMode, setEditMode] = useState(false);
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(query, TIMINGS.SEARCH_DEBOUNCE_MS);
+  const [results, setResults] = useState<GeocodingResult[]>([]);
+  const [status, setStatus] = useState<"idle" | "loading" | "error" | "empty">("idle");
+  const abortRef = useRef<AbortController | null>(null);
 
-  const [unit, setUnit] = useState<TemperatureUnit>(stored.unit);
-  const [location, setLocation] = useState<WeatherLocation | null>(stored.location);
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [status, setStatus] = useState<WeatherRequestStatus>("idle");
-  const [error, setError] = useState<WeatherErrorInfo | null>(null);
-  const [permission, setPermission] = useState<GeolocationPermissionState>("unknown");
+  useEffect(() => {
+    abortRef.current?.abort();
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [showManualSearch, setShowManualSearch] = useState<boolean>(false);
-
-  const hasRequestedInitialLocation = useRef(false);
-
-  const loadWeatherFor = useCallback(async (nextLocation: WeatherLocation) => {
-    setStatus("loading");
-    setError(null);
-    try {
-      const data = await fetchWeatherData(nextLocation);
-      setWeather(data);
-      setStatus("success");
-    } catch {
-      setStatus("error");
-      setError({
-        message: "We couldn't load the weather right now. Please try again in a moment.",
-        kind: "network",
-      });
-    }
-  }, []);
-
-  const requestBrowserLocation = useCallback(async () => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setPermission("unsupported");
-      setShowManualSearch(true);
-      setError({
-        message: "Your browser doesn't support automatic location detection.",
-        kind: "geolocation-unsupported",
-      });
-      setStatus("error");
+    const trimmed = debouncedQuery.trim();
+    if (trimmed.length < 2) {
+      setResults([]);
+      setStatus("idle");
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
     setStatus("loading");
-    setError(null);
 
-    try {
-      const coords = await getBrowserCoordinates(GEOLOCATION_OPTIONS);
-      setPermission("granted");
-      const detectedLocation: WeatherLocation = {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        name: reverseGeocodeName(coords.latitude, coords.longitude),
-        source: "geolocation",
-      };
-      setLocation(detectedLocation);
-      saveLocationPreference(detectedLocation);
-      await loadWeatherFor(detectedLocation);
-    } catch (err) {
-      const geoError = err as GeolocationPositionError;
-      if (geoError && geoError.code === 1) {
-        setPermission("denied");
-        setShowManualSearch(true);
-        setError({
-          message: "Location access was denied. Search for a city instead.",
-          kind: "permission-denied",
-        });
-      } else {
-        setShowManualSearch(true);
-        setError({
-          message: "We couldn't determine your location. Search for a city instead.",
-          kind: "unknown",
-        });
+    searchLocations(trimmed, controller.signal).then((result) => {
+      if (controller.signal.aborted) return;
+      if (result.ok) {
+        setResults(result.data);
+        setStatus(result.data.length === 0 ? "empty" : "idle");
+      } else if (!result.aborted) {
+        setResults([]);
+        setStatus("error");
       }
-      setStatus("error");
+    });
+
+    return () => controller.abort();
+  }, [debouncedQuery]);
+
+  const handleSelectResult = useCallback(
+    (result: GeocodingResult) => {
+      onAddLocation(result);
+      onSelectLocation(result);
+      setQuery("");
+      setResults([]);
+      setStatus("idle");
+    },
+    [onAddLocation, onSelectLocation]
+  );
+
+  return (
+    <div className="weather-root city-mgmt">
+      <div className="weather-screen">
+        <div className="weather-topbar">
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <IconButton label="Back" onClick={onBack}>
+              <ArrowLeft size={22} />
+            </IconButton>
+            <span className="weather-topbar__title" style={{ fontSize: "1.3rem" }}>
+              City management
+            </span>
+          </div>
+          <div className="weather-topbar__actions">
+            <IconButton label={editMode ? "Done editing" : "Edit locations"} onClick={() => setEditMode((v) => !v)}>
+              <Pencil size={20} />
+            </IconButton>
+            <IconButton label="Add city" onClick={() => document.getElementById("city-search-input")?.focus()}>
+              <Plus size={22} />
+            </IconButton>
+          </div>
+        </div>
+
+        <div className="city-mgmt__searchbar">
+          <Search size={18} color="rgba(20,23,43,0.45)" />
+          <input
+            id="city-search-input"
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for city weather"
+            aria-label="Search for city weather"
+            autoComplete="off"
+          />
+          {query && (
+            <button type="button" aria-label="Clear search" onClick={() => setQuery("")}>
+              <X size={18} color="rgba(20,23,43,0.45)" />
+            </button>
+          )}
+        </div>
+
+        {query.trim().length >= 2 && (
+          <div className="city-mgmt__results" role="listbox" aria-label="City search results">
+            {status === "loading" && (
+              <div style={{ padding: 16 }}>
+                <Skeleton width="60%" height="16px" />
+              </div>
+            )}
+            {status === "error" && (
+              <div style={{ padding: 16, color: "rgba(20,23,43,0.6)" }}>Unable to find this city.</div>
+            )}
+            {status === "empty" && (
+              <div style={{ padding: 16, color: "rgba(20,23,43,0.6)" }}>No matching cities found.</div>
+            )}
+            {results.map((result) => (
+              <button
+                type="button"
+                key={result.id}
+                className="city-mgmt__result"
+                role="option"
+                aria-selected={false}
+                onClick={() => handleSelectResult(result)}
+              >
+                <span className="city-mgmt__result-name">{result.name}</span>
+                <span className="city-mgmt__result-sub">
+                  {[result.admin1, result.country].filter(Boolean).join(", ") || "Unknown region"}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {savedLocations.length === 0 ? (
+          <p className="city-mgmt__empty">
+            No saved cities yet. Search above to add one, or allow location access to add your current city.
+          </p>
+        ) : (
+          <div className="city-mgmt__list">
+            {savedLocations.map((location) => (
+              <CityCard
+                key={location.id}
+                location={location}
+                unit={unit}
+                editMode={editMode}
+                onSelect={() => onSelectLocation(location)}
+                onDelete={() => onDeleteLocation(location.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+ * Main Weather component
+ * ========================================================================== */
+
+export default function Weather() {
+  const [view, setView] = useState<WeatherView>("details");
+  const [unit] = useState<TemperatureUnit>("celsius");
+  const [permissionState, setPermissionState] = useState<LocationPermissionState>("prompt");
+  const [weatherState, setWeatherState] = useState<WeatherState>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeLocation, setActiveLocation] = useState<WeatherLocation | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+
+  const { locations: savedLocations, addLocation, removeLocation } = useSavedLocations();
+  const weatherAbortRef = useRef<AbortController | null>(null);
+
+  const loadWeatherFor = useCallback(async (location: WeatherLocation, skipCache = false) => {
+    weatherAbortRef.current?.abort();
+    const controller = new AbortController();
+    weatherAbortRef.current = controller;
+
+    setActiveLocation(location);
+    setWeatherState("loading-weather");
+    setErrorMessage(null);
+
+    const result = await fetchWeatherBundle(location, controller.signal, { skipCache });
+    if (controller.signal.aborted) return;
+
+    if (result.ok) {
+      setWeatherData(result.data);
+      setActiveLocation(result.data.location);
+      setWeatherState("weather-loaded");
+    } else if (!result.aborted) {
+      setWeatherState("weather-error");
+      setErrorMessage(result.error);
     }
+  }, []);
+
+  const requestDeviceLocation = useCallback(async () => {
+    setPermissionState("locating");
+    setWeatherState("locating");
+    setErrorMessage(null);
+
+    const position = await getCurrentPosition();
+    if (!position.ok) {
+      const stateMap: Record<string, { permission: LocationPermissionState; weather: WeatherState }> = {
+        denied: { permission: "denied", weather: "location-denied" },
+        unavailable: { permission: "unavailable", weather: "location-unavailable" },
+        unsupported: { permission: "unsupported", weather: "geolocation-unsupported" },
+        timeout: { permission: "unavailable", weather: "location-unavailable" },
+      };
+      const mapped = stateMap[position.error.kind] ?? stateMap.unavailable;
+      setPermissionState(mapped.permission);
+      setWeatherState(mapped.weather);
+      setErrorMessage(position.error.message);
+      return;
+    }
+
+    setPermissionState("granted");
+    const geo = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+    if (!geo.ok) {
+      // reverseGeocode is designed to always resolve ok=true with a fallback name,
+      // but guard defensively regardless.
+      setWeatherState("weather-error");
+      setErrorMessage("Weather data is currently unavailable.");
+      return;
+    }
+    await loadWeatherFor(geo.data);
   }, [loadWeatherFor]);
 
   useEffect(() => {
-    if (hasRequestedInitialLocation.current) return;
-    hasRequestedInitialLocation.current = true;
-
-    if (stored.location) {
-      setPermission("granted");
-      void loadWeatherFor(stored.location);
-      return;
-    }
-
-    void requestBrowserLocation();
-  }, [loadWeatherFor, requestBrowserLocation, stored.location]);
-
-  const handleUnitToggle = useCallback((nextUnit: TemperatureUnit) => {
-    setUnit(nextUnit);
-    saveUnitPreference(nextUnit);
+    requestDeviceLocation();
+    return () => {
+      weatherAbortRef.current?.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearchSubmit = useCallback(async () => {
-    const trimmed = searchQuery.trim();
-    if (trimmed.length === 0) return;
-
-    setIsSearching(true);
-    setError(null);
-    try {
-      const results = await searchLocations(trimmed);
-      setSearchResults(results);
-      if (results.length === 0) {
-        setError({
-          message: `No locations found for "${trimmed}".`,
-          kind: "not-found",
-        });
-      }
-    } catch {
-      setError({
-        message: "Location search failed. Please try again.",
-        kind: "network",
-      });
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchQuery]);
-
-  const handleSelectResult = useCallback(
-    async (result: GeocodingResult) => {
-      const nextLocation = geocodingResultToLocation(result);
-      setLocation(nextLocation);
-      saveLocationPreference(nextLocation);
-      setSearchResults([]);
-      setSearchQuery("");
-      setShowManualSearch(false);
-      await loadWeatherFor(nextLocation);
+  const handleSelectSavedLocation = useCallback(
+    (location: WeatherLocation) => {
+      setView("details");
+      loadWeatherFor(location);
     },
-    [loadWeatherFor],
+    [loadWeatherFor]
   );
 
-  const isLoading = status === "loading";
-  const currentDescription = weather ? getWeatherDescription(weather.current.weatherCode) : null;
-  const todayForecast = weather?.daily[0];
-  const reportSummary =
-    weather && currentDescription
-      ? buildWeatherReportSummary(location ?? weather.location, weather.current, todayForecast, unit, currentDescription)
-      : null;
-  const dailyTrend = weather ? buildDailyTemperatureTrend(weather.daily, unit) : null;
+  const handleAddLocation = useCallback(
+    (location: WeatherLocation) => {
+      addLocation(location);
+    },
+    [addLocation]
+  );
+
+  const isLoading = weatherState === "locating" || weatherState === "loading-weather";
+  const showStateCard =
+    weatherState === "location-denied" ||
+    weatherState === "location-unavailable" ||
+    weatherState === "geolocation-unsupported" ||
+    weatherState === "weather-error";
+
+  if (view === "city-management") {
+    return (
+      <CityManagementScreen
+        savedLocations={savedLocations}
+        unit={unit}
+        onBack={() => setView("details")}
+        onSelectLocation={handleSelectSavedLocation}
+        onDeleteLocation={removeLocation}
+        onAddLocation={handleAddLocation}
+      />
+    );
+  }
+
+  const locationName = activeLocation?.name ?? (isLoading ? "Locating…" : "Weather");
 
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-            Weather report
-          </p>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            {reportSummary ? reportSummary.placeName : location ? formatLocationName(location) : "Weather"}
-          </h2>
-        </div>
-        <div className="flex items-center gap-1 rounded-full bg-slate-100 p-1 dark:bg-slate-800">
-          <button
-            type="button"
-            onClick={() => handleUnitToggle("fahrenheit")}
-            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-              unit === "fahrenheit"
-                ? "bg-white text-slate-900 shadow dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-            aria-pressed={unit === "fahrenheit"}
-          >
-            °F
-          </button>
-          <button
-            type="button"
-            onClick={() => handleUnitToggle("celsius")}
-            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-              unit === "celsius"
-                ? "bg-white text-slate-900 shadow dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-            aria-pressed={unit === "celsius"}
-          >
-            °C
-          </button>
-        </div>
-      </div>
-
-      {reportSummary && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800">
-          <span className="text-slate-700 dark:text-slate-200">{reportSummary.headline}</span>
-          <span className="text-slate-500 dark:text-slate-400">
-            H: {reportSummary.highLabel} · L: {reportSummary.lowLabel} · as of{" "}
-            {reportSummary.reportedAt}
-          </span>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="flex items-center justify-center py-12 text-slate-500 dark:text-slate-400">
-          <span>Loading weather…</span>
-        </div>
-      )}
-
-      {!isLoading && error && (
-        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-          <p className="mb-2">{error.message}</p>
-          {error.kind === "permission-denied" || error.kind === "geolocation-unsupported" ? (
-            <button
-              type="button"
-              onClick={() => setShowManualSearch(true)}
-              className="font-medium underline"
-            >
-              Search for a location
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void requestBrowserLocation()}
-              className="font-medium underline"
-            >
-              Try again
-            </button>
-          )}
-        </div>
-      )}
-
-      {!isLoading && weather && currentDescription && (
-        <div className="mb-6">
-          <div className="flex items-end gap-4">
-            <span className="text-5xl font-bold text-slate-900 dark:text-slate-50">
-              {formatTemperature(weather.current.temperature, unit)}
-            </span>
-            <div className="pb-1">
-              <p className="font-medium text-slate-800 dark:text-slate-100">
-                {currentDescription.label}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Feels like {formatTemperature(weather.current.apparentTemperature, unit)}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">Humidity</p>
-              <p className="font-medium text-slate-900 dark:text-slate-50">
-                {weather.current.relativeHumidity}%
-              </p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">Wind</p>
-              <p className="font-medium text-slate-900 dark:text-slate-50">
-                {formatWindSpeed(weather.current.windSpeed, unit)}
-              </p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">Precipitation</p>
-              <p className="font-medium text-slate-900 dark:text-slate-50">
-                {weather.current.precipitation} mm
-              </p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">Updated</p>
-              <p className="font-medium text-slate-900 dark:text-slate-50">
-                {formatClockTime(weather.current.time)}
-              </p>
-            </div>
+    <div className="weather-root">
+      <div className="weather-screen">
+        <div className="weather-topbar">
+          <span className="weather-topbar__title">{locationName}</span>
+          <div className="weather-topbar__actions">
+            <IconButton label="Refresh weather" onClick={() => activeLocation && loadWeatherFor(activeLocation, true)}>
+              <RefreshCw size={19} />
+            </IconButton>
+            <IconButton label="Manage cities" onClick={() => setView("city-management")}>
+              <MapPin size={20} />
+            </IconButton>
           </div>
         </div>
-      )}
 
-      {!isLoading && weather && (
-        <div className="mb-6">
-          <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Next 24 hours
-          </h3>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {weather.hourly.slice(0, 12).map((hour) => {
-              const description = getWeatherDescription(hour.weatherCode);
-              return (
-                <div
-                  key={hour.time}
-                  className="flex min-w-[64px] flex-col items-center gap-1 rounded-lg bg-slate-50 p-2 text-center dark:bg-slate-800"
-                >
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {formatHourLabel(hour.time)}
-                  </span>
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-50">
-                    {formatTemperature(hour.temperature, unit)}
-                  </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                    {description.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {!isLoading && weather && dailyTrend && (
-        <div className="mb-6">
-          <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-            7-day temperature trend
-          </h3>
-          <TemperatureTrendGraph
-            high={dailyTrend.high}
-            low={dailyTrend.low}
-            minValue={dailyTrend.minValue}
-            maxValue={dailyTrend.maxValue}
-            unit={unit}
+        {showStateCard ? (
+          <LocationStateCard
+            weatherState={weatherState}
+            permissionState={permissionState}
+            errorMessage={errorMessage}
+            onRetryLocation={requestDeviceLocation}
+            onSearchCity={() => setView("city-management")}
           />
-        </div>
-      )}
-
-      {!isLoading && weather && (
-        <div className="mb-2">
-          <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-            7-day forecast
-          </h3>
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-            {weather.daily.map((day) => {
-              const description = getWeatherDescription(day.weatherCode);
-              return (
-                <li key={day.date} className="flex items-center justify-between py-2 text-sm">
-                  <span className="w-12 font-medium text-slate-700 dark:text-slate-200">
-                    {formatDayLabel(day.date)}
-                  </span>
-                  <span className="flex-1 text-slate-500 dark:text-slate-400">
-                    {description.label}
-                  </span>
-                  <span className="text-slate-900 dark:text-slate-50">
-                    {formatTemperature(day.temperatureMax, unit)} /{" "}
-                    <span className="text-slate-400 dark:text-slate-500">
-                      {formatTemperature(day.temperatureMin, unit)}
-                    </span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {(showManualSearch || permission === "denied" || permission === "unsupported") && (
-        <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
-          <label
-            htmlFor="weather-location-search"
-            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200"
-          >
-            Search for a location
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="weather-location-search"
-              type="text"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  void handleSearchSubmit();
-                }
-              }}
-              placeholder="City name, e.g. Austin"
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50"
+        ) : (
+          <>
+            <CurrentWeatherHero
+              location={activeLocation}
+              current={weatherData?.current ?? null}
+              unit={unit}
+              weatherState={weatherState}
             />
-            <button
-              type="button"
-              onClick={() => void handleSearchSubmit()}
-              disabled={isSearching}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
-            >
-              {isSearching ? "Searching…" : "Search"}
-            </button>
-          </div>
 
-          {searchResults.length > 0 && (
-            <ul className="mt-3 divide-y divide-slate-100 rounded-lg border border-slate-100 dark:divide-slate-800 dark:border-slate-800">
-              {searchResults.map((result) => (
-                <li key={result.id}>
-                  <button
-                    type="button"
-                    onClick={() => void handleSelectResult(result)}
-                    className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
-                  >
-                    <span className="font-medium text-slate-900 dark:text-slate-50">
-                      {result.name}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {[result.admin1, result.country].filter(Boolean).join(", ")}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+            {weatherData && !isLoading && (
+              <p style={{ textAlign: "center", color: "var(--text-secondary)", fontSize: "0.92rem", marginTop: -8 }}>
+                {formatTemperature(weatherData.daily[0]?.temperatureMin ?? null, unit)}
+                {" ~ "}
+                {formatTemperature(weatherData.daily[0]?.temperatureMax ?? null, unit, { withUnit: true })}
+              </p>
+            )}
+
+            <HourlyForecastSection
+              hourly={weatherData?.hourly ?? []}
+              timezone={activeLocation?.timezone ?? "UTC"}
+              unit={unit}
+              isLoading={isLoading}
+            />
+
+            {weatherData && weatherData.hourly.length > 1 && (
+              <section className="weather-section" aria-label="Temperature trend">
+                <TemperatureChart hourly={weatherData.hourly} unit={unit} />
+              </section>
+            )}
+
+            <DailyForecastSection
+              daily={weatherData?.daily ?? []}
+              timezone={activeLocation?.timezone ?? "UTC"}
+              unit={unit}
+              isLoading={isLoading}
+            />
+
+            <WeatherDetailsCard current={weatherData?.current ?? null} unit={unit} isLoading={isLoading} />
+
+            <AirQualitySection airQuality={weatherData?.airQuality ?? null} isLoading={isLoading} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

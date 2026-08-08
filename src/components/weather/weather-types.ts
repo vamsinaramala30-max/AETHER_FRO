@@ -1,207 +1,136 @@
 /**
- * Shared TypeScript types and interfaces for the Weather feature.
+ * weather-types.ts
+ * Shared, strict TypeScript types for the Weather feature.
  */
 
-export type TemperatureUnit = "fahrenheit" | "celsius";
+/** Temperature unit. Centralized so a second unit can be added later. */
+export type TemperatureUnit = "celsius" | "fahrenheit";
 
-export type LocationSource = "geolocation" | "manual" | "stored";
+/** High level lifecycle of the whole weather screen. */
+export type WeatherState =
+  | "idle"
+  | "locating"
+  | "loading-weather"
+  | "weather-loaded"
+  | "weather-error"
+  | "location-denied"
+  | "location-unavailable"
+  | "geolocation-unsupported";
 
-export interface Coordinates {
+/** Browser geolocation permission lifecycle. */
+export type LocationPermissionState =
+  | "prompt"
+  | "locating"
+  | "granted"
+  | "denied"
+  | "unavailable"
+  | "unsupported";
+
+/** Which top-level screen is currently visible. */
+export type WeatherView = "details" | "city-management";
+
+/** A bare geographic point, as returned by geolocation/geocoding. */
+export interface GeoCoordinates {
   latitude: number;
   longitude: number;
 }
 
-export interface WeatherLocation extends Coordinates {
+/** A resolved place, from geocoding, reverse geocoding, or device location. */
+export interface WeatherLocation extends GeoCoordinates {
+  /** Human readable name, e.g. "Kurnool" */
   name: string;
-  region?: string;
-  country?: string;
-  source: LocationSource;
-}
-
-export interface GeocodingResult {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  country?: string;
   admin1?: string;
-  timezone?: string;
+  country?: string;
+  countryCode?: string;
+  timezone: string;
+}
+
+/** A location the user has saved for quick access. */
+export interface SavedLocation extends WeatherLocation {
+  id: string;
+  /** True for the device's live/current location entry. */
+  isCurrentLocation: boolean;
+  savedAt: number;
+}
+
+/** A single geocoding search result (before it is saved). */
+export interface GeocodingResult extends WeatherLocation {
+  id: string;
 }
 
 export interface CurrentWeather {
   temperature: number;
-  apparentTemperature: number;
-  relativeHumidity: number;
-  windSpeed: number;
-  windDirection: number;
+  apparentTemperature: number | null;
   weatherCode: number;
   isDay: boolean;
-  precipitation: number;
+  humidity: number | null;
+  windSpeedKmh: number | null;
+  windDirectionDeg: number | null;
+  pressureHpa: number | null;
+  visibilityMeters: number | null;
+  uvIndex: number | null;
   time: string;
 }
 
-export interface DailyForecastDay {
-  date: string;
-  weatherCode: number;
-  temperatureMax: number;
-  temperatureMin: number;
-  precipitationSum: number;
-  precipitationProbabilityMax: number;
-  windSpeedMax: number;
-  sunrise: string;
-  sunset: string;
-}
-
-export interface HourlyForecastEntry {
+export interface HourlyWeatherPoint {
   time: string;
   temperature: number;
   weatherCode: number;
-  precipitationProbability: number;
+  isDay: boolean;
+  precipitationProbability: number | null;
+}
+
+export interface DailyWeatherPoint {
+  date: string;
+  weatherCode: number;
+  temperatureMin: number;
+  temperatureMax: number;
+  uvIndexMax: number | null;
+  sunrise: string | null;
+  sunset: string | null;
+}
+
+export interface AirQuality {
+  europeanAqi: number | null;
+  usAqi: number | null;
+  pm2_5: number | null;
+  pm10: number | null;
+  carbonMonoxide: number | null;
+  sulphurDioxide: number | null;
+  time: string | null;
 }
 
 export interface WeatherData {
   location: WeatherLocation;
-  unit: TemperatureUnit;
   current: CurrentWeather;
-  hourly: HourlyForecastEntry[];
-  daily: DailyForecastDay[];
-  timezone: string;
-  fetchedAt: string;
+  hourly: HourlyWeatherPoint[];
+  daily: DailyWeatherPoint[];
+  airQuality: AirQuality | null;
+  fetchedAt: number;
 }
 
-export interface WeatherDescription {
+export interface AqiCategory {
   label: string;
-  icon: string;
+  /** 1-6, matching the European AQI "I" to "VI" band shown in the UI. */
+  band: number;
+  colorVar: string;
 }
 
-export type WeatherRequestStatus = "idle" | "loading" | "success" | "error";
-
-export type GeolocationPermissionState =
-  | "unknown"
-  | "prompt"
-  | "granted"
-  | "denied"
-  | "unsupported";
-
-export interface WeatherErrorInfo {
-  message: string;
-  kind: "permission-denied" | "geolocation-unsupported" | "network" | "not-found" | "unknown";
-}
-
-export interface StoredWeatherPreferences {
-  unit: TemperatureUnit;
-  location: WeatherLocation | null;
-}
-
-export interface OpenMeteoCurrentUnits {
-  temperature_2m: string;
-  apparent_temperature: string;
-  relative_humidity_2m: string;
-  wind_speed_10m: string;
-  precipitation: string;
-}
-
-export interface OpenMeteoCurrentBlock {
-  time: string;
-  temperature_2m: number;
-  apparent_temperature: number;
-  relative_humidity_2m: number;
-  wind_speed_10m: number;
-  wind_direction_10m: number;
-  weather_code: number;
-  is_day: number;
-  precipitation: number;
-}
-
-export interface OpenMeteoHourlyBlock {
-  time: string[];
-  temperature_2m: number[];
-  weather_code: number[];
-  precipitation_probability: number[];
-}
-
-export interface OpenMeteoDailyBlock {
-  time: string[];
-  weather_code: number[];
-  temperature_2m_max: number[];
-  temperature_2m_min: number[];
-  precipitation_sum: number[];
-  precipitation_probability_max: number[];
-  wind_speed_10m_max: number[];
-  sunrise: string[];
-  sunset: string[];
-}
-
-export interface OpenMeteoForecastResponse {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  current: OpenMeteoCurrentBlock;
-  current_units: OpenMeteoCurrentUnits;
-  hourly: OpenMeteoHourlyBlock;
-  daily: OpenMeteoDailyBlock;
-}
-
-export interface OpenMeteoGeocodingResult {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  country?: string;
-  admin1?: string;
-  timezone?: string;
-}
-
-export interface OpenMeteoGeocodingResponse {
-  results?: OpenMeteoGeocodingResult[];
-}
-
-/**
- * A single labeled data point used to plot a temperature trend graph
- * (e.g. one day of a 7-day forecast, or one hour of a 24-hour forecast).
- */
-export interface TemperatureTrendPoint {
-  /** Short axis label, e.g. "Mon" or "3 PM". */
+export interface WeatherConditionInfo {
   label: string;
-  /** ISO date or datetime this point represents. */
-  isoTime: string;
-  /** Display-unit temperature value (already converted). */
-  value: number;
-  /** Weather code for this point, used to pick an icon/description. */
-  weatherCode: number;
+  group:
+    | "clear"
+    | "partly-cloudy"
+    | "cloudy"
+    | "fog"
+    | "drizzle"
+    | "rain"
+    | "snow"
+    | "thunderstorm"
+    | "unknown";
 }
 
-/**
- * A two-line trend series (e.g. daily high/low) ready to be rendered as a graph.
- */
-export interface TemperatureTrendSeries {
-  high: TemperatureTrendPoint[];
-  low: TemperatureTrendPoint[];
-  minValue: number;
-  maxValue: number;
-}
-
-/** A plotted x/y coordinate pair within an SVG chart's viewBox. */
-export interface ChartCoordinate {
-  x: number;
-  y: number;
-}
-
-/** The result of laying out a value series into SVG-ready geometry. */
-export interface LineChartGeometry {
-  linePath: string;
-  areaPath: string;
-  coordinates: ChartCoordinate[];
-}
-
-/**
- * A compact human-readable summary of the current conditions and place,
- * used as the headline of the weather report.
- */
-export interface WeatherReportSummary {
-  placeName: string;
-  headline: string;
-  reportedAt: string;
-  highLabel: string;
-  lowLabel: string;
-}
+/** Discriminated result wrapper used by weather-api.ts calls. */
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; aborted?: boolean };

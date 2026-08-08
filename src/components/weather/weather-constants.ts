@@ -1,107 +1,88 @@
-import type { TemperatureUnit, WeatherDescription } from "./weather-types";
+/**
+ * weather-constants.ts
+ * Centralized constants: API endpoints, storage keys, timings, and limits.
+ * No magic numbers should live outside this file.
+ */
 
-export const OPEN_METEO_FORECAST_BASE_URL = "https://api.open-meteo.com/v1/forecast";
-export const OPEN_METEO_GEOCODING_BASE_URL = "https://geocoding-api.open-meteo.com/v1/search";
-
-export const DEFAULT_TEMPERATURE_UNIT: TemperatureUnit = "fahrenheit";
-
-export const WEATHER_STORAGE_KEYS = {
-  unit: "weather:unit",
-  location: "weather:location",
+export const API = {
+  FORECAST: "https://api.open-meteo.com/v1/forecast",
+  AIR_QUALITY: "https://air-quality-api.open-meteo.com/v1/air-quality",
+  GEOCODING: "https://geocoding-api.open-meteo.com/v1/search",
+  // Free, key-less client-side reverse geocoding service.
+  REVERSE_GEOCODE: "https://api.bigdatacloud.net/data/reverse-geocode-client",
 } as const;
 
-export const GEOLOCATION_OPTIONS: PositionOptions = {
-  enableHighAccuracy: false,
-  timeout: 10000,
-  maximumAge: 5 * 60 * 1000,
-};
+export const STORAGE_KEYS = {
+  SAVED_LOCATIONS: "weather:saved-locations:v1",
+} as const;
 
-export const HOURLY_FORECAST_HOURS = 24;
-export const DAILY_FORECAST_DAYS = 7;
-export const GEOCODING_RESULT_LIMIT = 5;
+export const TIMINGS = {
+  SEARCH_DEBOUNCE_MS: 350,
+  WEATHER_CACHE_MS: 5 * 60 * 1000, // 5 minutes
+  GEOLOCATION_TIMEOUT_MS: 12_000,
+  GEOLOCATION_MAX_AGE_MS: 60_000,
+} as const;
 
-export const CURRENT_WEATHER_PARAMS = [
+export const FORECAST_LIMITS = {
+  HOURLY_ITEMS: 12,
+  DAILY_ITEMS: 7,
+  GEOCODING_RESULTS: 8,
+} as const;
+
+export const CURRENT_PARAMS = [
   "temperature_2m",
-  "apparent_temperature",
   "relative_humidity_2m",
+  "apparent_temperature",
+  "is_day",
+  "weather_code",
+  "surface_pressure",
   "wind_speed_10m",
   "wind_direction_10m",
-  "weather_code",
-  "is_day",
-  "precipitation",
 ].join(",");
 
-export const HOURLY_WEATHER_PARAMS = [
+export const HOURLY_PARAMS = [
   "temperature_2m",
   "weather_code",
+  "is_day",
   "precipitation_probability",
+  "visibility",
+  "uv_index",
 ].join(",");
 
-export const DAILY_WEATHER_PARAMS = [
+export const DAILY_PARAMS = [
   "weather_code",
   "temperature_2m_max",
   "temperature_2m_min",
-  "precipitation_sum",
-  "precipitation_probability_max",
-  "wind_speed_10m_max",
+  "uv_index_max",
   "sunrise",
   "sunset",
 ].join(",");
 
-/**
- * WMO Weather interpretation codes, as used by Open-Meteo.
- * https://open-meteo.com/en/docs
- */
-export const WEATHER_CODE_MAP: Record<number, WeatherDescription> = {
-  0: { label: "Clear sky", icon: "sun" },
-  1: { label: "Mainly clear", icon: "sun" },
-  2: { label: "Partly cloudy", icon: "cloud-sun" },
-  3: { label: "Overcast", icon: "cloud" },
-  45: { label: "Fog", icon: "cloud-fog" },
-  48: { label: "Depositing rime fog", icon: "cloud-fog" },
-  51: { label: "Light drizzle", icon: "cloud-drizzle" },
-  53: { label: "Moderate drizzle", icon: "cloud-drizzle" },
-  55: { label: "Dense drizzle", icon: "cloud-drizzle" },
-  56: { label: "Light freezing drizzle", icon: "cloud-drizzle" },
-  57: { label: "Dense freezing drizzle", icon: "cloud-drizzle" },
-  61: { label: "Slight rain", icon: "cloud-rain" },
-  63: { label: "Moderate rain", icon: "cloud-rain" },
-  65: { label: "Heavy rain", icon: "cloud-rain-heavy" },
-  66: { label: "Light freezing rain", icon: "cloud-rain" },
-  67: { label: "Heavy freezing rain", icon: "cloud-rain-heavy" },
-  71: { label: "Slight snow fall", icon: "cloud-snow" },
-  73: { label: "Moderate snow fall", icon: "cloud-snow" },
-  75: { label: "Heavy snow fall", icon: "cloud-snow" },
-  77: { label: "Snow grains", icon: "cloud-snow" },
-  80: { label: "Slight rain showers", icon: "cloud-rain" },
-  81: { label: "Moderate rain showers", icon: "cloud-rain" },
-  82: { label: "Violent rain showers", icon: "cloud-rain-heavy" },
-  85: { label: "Slight snow showers", icon: "cloud-snow" },
-  86: { label: "Heavy snow showers", icon: "cloud-snow" },
-  95: { label: "Thunderstorm", icon: "cloud-lightning" },
-  96: { label: "Thunderstorm with slight hail", icon: "cloud-lightning" },
-  99: { label: "Thunderstorm with heavy hail", icon: "cloud-lightning" },
-};
+export const AIR_QUALITY_PARAMS = [
+  "european_aqi",
+  "us_aqi",
+  "pm2_5",
+  "pm10",
+  "carbon_monoxide",
+  "sulphur_dioxide",
+].join(",");
 
-export const UNKNOWN_WEATHER_DESCRIPTION: WeatherDescription = {
-  label: "Unknown conditions",
-  icon: "cloud-question",
-};
+/** European AQI bands (1-6 / "I"-"VI"), per Open-Meteo / EEA definitions. */
+export const AQI_BANDS: ReadonlyArray<{ max: number; label: string; band: number; colorVar: string }> = [
+  { max: 20, label: "Good", band: 1, colorVar: "var(--aqi-good)" },
+  { max: 40, label: "Fair", band: 2, colorVar: "var(--aqi-fair)" },
+  { max: 60, label: "Moderate", band: 3, colorVar: "var(--aqi-moderate)" },
+  { max: 80, label: "Poor", band: 4, colorVar: "var(--aqi-poor)" },
+  { max: 100, label: "Very Poor", band: 5, colorVar: "var(--aqi-very-poor)" },
+  { max: Infinity, label: "Extremely Poor", band: 6, colorVar: "var(--aqi-extremely-poor)" },
+];
 
-/**
- * Layout configuration for the inline SVG temperature trend graph rendered
- * in the weather report. No charting library is used — the graph is plotted
- * by hand using this fixed coordinate space, then scaled responsively via
- * the SVG's viewBox.
- */
-export const TEMPERATURE_TREND_CHART = {
-  viewBoxWidth: 640,
-  viewBoxHeight: 200,
-  paddingX: 32,
-  paddingY: 24,
-  highStrokeWidth: 3,
-  lowStrokeWidth: 2,
-  pointRadius: 3,
-} as const;
+/** Beaufort scale upper bounds in km/h, used for the "Force N" wind label. */
+export const BEAUFORT_KMH_THRESHOLDS: readonly number[] = [
+  1, 5, 11, 19, 28, 38, 49, 61, 74, 88, 102, 117,
+];
 
-export const TREND_CHART_RANGE_PADDING_DEGREES = 4;
+export const COMPASS_DIRECTIONS: readonly string[] = [
+  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+];

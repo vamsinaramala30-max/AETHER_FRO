@@ -52,14 +52,14 @@ function FavoriteToggle({
   tone: "ink" | "paper";
 }): React.ReactElement {
   const activeColor = tone === "ink" ? "text-amber-400" : "text-amber-600";
-  const idleColor = tone === "ink" ? "text-[#4B5580]" : "text-[#C9BC94]";
+  const idleColor = tone === "ink" ? "text-[#4B5580]" : "text-[#A9936B]";
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-pressed={isFavorite}
       aria-label={isFavorite ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
-      className={`shrink-0 text-base leading-none transition-colors ${
+      className={`shrink-0 rounded text-base leading-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C] ${
         isFavorite ? activeColor : idleColor
       }`}
     >
@@ -116,7 +116,7 @@ function WebsiteListRow({
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => onOpen(website)}
-          className="font-mono text-xs uppercase tracking-wide text-[#F4EEDD] underline decoration-[#C7A34C] decoration-2 underline-offset-4 hover:text-[#C7A34C]"
+          className="rounded font-mono text-xs uppercase tracking-wide text-[#F4EEDD] underline decoration-[#C7A34C] decoration-2 underline-offset-4 hover:text-[#C7A34C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C]"
         >
           Visit ↗
         </a>
@@ -196,7 +196,7 @@ function CountryStampCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => onOpen(website)}
-                  className="rounded-full border border-[#1C1A14]/25 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-[#1C1A14] transition-colors hover:bg-[#1C1A14] hover:text-[#F4EEDD]"
+                  className="rounded-full border border-[#1C1A14]/25 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-[#1C1A14] transition-colors hover:bg-[#1C1A14] hover:text-[#F4EEDD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9B3B33]"
                 >
                   Visit ↗
                 </a>
@@ -336,7 +336,7 @@ export default function WebDirectory(): React.ReactElement {
           type="button"
           onClick={() => handleViewModeChange("category")}
           aria-pressed={viewMode === "category"}
-          className={`relative px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors ${
+          className={`relative rounded-t px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C] ${
             viewMode === "category" ? "text-[#F4EEDD]" : "text-[#6B76A0] hover:text-[#B7C0DE]"
           }`}
         >
@@ -349,7 +349,7 @@ export default function WebDirectory(): React.ReactElement {
           type="button"
           onClick={() => handleViewModeChange("country")}
           aria-pressed={viewMode === "country"}
-          className={`relative px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors ${
+          className={`relative rounded-t px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C] ${
             viewMode === "country" ? "text-[#F4EEDD]" : "text-[#6B76A0] hover:text-[#B7C0DE]"
           }`}
         >
@@ -404,7 +404,7 @@ export default function WebDirectory(): React.ReactElement {
           <button
             type="button"
             onClick={handleSurpriseMe}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-dashed border-[#C7A34C]/60 px-4 py-2 font-mono text-xs uppercase tracking-widest text-[#C7A34C] transition-colors hover:border-[#C7A34C] hover:bg-[#C7A34C]/10"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-dashed border-[#C7A34C]/60 px-4 py-2 font-mono text-xs uppercase tracking-widest text-[#C7A34C] transition-colors hover:border-[#C7A34C] hover:bg-[#C7A34C]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C]"
           >
             🎲 Random entry
           </button>
@@ -425,7 +425,7 @@ export default function WebDirectory(): React.ReactElement {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleOpen(website)}
-                className="flex items-center gap-1.5 rounded-full border border-[#2A3350] px-3 py-1 font-mono text-[11px] uppercase tracking-wide text-[#B7C0DE] transition-colors hover:border-[#C7A34C] hover:text-[#F4EEDD]"
+                className="flex items-center gap-1.5 rounded-full border border-[#2A3350] px-3 py-1 font-mono text-[11px] uppercase tracking-wide text-[#B7C0DE] transition-colors hover:border-[#C7A34C] hover:text-[#F4EEDD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C]"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-[#C7A34C]" aria-hidden="true" />
                 {website.name}
