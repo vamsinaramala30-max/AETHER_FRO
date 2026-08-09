@@ -248,9 +248,14 @@ interface OpenMeteoForecastResponse {
   hourly?: {
     time: string[];
     temperature_2m: number[];
+    apparent_temperature?: number[];
     weather_code: number[];
     is_day: number[];
     precipitation_probability?: number[];
+    relative_humidity_2m?: number[];
+    wind_speed_10m?: number[];
+    wind_direction_10m?: number[];
+    surface_pressure?: number[];
     visibility?: number[];
     uv_index?: number[];
   };
@@ -306,19 +311,24 @@ export async function fetchWeather(
       time: json.current.time,
     };
 
-    const nowIndex = Math.max(0, json.hourly.time.findIndex((t) => t >= json.current!.time));
-    const hourly = json.hourly.time
-      .slice(nowIndex, nowIndex + FORECAST_LIMITS.HOURLY_ITEMS)
-      .map((time, i) => {
-        const index = nowIndex + i;
-        return {
-          time,
-          temperature: json.hourly!.temperature_2m[index],
-          weatherCode: json.hourly!.weather_code[index],
-          isDay: json.hourly!.is_day[index] === 1,
-          precipitationProbability: json.hourly!.precipitation_probability?.[index] ?? null,
-        };
-      });
+    // Return the FULL multi-day hourly series (not just the next few hours).
+    // Weather.tsx groups this by local calendar day so selecting "Tomorrow"
+    // (or any other day) in the daily forecast can show that day's own
+    // hourly breakdown and chart, not just "now onward".
+    const hourly = json.hourly.time.map((time, index) => ({
+      time,
+      temperature: json.hourly!.temperature_2m[index],
+      apparentTemperature: json.hourly!.apparent_temperature?.[index] ?? null,
+      weatherCode: json.hourly!.weather_code[index],
+      isDay: json.hourly!.is_day[index] === 1,
+      precipitationProbability: json.hourly!.precipitation_probability?.[index] ?? null,
+      humidity: json.hourly!.relative_humidity_2m?.[index] ?? null,
+      windSpeedKmh: json.hourly!.wind_speed_10m?.[index] ?? null,
+      windDirectionDeg: json.hourly!.wind_direction_10m?.[index] ?? null,
+      pressureHpa: json.hourly!.surface_pressure?.[index] ?? null,
+      visibilityMeters: json.hourly!.visibility?.[index] ?? null,
+      uvIndex: json.hourly!.uv_index?.[index] ?? null,
+    }));
 
     const daily = json.daily.time.slice(0, FORECAST_LIMITS.DAILY_ITEMS).map((date, index) => ({
       date,
