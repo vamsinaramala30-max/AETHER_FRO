@@ -222,6 +222,12 @@
 
 /* ----------------------------- Daily ----------------------------- */
 
+.weather-section__hint {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin: -6px 0 12px;
+}
+
 .daily-list {
   display: flex;
   flex-direction: column;
@@ -232,9 +238,26 @@
   grid-template-columns: 52px 1fr auto 36px 40px;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--border-subtle);
+  border-radius: 10px;
   font-size: 0.95rem;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.daily-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.daily-row--selected {
+  background: rgba(91, 157, 255, 0.14);
+  border-bottom-color: transparent;
+}
+
+.daily-row--selected .daily-row__label {
+  color: var(--accent-cyan);
 }
 
 .daily-row:last-child {
