@@ -75,9 +75,16 @@ export interface CurrentWeather {
 export interface HourlyWeatherPoint {
   time: string;
   temperature: number;
+  apparentTemperature: number | null;
   weatherCode: number;
   isDay: boolean;
   precipitationProbability: number | null;
+  humidity: number | null;
+  windSpeedKmh: number | null;
+  windDirectionDeg: number | null;
+  pressureHpa: number | null;
+  visibilityMeters: number | null;
+  uvIndex: number | null;
 }
 
 export interface DailyWeatherPoint {
