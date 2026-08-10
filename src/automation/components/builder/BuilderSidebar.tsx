@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Zap, GitBranch, Sparkles, CheckSquare } from 'lucide-react';
+import { GitBranch, Sparkles, CheckSquare } from 'lucide-react';
 
 interface Props {
   onAddStep: (type: 'condition' | 'ai_action' | 'action') => void;

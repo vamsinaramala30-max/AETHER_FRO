@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Calendar, BookOpen, Sliders, ArrowRight } from 'lucide-react';
+import { Calendar, BookOpen, Sliders, ArrowRight } from 'lucide-react';
 
 interface Props {
   onOpenQuickAi: () => void;

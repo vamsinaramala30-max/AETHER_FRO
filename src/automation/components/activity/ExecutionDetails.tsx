@@ -3,7 +3,6 @@ import { ExecutionLog } from '../../automation-types';
 import { AutomationDialog } from '../shared/AutomationDialog';
 import { ExecutionTimeline } from './ExecutionTimeline';
 import { ExecutionStatusBadge } from './ExecutionStatus';
-import { formatRelativeTime } from '../../automation-utils';
 import { AlertTriangle } from 'lucide-react';
 
 interface Props {

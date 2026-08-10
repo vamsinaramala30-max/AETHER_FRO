@@ -17,7 +17,7 @@ import type {
 import { aiEngine } from '../core/ai-engine';
 import { conversationStore } from '../conversations/conversation-store';
 import { messageStore } from '../conversations/message-store';
-import { createNewConversation, createUserMessage } from '../conversations/conversation-types';
+import { createUserMessage } from '../conversations/conversation-types';
 import { useAIStore } from '../ai-store';
 
 export interface SendMessageOptions {

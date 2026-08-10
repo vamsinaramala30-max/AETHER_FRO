@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAIStore } from '../ai-store';
 import { aiService } from '../services/ai-service';
 import type {
-  AIConversation,
   AIConnectionStatus,
   AIError,
   AIModelInfo,

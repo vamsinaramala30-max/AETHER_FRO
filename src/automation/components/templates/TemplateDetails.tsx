@@ -2,7 +2,7 @@ import React from 'react';
 import { AutomationTemplate } from '../../automation-types';
 import { AutomationDialog } from '../shared/AutomationDialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface Props {
   template: AutomationTemplate | null;

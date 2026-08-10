@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Play, Pause, ChevronRight } from 'lucide-react';
+import { Zap, Play, ChevronRight } from 'lucide-react';
 import { AutomationRule } from '../../automation-types';
 import { formatScheduleText, formatRelativeTime } from '../../automation-utils';
 import { Button } from '@/components/ui/button';

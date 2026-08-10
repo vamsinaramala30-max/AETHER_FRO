@@ -4,7 +4,7 @@
 // Manages prompt templates and builds prompts for different AI tasks.
 // ============================================================================
 
-import type { PromptTemplate, BuiltPrompt, PromptCategory, AIResult } from '../ai-types';
+import type { PromptTemplate, PromptCategory, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 
 /**

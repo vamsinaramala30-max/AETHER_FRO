@@ -1,7 +1,6 @@
 import React from 'react';
-import { Zap, Clock, Calendar, CheckSquare, Folder, BookOpen, Upload, Bot } from 'lucide-react';
-import { WorkflowStep, TriggerType } from '../../automation-types';
-import { TRIGGER_OPTIONS } from '../../automation-constants';
+import { Zap } from 'lucide-react';
+import { WorkflowStep } from '../../automation-types';
 
 interface Props {
   step: WorkflowStep;
@@ -10,7 +9,7 @@ interface Props {
   onRemove: () => void;
 }
 
-export const TriggerStepCard: React.FC<Props> = ({ step, isSelected, onSelect, onRemove }) => {
+export const TriggerStepCard: React.FC<Props> = ({ step, isSelected, onSelect, onRemove: _onRemove }) => {
   return (
     <div
       onClick={onSelect}

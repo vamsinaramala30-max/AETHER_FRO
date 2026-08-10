@@ -8,7 +8,6 @@
 import type {
   AIContext,
   GenerationResponse,
-  AIResult,
   StreamingSession,
   AIMessage,
   AIError,

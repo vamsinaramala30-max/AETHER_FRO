@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, CheckCircle, XCircle, Clock, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ChevronRight } from 'lucide-react';
 import { ExecutionLog } from '../../automation-types';
 import { formatRelativeTime } from '../../automation-utils';
 import { Button } from '@/components/ui/button';

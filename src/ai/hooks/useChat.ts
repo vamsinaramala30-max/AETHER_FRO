@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAIStore } from '../ai-store';
 import { aiService } from '../services/ai-service';
+import { buildThinkingState } from '../core/reasoning-engine';
 import type {
   AIConversation,
   AIMessage,
@@ -153,7 +154,6 @@ export function useChat(): UseChatReturn {
         content,
         stream: true,
         onThinkingUpdate: (status, toolName) => {
-          const { buildThinkingState } = require('../core/reasoning-engine');
           setThinkingState(buildThinkingState(status as never, toolName));
         },
         onSessionCreated: (session) => {

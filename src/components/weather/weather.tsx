@@ -312,7 +312,6 @@ function HourlyForecastSection({
       <div className="hourly-scroll">
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
-<<<<<<< HEAD
             <div className="hourly-item" key={i}>
               <Skeleton width="34px" height="12px" />
               <Skeleton width="26px" height="26px" radius={13} />
@@ -339,34 +338,6 @@ function HourlyForecastSection({
               );
             })
           )}
-=======
-              <div className="hourly-item" key={i}>
-                <Skeleton width="34px" height="12px" />
-                <Skeleton width="26px" height="26px" radius={13} />
-                <Skeleton width="30px" height="14px" />
-              </div>
-            ))
-          : hourly.length === 0 ? (
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                Hourly data unavailable for this day.
-              </p>
-            ) : (
-              hourly.map((hour) => {
-                const isNow = isCurrentHour(hour.time, timezone);
-                return (
-                  <div className="hourly-item" key={hour.time}>
-                    <span className={`hourly-item__label${isNow ? " hourly-item__label--now" : ""}`}>
-                      {getHourlySlotLabel(hour.time, timezone, isNow)}
-                    </span>
-                    <WeatherIcon code={hour.weatherCode} isDay={hour.isDay} size={24} />
-                    <span className="hourly-item__temp">
-                      {formatTemperature(hour.temperature, unit, { withUnit: true })}
-                    </span>
-                  </div>
-                );
-              })
-            )}
->>>>>>> 635822c3d79e6626aea198e19445e591573a8b57
       </div>
     </section>
   );
@@ -471,7 +442,6 @@ function DailyForecastSection({
       <div className="daily-list" role="tablist" aria-label="Select a day">
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
-<<<<<<< HEAD
             <div className="daily-row" key={i}>
               <Skeleton width="40px" height="12px" />
               <Skeleton width="70px" height="14px" />
@@ -499,35 +469,6 @@ function DailyForecastSection({
               </button>
             );
           })}
-=======
-              <div className="daily-row" key={i}>
-                <Skeleton width="40px" height="12px" />
-                <Skeleton width="70px" height="14px" />
-                <Skeleton width="24px" height="24px" radius={12} />
-                <Skeleton width="24px" height="14px" />
-                <Skeleton width="28px" height="14px" />
-              </div>
-            ))
-          : daily.map((day) => {
-              const isSelected = day.date === selectedDate;
-              return (
-                <button
-                  type="button"
-                  key={day.date}
-                  role="tab"
-                  aria-selected={isSelected}
-                  className={`daily-row${isSelected ? " daily-row--selected" : ""}`}
-                  onClick={() => onSelectDay(day.date)}
-                >
-                  <span className="daily-row__date">{formatShortDate(day.date, timezone)}</span>
-                  <span className="daily-row__label">{getRelativeDayLabel(day.date, timezone)}</span>
-                  <WeatherIcon code={day.weatherCode} isDay size={22} />
-                  <span className="daily-row__min">{formatTemperature(day.temperatureMin, unit)}°</span>
-                  <span className="daily-row__max">{formatTemperature(day.temperatureMax, unit)}°</span>
-                </button>
-              );
-            })}
->>>>>>> 635822c3d79e6626aea198e19445e591573a8b57
       </div>
     </section>
   );

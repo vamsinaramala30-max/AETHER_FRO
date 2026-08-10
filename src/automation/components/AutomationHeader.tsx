@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Plus, Sparkles, Sliders } from 'lucide-react';
+import { Zap, Sparkles, Sliders } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Props {

@@ -108,7 +108,7 @@ export const AIPage = memo(() => {
 
   const chatActions = useChat();
 
-  const handlePanelChange = useCallback(
+  const _handlePanelChange = useCallback(
     (panel: AIPanel) => {
       setActivePanel(panel);
       // On mobile, close sidebar after selection

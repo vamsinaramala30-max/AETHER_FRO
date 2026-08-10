@@ -33,10 +33,6 @@ import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
 
 // ── Automation ───────────────────────────────────────────────────────────────
 import { AutomationPage } from '@/automation/AutomationPage';
-import { WorkflowCenterPage } from '@/automation/workflow-center/workflowcenterpage';
-import { IntegrationsPage } from '@/automation/integrations/integrationpage';
-import { ScheduledAutomationPage } from '@/automation/scheduled-automation/scheduleautomationpage';
-import { AutomationLogsPage } from '@/automation/logs/automationlogspage';
 
 // ── Workspace ─────────────────────────────────────────────────────────────────
 import { WorkspacePage } from '@/workspace/WorkspacePage';

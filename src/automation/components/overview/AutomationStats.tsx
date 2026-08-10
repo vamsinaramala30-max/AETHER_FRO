@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, PlayCircle, CheckCircle, Clock, ShieldCheck } from 'lucide-react';
+import { Zap, PlayCircle, CheckCircle, Clock } from 'lucide-react';
 import { AutomationStatsSummary } from '../../automation-types';
 
 interface Props {

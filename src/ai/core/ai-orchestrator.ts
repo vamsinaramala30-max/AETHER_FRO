@@ -7,7 +7,6 @@
 import type {
   AIContext,
   GenerationRequest,
-  GenerationResponse,
   AIResult,
   ThinkingStatus,
 } from '../ai-types';

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { WorkflowStep, TriggerType, AIActionType, SystemActionType } from '../automation-types';
+import { WorkflowStep, TriggerType } from '../automation-types';
 
 export interface BuilderState {
   name: string;

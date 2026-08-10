@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sliders, Save, X, Play } from 'lucide-react';
+import { Sliders, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Props {

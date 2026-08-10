@@ -13,7 +13,6 @@ import { AutomationBuilder } from './components/builder/AutomationBuilder';
 import { AutomationDialog } from './components/shared/AutomationDialog';
 import { ConfirmAutomationAction } from './components/shared/ConfirmAutomationAction';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
 import { Sparkles, CheckCircle2, Zap } from 'lucide-react';
 import { automationService } from './services/automation-service';
 
@@ -37,7 +36,6 @@ export const AutomationPage: React.FC = () => {
     automations,
     allAutomations,
     isLoading,
-    error,
     searchQuery,
     setSearchQuery,
     statusFilter,

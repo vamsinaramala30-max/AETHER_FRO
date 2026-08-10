@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Sparkles, Clock, Folder, BookOpen, Bot, ArrowRight } from 'lucide-react';
+import { Calendar, Sparkles, Clock, Folder, BookOpen, Bot } from 'lucide-react';
 import { AutomationTemplate } from '../../automation-types';
 import { Button } from '@/components/ui/button';
 
