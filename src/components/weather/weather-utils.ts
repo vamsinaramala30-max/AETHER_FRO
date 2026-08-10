@@ -4,7 +4,12 @@
  */
 
 import { AQI_BANDS, BEAUFORT_KMH_THRESHOLDS, COMPASS_DIRECTIONS } from "./weather-constants";
-import type { AqiCategory, TemperatureUnit, WeatherConditionInfo } from "./weather-types";
+import type {
+  AqiCategory,
+  HourlyWeatherPoint,
+  TemperatureUnit,
+  WeatherConditionInfo,
+} from "./weather-types";
 
 /* -------------------------------------------------------------------------- */
 /* Weather code mapping                                                        */
@@ -157,17 +162,57 @@ export function formatWeekday(isoDate: string, timezone: string): string {
   return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: timezone }).format(date);
 }
 
-/** Returns the current date string (YYYY-MM-DD) as seen in a given timezone. */
-export function getTodayInTimezone(timezone: string): string {
+/** Returns the YYYY-MM-DD calendar-day key for a Date, as seen in a given timezone. */
+export function getDateKeyInTimezone(date: Date, timezone: string): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     timeZone: timezone,
-  }).formatToParts(new Date());
+  }).formatToParts(date);
   const lookup: Record<string, string> = {};
   for (const part of parts) lookup[part.type] = part.value;
   return `${lookup.year}-${lookup.month}-${lookup.day}`;
+}
+
+/** Returns today's date string (YYYY-MM-DD) as seen in a given timezone. */
+export function getTodayInTimezone(timezone: string): string {
+  return getDateKeyInTimezone(new Date(), timezone);
+}
+
+/**
+ * Groups a flat hourly series into per-local-calendar-day buckets, so a
+ * specific day (e.g. "Tomorrow") can be selected and shown on its own,
+ * correctly handling midnight rollover and timezone differences.
+ */
+export function groupHourlyByDate(
+  hourly: HourlyWeatherPoint[],
+  timezone: string
+): Map<string, HourlyWeatherPoint[]> {
+  const buckets = new Map<string, HourlyWeatherPoint[]>();
+  for (const point of hourly) {
+    const key = getDateKeyInTimezone(new Date(point.time), timezone);
+    const bucket = buckets.get(key);
+    if (bucket) {
+      bucket.push(point);
+    } else {
+      buckets.set(key, [point]);
+    }
+  }
+  return buckets;
+}
+
+/** True if the given ISO time falls in the same local hour as right now. */
+export function isCurrentHour(isoTime: string, timezone: string): boolean {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    timeZone: timezone,
+  });
+  return formatter.format(new Date()) === formatter.format(new Date(isoTime));
 }
 
 /** "Today" / "Tomorrow" / weekday name, based on the location's timezone. */
@@ -182,9 +227,9 @@ export function getRelativeDayLabel(isoDate: string, timezone: string): string {
   return formatWeekday(isoDate, timezone);
 }
 
-/** Label for the first hourly slot ("Now") vs. subsequent hourly times. */
-export function getHourlySlotLabel(isoTime: string, timezone: string, isFirst: boolean): string {
-  return isFirst ? "Now" : formatTime(isoTime, timezone);
+/** Label for the hourly slot matching the real current hour ("Now") vs. others. */
+export function getHourlySlotLabel(isoTime: string, timezone: string, isCurrent: boolean): string {
+  return isCurrent ? "Now" : formatTime(isoTime, timezone);
 }
 
 /* -------------------------------------------------------------------------- */

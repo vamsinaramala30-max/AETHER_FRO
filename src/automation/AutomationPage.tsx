@@ -1,326 +1,258 @@
 import React, { useState } from 'react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import {
-  Zap,
-  Plus,
-  Play,
-  Pause,
-  ChevronRight,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-interface Workflow {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'paused' | 'failed';
-  trigger: string;
-  lastRun: string;
-  runs: number;
-  successRate: number;
-}
-
-const STATUS_CONFIG = {
-  active: {
-    label: 'Active',
-    color: 'text-emerald-700 dark:text-emerald-400',
-    bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20',
-    icon: CheckCircle,
-  },
-  paused: {
-    label: 'Paused',
-    color: 'text-amber-700 dark:text-amber-400',
-    bg: 'bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20',
-    icon: Pause,
-  },
-  failed: {
-    label: 'Failed',
-    color: 'text-rose-700 dark:text-rose-400',
-    bg: 'bg-rose-50 border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20',
-    icon: XCircle,
-  },
-};
+import { useAutomations } from './hooks/useAutomations';
+import { useAutomationActivity } from './hooks/useAutomationActivity';
+import { useAutomationActions } from './hooks/useAutomationActions';
+import { AutomationTab, AutomationNavigation } from './components/AutomationNavigation';
+import { AutomationHeader } from './components/AutomationHeader';
+import { AutomationOverview } from './pages/AutomationOverview';
+import { MyAutomations } from './pages/MyAutomations';
+import { AutomationTemplates } from './pages/AutomationTemplates';
+import { AutomationActivity } from './pages/AutomationActivity';
+import { AutomationBuilder } from './components/builder/AutomationBuilder';
+import { AutomationDialog } from './components/shared/AutomationDialog';
+import { ConfirmAutomationAction } from './components/shared/ConfirmAutomationAction';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { automationService } from './services/automation-service';
 
 export const AutomationPage: React.FC = () => {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newWorkflow, setNewWorkflow] = useState({
-    name: '',
-    description: '',
-    trigger: 'Schedule · Daily',
+  const [activeTab, setActiveTab] = useState<AutomationTab>('overview');
+  const [isBuilderOpen, setIsBuilderOpen] = useState<boolean>(false);
+  const [isQuickAiOpen, setIsQuickAiOpen] = useState<boolean>(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // AI Quick prompt state
+  const [aiPrompt, setAiPrompt] = useState<string>('');
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState<boolean>(false);
+  const [aiPreview, setAiPreview] = useState<{
+    name: string;
+    schedule: string;
+    steps: string[];
+    rawTrigger: string;
+  } | null>(null);
+
+  const {
+    automations,
+    allAutomations,
+    isLoading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    refreshAutomations,
+  } = useAutomations();
+
+  const { logs, refreshActivity } = useAutomationActivity();
+
+  const { toggleStatus, runNow, duplicate, remove } = useAutomationActions(() => {
+    refreshAutomations();
+    refreshActivity();
   });
 
-  const toggleWorkflow = (id: string) =>
-    setWorkflows((prev) =>
-      prev.map((w) =>
-        w.id === id && w.status !== 'failed'
-          ? { ...w, status: w.status === 'active' ? 'paused' : 'active' }
-          : w,
-      ),
-    );
+  const handleAnalyzePrompt = () => {
+    if (!aiPrompt.trim()) return;
+    setIsAiAnalyzing(true);
 
-  const handleCreateWorkflow = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWorkflow.name.trim()) return;
-
-    const created: Workflow = {
-      id: `wf-${Date.now()}`,
-      name: newWorkflow.name.trim(),
-      description: newWorkflow.description.trim() || 'Automated task sequence.',
-      status: 'active',
-      trigger: newWorkflow.trigger,
-      lastRun: 'Just now',
-      runs: 0,
-      successRate: 100,
-    };
-
-    setWorkflows((prev) => [created, ...prev]);
-    setIsModalOpen(false);
-    setNewWorkflow({ name: '', description: '', trigger: 'Schedule · Daily' });
+    setTimeout(() => {
+      setAiPreview({
+        name: 'Daily Planning Briefing',
+        schedule: 'Every weekday at 8:00 AM',
+        rawTrigger: 'SCHEDULE',
+        steps: [
+          'Check workspace calendar for upcoming meetings',
+          'Review pending tasks and deadlines',
+          'Analyze top 3 daily priorities',
+          'Synthesize daily action plan',
+          'Send workspace notification digest',
+        ],
+      });
+      setIsAiAnalyzing(false);
+    }, 600);
   };
 
-  const totalRuns = workflows.reduce((s, w) => s + w.runs, 0);
-  const activeCount = workflows.filter((w) => w.status === 'active').length;
+  const handleSaveAiPreview = async () => {
+    if (!aiPreview) return;
+    try {
+      await automationService.createAutomation({
+        name: aiPreview.name,
+        description: aiPrompt,
+        trigger: aiPreview.rawTrigger,
+        schedule: '0 8 * * 1-5',
+        isEnabled: true,
+      });
+      refreshAutomations();
+      setIsQuickAiOpen(false);
+      setAiPrompt('');
+      setAiPreview(null);
+      setActiveTab('automations');
+    } catch (err) {
+      console.error('Failed to save AI automation', err);
+    }
+  };
 
   return (
     <PageWrapper>
-      {/* Header */}
-      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <Zap className="h-7 w-7 shrink-0 text-amber-500 dark:text-amber-400" />
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Automation
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Workflows, triggers, integrations, and schedules
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 hover:shadow-indigo-500/20"
+      <div className="space-y-6 pb-12">
+        <AutomationHeader
+          onOpenQuickAi={() => setIsQuickAiOpen(true)}
+          onOpenBuilder={() => setIsBuilderOpen(true)}
+        />
+
+        <AutomationNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          counts={{
+            automations: allAutomations.length,
+            templates: 6,
+            activity: logs.length,
+          }}
+        />
+
+        {activeTab === 'overview' && (
+          <AutomationOverview
+            automations={allAutomations}
+            logs={logs}
+            onToggleStatus={toggleStatus}
+            onRunNow={runNow}
+            onNavigateToTab={setActiveTab}
+            onOpenQuickAi={() => setIsQuickAiOpen(true)}
+            onOpenBuilder={() => setIsBuilderOpen(true)}
+          />
+        )}
+
+        {activeTab === 'automations' && (
+          <MyAutomations
+            automations={automations}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            onToggleStatus={toggleStatus}
+            onRunNow={runNow}
+            onDuplicate={duplicate}
+            onViewActivity={() => setActiveTab('activity')}
+            onDelete={(id) => setDeleteId(id)}
+            onOpenCreate={() => setIsQuickAiOpen(true)}
+          />
+        )}
+
+        {activeTab === 'templates' && (
+          <AutomationTemplates
+            onTemplateInstantiated={() => {
+              refreshAutomations();
+              setActiveTab('automations');
+            }}
+          />
+        )}
+
+        {activeTab === 'activity' && <AutomationActivity />}
+
+        {/* AI Quick Creator Dialog */}
+        <AutomationDialog
+          isOpen={isQuickAiOpen}
+          onClose={() => {
+            setIsQuickAiOpen(false);
+            setAiPrompt('');
+            setAiPreview(null);
+          }}
+          title="What would you like Aether to automate?"
+          description="Describe your desired workflow in plain text. Aether AI will parse and construct a human-readable preview before activation."
+          maxWidth="max-w-xl"
         >
-          <Plus className="h-4 w-4" />
-          New Workflow
-        </button>
-      </div>
-
-      {/* New Workflow Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Create Automation Workflow
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                ✕
-              </button>
+          <div className="space-y-4">
+            <div>
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                rows={3}
+                placeholder="e.g. Every weekday morning, review my calendar and tasks and prepare my daily plan."
+                className="w-full rounded-xl border border-slate-200 p-3.5 text-sm font-medium text-slate-800 focus:border-amber-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+              />
+              <div className="mt-2 flex justify-end">
+                <Button
+                  onClick={handleAnalyzePrompt}
+                  disabled={isAiAnalyzing || !aiPrompt.trim()}
+                  className="bg-amber-500 text-white hover:bg-amber-600"
+                >
+                  <Sparkles className="mr-1.5 h-4 w-4" />
+                  {isAiAnalyzing ? 'Analyzing Request...' : 'Generate Automation Preview'}
+                </Button>
+              </div>
             </div>
-            <form onSubmit={handleCreateWorkflow} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Workflow Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Lead Follow-up Routine"
-                  value={newWorkflow.name}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Summarize what this automation pipeline does..."
-                  value={newWorkflow.description}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Trigger Event
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Schedule · 9:00 AM or On document upload"
-                  value={newWorkflow.trigger}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, trigger: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/80 dark:text-white"
-                />
-              </div>
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
-                >
-                  Create & Activate
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Active Workflows
-          </p>
-          <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
-            {activeCount}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Total Executions
-          </p>
-          <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{totalRuns}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Avg Success Rate
-          </p>
-          <p className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
-            {Math.round(workflows.reduce((s, w) => s + w.successRate, 0) / workflows.length)}%
-          </p>
-        </div>
-      </div>
-
-      {/* Sub-navigation */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {['Workflows', 'Integrations', 'Schedules', 'Logs'].map((tab, i) => (
-          <Link
-            key={tab}
-            to={
-              i === 0
-                ? '/app/automation/workflows'
-                : i === 1
-                  ? '/app/automation/integrations'
-                  : i === 2
-                    ? '/app/automation/schedules'
-                    : '/app/automation/logs'
-            }
-            className={`shrink-0 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
-              i === 0
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
-            }`}
-          >
-            {tab}
-          </Link>
-        ))}
-      </div>
-
-      {/* Workflows List */}
-      <div className="space-y-3">
-        {workflows.map((workflow) => {
-          const status = STATUS_CONFIG[workflow.status];
-          const StatusIcon = status.icon;
-          return (
-            <div
-              key={workflow.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1.5 flex items-center gap-2.5">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      {workflow.name}
-                    </h3>
-                    <span
-                      className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${status.bg} ${status.color}`}
-                    >
-                      <StatusIcon className="h-3 w-3" />
-                      {status.label}
-                    </span>
+            {aiPreview && (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                      {aiPreview.name}
+                    </h4>
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                      {aiPreview.schedule}
+                    </p>
                   </div>
-                  <p className="mb-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    {workflow.description}
+                  <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+                    Preview Ready
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Aether Execution Steps:
                   </p>
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center gap-1 font-medium">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      {workflow.trigger}
-                    </span>
-                    <span className="font-semibold">{workflow.runs} runs</span>
-                    <span
-                      className={`font-bold ${
-                        workflow.successRate >= 90
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : workflow.successRate >= 70
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                      }`}
-                    >
-                      {workflow.successRate}% success
-                    </span>
-                    <span>Last: {workflow.lastRun}</span>
-                  </div>
+                  {aiPreview.steps.map((st, i) => (
+                    <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-200">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span>{st}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {workflow.status !== 'failed' && (
-                    <button
-                      type="button"
-                      onClick={() => toggleWorkflow(workflow.id)}
-                      className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      {workflow.status === 'active' ? (
-                        <>
-                          <Pause className="h-3.5 w-3.5" /> Pause
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-3.5 w-3.5" /> Resume
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {workflow.status === 'failed' && (
-                    <button
-                      type="button"
-                      className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
-                    >
-                      <AlertTriangle className="h-3.5 w-3.5" /> View Error
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="rounded-xl border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
+
+                <div className="mt-5 flex justify-end gap-2.5 border-t border-amber-500/20 pt-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAiPreview(null)}
+                    className="border-slate-300 dark:border-slate-700"
                   >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                    Adjust Request
+                  </Button>
+                  <Button onClick={handleSaveAiPreview} className="bg-amber-500 text-white hover:bg-amber-600">
+                    <Zap className="mr-1.5 h-4 w-4" />
+                    Save & Activate Automation
+                  </Button>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            )}
+          </div>
+        </AutomationDialog>
+
+        {/* Advanced Workflow Builder */}
+        <AutomationBuilder
+          isOpen={isBuilderOpen}
+          onClose={() => setIsBuilderOpen(false)}
+          onSaved={() => {
+            refreshAutomations();
+            setActiveTab('automations');
+          }}
+        />
+
+        {/* Delete Confirmation */}
+        <ConfirmAutomationAction
+          isOpen={Boolean(deleteId)}
+          onClose={() => setDeleteId(null)}
+          onConfirm={() => {
+            if (deleteId) remove(deleteId);
+          }}
+          title="Delete Automation"
+          description="Are you sure you want to permanently delete this automation rule? This action cannot be undone."
+          confirmLabel="Delete Permanently"
+          isDestructive={true}
+        />
       </div>
     </PageWrapper>
   );
 };
-
-export default AutomationPage;

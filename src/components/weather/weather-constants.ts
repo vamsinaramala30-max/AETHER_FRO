@@ -14,6 +14,10 @@ export const API = {
 
 export const STORAGE_KEYS = {
   SAVED_LOCATIONS: "weather:saved-locations:v1",
+  /** Last successfully-loaded location, so a reload doesn't need a fresh
+   *  user gesture to re-request geolocation (many mobile browsers block
+   *  geolocation prompts that aren't triggered by a direct tap/click). */
+  LAST_LOCATION: "weather:last-location:v1",
 } as const;
 
 export const TIMINGS = {
@@ -24,9 +28,13 @@ export const TIMINGS = {
 } as const;
 
 export const FORECAST_LIMITS = {
-  HOURLY_ITEMS: 12,
+  // Max hourly items shown per selected day (today: "now" onward; other
+  // days: full local day). 24 lets a fully-selected future day render whole.
+  HOURLY_ITEMS: 24,
   DAILY_ITEMS: 7,
-  GEOCODING_RESULTS: 8,
+  // Open-Meteo's geocoding index (GeoNames-based) covers small villages
+  // worldwide, not just major cities — a generous result count surfaces them.
+  GEOCODING_RESULTS: 10,
 } as const;
 
 export const CURRENT_PARAMS = [
@@ -42,9 +50,14 @@ export const CURRENT_PARAMS = [
 
 export const HOURLY_PARAMS = [
   "temperature_2m",
+  "apparent_temperature",
   "weather_code",
   "is_day",
   "precipitation_probability",
+  "relative_humidity_2m",
+  "wind_speed_10m",
+  "wind_direction_10m",
+  "surface_pressure",
   "visibility",
   "uv_index",
 ].join(",");

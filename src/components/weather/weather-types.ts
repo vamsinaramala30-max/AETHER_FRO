@@ -75,9 +75,16 @@ export interface CurrentWeather {
 export interface HourlyWeatherPoint {
   time: string;
   temperature: number;
+  apparentTemperature: number | null;
   weatherCode: number;
   isDay: boolean;
   precipitationProbability: number | null;
+  humidity: number | null;
+  windSpeedKmh: number | null;
+  windDirectionDeg: number | null;
+  pressureHpa: number | null;
+  visibilityMeters: number | null;
+  uvIndex: number | null;
 }
 
 export interface DailyWeatherPoint {
@@ -119,15 +126,15 @@ export interface AqiCategory {
 export interface WeatherConditionInfo {
   label: string;
   group:
-    | "clear"
-    | "partly-cloudy"
-    | "cloudy"
-    | "fog"
-    | "drizzle"
-    | "rain"
-    | "snow"
-    | "thunderstorm"
-    | "unknown";
+  | "clear"
+  | "partly-cloudy"
+  | "cloudy"
+  | "fog"
+  | "drizzle"
+  | "rain"
+  | "snow"
+  | "thunderstorm"
+  | "unknown";
 }
 
 /** Discriminated result wrapper used by weather-api.ts calls. */

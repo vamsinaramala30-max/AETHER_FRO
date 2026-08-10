@@ -147,10 +147,13 @@ export const protectedRoutes: RouteObject[] = [
         path: 'automation',
         children: [
           { index: true, element: <AutomationPage /> },
-          { path: 'workflows', element: <WorkflowCenterPage /> },
-          { path: 'integrations', element: <IntegrationsPage /> },
-          { path: 'schedules', element: <ScheduledAutomationPage /> },
-          { path: 'logs', element: <AutomationLogsPage /> },
+          { path: 'automations', element: <AutomationPage /> },
+          { path: 'templates', element: <AutomationPage /> },
+          { path: 'activity', element: <AutomationPage /> },
+          { path: 'workflows', element: <AutomationPage /> },
+          { path: 'integrations', element: <AutomationPage /> },
+          { path: 'schedules', element: <AutomationPage /> },
+          { path: 'logs', element: <AutomationPage /> },
         ],
       },
 

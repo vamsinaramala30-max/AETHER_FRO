@@ -73,10 +73,13 @@ import {
   getBeaufortForce,
   getHourlySlotLabel,
   getRelativeDayLabel,
+  getTodayInTimezone,
   getWeatherAriaLabel,
   getWeatherCondition,
   getWeatherIconKey,
   getWindDirectionLabel,
+  groupHourlyByDate,
+  isCurrentHour,
   mapValuesToPoints,
   safeGetStorage,
   safeSetStorage,
@@ -294,33 +297,47 @@ function HourlyForecastSection({
   timezone,
   unit,
   isLoading,
+  dayLabel,
 }: {
   hourly: HourlyWeatherPoint[];
   timezone: string;
   unit: TemperatureUnit;
   isLoading: boolean;
+  /** e.g. "Today" / "Tomorrow" / "Friday" — which day this hourly strip belongs to. */
+  dayLabel: string;
 }) {
   return (
-    <section className="weather-section" aria-label="Hourly forecast">
-      <h2 className="weather-section__heading">Hourly Forecast</h2>
+    <section className="weather-section" aria-label={`Hourly forecast for ${dayLabel}`}>
+      <h2 className="weather-section__heading">Hourly Forecast · {dayLabel}</h2>
       <div className="hourly-scroll">
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div className="hourly-item" key={i}>
-                <Skeleton width="34px" height="12px" />
-                <Skeleton width="26px" height="26px" radius={13} />
-                <Skeleton width="30px" height="14px" />
-              </div>
-            ))
-          : hourly.map((hour, index) => (
-              <div className="hourly-item" key={hour.time}>
-                <span className={`hourly-item__label${index === 0 ? " hourly-item__label--now" : ""}`}>
-                  {getHourlySlotLabel(hour.time, timezone, index === 0)}
-                </span>
-                <WeatherIcon code={hour.weatherCode} isDay={hour.isDay} size={24} />
-                <span className="hourly-item__temp">{formatTemperature(hour.temperature, unit, { withUnit: true })}</span>
-              </div>
-            ))}
+            <div className="hourly-item" key={i}>
+              <Skeleton width="34px" height="12px" />
+              <Skeleton width="26px" height="26px" radius={13} />
+              <Skeleton width="30px" height="14px" />
+            </div>
+          ))
+          : hourly.length === 0 ? (
+            <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+              Hourly data unavailable for this day.
+            </p>
+          ) : (
+            hourly.map((hour) => {
+              const isNow = isCurrentHour(hour.time, timezone);
+              return (
+                <div className="hourly-item" key={hour.time}>
+                  <span className={`hourly-item__label${isNow ? " hourly-item__label--now" : ""}`}>
+                    {getHourlySlotLabel(hour.time, timezone, isNow)}
+                  </span>
+                  <WeatherIcon code={hour.weatherCode} isDay={hour.isDay} size={24} />
+                  <span className="hourly-item__temp">
+                    {formatTemperature(hour.temperature, unit, { withUnit: true })}
+                  </span>
+                </div>
+              );
+            })
+          )}
       </div>
     </section>
   );
@@ -408,35 +425,50 @@ function DailyForecastSection({
   timezone,
   unit,
   isLoading,
+  selectedDate,
+  onSelectDay,
 }: {
   daily: DailyWeatherPoint[];
   timezone: string;
   unit: TemperatureUnit;
   isLoading: boolean;
+  selectedDate: string | null;
+  onSelectDay: (date: string) => void;
 }) {
   return (
     <section className="weather-section" aria-label="Daily forecast">
       <h2 className="weather-section__heading">7-Day Forecast</h2>
-      <div className="daily-list">
+      <p className="weather-section__hint">Tap a day to see its hourly forecast above.</p>
+      <div className="daily-list" role="tablist" aria-label="Select a day">
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <div className="daily-row" key={i}>
-                <Skeleton width="40px" height="12px" />
-                <Skeleton width="70px" height="14px" />
-                <Skeleton width="24px" height="24px" radius={12} />
-                <Skeleton width="24px" height="14px" />
-                <Skeleton width="28px" height="14px" />
-              </div>
-            ))
-          : daily.map((day) => (
-              <div className="daily-row" key={day.date}>
+            <div className="daily-row" key={i}>
+              <Skeleton width="40px" height="12px" />
+              <Skeleton width="70px" height="14px" />
+              <Skeleton width="24px" height="24px" radius={12} />
+              <Skeleton width="24px" height="14px" />
+              <Skeleton width="28px" height="14px" />
+            </div>
+          ))
+          : daily.map((day) => {
+            const isSelected = day.date === selectedDate;
+            return (
+              <button
+                type="button"
+                key={day.date}
+                role="tab"
+                aria-selected={isSelected}
+                className={`daily-row${isSelected ? " daily-row--selected" : ""}`}
+                onClick={() => onSelectDay(day.date)}
+              >
                 <span className="daily-row__date">{formatShortDate(day.date, timezone)}</span>
                 <span className="daily-row__label">{getRelativeDayLabel(day.date, timezone)}</span>
                 <WeatherIcon code={day.weatherCode} isDay size={22} />
                 <span className="daily-row__min">{formatTemperature(day.temperatureMin, unit)}°</span>
                 <span className="daily-row__max">{formatTemperature(day.temperatureMax, unit)}°</span>
-              </div>
-            ))}
+              </button>
+            );
+          })}
       </div>
     </section>
   );
@@ -453,21 +485,21 @@ function WeatherDetailsCard({
 }) {
   const items: Array<{ label: string; value: string; icon: LucideIcon }> = current
     ? [
-        {
-          label: "Feels like",
-          value: formatTemperature(current.apparentTemperature, unit, { withUnit: true }),
-          icon: SunMedium,
-        },
-        {
-          label: getWindDirectionLabel(current.windDirectionDeg),
-          value: current.windSpeedKmh !== null ? getBeaufortForce(current.windSpeedKmh) : "Unavailable",
-          icon: Wind,
-        },
-        { label: "Humidity", value: formatHumidity(current.humidity), icon: Droplets },
-        { label: "UV", value: formatUvLabel(current.uvIndex), icon: SunMedium },
-        { label: "Visibility", value: formatVisibility(current.visibilityMeters), icon: Eye },
-        { label: "Pressure", value: formatPressure(current.pressureHpa), icon: Gauge },
-      ]
+      {
+        label: "Feels like",
+        value: formatTemperature(current.apparentTemperature, unit, { withUnit: true }),
+        icon: SunMedium,
+      },
+      {
+        label: getWindDirectionLabel(current.windDirectionDeg),
+        value: current.windSpeedKmh !== null ? getBeaufortForce(current.windSpeedKmh) : "Unavailable",
+        icon: Wind,
+      },
+      { label: "Humidity", value: formatHumidity(current.humidity), icon: Droplets },
+      { label: "UV", value: formatUvLabel(current.uvIndex), icon: SunMedium },
+      { label: "Visibility", value: formatVisibility(current.visibilityMeters), icon: Eye },
+      { label: "Pressure", value: formatPressure(current.pressureHpa), icon: Gauge },
+    ]
     : [];
 
   return (
@@ -476,22 +508,22 @@ function WeatherDetailsCard({
         <div className="details-grid">
           {isLoading || !current
             ? Array.from({ length: 6 }).map((_, i) => (
-                <div className="details-grid__item" key={i}>
-                  <Skeleton width="22px" height="22px" radius={11} />
-                  <Skeleton width="50px" height="10px" />
-                  <Skeleton width="40px" height="14px" />
-                </div>
-              ))
+              <div className="details-grid__item" key={i}>
+                <Skeleton width="22px" height="22px" radius={11} />
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="40px" height="14px" />
+              </div>
+            ))
             : items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div className="details-grid__item" key={item.label}>
-                    <Icon size={22} />
-                    <span className="details-grid__label">{item.label}</span>
-                    <span className="details-grid__value">{item.value}</span>
-                  </div>
-                );
-              })}
+              const Icon = item.icon;
+              return (
+                <div className="details-grid__item" key={item.label}>
+                  <Icon size={22} />
+                  <span className="details-grid__label">{item.label}</span>
+                  <span className="details-grid__value">{item.value}</span>
+                </div>
+              );
+            })}
         </div>
       </div>
     </section>
@@ -518,11 +550,11 @@ function AirQualitySection({
 
   const pollutants: Array<{ label: string; value: number | null; unit: string; max: number }> = airQuality
     ? [
-        { label: "PM2.5", value: airQuality.pm2_5, unit: "", max: 75 },
-        { label: "PM10", value: airQuality.pm10, unit: "", max: 150 },
-        { label: "CO", value: airQuality.carbonMonoxide, unit: "", max: 100 },
-        { label: "SO2", value: airQuality.sulphurDioxide, unit: "", max: 100 },
-      ]
+      { label: "PM2.5", value: airQuality.pm2_5, unit: "", max: 75 },
+      { label: "PM10", value: airQuality.pm10, unit: "", max: 150 },
+      { label: "CO", value: airQuality.carbonMonoxide, unit: "", max: 100 },
+      { label: "SO2", value: airQuality.sulphurDioxide, unit: "", max: 100 },
+    ]
     : [];
 
   return (
@@ -638,6 +670,38 @@ function LocationStateCard({
             Try again
           </button>
         )}
+        <button type="button" className="btn-secondary" onClick={onSearchCity}>
+          Search for a city
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * First-run screen. Geolocation must be requested from a real click/tap in
+ * most mobile browsers and embedded webviews — requesting it automatically
+ * on page load is frequently blocked silently. This screen puts an explicit
+ * button in front of the person instead.
+ */
+function UseLocationPrompt({
+  onUseLocation,
+  onSearchCity,
+}: {
+  onUseLocation: () => void;
+  onSearchCity: () => void;
+}) {
+  return (
+    <div className="state-card">
+      <MapPin size={28} />
+      <p className="state-card__title">See weather for where you are</p>
+      <p className="state-card__body">
+        Tap below to allow location access, or search for any city or village worldwide instead.
+      </p>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+        <button type="button" className="btn-primary" onClick={onUseLocation}>
+          Use my location
+        </button>
         <button type="button" className="btn-secondary" onClick={onSearchCity}>
           Search for a city
         </button>
@@ -872,6 +936,10 @@ export default function Weather() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeLocation, setActiveLocation] = useState<WeatherLocation | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  /** Which day's hourly strip + chart is on screen (YYYY-MM-DD, in the
+   *  active location's timezone). Defaults to the first daily entry (today)
+   *  whenever a new location's weather loads. */
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const { locations: savedLocations, addLocation, removeLocation } = useSavedLocations();
   const weatherAbortRef = useRef<AbortController | null>(null);
@@ -891,7 +959,13 @@ export default function Weather() {
     if (result.ok) {
       setWeatherData(result.data);
       setActiveLocation(result.data.location);
+      // Jump back to "today" whenever a different location's data loads.
+      setSelectedDate(result.data.daily[0]?.date ?? getTodayInTimezone(result.data.location.timezone));
       setWeatherState("weather-loaded");
+      // Remember this as the last-viewed location so a page reload can show
+      // weather immediately without needing another location-permission
+      // prompt (which browsers require a fresh tap/click to trigger).
+      safeSetStorage(STORAGE_KEYS.LAST_LOCATION, result.data.location);
     } else if (!result.aborted) {
       setWeatherState("weather-error");
       setErrorMessage(result.error);
@@ -902,6 +976,15 @@ export default function Weather() {
     setPermissionState("locating");
     setWeatherState("locating");
     setErrorMessage(null);
+
+    if (typeof window !== "undefined" && window.isSecureContext === false) {
+      setPermissionState("unavailable");
+      setWeatherState("location-unavailable");
+      setErrorMessage(
+        "Location access requires a secure (https) connection. Search for a city instead."
+      );
+      return;
+    }
 
     const position = await getCurrentPosition();
     if (!position.ok) {
@@ -930,8 +1013,18 @@ export default function Weather() {
     await loadWeatherFor(geo.data);
   }, [loadWeatherFor]);
 
+  // On mount: if we already have a remembered location (from a previous
+  // visit / previous successful geolocation or search), load it straight
+  // away. Otherwise, DO NOT call geolocation automatically — many mobile
+  // browsers and embedded webviews silently refuse geolocation prompts
+  // that aren't triggered by a direct user tap, which is why "auto"
+  // requests can look like they "don't work". Instead we show an explicit
+  // "Use my location" button (see the idle state below).
   useEffect(() => {
-    requestDeviceLocation();
+    const lastLocation = safeGetStorage<WeatherLocation | null>(STORAGE_KEYS.LAST_LOCATION, null);
+    if (lastLocation) {
+      loadWeatherFor(lastLocation);
+    }
     return () => {
       weatherAbortRef.current?.abort();
     };
@@ -953,7 +1046,22 @@ export default function Weather() {
     [addLocation]
   );
 
+  const hourlyByDate = useMemo(
+    () =>
+      weatherData
+        ? groupHourlyByDate(weatherData.hourly, weatherData.location.timezone)
+        : new Map<string, HourlyWeatherPoint[]>(),
+    [weatherData]
+  );
+
+  const effectiveSelectedDate = selectedDate ?? weatherData?.daily[0]?.date ?? null;
+  const selectedDayHourly = effectiveSelectedDate ? hourlyByDate.get(effectiveSelectedDate) ?? [] : [];
+  const selectedDayLabel = effectiveSelectedDate && activeLocation
+    ? getRelativeDayLabel(effectiveSelectedDate, activeLocation.timezone)
+    : "Today";
+
   const isLoading = weatherState === "locating" || weatherState === "loading-weather";
+  const isIdle = weatherState === "idle";
   const showStateCard =
     weatherState === "location-denied" ||
     weatherState === "location-unavailable" ||
@@ -981,16 +1089,23 @@ export default function Weather() {
         <div className="weather-topbar">
           <span className="weather-topbar__title">{locationName}</span>
           <div className="weather-topbar__actions">
-            <IconButton label="Refresh weather" onClick={() => activeLocation && loadWeatherFor(activeLocation, true)}>
-              <RefreshCw size={19} />
-            </IconButton>
+            {!isIdle && (
+              <IconButton
+                label="Refresh weather"
+                onClick={() => activeLocation && loadWeatherFor(activeLocation, true)}
+              >
+                <RefreshCw size={19} />
+              </IconButton>
+            )}
             <IconButton label="Manage cities" onClick={() => setView("city-management")}>
               <MapPin size={20} />
             </IconButton>
           </div>
         </div>
 
-        {showStateCard ? (
+        {isIdle ? (
+          <UseLocationPrompt onUseLocation={requestDeviceLocation} onSearchCity={() => setView("city-management")} />
+        ) : showStateCard ? (
           <LocationStateCard
             weatherState={weatherState}
             permissionState={permissionState}
@@ -1016,15 +1131,16 @@ export default function Weather() {
             )}
 
             <HourlyForecastSection
-              hourly={weatherData?.hourly ?? []}
+              hourly={isLoading ? [] : selectedDayHourly}
               timezone={activeLocation?.timezone ?? "UTC"}
               unit={unit}
               isLoading={isLoading}
+              dayLabel={selectedDayLabel}
             />
 
-            {weatherData && weatherData.hourly.length > 1 && (
-              <section className="weather-section" aria-label="Temperature trend">
-                <TemperatureChart hourly={weatherData.hourly} unit={unit} />
+            {!isLoading && selectedDayHourly.length > 1 && (
+              <section className="weather-section" aria-label={`Temperature trend for ${selectedDayLabel}`}>
+                <TemperatureChart hourly={selectedDayHourly} unit={unit} />
               </section>
             )}
 
@@ -1033,6 +1149,8 @@ export default function Weather() {
               timezone={activeLocation?.timezone ?? "UTC"}
               unit={unit}
               isLoading={isLoading}
+              selectedDate={effectiveSelectedDate}
+              onSelectDay={setSelectedDate}
             />
 
             <WeatherDetailsCard current={weatherData?.current ?? null} unit={unit} isLoading={isLoading} />
