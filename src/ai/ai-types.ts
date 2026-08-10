@@ -552,7 +552,29 @@ export interface ThinkingState {
 // AI Store State Shape
 // ---------------------------------------------------------------------------
 
+export type AIProviderMode = 'auto' | 'gemini' | 'openai' | 'ollama';
+
+export interface ProviderStatusInfo {
+  name: 'gemini' | 'openai' | 'ollama';
+  status: 'available' | 'unavailable' | 'rate_limited' | 'timeout' | 'config_error';
+  message?: string;
+  checkedAt?: number;
+}
+
+export interface FallbackNotice {
+  activeProvider: string;
+  usedFallback: boolean;
+  reason?: string;
+  timestamp: number;
+}
+
 export interface AIStoreState {
+  // Provider Selection & Fallback
+  providerMode: AIProviderMode;
+  activeProvider: string;
+  fallbackNotice: FallbackNotice | null;
+  providerStatuses: Record<string, ProviderStatusInfo>;
+
   // Conversation
   conversations: Record<string, AIConversation>;
   activeConversationId: string | null;

@@ -50,12 +50,12 @@ export const ProductPreview: React.FC = () => {
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-2xl overflow-hidden lg:max-w-none">
       {/* Glow Ambient Layer behind Preview */}
       <div className="pointer-events-none absolute -inset-1 animate-pulse rounded-2xl bg-gradient-to-r from-indigo-500/20 via-cyan-500/20 to-purple-500/20 opacity-70 blur-xl" />
 
-      {/* Floating Card 1: Top Right Metrics */}
-      <div className="absolute -right-4 -top-5 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
+      {/* Floating Card 1: Top Right Metrics (Desktop / Tablet) */}
+      <div className="absolute -right-2 -top-4 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-1.5 text-emerald-400">
           <Zap className="h-4 w-4" />
         </div>
@@ -68,8 +68,8 @@ export const ProductPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Card 2: Bottom Left Memory Status */}
-      <div className="absolute -bottom-5 -left-4 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
+      {/* Floating Card 2: Bottom Left Memory Status (Desktop / Tablet) */}
+      <div className="absolute -bottom-4 -left-2 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
         <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-1.5 text-indigo-400">
           <Brain className="h-4 w-4" />
         </div>
@@ -80,7 +80,7 @@ export const ProductPreview: React.FC = () => {
       </div>
 
       {/* Main Glass Container */}
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/90 shadow-2xl backdrop-blur-sm">
+      <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 dark:border-zinc-800/80 light:border-zinc-200/80 bg-zinc-950/85 dark:bg-zinc-950/85 light:bg-white/85 shadow-2xl backdrop-blur-xl">
         {/* Window Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/60 bg-zinc-900/40 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -104,11 +104,11 @@ export const ProductPreview: React.FC = () => {
         </div>
 
         {/* Tab Navigation Toolbar */}
-        <div className="scrollbar-none flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2 text-xs">
+        <div className="flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-2 py-2 text-xs scrollbar-none sm:px-3">
           <button
             type="button"
             onClick={() => setActiveTab('ai')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
               activeTab === 'ai'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
@@ -120,19 +120,19 @@ export const ProductPreview: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
               activeTab === 'tasks'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
             }`}
           >
             <CheckSquare className="h-3.5 w-3.5" />
-            Tasks & Board
+            Tasks
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('memory')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
               activeTab === 'memory'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
@@ -144,7 +144,7 @@ export const ProductPreview: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('graph')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
               activeTab === 'graph'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
@@ -156,7 +156,7 @@ export const ProductPreview: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
               activeTab === 'analytics'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
@@ -168,14 +168,14 @@ export const ProductPreview: React.FC = () => {
         </div>
 
         {/* Dynamic Tab Body */}
-        <div className="max-h-[360px] min-h-[300px] overflow-y-auto p-4 font-sans text-sm sm:p-5">
+        <div className="max-h-[360px] min-h-[300px] overflow-y-auto p-3.5 font-sans text-sm sm:p-5">
           {activeTab === 'ai' && (
             <div className="flex h-full flex-col justify-between space-y-4">
               <div className="space-y-3.5">
                 {chatLogs.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`flex items-start gap-3 ${
+                    className={`flex items-start gap-2.5 ${
                       msg.sender === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
@@ -223,6 +223,7 @@ export const ProductPreview: React.FC = () => {
                 />
                 <button
                   type="submit"
+                  aria-label="Send message"
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-indigo-400 transition-colors hover:bg-indigo-500/10 hover:text-indigo-300"
                 >
                   <Send className="h-3.5 w-3.5" />
@@ -262,24 +263,25 @@ export const ProductPreview: React.FC = () => {
                 ].map((task, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-900/60 p-2.5 text-xs transition-colors hover:border-zinc-700"
+                    className="flex flex-col gap-2 rounded-lg border border-zinc-800/60 bg-zinc-900/60 p-2.5 text-xs transition-colors hover:border-zinc-700 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <input
                         type="checkbox"
                         checked={task.status === 'Done'}
                         readOnly
-                        className="rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-0"
+                        aria-label={task.title}
+                        className="rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-0 shrink-0"
                       />
                       <span
-                        className={`font-medium ${
+                        className={`truncate font-medium ${
                           task.status === 'Done' ? 'text-zinc-400 line-through' : 'text-zinc-200'
                         }`}
                       >
                         {task.title}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="rounded bg-zinc-800 px-2 py-0.5 font-mono text-[10px] text-zinc-400">
                         {task.tag}
                       </span>
@@ -383,9 +385,9 @@ export const ProductPreview: React.FC = () => {
         </div>
 
         {/* Footer Status Bar */}
-        <div className="flex items-center justify-between border-t border-zinc-800/60 bg-zinc-950/80 px-4 py-2 text-[11px] text-zinc-400">
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        <div className="flex flex-wrap items-center justify-between gap-1.5 border-t border-zinc-800/60 bg-zinc-950/80 px-3.5 py-2 text-[11px] text-zinc-400">
+          <span className="flex items-center gap-1.5 truncate">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
             Local Vector Engine: Connected
           </span>
           <span className="font-mono text-zinc-400">SOC2 Type II • AES-256</span>

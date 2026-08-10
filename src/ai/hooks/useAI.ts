@@ -12,6 +12,9 @@ import type {
   StreamingStatus,
   ThinkingState,
   AIPanel,
+  AIProviderMode,
+  FallbackNotice,
+  ProviderStatusInfo,
 } from '../ai-types';
 
 export interface UseAIReturn {
@@ -26,12 +29,19 @@ export interface UseAIReturn {
   isStreaming: boolean;
   isAvailable: boolean;
 
+  // Provider State
+  providerMode: AIProviderMode;
+  activeProvider: string;
+  fallbackNotice: FallbackNotice | null;
+  providerStatuses: Record<string, ProviderStatusInfo>;
+
   // Actions
   clearError: () => void;
   stopGeneration: () => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   setActivePanel: (panel: AIPanel) => void;
+  setProviderMode: (mode: AIProviderMode) => void;
   checkHealth: () => Promise<void>;
 }
 
@@ -47,11 +57,17 @@ export function useAI(): UseAIReturn {
   const sidebarOpen = useAIStore((s) => s.sidebarOpen);
   const activePanel = useAIStore((s) => s.activePanel);
 
+  const providerMode = useAIStore((s) => s.providerMode);
+  const activeProvider = useAIStore((s) => s.activeProvider);
+  const fallbackNotice = useAIStore((s) => s.fallbackNotice);
+  const providerStatuses = useAIStore((s) => s.providerStatuses);
+
   const setConnectionStatus = useAIStore((s) => s.setConnectionStatus);
   const clearError = useAIStore((s) => s.clearError);
   const setSidebarOpen = useAIStore((s) => s.setSidebarOpen);
   const toggleSidebar = useAIStore((s) => s.toggleSidebar);
   const setActivePanel = useAIStore((s) => s.setActivePanel);
+  const setProviderMode = useAIStore((s) => s.setProviderMode);
 
   const healthCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -84,11 +100,16 @@ export function useAI(): UseAIReturn {
     activePanel,
     isStreaming: streamingStatus === 'streaming' || streamingStatus === 'starting',
     isAvailable: connectionStatus === 'connected',
+    providerMode,
+    activeProvider,
+    fallbackNotice,
+    providerStatuses,
     clearError,
     stopGeneration,
     setSidebarOpen,
     toggleSidebar,
     setActivePanel,
+    setProviderMode,
     checkHealth,
   };
 }

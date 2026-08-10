@@ -1,10 +1,11 @@
 // ============================================================================
-// AETHER AI — AIHeader Component
+// AETHER AI — AIHeader Component with Provider Selection
 // ============================================================================
 
 import React, { memo } from 'react';
-import type { AIModelInfo, AIConnectionStatus } from '../ai-types';
+import type { AIModelInfo, AIConnectionStatus, AIProviderMode } from '../ai-types';
 import { AIStatus } from './AIStatus';
+import { useAIStore } from '../ai-store';
 
 interface AIHeaderProps {
   connectionStatus: AIConnectionStatus;
@@ -14,8 +15,15 @@ interface AIHeaderProps {
   className?: string;
 }
 
+const PROVIDERS: { id: AIProviderMode; label: string; badge: string }[] = [
+  { id: 'auto', label: 'Auto (Gemini → OpenAI)', badge: 'Auto Fallback' },
+  { id: 'gemini', label: 'Gemini (Primary)', badge: 'Gemini' },
+  { id: 'openai', label: 'OpenAI (Fallback)', badge: 'OpenAI' },
+  { id: 'ollama', label: 'Ollama (Local)', badge: 'Ollama' },
+];
+
 /**
- * AIHeader — Branding, active model status, and responsive sidebar toggle.
+ * AIHeader — Branding, provider selector, active model status, and responsive sidebar toggle.
  */
 export const AIHeader = memo<AIHeaderProps>(({
   connectionStatus,
@@ -24,6 +32,9 @@ export const AIHeader = memo<AIHeaderProps>(({
   onToggleSidebar,
   className = '',
 }) => {
+  const providerMode = useAIStore((s) => s.providerMode);
+  const setProviderMode = useAIStore((s) => s.setProviderMode);
+
   return (
     <header
       className={`flex items-center justify-between border-b border-slate-800/80 bg-slate-900/80 px-4 py-3 backdrop-blur-sm ${className}`}
@@ -61,20 +72,35 @@ export const AIHeader = memo<AIHeaderProps>(({
         </div>
       </div>
 
-      {/* Center: Active model */}
-      {activeModel && (
-        <div className="hidden items-center gap-2 sm:flex" aria-label={`Active model: ${activeModel.name}`}>
-          <span className="text-xs text-slate-500">Model:</span>
-          <span className="rounded-lg bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200">
-            {activeModel.name}
-          </span>
-        </div>
-      )}
+      {/* Center: Provider Selector */}
+      <div className="flex items-center gap-2">
+        <label htmlFor="ai-provider-select" className="hidden text-xs text-slate-400 md:inline">
+          Provider:
+        </label>
+        <select
+          id="ai-provider-select"
+          value={providerMode}
+          onChange={(e) => setProviderMode(e.target.value as AIProviderMode)}
+          aria-label="Select AI Provider"
+          className="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-200 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        >
+          {PROVIDERS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Right: Status */}
+      {/* Right: Active model & Status */}
       <div className="flex items-center gap-3">
-        {!activeModel && (
-          <span className="hidden text-xs text-slate-500 sm:block">No model selected</span>
+        {activeModel && (
+          <div className="hidden items-center gap-2 lg:flex" aria-label={`Active model: ${activeModel.name}`}>
+            <span className="text-xs text-slate-500">Model:</span>
+            <span className="rounded-lg bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200">
+              {activeModel.name}
+            </span>
+          </div>
         )}
         <AIStatus connectionStatus={connectionStatus} />
       </div>

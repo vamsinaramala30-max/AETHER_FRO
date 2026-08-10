@@ -16,6 +16,7 @@ import { aiOrchestrator, type ThinkingUpdateHandler } from './ai-orchestrator';
 import { streamingEngine } from './streaming-engine';
 import { responseEngine } from './response-engine';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
+import { useAIStore } from '../ai-store';
 
 let messageIdCounter = 0;
 function generateMessageId(): string {
@@ -111,6 +112,7 @@ export class AIEngine {
           conversation_id: request.conversationId,
           messages: request.messages,
           model_id: request.modelId,
+          providerMode: useAIStore.getState().providerMode,
           system_prompt: request.systemPrompt,
           rag_context: request.ragContext,
           stream: true,
@@ -183,6 +185,7 @@ export class AIEngine {
           conversation_id: request.conversationId,
           messages: request.messages,
           model_id: request.modelId,
+          providerMode: useAIStore.getState().providerMode,
           system_prompt: request.systemPrompt,
           rag_context: request.ragContext,
           stream: false,

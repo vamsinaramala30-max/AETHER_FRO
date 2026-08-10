@@ -25,6 +25,9 @@ import type {
   MemoryStatus,
   ToolRegistryStatus,
   AIPanel,
+  AIProviderMode,
+  FallbackNotice,
+  ProviderStatusInfo,
 } from './ai-types';
 import { AI_DEFAULTS, AI_STORAGE_KEYS } from './ai-constants';
 
@@ -33,6 +36,12 @@ import { AI_DEFAULTS, AI_STORAGE_KEYS } from './ai-constants';
 // ---------------------------------------------------------------------------
 
 export interface AIStoreActions {
+  // --- Provider ---
+  setProviderMode: (mode: AIProviderMode) => void;
+  setActiveProvider: (provider: string) => void;
+  setFallbackNotice: (notice: FallbackNotice | null) => void;
+  setProviderStatuses: (statuses: Record<string, ProviderStatusInfo>) => void;
+
   // --- Conversation ---
   setConversations: (conversations: Record<string, AIConversation>) => void;
   upsertConversation: (conversation: AIConversation) => void;
@@ -120,6 +129,10 @@ function loadPanelPref(): AIPanel {
 }
 
 const INITIAL_STATE: AIStoreState = {
+  providerMode: 'auto',
+  activeProvider: 'gemini',
+  fallbackNotice: null,
+  providerStatuses: {},
   conversations: {},
   activeConversationId: null,
   messages: {},
@@ -152,6 +165,12 @@ const INITIAL_STATE: AIStoreState = {
 export const useAIStore = create<AIStoreState & AIStoreActions>()(
   subscribeWithSelector((set, get) => ({
     ...INITIAL_STATE,
+
+    // ----- Provider -----
+    setProviderMode: (providerMode) => set({ providerMode }),
+    setActiveProvider: (activeProvider) => set({ activeProvider }),
+    setFallbackNotice: (fallbackNotice) => set({ fallbackNotice }),
+    setProviderStatuses: (providerStatuses) => set({ providerStatuses }),
 
     // ----- Conversation -----
     setConversations: (conversations) => set({ conversations }),

@@ -1,15 +1,16 @@
 // ============================================================================
-// AETHER AI — AIChat Component
+// AETHER AI — AIChat Component with Multi-Provider Fallback Transparency
 // ============================================================================
 
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import type { AIMessage as AIMessageType, AIError } from '../ai-types';
+import type { AIMessage as AIMessageType, AIError, FallbackNotice as FallbackNoticeType } from '../ai-types';
 import { AIMessage } from './AIMessage';
 import { AIInput } from './AIInput';
 import { AIThinking } from './AIThinking';
 import { AIWelcome } from './AIWelcome';
 import { AI_ERROR_MESSAGES } from '../ai-constants';
 import { useChat } from '../hooks/useChat';
+import { useAIStore } from '../ai-store';
 
 interface AIChatProps {
   conversationId: string | null;
@@ -43,6 +44,23 @@ function ErrorBanner({ error, onDismiss }: { error: AIError; onDismiss: () => vo
   );
 }
 
+function FallbackBanner({ notice }: { notice: FallbackNoticeType }): React.ReactElement {
+  return (
+    <div
+      className="mx-4 mb-3 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-950/50 px-4 py-2.5 shadow-sm"
+      role="status"
+      aria-live="polite"
+    >
+      <svg className="h-4 w-4 shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.007v.008H12v-.008zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z" />
+      </svg>
+      <p className="flex-1 text-xs text-amber-200">
+        <span className="font-semibold">Gemini Unavailable:</span> Switched fallback to <span className="font-bold text-amber-100 uppercase">{notice.activeProvider}</span> provider.
+      </p>
+    </div>
+  );
+}
+
 /**
  * AIChat — Full chat interface with message list, input, streaming, and error handling.
  * Handles empty state, welcome screen, and per-message rendering.
@@ -59,6 +77,7 @@ export const AIChat = memo<AIChatProps>(({ conversationId, onNewConversation, cl
     clearError,
   } = useChat();
 
+  const fallbackNotice = useAIStore((s) => s.fallbackNotice);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +137,11 @@ export const AIChat = memo<AIChatProps>(({ conversationId, onNewConversation, cl
           </>
         )}
       </div>
+
+      {/* Fallback Banner */}
+      {fallbackNotice && fallbackNotice.usedFallback && (
+        <FallbackBanner notice={fallbackNotice} />
+      )}
 
       {/* Error banner */}
       {error && <ErrorBanner error={error} onDismiss={clearError} />}
