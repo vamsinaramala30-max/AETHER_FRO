@@ -1,5 +1,17 @@
 import React from 'react';
-import { Home, Bot, FolderOpen, BookOpen, Zap, Building2, Settings } from 'lucide-react';
+import {
+  Home,
+  Sparkles,
+  Brain,
+  Command,
+  Cpu,
+  Bot,
+  FolderOpen,
+  BookOpen,
+  Zap,
+  Building2,
+  Settings,
+} from 'lucide-react';
 import { NavGroup } from './types';
 
 export const navigationGroups: NavGroup[] = [
@@ -20,15 +32,40 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         id: 'ai',
-        label: 'AI Operating System',
-        icon: React.createElement(Bot, { className: 'h-4 w-4' }),
+        label: 'AETHER AGENT',
+        icon: React.createElement(Sparkles, { className: 'h-4 w-4' }),
         href: '/app/ai',
         items: [
-          { label: 'Assistant', href: '/app/ai/assistant' },
-          { label: 'Memory', href: '/app/ai/memory' },
-          { label: 'Prompt Library', href: '/app/ai/prompts' },
-          { label: 'Models', href: '/app/ai/models' },
-          { label: 'Agents', href: '/app/ai/agents' },
+          {
+            id: 'agent',
+            label: 'Agent',
+            href: '/app/ai/assistant',
+            icon: React.createElement(Sparkles, { className: 'h-3.5 w-3.5' }),
+          },
+          {
+            id: 'memory',
+            label: 'Memory',
+            href: '/app/ai/memory',
+            icon: React.createElement(Brain, { className: 'h-3.5 w-3.5' }),
+          },
+          {
+            id: 'prompts',
+            label: 'Prompt Library',
+            href: '/app/ai/prompts',
+            icon: React.createElement(Command, { className: 'h-3.5 w-3.5' }),
+          },
+          {
+            id: 'models',
+            label: 'Models',
+            href: '/app/ai/models',
+            icon: React.createElement(Cpu, { className: 'h-3.5 w-3.5' }),
+          },
+          {
+            id: 'agents',
+            label: 'Agents',
+            href: '/app/ai/agents',
+            icon: React.createElement(Bot, { className: 'h-3.5 w-3.5' }),
+          },
         ],
       },
     ],

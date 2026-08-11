@@ -5,16 +5,17 @@ import { TaskCard } from './taskcard';
 interface TaskBoardProps {
   tasks: Task[];
   onStatusChange: (id: string, nextStatus: Task['status']) => void;
+  onDeleteTask?: (id: string) => void;
 }
 
 const COLUMNS: { id: Task['status']; title: string }[] = [
-  { id: 'todo', title: 'To Do' },
-  { id: 'in_progress', title: 'In Execution' },
-  { id: 'review', title: 'Review' },
-  { id: 'done', title: 'Done' },
+  { id: 'todo', title: 'TODO' },
+  { id: 'in_progress', title: 'IN EXECUTION' },
+  { id: 'review', title: 'REVIEW' },
+  { id: 'done', title: 'DONE' },
 ];
 
-export const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, onStatusChange }) => {
+export const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, onStatusChange, onDeleteTask }) => {
   return (
     <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-4">
       {COLUMNS.map((col) => {
@@ -40,7 +41,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, onStatusChange }) =
                 </div>
               ) : (
                 columnTasks.map((t) => (
-                  <TaskCard key={t.id} task={t} onStatusChange={onStatusChange} />
+                  <TaskCard
+                    key={t.id}
+                    task={t}
+                    onStatusChange={onStatusChange}
+                    onDeleteTask={onDeleteTask}
+                  />
                 ))
               )}
             </div>

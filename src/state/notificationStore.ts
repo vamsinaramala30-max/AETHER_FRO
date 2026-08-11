@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apiClient } from '../api/client';
 
 export interface Notification {
   id: string;
@@ -30,6 +31,7 @@ interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
 
+  fetchNotifications: () => Promise<void>;
   addNotification: (notif: NotificationInput) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
@@ -89,6 +91,32 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   notifications: initial,
   unreadCount: initial.filter((n) => !n.read).length,
 
+  fetchNotifications: async () => {
+    try {
+      const res = await apiClient.get<any>('/notifications');
+      const payload = res?.data || res;
+      const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
+      if (Array.isArray(items) && items.length > 0) {
+        const mapped: Notification[] = items.map((item: any) => ({
+          id: item.id || `notif_${Date.now()}`,
+          type: (item.type?.toLowerCase() as Notification['type']) || 'system',
+          title: item.title || 'Notification',
+          description: item.message || item.description || '',
+          time: item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+          read: Boolean(item.isRead ?? item.read),
+          createdAt: item.createdAt || new Date().toISOString(),
+        }));
+        saveNotifications(mapped);
+        set({
+          notifications: mapped,
+          unreadCount: mapped.filter((n) => !n.read).length,
+        });
+      }
+    } catch {
+      // Keep existing
+    }
+  },
+
   addNotification: (notif) => {
     set((state) => {
       const newNotif: Notification = {
@@ -110,6 +138,11 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   },
 
   markAsRead: (id) => {
+    try {
+      void apiClient.patch(`/notifications/${id}/read`);
+    } catch {
+      // Ignore
+    }
     set((state) => {
       const updated = state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
       saveNotifications(updated);
@@ -121,6 +154,11 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   },
 
   markAllAsRead: () => {
+    try {
+      void apiClient.patch('/notifications/read-all');
+    } catch {
+      // Ignore
+    }
     set((state) => {
       const updated = state.notifications.map((n) => ({ ...n, read: true }));
       saveNotifications(updated);
@@ -132,6 +170,11 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   },
 
   dismissNotification: (id) => {
+    try {
+      void apiClient.delete(`/notifications/${id}`);
+    } catch {
+      // Ignore
+    }
     set((state) => {
       const updated = state.notifications.filter((n) => n.id !== id);
       saveNotifications(updated);
@@ -143,6 +186,11 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   },
 
   clearAll: () => {
+    try {
+      void apiClient.delete('/notifications/clear-all');
+    } catch {
+      // Ignore
+    }
     saveNotifications([]);
     set({
       notifications: [],
@@ -150,3 +198,4 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     });
   },
 }));
+

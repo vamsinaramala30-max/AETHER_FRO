@@ -5,6 +5,7 @@ import { TaskForm } from './taskform';
 import { TaskFilters } from './taskfilter';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { CheckSquare, AlertCircle } from 'lucide-react';
+import { useNotificationStore } from '@/state/notificationStore';
 
 export const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -12,7 +13,9 @@ export const TasksPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TaskFiltersState>({
     search: '',
+    status: 'all',
     priority: 'all',
+    sortBy: 'newest',
     tag: '',
   });
 
@@ -37,8 +40,17 @@ export const TasksPage: React.FC = () => {
         setTasks((prev) =>
           Array.isArray(prev) ? prev.map((t) => (t.id === id ? updated : t)) : [],
         );
+        useNotificationStore.getState().addNotification({
+          title: 'Task Status Updated',
+          description: `Task state changed to ${nextStatus.toUpperCase().replace('_', ' ')}.`,
+          type: 'project',
+        });
       } catch {
-        alert('Failed to transition task state.');
+        useNotificationStore.getState().addNotification({
+          title: 'Task Transition Error',
+          description: 'Failed to transition task state on backend.',
+          type: 'project',
+        });
       }
     })();
   };
@@ -48,15 +60,46 @@ export const TasksPage: React.FC = () => {
       try {
         const created = await taskService.createTask(rawTask);
         setTasks((prev) => [...(Array.isArray(prev) ? prev : []), created]);
+        useNotificationStore.getState().addNotification({
+          title: 'Task Created',
+          description: `Task "${created.title}" added to control plane.`,
+          type: 'project',
+        });
       } catch {
-        alert('Failed to commit task.');
+        useNotificationStore.getState().addNotification({
+          title: 'Creation Failed',
+          description: 'Failed to commit new task to backend database.',
+          type: 'project',
+        });
+      }
+    })();
+  };
+
+  const handleDeleteTask = (id: string) => {
+    void (async () => {
+      try {
+        await taskService.deleteTask(id);
+        setTasks((prev) => (Array.isArray(prev) ? prev.filter((t) => t.id !== id) : []));
+        useNotificationStore.getState().addNotification({
+          title: 'Task Deleted',
+          description: 'Task permanently removed.',
+          type: 'project',
+        });
+      } catch {
+        useNotificationStore.getState().addNotification({
+          title: 'Deletion Error',
+          description: 'Failed to delete task from backend database.',
+          type: 'project',
+        });
       }
     })();
   };
 
   const filteredTasks = useMemo(() => {
     const safeTasks = Array.isArray(tasks) ? tasks : [];
-    return safeTasks.filter((t) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    const filtered = safeTasks.filter((t) => {
       const titleMatch = t.title
         ? t.title.toLowerCase().includes(filters.search.toLowerCase())
         : false;
@@ -64,13 +107,37 @@ export const TasksPage: React.FC = () => {
         ? t.description.toLowerCase().includes(filters.search.toLowerCase())
         : false;
       const matchSearch = titleMatch || descMatch;
+
       const matchPriority = filters.priority === 'all' || t.priority === filters.priority;
       const hasFilterTag = typeof filters.tag === 'string' && filters.tag.trim() !== '';
       const matchTag =
         !hasFilterTag ||
         (Array.isArray(t.tags) &&
           t.tags.some((tag) => tag.toLowerCase().includes(filters.tag.toLowerCase())));
-      return matchSearch && matchPriority && matchTag;
+
+      let matchStatus = true;
+      if (filters.status === 'overdue') {
+        matchStatus = Boolean(t.dueDate && t.dueDate < todayStr && t.status !== 'done');
+      } else if (filters.status !== 'all') {
+        matchStatus = t.status === filters.status;
+      }
+
+      return matchSearch && matchPriority && matchTag && matchStatus;
+    });
+
+    return filtered.sort((a, b) => {
+      if (filters.sortBy === 'oldest') {
+        return (a.createdAt || '').localeCompare(b.createdAt || '');
+      }
+      if (filters.sortBy === 'dueDate') {
+        return (a.dueDate || '9999').localeCompare(b.dueDate || '9999');
+      }
+      if (filters.sortBy === 'priority') {
+        const order = { urgent: 4, high: 3, medium: 2, low: 1 };
+        return (order[b.priority] || 0) - (order[a.priority] || 0);
+      }
+      // default: newest
+      return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
   }, [tasks, filters]);
 
@@ -113,8 +180,13 @@ export const TasksPage: React.FC = () => {
       <div className="mt-6 space-y-6">
         <TaskForm onSubmit={handleCreateTask} />
         <TaskFilters filters={filters} onChange={setFilters} />
-        <TaskBoard tasks={filteredTasks} onStatusChange={handleStatusChange} />
+        <TaskBoard
+          tasks={filteredTasks}
+          onStatusChange={handleStatusChange}
+          onDeleteTask={handleDeleteTask}
+        />
       </div>
     </PageWrapper>
   );
 };
+

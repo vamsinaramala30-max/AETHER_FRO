@@ -96,6 +96,7 @@ export const protectedRoutes: RouteObject[] = [
         children: [
           { index: true, element: <AIModulePage /> },
           { path: 'assistant', element: <AssistantPage /> },
+          { path: 'agent', element: <Navigate to="/app/ai/assistant" replace /> },
           { path: 'conversations', element: <Navigate to="/app/ai/assistant" replace /> },
           {
             path: 'conversations/:conversationId',

@@ -6,6 +6,8 @@ import { NoteCard } from './notecard';
 import { NoteEditor } from './noteeditor';
 import { NoteFilters } from './notefilters';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { FileText, Plus } from 'lucide-react';
+import { onActivityUpdate } from '@/shared/activityEvents';
 
 export const NotesPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -24,7 +26,7 @@ export const NotesPage: React.FC = () => {
       setNotes(data);
       setError(null);
     } catch {
-      setError('Failed to securely load your internal node knowledge map.');
+      setError('Failed to load notes from database.');
     } finally {
       setLoading(false);
     }
@@ -32,6 +34,10 @@ export const NotesPage: React.FC = () => {
 
   useEffect(() => {
     void fetchNotes();
+    const unsubscribe = onActivityUpdate(() => {
+      void fetchNotes();
+    });
+    return unsubscribe;
   }, [fetchNotes]);
 
   const handleSave = (
@@ -40,18 +46,16 @@ export const NotesPage: React.FC = () => {
     void (async () => {
       try {
         await notesService.saveNote(noteData);
-        setIsEditing(false);
-        setCurrentNote(null);
         await fetchNotes();
       } catch {
-        alert('Error updating configuration node.');
+        console.error('Error saving note.');
       }
     })();
   };
 
   const handleDelete = (id: string) => {
     void (async () => {
-      if (confirm('Permanently purge this item from memory cells?')) {
+      if (confirm('Permanently delete this note?')) {
         await notesService.deleteNote(id);
         await fetchNotes();
       }
@@ -71,15 +75,18 @@ export const NotesPage: React.FC = () => {
   const hasError = typeof error === 'string' && error.trim() !== '';
 
   return (
-    <PageWrapper>
+    <PageWrapper wide>
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Atomic Notes
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Capture persistent ideas, structures, and schemas asynchronously.
-          </p>
+        <div className="flex items-center gap-3">
+          <FileText className="h-7 w-7 text-amber-500 shrink-0" />
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Atomic Notes
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Capture persistent ideas, research, checklists, and rich markdown notes.
+            </p>
+          </div>
         </div>
         {!isEditing && (
           <button
@@ -87,9 +94,10 @@ export const NotesPage: React.FC = () => {
               setCurrentNote(null);
               setIsEditing(true);
             }}
-            className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-amber-500"
+            className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-amber-500"
           >
-            + Create Note
+            <Plus className="h-4 w-4" />
+            <span>Create Note</span>
           </button>
         )}
       </div>
@@ -101,6 +109,7 @@ export const NotesPage: React.FC = () => {
           onCancel={() => {
             setIsEditing(false);
             setCurrentNote(null);
+            void fetchNotes();
           }}
         />
       ) : (
@@ -115,8 +124,8 @@ export const NotesPage: React.FC = () => {
 
           {loading ? (
             <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-              <span className="animate-pulse text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                Syncing notes index...
+              <span className="animate-pulse text-xs font-semibold text-amber-500">
+                Syncing notes from workspace...
               </span>
             </div>
           ) : hasError ? (
@@ -124,10 +133,22 @@ export const NotesPage: React.FC = () => {
               {error}
             </div>
           ) : filteredNotes.length === 0 ? (
-            <div className="flex h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                No matching notes found.
-              </span>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+              <FileText className="mb-3 h-10 w-10 text-slate-400" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No notes yet</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Capture ideas, research and important information.
+              </p>
+              <button
+                onClick={() => {
+                  setCurrentNote(null);
+                  setIsEditing(true);
+                }}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-500"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create Note</span>
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -149,3 +170,4 @@ export const NotesPage: React.FC = () => {
     </PageWrapper>
   );
 };
+

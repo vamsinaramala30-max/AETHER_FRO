@@ -5,6 +5,7 @@ export interface Note {
   title: string;
   content: string;
   tags: string[];
+  isPinned?: boolean;
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -16,7 +17,10 @@ export interface DocumentItem {
   size: number;
   mimeType: string;
   url: string;
+  category?: string; // 'Notes' | 'Reports' | 'Meeting Notes' | 'Project Documents' | 'AI-generated Documents'
+  content?: string;
   tags: string[];
+  attachedFileIds?: string[];
   createdAt: string;
   userId: string;
   type: string;
@@ -26,7 +30,8 @@ export interface DocumentItem {
 export interface KnowledgeNode {
   id: string;
   label: string;
-  type: 'note' | 'document' | 'concept';
+  type: 'note' | 'document' | 'concept' | 'project' | 'task' | 'file';
+  category?: string;
   connections: string[];
 }
 
@@ -38,3 +43,4 @@ export interface SearchResult {
   score: number;
   date: string;
 }
+

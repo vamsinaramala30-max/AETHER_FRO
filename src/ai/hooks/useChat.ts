@@ -178,12 +178,17 @@ export function useChat(): UseChatReturn {
           setStreamingStatus('completed');
           setThinkingState(null);
           setStreamingSession(null);
+          if (response.confirmationRequest) {
+            useAIStore.getState().setPendingConfirmation(response.confirmationRequest);
+          }
           if (streamingMessageIdRef.current) {
             updateMessage(convId, streamingMessageIdRef.current, {
               content: response.content,
               status: 'delivered',
               citations: response.citations,
               toolInvocations: response.toolInvocations,
+              confidence: response.confidence,
+              confirmationRequest: response.confirmationRequest,
               tokens: response.usage
                 ? {
                     prompt: response.usage.promptTokens,

@@ -41,6 +41,19 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
+function formatFocusDuration(totalMinutes: number): string {
+  if (!totalMinutes || totalMinutes <= 0) return '0m';
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours > 0 && mins > 0) {
+    return `${hours}h ${mins}m`;
+  } else if (hours > 0) {
+    return `${hours}h`;
+  } else {
+    return `${mins}m`;
+  }
+}
+
 function formatDate(): string {
   return new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -392,6 +405,18 @@ export const HomePage: React.FC = () => {
     void loadDashboardData();
   }, [loadDashboardData]);
 
+  useEffect(() => {
+    const handleFocusUpdate = () => {
+      void fetchProductivity();
+    };
+    window.addEventListener('aether-focus-updated', handleFocusUpdate);
+    window.addEventListener('storage', handleFocusUpdate);
+    return () => {
+      window.removeEventListener('aether-focus-updated', handleFocusUpdate);
+      window.removeEventListener('storage', handleFocusUpdate);
+    };
+  }, [fetchProductivity]);
+
   const QUICK_ACTIONS: QuickAction[] = [
     {
       label: 'New Chat',
@@ -583,11 +608,11 @@ export const HomePage: React.FC = () => {
           />
           <StatCard
             label="Focus Time Today"
-            value={`${prodState.data?.focusMinutesToday ?? 0}m`}
+            value={formatFocusDuration(prodState.data?.focusMinutesToday ?? 0)}
             subtitle={prodState.status === 'success' ? 'Attentional telemetry' : undefined}
             icon={<Clock className="h-4 w-4 text-emerald-400" />}
             iconBg="bg-emerald-500/10"
-            href="/app/workspace/productivity-hub"
+            href="/app/workspace/focustimer"
             isError={prodState.status === 'error'}
             onRetry={fetchProductivity}
           />

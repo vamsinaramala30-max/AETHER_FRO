@@ -1,7 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { productivityService } from "../productivity-hub/productivityservice";
 
 type TimerStatus = "idle" | "running" | "paused" | "finished";
-type DailyHistory = Record<string, number>;
+
+export interface FocusSessionItem {
+  id: string;
+  minutes: number;
+  createdAt: number;
+}
+
+export type DailyHistory = Record<string, FocusSessionItem[]>;
 
 const MIN_MINUTES = 1;
 const MAX_MINUTES = 240;
@@ -24,8 +32,6 @@ function todayKey(): string {
 }
 
 function formatDateLabel(key: string): string {
-  const [y, m, d] = key.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
   const today = todayKey();
   if (key === today) return "Today";
   const yesterday = new Date();
@@ -35,10 +41,13 @@ function formatDateLabel(key: string): string {
     "0"
   )}-${String(yesterday.getDate()).padStart(2, "0")}`;
   if (key === yKey) return "Yesterday";
-  return date.toLocaleDateString(undefined, {
-    weekday: "short",
+
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -325,8 +334,46 @@ function loadHistory(): DailyHistory {
   try {
     const raw = window.localStorage.getItem(HISTORY_KEY);
     if (!raw) return {};
-    const parsed = JSON.parse(raw) as unknown;
-    return parsed && typeof parsed === "object" ? (parsed as DailyHistory) : {};
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (!parsed || typeof parsed !== "object") return {};
+
+    const normalized: DailyHistory = {};
+    for (const [key, val] of Object.entries(parsed)) {
+      if (typeof val === "number") {
+        normalized[key] = [
+          {
+            id: `legacy-${key}`,
+            minutes: val,
+            createdAt: new Date(key).getTime() || Date.now(),
+          },
+        ];
+      } else if (Array.isArray(val)) {
+        normalized[key] = val
+          .map((item, idx) => {
+            if (typeof item === "number") {
+              return {
+                id: `${key}-${idx}`,
+                minutes: item,
+                createdAt: Date.now() - idx * 1000,
+              };
+            } else if (
+              item &&
+              typeof item === "object" &&
+              typeof (item as any).minutes === "number"
+            ) {
+              return {
+                id: (item as any).id || `${key}-${idx}`,
+                minutes: (item as any).minutes,
+                createdAt: (item as any).createdAt || Date.now(),
+              };
+            }
+            return { id: `${key}-${idx}`, minutes: 0, createdAt: Date.now() };
+          })
+          .filter((s) => s.minutes > 0)
+          .sort((a, b) => b.createdAt - a.createdAt);
+      }
+    }
+    return normalized;
   } catch {
     return {};
   }
@@ -367,6 +414,12 @@ export default function FocusTimer({
   // NodeJS.Timeout, in case @types/node is also present in the project.
   const intervalRef = useRef<number | null>(null);
 
+  const notifyUpdate = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("aether-focus-updated"));
+    }
+  }, []);
+
   // Load saved history once on mount.
   useEffect(() => {
     setHistory(loadHistory());
@@ -380,15 +433,41 @@ export default function FocusTimer({
 
   const recordSession = useCallback(
     (minutes: number) => {
+      void productivityService.logFocusSession(minutes);
       setHistory((prev) => {
         const key = todayKey();
-        const nextTotal = (prev[key] || 0) + minutes;
-        const next: DailyHistory = { ...prev, [key]: nextTotal };
+        const newSession: FocusSessionItem = {
+          id: `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          minutes,
+          createdAt: Date.now(),
+        };
+        const existing = prev[key] || [];
+        const next: DailyHistory = { ...prev, [key]: [newSession, ...existing] };
         persistHistory(next);
         return next;
       });
+      notifyUpdate();
     },
-    [persistHistory]
+    [persistHistory, notifyUpdate]
+  );
+
+  const deleteSession = useCallback(
+    (dateKey: string, sessionId: string) => {
+      setHistory((prev) => {
+        const currentList = prev[dateKey] || [];
+        const updatedList = currentList.filter((s) => s.id !== sessionId);
+        const next = { ...prev };
+        if (updatedList.length > 0) {
+          next[dateKey] = updatedList;
+        } else {
+          delete next[dateKey];
+        }
+        persistHistory(next);
+        return next;
+      });
+      notifyUpdate();
+    },
+    [persistHistory, notifyUpdate]
   );
 
   const deleteDay = useCallback(
@@ -399,14 +478,16 @@ export default function FocusTimer({
         persistHistory(next);
         return next;
       });
+      notifyUpdate();
     },
-    [persistHistory]
+    [persistHistory, notifyUpdate]
   );
 
   const clearAllHistory = useCallback(() => {
     setHistory({});
     persistHistory({});
-  }, [persistHistory]);
+    notifyUpdate();
+  }, [persistHistory, notifyUpdate]);
 
   const clearTick = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -527,7 +608,8 @@ export default function FocusTimer({
   const isPaused = status === "paused";
   const isIdle = status === "idle";
 
-  const todayTotal = history[todayKey()] || 0;
+  const todaySessions = history[todayKey()] || [];
+  const todayTotal = todaySessions.reduce((sum, s) => sum + s.minutes, 0);
   const sortedDays = Object.keys(history).sort((a, b) => (a < b ? 1 : -1));
 
   return (
@@ -649,31 +731,55 @@ export default function FocusTimer({
           )}
 
           {historyLoaded && sortedDays.length > 0 && (
-            <ul className="max-h-52 space-y-1.5 overflow-y-auto pr-1">
-              {sortedDays.map((key) => (
-                <li
-                  key={key}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-gray-700/60"
-                >
-                  <span className="font-medium text-gray-700 dark:text-gray-200">
-                    {formatDateLabel(key)}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {history[key]} min
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => deleteDay(key)}
-                      aria-label={`Delete history for ${formatDateLabel(key)}`}
-                      className="text-gray-300 transition-colors hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
-                    >
-                      ✕
-                    </button>
+            <div className="max-h-60 space-y-3 overflow-y-auto pr-1">
+              {sortedDays.map((key) => {
+                const daySessions = history[key] || [];
+                const dayTotal = daySessions.reduce((sum, s) => sum + s.minutes, 0);
+                return (
+                  <div
+                    key={key}
+                    className="rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700/50 dark:bg-gray-700/40"
+                  >
+                    <div className="flex items-center justify-between border-b border-gray-200/60 pb-2 dark:border-gray-600/50">
+                      <span className="font-semibold text-xs tracking-wider uppercase text-gray-700 dark:text-gray-200">
+                        {formatDateLabel(key)}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                          {dayTotal} min total
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => deleteDay(key)}
+                          aria-label={`Delete history for ${formatDateLabel(key)}`}
+                          className="text-gray-400 transition-colors hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                    <ul className="mt-2 space-y-1.5">
+                      {daySessions.map((session) => (
+                        <li
+                          key={session.id}
+                          className="flex items-center justify-between rounded-md bg-white px-2.5 py-1.5 text-xs text-gray-700 shadow-xs dark:bg-gray-800 dark:text-gray-200"
+                        >
+                          <span className="font-medium">{session.minutes} min Focus</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteSession(key, session.id)}
+                            aria-label={`Delete session of ${session.minutes} min`}
+                            className="text-gray-300 transition-colors hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 text-[10px]"
+                          >
+                            ✕
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </li>
-              ))}
-            </ul>
+                );
+              })}
+            </div>
           )}
 
           {historyError && (

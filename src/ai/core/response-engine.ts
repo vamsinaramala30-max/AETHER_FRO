@@ -27,6 +27,9 @@ export interface RawBackendResponse {
   finish_reason?: string;
   citations?: unknown[];
   tool_invocations?: unknown[];
+  confidence?: string;
+  confirmationRequest?: unknown;
+  confirmation_request?: unknown;
   usage?: {
     prompt_tokens?: number;
     completion_tokens?: number;
@@ -110,6 +113,8 @@ export function normalizeGenerationResponse(
     ? (finishReason as GenerationResponse['finishReason'])
     : undefined;
 
+  const confReq = raw.confirmationRequest ?? raw.confirmation_request;
+
   return aiSuccess<GenerationResponse>({
     messageId,
     conversationId,
@@ -118,6 +123,8 @@ export function normalizeGenerationResponse(
     finishReason: resolvedFinish,
     citations: citations.length > 0 ? citations : undefined,
     toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined,
+    confidence: raw.confidence as any,
+    confirmationRequest: confReq as any,
     usage: raw.usage
       ? {
           promptTokens: raw.usage.prompt_tokens ?? 0,
@@ -144,6 +151,8 @@ export function generationResponseToMessage(response: GenerationResponse): AIMes
     updatedAt: response.generatedAt,
     citations: response.citations,
     toolInvocations: response.toolInvocations,
+    confidence: response.confidence,
+    confirmationRequest: response.confirmationRequest,
     tokens: response.usage
       ? {
           prompt: response.usage.promptTokens,

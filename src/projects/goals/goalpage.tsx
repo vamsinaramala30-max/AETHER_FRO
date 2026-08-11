@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { goalService, Goal } from './goalservice';
+import { goalService, Goal, GoalStatus } from './goalservice';
 import { GoalCard } from './goalcard';
 import { GoalForm } from './golaform';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Target } from 'lucide-react';
+import { useNotificationStore } from '@/state/notificationStore';
 
 export const GoalsPage: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -11,9 +12,18 @@ export const GoalsPage: React.FC = () => {
 
   useEffect(() => {
     void (async () => {
-      const data = await goalService.getGoals();
-      setGoals(data);
-      setLoading(false);
+      try {
+        const data = await goalService.getGoals();
+        setGoals(data);
+      } catch {
+        useNotificationStore.getState().addNotification({
+          title: 'Goal Sync Failed',
+          description: 'Could not load project goals from the backend server.',
+          type: 'project',
+        });
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -22,19 +32,81 @@ export const GoalsPage: React.FC = () => {
       try {
         const updated = await goalService.updateGoalProgress(id, nextProgress);
         setGoals((prev) => prev.map((g) => (g.id === id ? updated : g)));
+        useNotificationStore.getState().addNotification({
+          title: 'Progress Updated',
+          description: `Goal progress updated to ${nextProgress}%.`,
+          type: 'project',
+        });
       } catch {
-        alert('Error updating progress.');
+        useNotificationStore.getState().addNotification({
+          title: 'Update Error',
+          description: 'Unable to save goal progress to database.',
+          type: 'project',
+        });
       }
     })();
   };
 
-  const handleCreateGoal = (rawGoal: Omit<Goal, 'id' | 'progress'>) => {
+  const handleStatusChange = (id: string, nextStatus: GoalStatus) => {
     void (async () => {
       try {
-        const created = await goalService.createGoal({ ...rawGoal, progress: 0 });
-        setGoals((prev) => [...prev, created]);
+        const updated = await goalService.updateGoal(id, { status: nextStatus });
+        setGoals((prev) => prev.map((g) => (g.id === id ? updated : g)));
+        useNotificationStore.getState().addNotification({
+          title: 'Status Updated',
+          description: `Goal status transitioned to ${nextStatus.replace('_', ' ')}.`,
+          type: 'project',
+        });
       } catch {
-        alert('Error creating goal.');
+        useNotificationStore.getState().addNotification({
+          title: 'Status Error',
+          description: 'Failed to transition goal status.',
+          type: 'project',
+        });
+      }
+    })();
+  };
+
+  const handleCreateGoal = (rawGoal: Omit<Goal, 'id' | 'progress' | 'status'>) => {
+    void (async () => {
+      try {
+        const created = await goalService.createGoal({
+          ...rawGoal,
+          progress: 0,
+          status: 'PLANNED',
+        });
+        setGoals((prev) => [created, ...prev]);
+        useNotificationStore.getState().addNotification({
+          title: 'Goal Established',
+          description: `New goal "${created.title}" successfully committed to project.`,
+          type: 'project',
+        });
+      } catch {
+        useNotificationStore.getState().addNotification({
+          title: 'Goal Creation Error',
+          description: 'Unable to establish new goal on backend.',
+          type: 'project',
+        });
+      }
+    })();
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    void (async () => {
+      try {
+        await goalService.deleteGoal(id);
+        setGoals((prev) => prev.filter((g) => g.id !== id));
+        useNotificationStore.getState().addNotification({
+          title: 'Goal Removed',
+          description: 'Goal permanently removed from project.',
+          type: 'project',
+        });
+      } catch {
+        useNotificationStore.getState().addNotification({
+          title: 'Deletion Error',
+          description: 'Failed to delete goal from backend database.',
+          type: 'project',
+        });
       }
     })();
   };
@@ -71,7 +143,13 @@ export const GoalsPage: React.FC = () => {
         {Array.isArray(goals) && goals.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {goals.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} onUpdateProgress={handleUpdateProgress} />
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                onUpdateProgress={handleUpdateProgress}
+                onStatusChange={handleStatusChange}
+                onDeleteGoal={handleDeleteGoal}
+              />
             ))}
           </div>
         ) : (
@@ -89,3 +167,4 @@ export const GoalsPage: React.FC = () => {
     </PageWrapper>
   );
 };
+

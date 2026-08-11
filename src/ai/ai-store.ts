@@ -28,6 +28,7 @@ import type {
   AIProviderMode,
   FallbackNotice,
   ProviderStatusInfo,
+  PendingConfirmation,
 } from './ai-types';
 import { AI_DEFAULTS, AI_STORAGE_KEYS } from './ai-constants';
 
@@ -91,6 +92,9 @@ export interface AIStoreActions {
   // --- Connection ---
   setConnectionStatus: (status: AIConnectionStatus) => void;
 
+  // --- Confirmation ---
+  setPendingConfirmation: (confirmation: PendingConfirmation | null) => void;
+
   // --- Error ---
   setError: (error: AIError | null) => void;
   clearError: () => void;
@@ -153,6 +157,7 @@ const INITIAL_STATE: AIStoreState = {
   availableTools: [],
   toolRegistryStatus: null,
   connectionStatus: 'connecting',
+  pendingConfirmation: null,
   error: null,
   sidebarOpen: loadSidebarPref(),
   activePanel: loadPanelPref(),
@@ -323,6 +328,9 @@ export const useAIStore = create<AIStoreState & AIStoreActions>()(
 
     // ----- Connection -----
     setConnectionStatus: (connectionStatus) => set({ connectionStatus }),
+
+    // ----- Confirmation -----
+    setPendingConfirmation: (pendingConfirmation) => set({ pendingConfirmation }),
 
     // ----- Error -----
     setError: (error) => set({ error }),

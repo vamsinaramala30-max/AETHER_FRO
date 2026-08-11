@@ -1,19 +1,32 @@
 import React from 'react';
 import { KnowledgeNode } from '../types';
+import { Network } from 'lucide-react';
 
 interface KnowledgeGraphProps {
   nodes: KnowledgeNode[];
 }
 
 export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
+  if (!nodes || nodes.length === 0) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+        <Network className="mb-2 h-10 w-10 text-slate-400" />
+        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No connected knowledge yet</p>
+        <p className="mt-1 text-xs text-slate-400 max-w-sm">
+          Add files, documents, projects, or notes to start building your connected AETHER knowledge graph.
+        </p>
+      </div>
+    );
+  }
+
   const width = 800;
   const height = 400;
   const centerX = width / 2;
   const centerY = height / 2;
 
   const positionedNodes = nodes.map((node, index) => {
-    const angle = index * ((Math.PI * 2) / Math.min(nodes.length, 12)) + index * 0.2;
-    const radius = 50 + Math.floor(index / 6) * 60;
+    const angle = index * ((Math.PI * 2) / Math.min(nodes.length, 16)) + index * 0.15;
+    const radius = 60 + (index % 3) * 65;
     return {
       ...node,
       x: centerX + Math.cos(angle) * radius,
@@ -25,7 +38,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
 
   const links: Array<{ x1: number; y1: number; x2: number; y2: number; id: string }> = [];
   positionedNodes.forEach((source) => {
-    source.connections.forEach((targetId) => {
+    (source.connections || []).forEach((targetId) => {
       const target = nodeMap.get(targetId);
       if (target) {
         links.push({
@@ -39,10 +52,13 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
     });
   });
 
-  const colorMap = {
+  const colorMap: Record<string, string> = {
     note: '#f59e0b',
-    document: '#3b82f6',
+    document: '#10b981',
     concept: '#a855f7',
+    project: '#6366f1',
+    task: '#ec4899',
+    file: '#3b82f6',
   };
 
   return (
@@ -57,7 +73,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
               x2={link.x2}
               y2={link.y2}
               stroke="currentColor"
-              className="text-slate-300 dark:text-slate-700"
+              className="text-slate-300 dark:text-slate-700 opacity-60"
               strokeWidth="1.5"
               strokeDasharray="4 2"
             />
@@ -69,8 +85,8 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
                 cx={node.x}
                 cy={node.y}
                 r={node.type === 'concept' ? '8' : '6'}
-                fill={colorMap[node.type]}
-                className="opacity-80 transition-all duration-200 group-hover:opacity-100"
+                fill={colorMap[node.type] || '#64748b'}
+                className="opacity-80 transition-all duration-200 group-hover:opacity-100 group-hover:scale-125"
               />
               <text
                 x={node.x}
@@ -84,17 +100,27 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
           ))}
         </svg>
       </div>
-      <div className="mt-2 flex justify-center gap-6 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+      <div className="mt-3 flex flex-wrap justify-center gap-5 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-indigo-500"></span> Project
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-pink-500"></span> Task
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Document
+        </div>
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-amber-500"></span> Note
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Document
+          <span className="h-2.5 w-2.5 rounded-full bg-blue-500"></span> File
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-purple-500"></span> Concept
+          <span className="h-2.5 w-2.5 rounded-full bg-purple-500"></span> Concept / Tag
         </div>
       </div>
     </div>
   );
 };
+

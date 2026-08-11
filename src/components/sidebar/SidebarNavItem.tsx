@@ -161,7 +161,20 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
                 {isSubActive && (
                   <span className="absolute -left-3 bottom-2 top-2 w-0.5 rounded-full bg-indigo-500" />
                 )}
-                <span className="truncate">{sub.label}</span>
+                <div className="flex min-w-0 flex-1 items-center gap-2 truncate">
+                  {sub.icon && (
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center transition-colors duration-200 ${
+                        isSubActive
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-aether-muted/70 group-hover:text-aether-main'
+                      }`}
+                    >
+                      {sub.icon}
+                    </span>
+                  )}
+                  <span className="truncate">{sub.label}</span>
+                </div>
                 {sub.badge && (
                   <span className="rounded-full bg-aether-subtle px-1.5 py-0.5 text-[9px] font-bold text-aether-muted">
                     {sub.badge}

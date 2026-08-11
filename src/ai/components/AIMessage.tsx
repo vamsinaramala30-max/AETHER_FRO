@@ -99,6 +99,30 @@ export const AIMessage = memo<AIMessageProps>(({ message, className = '' }) => {
                 : 'rounded-tl-sm bg-slate-800/80 text-slate-100'
           }`}
         >
+          {isAssistant && message.confidence && (
+            <div className="mb-2 flex items-center gap-1.5">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border ${
+                  message.confidence === 'HIGH_CONFIDENCE'
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                    : message.confidence === 'MEDIUM_CONFIDENCE'
+                      ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
+                      : message.confidence === 'LOW_CONFIDENCE'
+                        ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                        : 'border-purple-500/30 bg-purple-500/10 text-purple-400'
+                }`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                {message.confidence === 'HIGH_CONFIDENCE'
+                  ? 'Verified Evidence'
+                  : message.confidence === 'MEDIUM_CONFIDENCE'
+                    ? 'Qualified Answer'
+                    : message.confidence === 'LOW_CONFIDENCE'
+                      ? 'Low Confidence'
+                      : 'Insufficient Info'}
+              </span>
+            </div>
+          )}
           {isError ? (
             <p className="text-sm">{message.error ?? 'An error occurred.'}</p>
           ) : (

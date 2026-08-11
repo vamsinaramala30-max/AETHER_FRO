@@ -1,10 +1,11 @@
 import { taskService } from '../../projects/tasks/taskservice';
+import { apiClient } from '../../api/client';
 
 export interface ProductivityStatsData {
   focusTimeToday: number; // in minutes
   tasksCompleted: number;
   efficiencyScore: number; // percentage
-  weeklyComparison: number; // differential indicator
+  weeklyComparison?: number; // optional legacy field
 }
 
 export interface ChartDataPoint {
@@ -13,7 +14,38 @@ export interface ChartDataPoint {
   tasks: number;
 }
 
-const STATS_STORAGE_KEY = 'aether_productivity_stats_v2';
+export const FOCUS_HISTORY_KEY = 'focus-timer-history';
+
+export function getLocalDateKey(date: Date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function getTodayFocusMinutes(): number {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const raw = window.localStorage.getItem(FOCUS_HISTORY_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    const today = getLocalDateKey();
+    const todayData = parsed[today];
+    if (typeof todayData === 'number') {
+      return todayData;
+    }
+    if (Array.isArray(todayData)) {
+      return todayData.reduce((sum: number, item: any) => {
+        if (typeof item === 'number') return sum + item;
+        if (item && typeof item.minutes === 'number') return sum + item.minutes;
+        return sum;
+      }, 0);
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
 
 const emptyHistory: ChartDataPoint[] = [
   { day: 'Mon', focusMinutes: 0, tasks: 0 },
@@ -27,17 +59,17 @@ const emptyHistory: ChartDataPoint[] = [
 
 export const productivityService = {
   async getStats(): Promise<ProductivityStatsData> {
-    let focusMins = 0;
+    let focusMins = getTodayFocusMinutes();
+
+    // Fetch server focus analytics for current user
     try {
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(STATS_STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          focusMins = typeof parsed.focusTimeToday === 'number' ? parsed.focusTimeToday : 0;
-        }
+      const res = await apiClient.get<any>('/workspaces/default/focus/analytics');
+      const data = res?.data || res;
+      if (typeof data?.totalFocusMinutes === 'number') {
+        focusMins = Math.max(focusMins, data.totalFocusMinutes);
       }
     } catch {
-      focusMins = 0;
+      // Fallback to local
     }
 
     // Fetch real tasks from taskService to calculate actual completed task count
@@ -72,23 +104,50 @@ export const productivityService = {
   },
 
   async logFocusSession(minutes: number): Promise<ProductivityStatsData> {
-    let currentFocus = 0;
+    // 1. Sync session with backend Focus API
     try {
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(STATS_STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          currentFocus = typeof parsed.focusTimeToday === 'number' ? parsed.focusTimeToday : 0;
-        }
+      const startRes = await apiClient.post<any>('/workspaces/default/focus/start', {
+        durationMinutes: minutes,
+        type: 'focus',
+      });
+      const session = startRes?.data || startRes;
+      if (session?.id) {
+        await apiClient.post<any>(`/workspaces/default/focus/${session.id}/complete`, {
+          durationSeconds: minutes * 60,
+        });
       }
     } catch {
-      currentFocus = 0;
+      // Ignore network errors for local cache fallback
     }
 
-    const newFocus = currentFocus + minutes;
+    // 2. Update local storage cache
     try {
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify({ focusTimeToday: newFocus }));
+        const raw = window.localStorage.getItem(FOCUS_HISTORY_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        const today = getLocalDateKey();
+        const newSession = {
+          id: `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          minutes,
+          createdAt: Date.now(),
+        };
+
+        const existing = parsed[today];
+        let updated: any[];
+        if (Array.isArray(existing)) {
+          updated = [newSession, ...existing];
+        } else if (typeof existing === 'number') {
+          updated = [
+            newSession,
+            { id: `legacy_${today}`, minutes: existing, createdAt: Date.now() },
+          ];
+        } else {
+          updated = [newSession];
+        }
+
+        parsed[today] = updated;
+        window.localStorage.setItem(FOCUS_HISTORY_KEY, JSON.stringify(parsed));
+        window.dispatchEvent(new CustomEvent('aether-focus-updated'));
       }
     } catch {
       // Ignore
@@ -97,3 +156,4 @@ export const productivityService = {
     return this.getStats();
   },
 };
+

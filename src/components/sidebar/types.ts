@@ -5,6 +5,7 @@ export interface NavSubItem {
   label: string;
   href: string;
   badge?: string | number;
+  icon?: React.ReactNode;
 }
 
 export interface NavSectionItem {

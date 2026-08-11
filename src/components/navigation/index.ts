@@ -5,3 +5,5 @@ export * from './Breadcrumb';
 export * from './SearchBar';
 export * from './UserMenu';
 export * from './CommandPalette';
+export * from './AppFooter';
+

@@ -98,6 +98,20 @@ export interface ToolInvocationRef {
   completedAt?: number;
 }
 
+export type ConfidenceLevel =
+  | 'HIGH_CONFIDENCE'
+  | 'MEDIUM_CONFIDENCE'
+  | 'LOW_CONFIDENCE'
+  | 'INSUFFICIENT_INFORMATION';
+
+export interface PendingConfirmation {
+  actionId: string;
+  toolName: string;
+  description: string;
+  riskLevel: 'READ' | 'LOW_RISK_WRITE' | 'HIGH_RISK_WRITE' | 'DESTRUCTIVE';
+  args: Record<string, unknown>;
+}
+
 export interface AIMessage {
   id: string;
   conversationId: string;
@@ -107,6 +121,8 @@ export interface AIMessage {
   createdAt: number;
   updatedAt: number;
   error?: string;
+  confidence?: ConfidenceLevel;
+  confirmationRequest?: PendingConfirmation;
   citations?: SourceCitationRef[];
   toolInvocations?: ToolInvocationRef[];
   ragContext?: string[];
@@ -479,6 +495,8 @@ export interface GenerationResponse {
   finishReason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
   citations?: SourceCitationRef[];
   toolInvocations?: ToolInvocationRef[];
+  confidence?: ConfidenceLevel;
+  confirmationRequest?: PendingConfirmation;
   usage?: {
     promptTokens: number;
     completionTokens: number;
@@ -612,6 +630,9 @@ export interface AIStoreState {
 
   // Connection
   connectionStatus: AIConnectionStatus;
+
+  // Confirmation Flow
+  pendingConfirmation: PendingConfirmation | null;
 
   // Error
   error: AIError | null;

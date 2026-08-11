@@ -13,6 +13,7 @@ import {
 
 import { useTheme } from '../providers/themeprovider';
 import { Sidebar } from '../../components/sidebar/Sidebar';
+import { AppFooter } from '../../components/navigation/AppFooter';
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded modals/components
@@ -504,8 +505,13 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
         </div>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto bg-aether-bg p-3 transition-all duration-200 sm:p-4 md:p-6">
-          <Outlet />
+        <main className="flex flex-1 flex-col overflow-y-auto bg-aether-bg transition-all duration-200">
+          <div className="flex min-h-full flex-1 flex-col justify-between p-3 pb-0 sm:p-4 sm:pb-0 md:p-6 md:pb-0">
+            <div className="flex-1 pb-4 sm:pb-6">
+              <Outlet />
+            </div>
+            <AppFooter />
+          </div>
         </main>
       </div>
 

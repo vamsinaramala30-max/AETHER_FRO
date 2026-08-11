@@ -4,7 +4,7 @@ import { Target, Plus } from 'lucide-react';
 import { useNotificationStore } from '@/state/notificationStore';
 
 interface GoalFormProps {
-  onSubmit: (goal: Omit<Goal, 'id' | 'progress'>) => void;
+  onSubmit: (goal: Omit<Goal, 'id' | 'progress' | 'status'>) => void;
 }
 
 export const GoalForm: React.FC<GoalFormProps> = ({ onSubmit }) => {

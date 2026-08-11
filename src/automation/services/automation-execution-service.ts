@@ -1,9 +1,12 @@
 import { automationApi } from '../automation-api';
 import { ExecutionLog } from '../automation-types';
+import { triggerActivityUpdate } from '@/shared/activityEvents';
 
 export class AutomationExecutionService {
   public async executeRule(id: string): Promise<{ success: boolean; executionId: string }> {
-    return automationApi.executeAutomation(id);
+    const res = await automationApi.executeAutomation(id);
+    triggerActivityUpdate();
+    return res;
   }
 
   public async fetchLogs(query?: {
@@ -17,3 +20,4 @@ export class AutomationExecutionService {
 }
 
 export const automationExecutionService = new AutomationExecutionService();
+

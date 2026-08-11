@@ -20,7 +20,7 @@ import { DEFAULT_AI_CONFIG } from '../ai-config';
  * Trim the message history to fit within context window limits.
  * Always keeps the system-level context and trims oldest messages first.
  */
-function trimMessages(
+export function trimMessages(
   messages: AIMessage[],
   maxChars: number,
 ): AIMessage[] {

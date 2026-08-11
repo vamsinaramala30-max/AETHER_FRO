@@ -92,6 +92,9 @@ function PanelContent({ panel, chatActions }: {
   );
 }
 
+import { ConfirmationDialog } from './components/ConfirmationDialog';
+import { useAIStore } from './ai-store';
+
 /**
  * AIPage — Full-page AI experience with responsive sidebar and panel switching.
  */
@@ -107,6 +110,8 @@ export const AIPage = memo(() => {
   } = useAI();
 
   const chatActions = useChat();
+  const pendingConfirmation = useAIStore((s) => s.pendingConfirmation);
+  const setPendingConfirmation = useAIStore((s) => s.setPendingConfirmation);
 
   const _handlePanelChange = useCallback(
     (panel: AIPanel) => {
@@ -128,6 +133,21 @@ export const AIPage = memo(() => {
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
       />
+
+      {/* Confirmation Dialog Modal */}
+      {pendingConfirmation && (
+        <ConfirmationDialog
+          confirmation={pendingConfirmation}
+          onConfirm={() => {
+            const confirmedMsg = `Authorized: Executing ${pendingConfirmation.toolName}`;
+            setPendingConfirmation(null);
+            void chatActions.sendMessage(confirmedMsg);
+          }}
+          onCancel={() => {
+            setPendingConfirmation(null);
+          }}
+        />
+      )}
 
       {/* Main layout */}
       <div className="relative flex flex-1 overflow-hidden">

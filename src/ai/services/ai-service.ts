@@ -88,11 +88,23 @@ export class AIService {
       status: 'sent',
     });
 
+    // Retrieve user ID from auth state/storage
+    let userId = 'user_default';
+    try {
+      const authRaw = localStorage.getItem('aether-auth-storage');
+      if (authRaw) {
+        const parsed = JSON.parse(authRaw);
+        userId = parsed?.state?.user?.id || parsed?.state?.userId || 'user_default';
+      }
+    } catch {
+      // Fallback if unavailable
+    }
+
     // Build AI context from current store state
     const messages = store.messages[opts.conversationId] ?? [];
     const context: AIContext = {
       conversationId: opts.conversationId,
-      userId: '', // Set by auth layer
+      userId,
       messages,
       activeModel: store.activeModel,
       intent: null,
