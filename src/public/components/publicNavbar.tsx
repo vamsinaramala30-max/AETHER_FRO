@@ -13,7 +13,9 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Privacy Focus', href: '/privacy' },
   { label: 'Security', href: '/security' },
-  { label: 'System States', href: '/states' },
+  { label: 'Docs', href: '/docs' },
+  { label: 'Help', href: '/help' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export const PublicNavbar: React.FC = () => {

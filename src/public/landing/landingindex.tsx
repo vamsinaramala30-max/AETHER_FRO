@@ -13,7 +13,6 @@ import { PlatformPreview } from './PlatformPreview/PlatformPreview';
 import { PrivacyPreview } from './PrivacyPreview/privacypreview';
 import { TrustCenterPreview } from './TrustCenterPreview/TrustCenterPreview';
 import { CTA } from './CTA/CTA';
-import { Footer } from './Footer/footer';
 
 export const LandingIndex: React.FC = () => {
   return (
@@ -55,9 +54,6 @@ export const LandingIndex: React.FC = () => {
 
           {/* 10. Final CTA */}
           <CTA />
-
-          {/* 11. Footer */}
-          <Footer />
         </div>
       </div>
     </PublicPageLayout>
