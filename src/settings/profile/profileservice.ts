@@ -1,56 +1,79 @@
-import { apiClient } from '../../api/client';
-import { normalizeUserProfile } from '../../auth/userProfile';
+import { api } from '../../shared/api';
 
 export interface UserProfile {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  username?: string | null;
+  fullName?: string | null;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string | null;
-  bio?: string;
-  company?: string;
-}
-
-function toUserProfile(
-  payload: Record<string, unknown>,
-  fallback: Partial<UserProfile> = {},
-): UserProfile {
-  const normalized = normalizeUserProfile({
-    id: fallback.id,
-    email: fallback.email,
-    fullName: typeof payload.fullName === 'string' ? payload.fullName : undefined,
-    name: typeof payload.name === 'string' ? payload.name : undefined,
-    firstName: typeof payload.firstName === 'string' ? payload.firstName : undefined,
-    lastName: typeof payload.lastName === 'string' ? payload.lastName : undefined,
-    avatarUrl: typeof payload.avatarUrl === 'string' ? payload.avatarUrl : undefined,
-    bio: typeof payload.bio === 'string' ? payload.bio : fallback.bio,
-    company: typeof payload.company === 'string' ? payload.company : fallback.company,
-    role: typeof payload.role === 'string' ? payload.role : undefined,
-  });
-
-  return {
-    id: normalized.id || fallback.id || '',
-    email: normalized.email || fallback.email || '',
-    firstName: normalized.firstName || fallback.firstName || '',
-    lastName: normalized.lastName || fallback.lastName || '',
-    avatarUrl: typeof normalized.avatarUrl === 'string' ? normalized.avatarUrl : undefined,
-    bio: typeof normalized.bio === 'string' ? normalized.bio : fallback.bio || '',
-    company: typeof normalized.company === 'string' ? normalized.company : fallback.company || '',
-  };
+  bio?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  timezone?: string;
+  language?: string;
+  country?: string;
+  role?: string;
+  isEmailVerified?: boolean;
+  is2FAEnabled?: boolean;
+  passwordLastChangedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  lastLoginAt?: string | null;
 }
 
 export const profileService = {
   getCurrentProfile: async (): Promise<UserProfile> => {
-    const response = await apiClient.get<any>('/auth/profile');
-    const payload = response?.data?.data ?? response?.data ?? response;
-    return toUserProfile(payload as Record<string, unknown>);
+    try {
+      const response = await api.get<any>('/settings/profile');
+      if (response.data?.data) return response.data.data;
+      if (response.data) return response.data;
+    } catch {
+      const fallbackResponse = await api.get<any>('/auth/me');
+      if (fallbackResponse.data?.data) return fallbackResponse.data.data;
+    }
+
+    throw new Error('Unable to resolve user profile.');
   },
 
   updateProfile: async (data: Partial<UserProfile>): Promise<UserProfile> => {
-    const response = await apiClient.put<any>('/auth/profile', data);
-    const payload = response?.data?.data ?? response?.data ?? response;
-    const updatedProfile = toUserProfile(payload as Record<string, unknown>, data);
-    window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updatedProfile }));
-    return updatedProfile;
+    const response = await api.patch<any>('/settings/profile', data);
+    const updated = response.data?.data || response.data;
+    window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updated }));
+    return updated;
+  },
+
+  uploadAvatar: async (file: File): Promise<UserProfile> => {
+    // Validate file type
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only PNG, JPEG, WEBP, and GIF images are allowed.');
+    }
+
+    // Validate size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('File size exceeds maximum limit of 5MB.');
+    }
+
+    // Convert to Base64 preview/upload data URL or multipart form
+    const reader = new FileReader();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read image file.'));
+      reader.readAsDataURL(file);
+    });
+
+    const response = await api.post<any>('/settings/profile/avatar', { avatarUrl: dataUrl });
+    const updated = response.data?.data || response.data;
+    window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updated }));
+    return updated;
+  },
+
+  removeAvatar: async (): Promise<UserProfile> => {
+    const response = await api.delete<any>('/settings/profile/avatar');
+    const updated = response.data?.data || response.data;
+    window.dispatchEvent(new CustomEvent('aether-profile-updated', { detail: updated }));
+    return updated;
   },
 };

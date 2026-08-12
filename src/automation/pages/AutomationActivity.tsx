@@ -11,6 +11,8 @@ export const AutomationActivity: React.FC = () => {
     isLoading,
     statusFilter,
     setStatusFilter,
+    dateRange,
+    setDateRange,
     searchQuery,
     setSearchQuery,
     page,
@@ -25,6 +27,8 @@ export const AutomationActivity: React.FC = () => {
       <ActivityFilters
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />

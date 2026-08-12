@@ -12,6 +12,8 @@ import { AI_ERROR_MESSAGES } from '../ai-constants';
 import { useChat } from '../hooks/useChat';
 import { useAIStore } from '../ai-store';
 
+import { ConfirmationDialog } from './ConfirmationDialog';
+
 interface AIChatProps {
   conversationId: string | null;
   onNewConversation: () => void;
@@ -78,6 +80,9 @@ export const AIChat = memo<AIChatProps>(({ conversationId, onNewConversation, cl
   } = useChat();
 
   const fallbackNotice = useAIStore((s) => s.fallbackNotice);
+  const pendingConfirmation = useAIStore((s) => s.pendingConfirmation);
+  const setPendingConfirmation = useAIStore((s) => s.setPendingConfirmation);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +97,17 @@ export const AIChat = memo<AIChatProps>(({ conversationId, onNewConversation, cl
     },
     [sendMessage],
   );
+
+  const handleConfirmAction = useCallback(() => {
+    if (!pendingConfirmation) return;
+    const toolName = pendingConfirmation.toolName;
+    setPendingConfirmation(null);
+    void sendMessage(`Confirm tool execution: ${toolName}`);
+  }, [pendingConfirmation, setPendingConfirmation, sendMessage]);
+
+  const handleCancelAction = useCallback(() => {
+    setPendingConfirmation(null);
+  }, [setPendingConfirmation]);
 
   // No active conversation → show welcome
   if (!conversationId) {
@@ -137,6 +153,15 @@ export const AIChat = memo<AIChatProps>(({ conversationId, onNewConversation, cl
           </>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      {pendingConfirmation && (
+        <ConfirmationDialog
+          confirmation={pendingConfirmation}
+          onConfirm={handleConfirmAction}
+          onCancel={handleCancelAction}
+        />
+      )}
 
       {/* Fallback Banner */}
       {fallbackNotice && fallbackNotice.usedFallback && (

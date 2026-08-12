@@ -7,6 +7,8 @@ interface Props {
 }
 
 export const AutomationStats: React.FC<Props> = ({ stats }) => {
+  const isTimeCalculable = stats.totalExecutions > 0 && stats.timeSavedHours > 0;
+
   const cards = [
     {
       title: 'Active Automations',
@@ -18,7 +20,7 @@ export const AutomationStats: React.FC<Props> = ({ stats }) => {
     {
       title: 'Total Executions',
       value: stats.totalExecutions.toLocaleString(),
-      subtitle: 'Last 30 days',
+      subtitle: `${stats.totalExecutions - stats.failedCount} successful`,
       icon: PlayCircle,
       color: 'text-indigo-500 bg-indigo-500/10',
     },
@@ -31,8 +33,8 @@ export const AutomationStats: React.FC<Props> = ({ stats }) => {
     },
     {
       title: 'Est. Time Saved',
-      value: `${stats.timeSavedHours} hrs`,
-      subtitle: 'Weekly workspace gain',
+      value: isTimeCalculable ? `${stats.timeSavedHours} hrs` : 'N/A',
+      subtitle: isTimeCalculable ? 'Calculated workspace gain' : 'Calculated after executions',
       icon: Clock,
       color: 'text-sky-500 bg-sky-500/10',
     },

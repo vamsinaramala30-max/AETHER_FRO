@@ -80,9 +80,36 @@ export class StreamingEngine {
     let chunkIndex = 0;
 
     try {
+      let token =
+        localStorage.getItem('aether_auth_token') ||
+        localStorage.getItem('aether-auth-token') ||
+        localStorage.getItem('auth_token');
+
+      if (!token) {
+        try {
+          const store = localStorage.getItem('aether-auth-storage');
+          if (store) {
+            const parsed = JSON.parse(store);
+            if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+              token = parsed.state.token;
+            }
+          }
+        } catch {
+          // Ignore storage parse error
+        }
+      }
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      };
+      if (token && typeof token === 'string' && token.trim() !== '') {
+        headers['Authorization'] = `Bearer ${token.trim()}`;
+      }
+
       const response = await fetch(request.endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        headers,
         body: JSON.stringify(request.payload),
         signal: request.signal,
       });

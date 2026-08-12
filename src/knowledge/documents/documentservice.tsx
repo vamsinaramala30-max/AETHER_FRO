@@ -37,7 +37,9 @@ export const documentsService = {
         try {
           const parsed = JSON.parse(stored) as DocumentItem[];
           return Array.isArray(parsed) ? parsed : [];
-        } catch {}
+        } catch {
+          /* ignore parse error */
+        }
       }
     }
     return [];
@@ -117,7 +119,9 @@ export const documentsService = {
     try {
       await apiClient.delete(`/knowledge/documents/${id}`);
       triggerActivityUpdate();
-    } catch {}
+    } catch {
+      /* ignore api error */
+    }
     const docs = await this.getDocuments();
     const filtered = docs.filter((d) => d.id !== id);
     localStorage.setItem('aether_docs', JSON.stringify(filtered));

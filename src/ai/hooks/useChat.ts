@@ -142,8 +142,20 @@ export function useChat(): UseChatReturn {
 
   const sendMessage = useCallback(
     async (content: string) => {
-      const convId = activeConversationId;
-      if (!convId || !content.trim() || isStreaming) return;
+      let convId = activeConversationId;
+      if (!content.trim() || isStreaming) return;
+
+      if (!convId) {
+        const title = content.trim().substring(0, 35) || 'New Conversation';
+        const res = await aiService.createConversation(title);
+        if (!res.success) {
+          setError(res.error);
+          return;
+        }
+        upsertConversation(res.data);
+        setActiveConversationId(res.data.id);
+        convId = res.data.id;
+      }
 
       clearError();
       setStreamingStatus('starting');

@@ -125,7 +125,7 @@ export interface ExecutionLog {
   userFriendlyError?: string | null;
 }
 
-export type TemplateCategory = 'Productivity' | 'Projects' | 'Knowledge' | 'AI';
+export type TemplateCategory = 'Productivity' | 'Projects' | 'Tasks' | 'Knowledge' | 'AI';
 
 export interface AutomationTemplate {
   id: string;

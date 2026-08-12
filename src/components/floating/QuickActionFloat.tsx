@@ -54,8 +54,11 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
           <button
             type="button"
             onClick={() => {
-              setIsOpen(false);
-              onOpenSearch ? onOpenSearch() : handleNav('/app/knowledge/search');
+              if (onOpenSearch) {
+                onOpenSearch();
+              } else {
+                handleNav('/app/knowledge/search');
+              }
             }}
             className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800/80 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition-colors"
             role="menuitem"

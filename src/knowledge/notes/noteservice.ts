@@ -30,7 +30,9 @@ export const notesService = {
         try {
           const parsed = JSON.parse(stored) as Note[];
           return Array.isArray(parsed) ? parsed : [];
-        } catch {}
+        } catch {
+          /* ignore parse error */
+        }
       }
     }
     return [];
@@ -105,13 +107,18 @@ export const notesService = {
   },
 
   async deleteNote(id: string): Promise<void> {
-    try {
-      await apiClient.delete(`/knowledge/notes/${id}`);
-      triggerActivityUpdate();
-    } catch {}
-    const notes = await this.getNotes();
-    const filtered = notes.filter((n) => n.id !== id);
-    localStorage.setItem('aether_notes', JSON.stringify(filtered));
+    await apiClient.delete(`/knowledge/notes/${id}`);
+    const stored = localStorage.getItem('aether_notes');
+    if (typeof stored === 'string' && stored.trim() !== '') {
+      try {
+        const parsed = JSON.parse(stored) as Note[];
+        const filtered = parsed.filter((n) => n.id !== id);
+        localStorage.setItem('aether_notes', JSON.stringify(filtered));
+      } catch {
+        /* ignore parse error */
+      }
+    }
+    triggerActivityUpdate();
   },
 };
 

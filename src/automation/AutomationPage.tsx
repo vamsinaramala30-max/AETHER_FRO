@@ -13,8 +13,11 @@ import { AutomationBuilder } from './components/builder/AutomationBuilder';
 import { AutomationDialog } from './components/shared/AutomationDialog';
 import { ConfirmAutomationAction } from './components/shared/ConfirmAutomationAction';
 import { Button } from '@/components/ui/button';
-import { Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { Sparkles, CheckCircle2, Zap, AlertCircle, ShieldCheck, Database, Target, Clock } from 'lucide-react';
 import { automationService } from './services/automation-service';
+import { automationApi } from './automation-api';
+import { AUTOMATION_TEMPLATES } from './automation-constants';
+import { formatScheduleText } from './automation-utils';
 
 export const AutomationPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AutomationTab>('overview');
@@ -25,11 +28,19 @@ export const AutomationPage: React.FC = () => {
   // AI Quick prompt state
   const [aiPrompt, setAiPrompt] = useState<string>('');
   const [isAiAnalyzing, setIsAiAnalyzing] = useState<boolean>(false);
+  const [unsupportedError, setUnsupportedError] = useState<string | null>(null);
   const [aiPreview, setAiPreview] = useState<{
     name: string;
-    schedule: string;
-    steps: string[];
+    description: string;
     rawTrigger: string;
+    schedule: string | null;
+    scheduleText: string;
+    rawConditions: any;
+    rawActions: any[];
+    targetData: string;
+    expectedResult: string;
+    requiredPermissions: string[];
+    steps: string[];
   } | null>(null);
 
   const {
@@ -50,25 +61,40 @@ export const AutomationPage: React.FC = () => {
     refreshActivity();
   });
 
-  const handleAnalyzePrompt = () => {
+  const handleAnalyzePrompt = async () => {
     if (!aiPrompt.trim()) return;
     setIsAiAnalyzing(true);
+    setUnsupportedError(null);
+    setAiPreview(null);
 
-    setTimeout(() => {
-      setAiPreview({
-        name: 'Daily Planning Briefing',
-        schedule: 'Every weekday at 8:00 AM',
-        rawTrigger: 'SCHEDULE',
-        steps: [
-          'Check workspace calendar for upcoming meetings',
-          'Review pending tasks and deadlines',
-          'Analyze top 3 daily priorities',
-          'Synthesize daily action plan',
-          'Send workspace notification digest',
-        ],
-      });
+    try {
+      const parsed = await automationApi.parseIntent(aiPrompt);
+
+      if (parsed && parsed.supported) {
+        setAiPreview({
+          name: parsed.name || 'Custom Automation',
+          description: parsed.description || aiPrompt,
+          rawTrigger: parsed.trigger || 'MANUAL',
+          schedule: parsed.schedule || null,
+          scheduleText: parsed.schedule ? formatScheduleText(parsed.schedule) : 'Manual Trigger',
+          rawConditions: parsed.conditions || null,
+          rawActions: parsed.actions || [],
+          targetData: parsed.targetData || 'Workspace Data',
+          expectedResult: parsed.expectedResult || 'Execute automated action sequence',
+          requiredPermissions: parsed.requiredPermissions || ['Read Workspace', 'Write Workspace'],
+          steps: parsed.steps || [],
+        });
+      } else {
+        setUnsupportedError(
+          parsed?.unsupportedReason ||
+            'This automation request is currently unsupported. AETHER Automation supports Tasks, Projects, Calendar, Files, Knowledge Base, Notifications, and Scheduled Digests.',
+        );
+      }
+    } catch (err: any) {
+      setUnsupportedError(err?.message || 'Failed to parse automation request.');
+    } finally {
       setIsAiAnalyzing(false);
-    }, 600);
+    }
   };
 
   const handleSaveAiPreview = async () => {
@@ -76,16 +102,20 @@ export const AutomationPage: React.FC = () => {
     try {
       await automationService.createAutomation({
         name: aiPreview.name,
-        description: aiPrompt,
+        description: aiPreview.description,
         trigger: aiPreview.rawTrigger,
-        schedule: '0 8 * * 1-5',
+        schedule: aiPreview.schedule || undefined,
+        conditions: aiPreview.rawConditions,
+        steps: aiPreview.rawActions,
         isEnabled: true,
       });
       refreshAutomations();
+      refreshActivity();
       setIsQuickAiOpen(false);
       setAiPrompt('');
       setAiPreview(null);
-      setActiveTab('automations');
+      setUnsupportedError(null);
+      setActiveTab('overview');
     } catch (err) {
       console.error('Failed to save AI automation', err);
     }
@@ -104,7 +134,7 @@ export const AutomationPage: React.FC = () => {
           onTabChange={setActiveTab}
           counts={{
             automations: allAutomations.length,
-            templates: 6,
+            templates: AUTOMATION_TEMPLATES.length,
             activity: logs.length,
           }}
         />
@@ -156,18 +186,22 @@ export const AutomationPage: React.FC = () => {
             setIsQuickAiOpen(false);
             setAiPrompt('');
             setAiPreview(null);
+            setUnsupportedError(null);
           }}
           title="What would you like Aether to automate?"
           description="Describe your desired workflow in plain text. Aether AI will parse and construct a human-readable preview before activation."
-          maxWidth="max-w-xl"
+          maxWidth="max-w-2xl"
         >
           <div className="space-y-4">
             <div>
               <textarea
                 value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
+                onChange={(e) => {
+                  setAiPrompt(e.target.value);
+                  if (unsupportedError) setUnsupportedError(null);
+                }}
                 rows={3}
-                placeholder="e.g. Every weekday morning, review my calendar and tasks and prepare my daily plan."
+                placeholder="e.g. Complete all my tasks and make them done"
                 className="w-full rounded-xl border border-slate-200 p-3.5 text-sm font-medium text-slate-800 focus:border-amber-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               />
               <div className="mt-2 flex justify-end">
@@ -182,35 +216,68 @@ export const AutomationPage: React.FC = () => {
               </div>
             </div>
 
+            {unsupportedError && (
+              <div className="flex items-start gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-300 animate-in fade-in duration-200">
+                <AlertCircle className="h-5 w-5 shrink-0 text-rose-500 mt-0.5" />
+                <div>
+                  <h5 className="font-bold text-sm">Unsupported Automation Request</h5>
+                  <p className="mt-1 leading-relaxed">{unsupportedError}</p>
+                </div>
+              </div>
+            )}
+
             {aiPreview && (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 animate-in fade-in duration-200">
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 animate-in fade-in duration-200 space-y-4">
                 <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
                   <div>
                     <h4 className="text-base font-bold text-slate-900 dark:text-white">
                       {aiPreview.name}
                     </h4>
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                      {aiPreview.schedule}
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-0.5">
+                      <Clock className="h-3.5 w-3.5" />
+                      Trigger: {aiPreview.rawTrigger} ({aiPreview.scheduleText})
                     </p>
                   </div>
-                  <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
-                    Preview Ready
+                  <span className="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+                    Preview Plan Ready
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3">
+                    <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Database className="h-3.5 w-3.5 text-amber-500" />
+                      Target Data
+                    </p>
+                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">{aiPreview.targetData}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3">
+                    <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Target className="h-3.5 w-3.5 text-emerald-500" />
+                      Expected Result
+                    </p>
+                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">{aiPreview.expectedResult}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Aether Execution Steps:
+                    Workflow Actions Sequence:
                   </p>
                   {aiPreview.steps.map((st, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-200">
+                    <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white/40 dark:bg-slate-900/40 p-2 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span>{st}</span>
+                      <span>{i + 1}. {st}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-5 flex justify-end gap-2.5 border-t border-amber-500/20 pt-3">
+                <div className="pt-2 border-t border-amber-500/20 text-xs flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                  <ShieldCheck className="h-4 w-4 text-amber-500 shrink-0" />
+                  <span>Required Permissions: {aiPreview.requiredPermissions.join(', ')}</span>
+                </div>
+
+                <div className="flex justify-end gap-2.5 border-t border-amber-500/20 pt-3">
                   <Button
                     variant="outline"
                     onClick={() => setAiPreview(null)}

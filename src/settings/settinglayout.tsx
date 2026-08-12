@@ -6,22 +6,31 @@ import { SecurityPage } from './security/securitypage';
 import { PreferencesPage } from './preferences/preferencepage';
 import { ConnectedAccountsPage } from './connected-accounts/connectedaccountpage';
 import { BillingPage } from './billing/billingpage';
-import { User, Palette, Bell, ShieldCheck, Sliders, Link2, CreditCard } from 'lucide-react';
+import { ContactPage } from './contact/contactpage';
+import { User, Palette, Bell, ShieldCheck, Sliders, Link2, CreditCard, HelpCircle } from 'lucide-react';
 
 type SettingsTab =
-  'profile' | 'appearance' | 'notifications' | 'security' | 'preferences' | 'connected' | 'billing';
+  | 'profile'
+  | 'notifications'
+  | 'security'
+  | 'connected'
+  | 'appearance'
+  | 'preferences'
+  | 'billing'
+  | 'contact';
 
 export const SettingsLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
 
   const tabs: { id: SettingsTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'profile', label: 'Profile Settings', icon: User },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security & Auth', icon: ShieldCheck },
-    { id: 'preferences', label: 'Preferences', icon: Sliders },
     { id: 'connected', label: 'Connected Accounts', icon: Link2 },
+    { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'preferences', label: 'Preferences', icon: Sliders },
     { id: 'billing', label: 'Billing & Plan', icon: CreditCard },
+    { id: 'contact', label: 'Contact & Support', icon: HelpCircle },
   ];
 
   return (
@@ -52,12 +61,13 @@ export const SettingsLayout: React.FC = () => {
       {/* Main View Area */}
       <main className="min-w-0 max-w-full flex-1">
         {activeTab === 'profile' && <ProfilePage />}
-        {activeTab === 'appearance' && <AppearancePage />}
         {activeTab === 'notifications' && <NotificationsPage />}
         {activeTab === 'security' && <SecurityPage />}
-        {activeTab === 'preferences' && <PreferencesPage />}
         {activeTab === 'connected' && <ConnectedAccountsPage />}
+        {activeTab === 'appearance' && <AppearancePage />}
+        {activeTab === 'preferences' && <PreferencesPage />}
         {activeTab === 'billing' && <BillingPage />}
+        {activeTab === 'contact' && <ContactPage />}
       </main>
     </div>
   );

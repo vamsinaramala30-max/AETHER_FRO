@@ -3,7 +3,7 @@ import { ProfileForm } from './profileform';
 import { profileService, UserProfile } from './profileservice';
 import { useAuth } from '@/app/providers/authprovider';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { User } from 'lucide-react';
+import { User, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { user, refreshSession } = useAuth();
@@ -11,58 +11,69 @@ export const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const data = await profileService.getCurrentProfile();
-        setProfile(data);
-      } catch {
-        if (user) {
-          setProfile({
-            id: user.id || 'usr_default',
-            email: user.email || '',
-            firstName: user.firstName || (user.name ? user.name.split(' ')[0] : 'User'),
-            lastName: user.lastName || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
-            avatarUrl: user.avatarUrl,
-            bio: '',
-            company: '',
-          });
-        } else {
-          setError('Failed to load profile settings.');
-        }
-      } finally {
-        setLoading(false);
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await profileService.getCurrentProfile();
+      setProfile(data);
+    } catch {
+      if (user) {
+        setProfile({
+          id: user.id || 'usr_default',
+          email: user.email || '',
+          fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'AETHER User',
+          username: (user as any)?.username || null,
+          avatarUrl: user.avatarUrl || null,
+          bio: (user as any)?.bio || '',
+          company: (user as any)?.company || '',
+          phone: (user as any)?.phone || '',
+          timezone: (user as any)?.timezone || 'UTC',
+          language: (user as any)?.language || 'en',
+          country: (user as any)?.country || 'United States',
+          isEmailVerified: true,
+        });
+      } else {
+        setError('Unable to load profile information from server.');
       }
-    })();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadProfileData();
   }, [user]);
 
   if (loading) {
     return (
-      <div className="animate-pulse text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-        Loading profile settings...
-      </div>
+      <PageWrapper>
+        <div className="flex items-center gap-3 py-8 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400" />
+          <span>Loading authenticated profile data...</span>
+        </div>
+      </PageWrapper>
     );
   }
 
-  const hasError = typeof error === 'string' && error.trim() !== '';
-  if (hasError || profile === null) {
+  if (error || !profile) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-400">
-        {hasError ? error : 'Profile could not be resolved.'}
-      </div>
+      <PageWrapper>
+        <div className="flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-400">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <span>{error || 'Profile could not be resolved.'}</span>
+        </div>
+      </PageWrapper>
     );
   }
 
-  const initialChar =
-    typeof profile.firstName === 'string' && profile.firstName.length > 0
-      ? profile.firstName[0]
-      : profile.email.length > 0
-        ? profile.email[0]
-        : 'U';
+  const displayName = profile.fullName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email;
+  const initialChar = displayName ? displayName[0].toUpperCase() : 'U';
 
   return (
     <PageWrapper>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center gap-3 border-b border-slate-200 pb-5 dark:border-slate-800">
           <User className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
           <div>
@@ -75,20 +86,37 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
+        {/* User Card */}
         <div className="flex flex-col items-start gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-2xl font-black uppercase text-white shadow-md">
-            {initialChar}
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-2xl font-black uppercase text-white shadow-md">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
+            ) : (
+              initialChar
+            )}
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              {profile.firstName} {profile.lastName}
-            </h3>
-            <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-              {profile.email}
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{displayName}</h3>
+              {profile.isEmailVerified && (
+                <span title="Verified Account">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              {profile.email} {profile.username ? `• @${profile.username}` : ''}
             </p>
+
+            {profile.company && (
+              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{profile.company}</p>
+            )}
           </div>
         </div>
 
+        {/* Profile Form */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <ProfileForm
             initialProfile={profile}
@@ -102,3 +130,5 @@ export const ProfilePage: React.FC = () => {
     </PageWrapper>
   );
 };
+
+export default ProfilePage;

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AutomationRule, ExecutionLog, AutomationStatsSummary } from '../automation-types';
 import { AutomationStats } from '../components/overview/AutomationStats';
 import { ActiveAutomations } from '../components/overview/ActiveAutomations';
 import { RecentActivity } from '../components/overview/RecentActivity';
+import { UpcomingRuns } from '../components/overview/UpcomingRuns';
 import { AutomationHealth } from '../components/overview/AutomationHealth';
 import { QuickActions } from '../components/overview/QuickActions';
 import { Zap, Plus } from 'lucide-react';
+import { automationApi } from '../automation-api';
 
 interface Props {
   automations: AutomationRule[];
@@ -26,6 +28,20 @@ export const AutomationOverview: React.FC<Props> = ({
   onOpenQuickAi,
   onOpenBuilder,
 }) => {
+  const [realStats, setRealStats] = useState<AutomationStatsSummary | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    automationApi.getStats().then((data) => {
+      if (isMounted && data) {
+        setRealStats(data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [automations, logs]);
+
   const activeCount = automations.filter((a) => a.status === 'active').length;
   const pausedCount = automations.filter((a) => a.status === 'paused').length;
   const failedCount = automations.filter((a) => a.status === 'failed').length;
@@ -37,9 +53,9 @@ export const AutomationOverview: React.FC<Props> = ({
 
   const successRate =
     totalExecutions > 0 ? Math.round((successfulExecutions / totalExecutions) * 100) : 100;
-  const timeSavedHours = parseFloat((totalExecutions * 0.15).toFixed(1));
+  const timeSavedHours = parseFloat((totalExecutions * 0.25).toFixed(1));
 
-  const stats: AutomationStatsSummary = {
+  const stats: AutomationStatsSummary = realStats || {
     totalAutomations: automations.length,
     activeCount,
     pausedCount,
@@ -52,15 +68,15 @@ export const AutomationOverview: React.FC<Props> = ({
 
   if (automations.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 text-center dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 text-center dark:border-slate-800 dark:bg-slate-900 animate-in fade-in duration-200">
         <Zap className="mb-4 h-12 w-12 text-amber-500" />
         <h3 className="text-base font-bold text-slate-900 dark:text-white">No automations yet</h3>
         <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-          Automate repetitive work across AETHER with intelligent rules and AI triggers.
+          Create your first automation to automate AETHER.
         </p>
         <button
           onClick={onOpenQuickAi}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>Create Automation</span>
@@ -86,6 +102,10 @@ export const AutomationOverview: React.FC<Props> = ({
           onRunNow={onRunNow}
           onNavigateToAll={() => onNavigateToTab('automations')}
         />
+        <UpcomingRuns automations={automations} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
         <RecentActivity logs={logs} onNavigateToActivity={() => onNavigateToTab('activity')} />
       </div>
 
@@ -93,4 +113,3 @@ export const AutomationOverview: React.FC<Props> = ({
     </div>
   );
 };
-
