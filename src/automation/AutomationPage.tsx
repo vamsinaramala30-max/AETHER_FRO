@@ -19,8 +19,10 @@ import { automationApi } from './automation-api';
 import { AUTOMATION_TEMPLATES } from './automation-constants';
 import { formatScheduleText } from './automation-utils';
 
+import { RuleEngineStudio } from './components/RuleEngineStudio';
+
 export const AutomationPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AutomationTab>('overview');
+  const [activeTab, setActiveTab] = useState<AutomationTab>('studio');
   const [isBuilderOpen, setIsBuilderOpen] = useState<boolean>(false);
   const [isQuickAiOpen, setIsQuickAiOpen] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -138,6 +140,8 @@ export const AutomationPage: React.FC = () => {
             activity: logs.length,
           }}
         />
+
+        {activeTab === 'studio' && <RuleEngineStudio />}
 
         {activeTab === 'overview' && (
           <AutomationOverview

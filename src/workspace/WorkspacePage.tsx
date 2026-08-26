@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Crown,
   Calendar as CalendarIcon,
+  CalendarDays,
   Zap,
   FileText,
   Star,
@@ -21,6 +22,7 @@ import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
 import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhubpage';
 import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
+import WeeklyPlanner from '@/workspace/weekly planner/weeklyplanner';
 
 const WORKSPACE_MODULES = [
   {
@@ -31,6 +33,15 @@ const WORKSPACE_MODULES = [
     count: 'Events & Agenda',
     iconColor: 'text-indigo-600 dark:text-indigo-400',
     bg: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
+  },
+  {
+    href: '/app/workspace/weeklyplanner',
+    icon: CalendarDays,
+    label: 'Weekly Planner',
+    description: 'Weekly 24-hour dial schedule & 1-4-7 spaced repetition planner.',
+    count: 'Weekly Spaced Rep',
+    iconColor: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20',
   },
   {
     href: '/app/workspace/productivity-hub',
@@ -109,6 +120,7 @@ const ROLE_CONFIG: Record<string, string> = {
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/app/workspace' },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon, path: '/app/workspace/calendar' },
+  { id: 'weeklyplanner', label: 'Weekly Planner', icon: CalendarDays, path: '/app/workspace/weeklyplanner' },
   {
     id: 'productivity-hub',
     label: 'Productivity Hub',
@@ -191,6 +203,7 @@ export const WorkspacePage: React.FC = () => {
   const getActiveTab = () => {
     const path = location.pathname;
     if (path.includes('/workspace/calendar')) return 'calendar';
+    if (path.includes('/workspace/weeklyplanner')) return 'weeklyplanner';
     if (path.includes('/workspace/productivity-hub')) return 'productivity-hub';
     if (path.includes('/workspace/recent-files')) return 'recent-files';
     if (path.includes('/workspace/favorites')) return 'favorites';
@@ -252,6 +265,12 @@ export const WorkspacePage: React.FC = () => {
       {activeTab === 'calendar' && (
         <div className="mt-4">
           <CalendarPage />
+        </div>
+      )}
+
+      {activeTab === 'weeklyplanner' && (
+        <div className="mt-4">
+          <WeeklyPlanner />
         </div>
       )}
 
