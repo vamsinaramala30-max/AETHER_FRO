@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAIStore } from '../ai-store';
 import { aiService } from '../services/ai-service';
+import { modelService } from '../services/model-service';
 import type {
   AIConnectionStatus,
   AIError,
@@ -81,10 +82,26 @@ export function useAI(): UseAIReturn {
     aiService.stopStreaming();
   }, []);
 
-  // Initial health check and periodic polling
+  // Initial health check, model discovery, and periodic polling
   useEffect(() => {
     void checkHealth();
-    healthCheckRef.current = setInterval(() => { void checkHealth(); }, 60_000);
+
+    if (!useAIStore.getState().activeModel) {
+      void modelService.listModels().then((result) => {
+        if (result.success && result.data.length > 0) {
+          useAIStore.getState().setAvailableModels(result.data);
+          const best = modelService.selectBestModel(result.data);
+          if (best) {
+            useAIStore.getState().setActiveModel(best);
+            useAIStore.getState().setModelStatus(best.status);
+          }
+        }
+      });
+    }
+
+    healthCheckRef.current = setInterval(() => {
+      void checkHealth();
+    }, 60_000);
     return () => {
       if (healthCheckRef.current) clearInterval(healthCheckRef.current);
     };

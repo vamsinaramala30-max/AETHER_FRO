@@ -13,7 +13,7 @@ export const AIActionStepCard: React.FC<Props> = ({ step, isSelected, onSelect, 
   return (
     <div
       onClick={onSelect}
-      className={`cursor-pointer rounded-2xl border p-4.5 transition-all ${
+      className={`p-4.5 cursor-pointer rounded-2xl border transition-all ${
         isSelected
           ? 'border-sky-500 bg-sky-500/5 ring-4 ring-sky-500/10 dark:border-sky-400 dark:bg-sky-500/10'
           : 'border-slate-200/80 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
@@ -41,7 +41,9 @@ export const AIActionStepCard: React.FC<Props> = ({ step, isSelected, onSelect, 
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
-      {step.subtitle && <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{step.subtitle}</p>}
+      {step.subtitle && (
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{step.subtitle}</p>
+      )}
     </div>
   );
 };

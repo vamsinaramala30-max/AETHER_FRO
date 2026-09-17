@@ -18,7 +18,8 @@ const DOCS_DATA: DocSection[] = [
     category: 'Core Concepts',
     title: 'Getting Started with AETHER',
     badge: 'Production',
-    description: 'Learn how to set up your workspace, configure AI agents, and connect data streams.',
+    description:
+      'Learn how to set up your workspace, configure AI agents, and connect data streams.',
     content: [
       'AETHER is designed around unified cognitive spaces called Workspaces.',
       'To begin, create an organization workspace or join an invitation link from your admin.',
@@ -34,7 +35,8 @@ $ aether workspace init`,
     category: 'Core Concepts',
     title: 'AETHER Platform Overview',
     badge: 'Production',
-    description: 'Architecture breakdown of AETHER cognitive kernel, database schema, and vector retrieval.',
+    description:
+      'Architecture breakdown of AETHER cognitive kernel, database schema, and vector retrieval.',
     content: [
       'The platform consists of three core components: AI Kernel, Knowledge Graph, and Execution Engines.',
       'The AI Kernel routes prompt requests using smart model selection based on latency and task type.',
@@ -46,7 +48,8 @@ $ aether workspace init`,
     category: 'AI Capabilities',
     title: 'AI Platform & LLM Orchestration',
     badge: 'Production',
-    description: 'How AETHER manages conversational state, prompt pipelines, and multi-model fallbacks.',
+    description:
+      'How AETHER manages conversational state, prompt pipelines, and multi-model fallbacks.',
     content: [
       'Conversations preserve message trajectory and state using PostgreSQL vector embeddings.',
       'Context windows automatically condense past turns when token thresholds are exceeded.',
@@ -69,7 +72,8 @@ $ aether workspace init`,
     category: 'Workspace Tools',
     title: 'Knowledge Base & Vector Search',
     badge: 'Production',
-    description: 'Uploading documents, automatic semantic indexing, and hybrid vector/keyword search.',
+    description:
+      'Uploading documents, automatic semantic indexing, and hybrid vector/keyword search.',
     content: [
       'Supports PDF, Markdown, JSON, CSV, and code repositories.',
       'Files are chunked into semantic units and embedded using high-density vector representations.',
@@ -108,7 +112,8 @@ const results = await aether.knowledge.search({
     category: 'Security & Privacy',
     title: 'Security Architecture & Best Practices',
     badge: 'Production',
-    description: 'Details on TLS 1.3 in-transit encryption, AES-256 field encryption, and secret storage.',
+    description:
+      'Details on TLS 1.3 in-transit encryption, AES-256 field encryption, and secret storage.',
     content: [
       'All passwords are salted and hashed using Argon2id.',
       'JWT tokens are cryptographically signed using asymmetric keys and refreshed via HttpOnly cookies.',
@@ -119,7 +124,8 @@ const results = await aether.knowledge.search({
     category: 'Security & Privacy',
     title: 'Data Privacy Controls & Deletion',
     badge: 'Production',
-    description: 'Understanding zero-retention policies, data export routines, and user privacy rights.',
+    description:
+      'Understanding zero-retention policies, data export routines, and user privacy rights.',
     content: [
       'Users can request a complete ZIP export of their personal workspace history.',
       'Permanent deletion removes all relational rows and vector embeddings within 72 hours.',
@@ -130,7 +136,8 @@ const results = await aether.knowledge.search({
     category: 'Developer Tools',
     title: 'REST API & Webhook Reference',
     badge: 'Coming soon',
-    description: 'Full OpenAPI / Swagger specification for programmatically controlling AETHER resources.',
+    description:
+      'Full OpenAPI / Swagger specification for programmatically controlling AETHER resources.',
     content: [
       'The REST API specification is currently undergoing external security audit.',
       'Developers will be able to spawn agents, execute workflows, and query knowledge bases programmatically.',
@@ -146,7 +153,7 @@ export const DocsPage: React.FC = () => {
     (doc) =>
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.category.toLowerCase().includes(searchQuery.toLowerCase())
+      doc.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const activeDoc = DOCS_DATA.find((d) => d.id === activeId) || DOCS_DATA[0];
@@ -163,12 +170,13 @@ export const DocsPage: React.FC = () => {
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               AETHER Documentation
             </h1>
-            <p className="mt-3 text-base text-zinc-400 max-w-3xl">
-              Technical guides, architectural blueprints, integration details, and system references.
+            <p className="mt-3 max-w-3xl text-base text-zinc-400">
+              Technical guides, architectural blueprints, integration details, and system
+              references.
             </p>
 
             {/* Search Input */}
-            <div className="mt-6 max-w-xl relative">
+            <div className="relative mt-6 max-w-xl">
               <input
                 type="text"
                 placeholder="Search documentation (e.g. vector search, security, cron)..."
@@ -182,7 +190,12 @@ export const DocsPage: React.FC = () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
           </div>
@@ -190,9 +203,9 @@ export const DocsPage: React.FC = () => {
           {/* Main Layout Grid */}
           <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-4">
             {/* Sidebar Navigation */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="space-y-6 lg:col-span-1">
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-2 mb-3">
+                <h3 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
                   Articles ({filteredDocs.length})
                 </h3>
                 <nav className="space-y-1" aria-label="Documentation section navigation">
@@ -201,16 +214,16 @@ export const DocsPage: React.FC = () => {
                       key={doc.id}
                       type="button"
                       onClick={() => setActiveId(doc.id)}
-                      className={`w-full text-left rounded-xl px-3 py-2.5 text-xs font-medium transition-colors ${
+                      className={`w-full rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-colors ${
                         activeId === doc.id
-                          ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
+                          ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                           : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="truncate">{doc.title}</span>
                         {doc.badge === 'Coming soon' && (
-                          <span className="ml-1 rounded bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-400">
+                          <span className="ml-1 rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-400">
                             Soon
                           </span>
                         )}
@@ -223,10 +236,10 @@ export const DocsPage: React.FC = () => {
 
             {/* Document Content View */}
             <div className="lg:col-span-3">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-10 shadow-xl backdrop-blur-xl">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 shadow-xl backdrop-blur-xl sm:p-10">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
                   <div>
-                    <span className="text-xs font-mono uppercase tracking-widest text-indigo-400">
+                    <span className="font-mono text-xs uppercase tracking-widest text-indigo-400">
                       {activeDoc.category}
                     </span>
                     <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
@@ -239,8 +252,8 @@ export const DocsPage: React.FC = () => {
                         activeDoc.badge === 'Production'
                           ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
                           : activeDoc.badge === 'Preview'
-                          ? 'border border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
-                          : 'border border-amber-500/30 bg-amber-500/10 text-amber-400'
+                            ? 'border border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+                            : 'border border-amber-500/30 bg-amber-500/10 text-amber-400'
                       }`}
                     >
                       {activeDoc.badge}
@@ -255,7 +268,7 @@ export const DocsPage: React.FC = () => {
                 <div className="mt-8 space-y-4">
                   {activeDoc.content.map((paragraph, idx) => (
                     <div key={idx} className="flex gap-3 text-sm leading-relaxed text-zinc-400">
-                      <span className="text-indigo-400 font-bold">•</span>
+                      <span className="font-bold text-indigo-400">•</span>
                       <span>{paragraph}</span>
                     </div>
                   ))}
@@ -263,19 +276,17 @@ export const DocsPage: React.FC = () => {
 
                 {activeDoc.codeSnippet && (
                   <div className="mt-8">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-2">
+                    <h4 className="mb-2 font-mono text-xs uppercase tracking-wider text-zinc-400">
                       Code Example / Execution
                     </h4>
-                    <pre className="rounded-2xl border border-white/10 bg-black/60 p-4 font-mono text-xs text-indigo-300 overflow-x-auto">
+                    <pre className="overflow-x-auto rounded-2xl border border-white/10 bg-black/60 p-4 font-mono text-xs text-indigo-300">
                       <code>{activeDoc.codeSnippet}</code>
                     </pre>
                   </div>
                 )}
 
                 <div className="mt-12 flex items-center justify-between border-t border-white/10 pt-6">
-                  <p className="text-xs text-zinc-500">
-                    Need further technical assistance?
-                  </p>
+                  <p className="text-xs text-zinc-500">Need further technical assistance?</p>
                   <Link
                     to="/contact"
                     className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300"

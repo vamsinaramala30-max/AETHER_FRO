@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, Image as ImageIcon, Video, Music, Check, X, FolderOpen } from 'lucide-react';
+import {
+  Search,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  Music,
+  Check,
+  X,
+  FolderOpen,
+} from 'lucide-react';
 import { apiClient } from '@/api/client';
 
 export interface StorageFile {
@@ -32,7 +41,9 @@ export const AttachFileModal: React.FC<AttachFileModalProps> = ({
     const fetchFiles = async () => {
       setLoading(true);
       try {
-        const data = await apiClient.get<any>(`/uploads?search=${encodeURIComponent(search)}&limit=50`);
+        const data = await apiClient.get<any>(
+          `/uploads?search=${encodeURIComponent(search)}&limit=50`,
+        );
         const payload = data.data || data;
         const rawFiles = Array.isArray(payload) ? payload : payload?.files || payload?.data || [];
         if (Array.isArray(rawFiles)) {
@@ -59,15 +70,15 @@ export const AttachFileModal: React.FC<AttachFileModalProps> = ({
 
   const getIcon = (mime: string, name: string) => {
     if (mime.includes('image') || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(name)) {
-      return <ImageIcon className="h-4 w-4 text-emerald-500 shrink-0" />;
+      return <ImageIcon className="h-4 w-4 shrink-0 text-emerald-500" />;
     }
     if (mime.includes('video') || /\.(mp4|mov|webm)$/i.test(name)) {
-      return <Video className="h-4 w-4 text-purple-500 shrink-0" />;
+      return <Video className="h-4 w-4 shrink-0 text-purple-500" />;
     }
     if (mime.includes('audio') || /\.(mp3|wav|ogg)$/i.test(name)) {
-      return <Music className="h-4 w-4 text-amber-500 shrink-0" />;
+      return <Music className="h-4 w-4 shrink-0 text-amber-500" />;
     }
-    return <FileText className="h-4 w-4 text-slate-500 shrink-0" />;
+    return <FileText className="h-4 w-4 shrink-0 text-slate-500" />;
   };
 
   const formatSize = (bytes: number) => {
@@ -79,7 +90,7 @@ export const AttachFileModal: React.FC<AttachFileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+    <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm duration-150">
       <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
           <div className="flex items-center gap-2">
@@ -113,15 +124,19 @@ export const AttachFileModal: React.FC<AttachFileModalProps> = ({
         </div>
 
         {/* File List */}
-        <div className="mt-4 max-h-64 overflow-y-auto space-y-1.5 scrollbar-thin">
+        <div className="scrollbar-thin mt-4 max-h-64 space-y-1.5 overflow-y-auto">
           {loading ? (
-            <div className="flex h-32 items-center justify-center text-xs font-semibold text-indigo-500 animate-pulse">
+            <div className="flex h-32 animate-pulse items-center justify-center text-xs font-semibold text-indigo-500">
               Loading workspace files...
             </div>
           ) : files.length === 0 ? (
             <div className="flex h-32 flex-col items-center justify-center text-center">
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">No workspace files found</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">Upload files in Workspace → Files first.</p>
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                No workspace files found
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Upload files in Workspace → Files first.
+              </p>
             </div>
           ) : (
             files.map((file) => {
@@ -133,7 +148,7 @@ export const AttachFileModal: React.FC<AttachFileModalProps> = ({
                     onSelectFile(file);
                     onClose();
                   }}
-                  className={`flex items-center justify-between rounded-xl border p-2.5 transition-all cursor-pointer ${
+                  className={`flex cursor-pointer items-center justify-between rounded-xl border p-2.5 transition-all ${
                     isSelected
                       ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20'
                       : 'border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-800'

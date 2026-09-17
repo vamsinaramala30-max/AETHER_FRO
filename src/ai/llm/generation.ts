@@ -4,12 +4,7 @@
 // Utilities for building and validating generation requests.
 // ============================================================================
 
-import type {
-  GenerationRequest,
-  GenerationResponse,
-  AIMessage,
-  MessageRole,
-} from '../ai-types';
+import type { GenerationRequest, GenerationResponse, AIMessage, MessageRole } from '../ai-types';
 
 export interface MessageInput {
   role: MessageRole;

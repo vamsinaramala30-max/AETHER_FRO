@@ -35,7 +35,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange, onDele
         <h4 className="text-sm font-bold leading-snug text-slate-900 dark:text-white">
           {task.title}
         </h4>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex shrink-0 items-center gap-1.5">
           <span
             className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
               PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.medium
@@ -80,7 +80,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange, onDele
           {hasDueDate ? task.dueDate : 'No due date'}
         </span>
         <div className="flex items-center gap-1">
-          <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">Status:</span>
+          <span className="hidden text-[10px] font-medium text-slate-400 sm:inline">Status:</span>
           <select
             value={task.status}
             onChange={handleStatusChange}
@@ -132,4 +132,3 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange, onDele
     </div>
   );
 };
-

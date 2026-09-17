@@ -79,4 +79,3 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onChange }) =
     </div>
   );
 };
-

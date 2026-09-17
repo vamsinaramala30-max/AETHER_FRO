@@ -20,7 +20,14 @@ export interface DocumentParseRequest {
  * Normalize a raw backend document payload.
  */
 export function normalizeDocument(raw: Record<string, unknown>): AIDocument {
-  const validStatuses: DocumentStatus[] = ['pending', 'parsing', 'chunking', 'embedding', 'indexed', 'error'];
+  const validStatuses: DocumentStatus[] = [
+    'pending',
+    'parsing',
+    'chunking',
+    'embedding',
+    'indexed',
+    'error',
+  ];
   const rawStatus = raw['status'] as string;
   const status: DocumentStatus = validStatuses.includes(rawStatus as DocumentStatus)
     ? (rawStatus as DocumentStatus)
@@ -40,13 +47,12 @@ export function normalizeDocument(raw: Record<string, unknown>): AIDocument {
   };
 }
 
+import { apiClient } from '../../api/client';
+
 /**
  * Upload a document to the AETHER backend for parsing and indexing.
  */
-export async function uploadDocument(
-  request: DocumentParseRequest,
-): Promise<AIResult<AIDocument>> {
-  const url = `${DEFAULT_AI_CONFIG.backend.baseUrl}${DEFAULT_AI_CONFIG.backend.knowledgePath}/documents`;
+export async function uploadDocument(request: DocumentParseRequest): Promise<AIResult<AIDocument>> {
   try {
     const formData = new FormData();
     formData.append('file', request.file);
@@ -55,31 +61,24 @@ export async function uploadDocument(
       formData.append('metadata', JSON.stringify(request.metadata));
     }
 
-    const res = await fetch(url, {
-      method: 'POST',
-      body: formData,
-      signal: AbortSignal.timeout(120_000), // 2 min for large files
-    });
+    const res = await apiClient.post<Record<string, unknown> | { success?: boolean; data?: Record<string, unknown> }>(
+      `${DEFAULT_AI_CONFIG.backend.knowledgePath}/documents`,
+      formData,
+      { timeout: 120_000 }
+    );
 
-    if (!res.ok) {
-      return {
-        success: false,
-        error: {
-          code: 'RAG_FAILED',
-          message: `Document upload failed: HTTP ${res.status}`,
-          timestamp: Date.now(),
-        },
-      };
-    }
+    const payload = (res && typeof res === 'object' && 'data' in res && res.data && typeof res.data === 'object')
+      ? (res.data as Record<string, unknown>)
+      : (res as Record<string, unknown>);
 
-    const raw = await res.json() as Record<string, unknown>;
-    return { success: true, data: normalizeDocument(raw) };
-  } catch {
+    return { success: true, data: normalizeDocument(payload) };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Cannot upload document to the AETHER backend.';
     return {
       success: false,
       error: {
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Cannot upload document to the AETHER backend.',
+        code: 'RAG_FAILED',
+        message,
         timestamp: Date.now(),
       },
     };
@@ -91,13 +90,20 @@ export async function uploadDocument(
  */
 export function getDocumentStatusLabel(status: DocumentStatus): string {
   switch (status) {
-    case 'pending': return 'Pending';
-    case 'parsing': return 'Parsing…';
-    case 'chunking': return 'Chunking…';
-    case 'embedding': return 'Embedding…';
-    case 'indexed': return 'Indexed';
-    case 'error': return 'Error';
-    default: return 'Unknown';
+    case 'pending':
+      return 'Pending';
+    case 'parsing':
+      return 'Parsing…';
+    case 'chunking':
+      return 'Chunking…';
+    case 'embedding':
+      return 'Embedding…';
+    case 'indexed':
+      return 'Indexed';
+    case 'error':
+      return 'Error';
+    default:
+      return 'Unknown';
   }
 }
 

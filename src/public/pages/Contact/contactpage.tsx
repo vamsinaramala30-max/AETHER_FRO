@@ -96,7 +96,9 @@ export const ContactPage: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         setIsSubmitted(true);
-        setReferenceId(data?.data?.referenceId || `ATH-CNT-${Date.now().toString(36).toUpperCase()}`);
+        setReferenceId(
+          data?.data?.referenceId || `ATH-CNT-${Date.now().toString(36).toUpperCase()}`,
+        );
       } else {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData?.message || 'Failed to submit inquiry to server.');
@@ -113,7 +115,7 @@ export const ContactPage: React.FC = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -144,8 +146,8 @@ export const ContactPage: React.FC = () => {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              Have a product inquiry, technical requirement, enterprise integration need, or feedback?
-              Our specialized team is ready to connect.
+              Have a product inquiry, technical requirement, enterprise integration need, or
+              feedback? Our specialized team is ready to connect.
             </p>
           </div>
 
@@ -168,20 +170,27 @@ export const ContactPage: React.FC = () => {
           </div>
 
           {/* Main Form Container */}
-          <div className="mt-12 mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-6 shadow-2xl backdrop-blur-xl sm:p-10">
+          <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-6 shadow-2xl backdrop-blur-xl sm:p-10">
             {isSubmitted ? (
               <div className="py-12 text-center" role="status" aria-live="polite">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
                   <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <h2 className="mt-6 text-2xl font-bold text-white">Inquiry Received</h2>
                 <p className="mt-2 text-sm text-zinc-400">
-                  Thank you, <span className="font-semibold text-white">{formData.fullName}</span>. Your message regarding{' '}
-                  <span className="font-semibold text-indigo-400">{formData.inquiryType}</span> has been logged securely.
+                  Thank you, <span className="font-semibold text-white">{formData.fullName}</span>.
+                  Your message regarding{' '}
+                  <span className="font-semibold text-indigo-400">{formData.inquiryType}</span> has
+                  been logged securely.
                 </p>
-                <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-xs font-mono text-zinc-300">
+                <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-2 font-mono text-xs text-zinc-300">
                   <span>Reference ID:</span>
                   <span className="font-bold text-cyan-400">{referenceId}</span>
                 </div>
@@ -208,7 +217,10 @@ export const ContactPage: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 {submitError && (
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400" role="alert">
+                  <div
+                    className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400"
+                    role="alert"
+                  >
                     {submitError}
                   </div>
                 )}
@@ -216,7 +228,10 @@ export const ContactPage: React.FC = () => {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {/* Full Name */}
                   <div>
-                    <label htmlFor="fullName" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                    <label
+                      htmlFor="fullName"
+                      className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                    >
                       Full Name <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -241,7 +256,10 @@ export const ContactPage: React.FC = () => {
 
                   {/* Email */}
                   <div>
-                    <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                    <label
+                      htmlFor="email"
+                      className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                    >
                       Email Address <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -268,8 +286,12 @@ export const ContactPage: React.FC = () => {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {/* Company */}
                   <div>
-                    <label htmlFor="company" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                      Company / Organization <span className="text-xs text-zinc-500">(Optional)</span>
+                    <label
+                      htmlFor="company"
+                      className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                    >
+                      Company / Organization{' '}
+                      <span className="text-xs text-zinc-500">(Optional)</span>
                     </label>
                     <input
                       type="text"
@@ -284,7 +306,10 @@ export const ContactPage: React.FC = () => {
 
                   {/* Inquiry Category */}
                   <div>
-                    <label htmlFor="inquiryType" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                    <label
+                      htmlFor="inquiryType"
+                      className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                    >
                       Category
                     </label>
                     <select
@@ -305,7 +330,10 @@ export const ContactPage: React.FC = () => {
 
                 {/* Subject */}
                 <div>
-                  <label htmlFor="subject" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                  <label
+                    htmlFor="subject"
+                    className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                  >
                     Subject <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -330,7 +358,10 @@ export const ContactPage: React.FC = () => {
 
                 {/* Message */}
                 <div>
-                  <label htmlFor="message" className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                  <label
+                    htmlFor="message"
+                    className="block text-xs font-semibold uppercase tracking-wider text-zinc-300"
+                  >
                     Message <span className="text-red-400">*</span>
                   </label>
                   <textarea
@@ -358,13 +389,28 @@ export const ContactPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        <svg
+                          className="h-5 w-5 animate-spin text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          />
                         </svg>
                         Sending Message...
                       </>

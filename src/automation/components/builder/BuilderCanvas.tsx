@@ -21,7 +21,7 @@ export const BuilderCanvas: React.FC<Props> = ({
   onRemoveStep,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-start p-6 min-h-[420px] bg-slate-50/50 dark:bg-slate-950/40">
+    <div className="flex min-h-[420px] flex-col items-center justify-start bg-slate-50/50 p-6 dark:bg-slate-950/40">
       <div className="w-full max-w-lg space-y-0">
         {steps.map((step, index) => {
           const isSelected = step.id === selectedStepId;

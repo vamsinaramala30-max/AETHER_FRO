@@ -33,13 +33,7 @@ export type ConditionOperator =
   | 'NOT';
 
 export type AIActionType =
-  | 'ASK_AETHER'
-  | 'SUMMARIZE'
-  | 'ANALYZE'
-  | 'CLASSIFY'
-  | 'GENERATE'
-  | 'EXTRACT'
-  | 'TRANSFORM';
+  'ASK_AETHER' | 'SUMMARIZE' | 'ANALYZE' | 'CLASSIFY' | 'GENERATE' | 'EXTRACT' | 'TRANSFORM';
 
 export type SystemActionType =
   | 'CREATE_TASK'

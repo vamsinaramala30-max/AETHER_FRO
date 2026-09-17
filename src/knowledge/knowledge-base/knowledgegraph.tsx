@@ -11,9 +11,12 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
     return (
       <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
         <Network className="mb-2 h-10 w-10 text-slate-400" />
-        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No connected knowledge yet</p>
-        <p className="mt-1 text-xs text-slate-400 max-w-sm">
-          Add files, documents, projects, or notes to start building your connected AETHER knowledge graph.
+        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+          No connected knowledge yet
+        </p>
+        <p className="mt-1 max-w-sm text-xs text-slate-400">
+          Add files, documents, projects, or notes to start building your connected AETHER knowledge
+          graph.
         </p>
       </div>
     );
@@ -73,7 +76,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
               x2={link.x2}
               y2={link.y2}
               stroke="currentColor"
-              className="text-slate-300 dark:text-slate-700 opacity-60"
+              className="text-slate-300 opacity-60 dark:text-slate-700"
               strokeWidth="1.5"
               strokeDasharray="4 2"
             />
@@ -86,7 +89,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
                 cy={node.y}
                 r={node.type === 'concept' ? '8' : '6'}
                 fill={colorMap[node.type] || '#64748b'}
-                className="opacity-80 transition-all duration-200 group-hover:opacity-100 group-hover:scale-125"
+                className="opacity-80 transition-all duration-200 group-hover:scale-125 group-hover:opacity-100"
               />
               <text
                 x={node.x}
@@ -123,4 +126,3 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodes }) => {
     </div>
   );
 };
-

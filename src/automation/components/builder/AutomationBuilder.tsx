@@ -14,15 +14,8 @@ interface Props {
 }
 
 export const AutomationBuilder: React.FC<Props> = ({ isOpen, onClose, onSaved, initialData }) => {
-  const {
-    state,
-    setWorkFlowName,
-    selectStep,
-    addStep,
-    updateStep,
-    removeStep,
-    selectedStep,
-  } = useAutomationBuilder(initialData);
+  const { state, setWorkFlowName, selectStep, addStep, updateStep, removeStep, selectedStep } =
+    useAutomationBuilder(initialData);
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -77,7 +70,7 @@ export const AutomationBuilder: React.FC<Props> = ({ isOpen, onClose, onSaved, i
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-6 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 backdrop-blur-sm duration-200 sm:p-6">
       <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
         <BuilderHeader
           workflowName={state.name}
@@ -92,7 +85,7 @@ export const AutomationBuilder: React.FC<Props> = ({ isOpen, onClose, onSaved, i
             <BuilderSidebar onAddStep={handleAddPaletteStep} />
           </div>
 
-          <div className="lg:col-span-6 border-b border-slate-200 dark:border-slate-800 lg:border-b-0 lg:border-r">
+          <div className="border-b border-slate-200 dark:border-slate-800 lg:col-span-6 lg:border-b-0 lg:border-r">
             <BuilderCanvas
               steps={state.steps}
               selectedStepId={state.selectedStepId}

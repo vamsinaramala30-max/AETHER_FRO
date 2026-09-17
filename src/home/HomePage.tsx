@@ -853,27 +853,72 @@ export const HomePage: React.FC = () => {
               {[
                 {
                   label: 'AI Core Engine',
-                  status: aiService.isAiEnabled() ? 'Operational' : 'Active (Local)',
+                  status: aiService.isAiEnabled() ? 'Operational' : 'Ready (Local)',
                   color: 'text-emerald-400',
                   dot: 'bg-emerald-400',
                 },
                 {
                   label: 'Calendar Engine',
-                  status: 'Operational',
-                  color: 'text-emerald-400',
-                  dot: 'bg-emerald-400',
+                  status:
+                    calendarState.status === 'success'
+                      ? 'Operational'
+                      : calendarState.status === 'error'
+                        ? 'Unavailable'
+                        : 'Connecting',
+                  color:
+                    calendarState.status === 'success'
+                      ? 'text-emerald-400'
+                      : calendarState.status === 'error'
+                        ? 'text-amber-400'
+                        : 'text-slate-400',
+                  dot:
+                    calendarState.status === 'success'
+                      ? 'bg-emerald-400'
+                      : calendarState.status === 'error'
+                        ? 'bg-amber-400'
+                        : 'bg-slate-400',
                 },
                 {
-                  label: 'Telemetry Pipelines',
-                  status: 'Operational',
-                  color: 'text-emerald-400',
-                  dot: 'bg-emerald-400',
+                  label: 'Tasks & Projects',
+                  status:
+                    tasksState.status === 'success'
+                      ? 'Operational'
+                      : tasksState.status === 'error'
+                        ? 'Unavailable'
+                        : 'Connecting',
+                  color:
+                    tasksState.status === 'success'
+                      ? 'text-emerald-400'
+                      : tasksState.status === 'error'
+                        ? 'text-amber-400'
+                        : 'text-slate-400',
+                  dot:
+                    tasksState.status === 'success'
+                      ? 'bg-emerald-400'
+                      : tasksState.status === 'error'
+                        ? 'bg-amber-400'
+                        : 'bg-slate-400',
                 },
                 {
-                  label: 'Storage & Blobs',
-                  status: 'Operational',
-                  color: 'text-emerald-400',
-                  dot: 'bg-emerald-400',
+                  label: 'Files & Storage',
+                  status:
+                    filesState.status === 'success'
+                      ? 'Operational'
+                      : filesState.status === 'error'
+                        ? 'Unavailable'
+                        : 'Connecting',
+                  color:
+                    filesState.status === 'success'
+                      ? 'text-emerald-400'
+                      : filesState.status === 'error'
+                        ? 'text-amber-400'
+                        : 'text-slate-400',
+                  dot:
+                    filesState.status === 'success'
+                      ? 'bg-emerald-400'
+                      : filesState.status === 'error'
+                        ? 'bg-amber-400'
+                        : 'bg-slate-400',
                 },
               ].map((item) => (
                 <div key={item.label} className="flex items-center justify-between">

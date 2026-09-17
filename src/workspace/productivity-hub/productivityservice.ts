@@ -156,4 +156,3 @@ export const productivityService = {
     return this.getStats();
   },
 };
-

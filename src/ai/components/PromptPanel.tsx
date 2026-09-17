@@ -24,7 +24,7 @@ const PromptItem = memo<PromptItemProps>(({ template }) => {
   const preview = previewPrompt(template).slice(0, 120);
 
   return (
-    <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/30">
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
@@ -38,7 +38,9 @@ const PromptItem = memo<PromptItemProps>(({ template }) => {
               {CATEGORY_LABELS[template.category]}
             </span>
             {template.isBuiltIn && (
-              <span className="rounded bg-slate-700 px-1 py-0.5 text-[9px] text-slate-400">Built-in</span>
+              <span className="rounded bg-slate-700 px-1 py-0.5 text-[9px] text-slate-400">
+                Built-in
+              </span>
             )}
           </div>
           <p className="mt-0.5 text-xs font-medium text-slate-200">{template.name}</p>
@@ -64,7 +66,10 @@ const PromptItem = memo<PromptItemProps>(({ template }) => {
           role="region"
           aria-labelledby={`prompt-${template.id}`}
         >
-          <p className="text-[11px] leading-relaxed text-slate-400">{preview}{preview.length < template.template.length ? '…' : ''}</p>
+          <p className="text-[11px] leading-relaxed text-slate-400">
+            {preview}
+            {preview.length < template.template.length ? '…' : ''}
+          </p>
           {template.variables.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {template.variables.map((v) => (
@@ -72,7 +77,8 @@ const PromptItem = memo<PromptItemProps>(({ template }) => {
                   key={v.name}
                   className="rounded bg-indigo-500/10 px-1.5 py-0.5 text-[10px] text-indigo-300"
                 >
-                  {`{{${v.name}}}`}{v.required ? '*' : ''}
+                  {`{{${v.name}}}`}
+                  {v.required ? '*' : ''}
                 </span>
               ))}
             </div>
@@ -109,7 +115,10 @@ export const PromptPanel = memo(() => {
 
       {loading ? (
         <div className="py-8 text-center">
-          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-400" aria-label="Loading prompts" />
+          <div
+            className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-400"
+            aria-label="Loading prompts"
+          />
         </div>
       ) : templates.length === 0 ? (
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 p-6 text-center">

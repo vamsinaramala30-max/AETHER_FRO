@@ -25,7 +25,10 @@ export { PromptPanel } from './components/PromptPanel';
 export { ModelPanel } from './components/ModelPanel';
 export { AgentPanel } from './components/AgentPanel';
 export { SourceCitation } from './components/SourceCitation';
+
 export { ToolExecution } from './components/ToolExecution';
+export { ConfirmationDialog } from './components/ConfirmationDialog';
+export { PlanView } from './components/PlanView';
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 export { useAI } from './hooks/useAI';

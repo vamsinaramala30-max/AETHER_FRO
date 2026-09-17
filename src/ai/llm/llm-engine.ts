@@ -35,7 +35,7 @@ export interface LLMEndpoint {
 
 /**
  * Build a GenerationRequest for the backend.
- * The frontend never constructs LLM prompts from raw data — 
+ * The frontend never constructs LLM prompts from raw data —
  * the backend handles prompt engineering.
  */
 export function buildLLMRequest(
@@ -89,7 +89,7 @@ export class LLMEngine {
         };
       }
 
-      const raw = await res.json() as {
+      const raw = (await res.json()) as {
         id?: string;
         content?: string;
         finish_reason?: string;
@@ -132,9 +132,7 @@ export class LLMEngine {
    * Select the best available model from the list.
    */
   selectBestModel(models: AIModelInfo[]): AIModelInfo | null {
-    const available = models.filter(
-      (m) => m.status === 'available' || m.status === 'loaded',
-    );
+    const available = models.filter((m) => m.status === 'available' || m.status === 'loaded');
     if (available.length === 0) return null;
     // Prefer loaded models
     const loaded = available.find((m) => m.status === 'loaded');

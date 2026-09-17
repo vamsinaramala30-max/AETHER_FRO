@@ -13,8 +13,6 @@ import {
   AlertTriangle,
   Plus,
   ArrowRight,
-  Sparkles,
-  Link2,
 } from 'lucide-react';
 import { apiClient } from '@/api/client';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +33,9 @@ export const KnowledgeBasePage: React.FC = () => {
   const [stats, setStats] = useState<KnowledgeStats | null>(null);
   const [nodes, setNodes] = useState<KnowledgeNode[]>([]);
   const [activity, setActivity] = useState<DateActivityItem[]>([]);
-  const [gaps, setGaps] = useState<Array<{ projectId: string; projectName: string; message: string }>>([]);
+  const [gaps, setGaps] = useState<
+    Array<{ projectId: string; projectName: string; message: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
@@ -89,7 +89,8 @@ export const KnowledgeBasePage: React.FC = () => {
               AETHER Knowledge Intelligence Base
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Real relational intelligence view connecting Files, Documents, Notes, Projects, and Automations.
+              Real relational intelligence view connecting Files, Documents, Notes, Projects, and
+              Automations.
             </p>
           </div>
         </div>
@@ -105,7 +106,7 @@ export const KnowledgeBasePage: React.FC = () => {
           </button>
 
           {isAddMenuOpen && (
-            <div className="absolute right-0 top-12 z-40 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900 animate-in fade-in duration-150">
+            <div className="animate-in fade-in absolute right-0 top-12 z-40 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl duration-150 dark:border-slate-800 dark:bg-slate-900">
               <button
                 onClick={() => {
                   setIsAddMenuOpen(false);
@@ -148,7 +149,9 @@ export const KnowledgeBasePage: React.FC = () => {
       ) : isEmptyState ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 text-center dark:border-slate-800 dark:bg-slate-900">
           <Database className="mb-4 h-12 w-12 text-slate-400" />
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">No knowledge data yet</h3>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            No knowledge data yet
+          </h3>
           <p className="mt-1 max-w-md text-xs text-slate-500 dark:text-slate-400">
             Add files, documents or notes to start building your AETHER knowledge base.
           </p>
@@ -182,7 +185,9 @@ export const KnowledgeBasePage: React.FC = () => {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Knowledge</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Total Knowledge
+                </span>
                 <Database className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -192,7 +197,9 @@ export const KnowledgeBasePage: React.FC = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-purple-600 dark:text-purple-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Files</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Files
+                </span>
                 <FolderOpen className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -202,7 +209,9 @@ export const KnowledgeBasePage: React.FC = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Documents</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Documents
+                </span>
                 <FileText className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -212,7 +221,9 @@ export const KnowledgeBasePage: React.FC = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-amber-600 dark:text-amber-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Notes</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Notes
+                </span>
                 <BookOpen className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -222,7 +233,9 @@ export const KnowledgeBasePage: React.FC = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-blue-600 dark:text-blue-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Projects</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Projects
+                </span>
                 <Layers className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -232,7 +245,9 @@ export const KnowledgeBasePage: React.FC = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-pink-600 dark:text-pink-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tasks</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Tasks
+                </span>
                 <CheckSquare className="h-4 w-4" />
               </div>
               <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -250,7 +265,7 @@ export const KnowledgeBasePage: React.FC = () => {
                   className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 dark:border-amber-500/20 sm:flex-row sm:items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <div>
                       <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200">
                         Knowledge gap detected

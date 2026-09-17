@@ -25,6 +25,7 @@ export interface DocumentItem {
   userId: string;
   type: string;
   updatedAt: string;
+  status?: string;
 }
 
 export interface KnowledgeNode {
@@ -43,4 +44,3 @@ export interface SearchResult {
   score: number;
   date: string;
 }
-

@@ -29,9 +29,22 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onDelet
             <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
-        <p className="mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
-          {(doc.size / 1024).toFixed(1)} KB · {doc.mimeType || 'Document'}
-        </p>
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            {(doc.size / 1024).toFixed(1)} KB · {doc.mimeType || 'Document'}
+          </p>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+              doc.status === 'READY' || doc.status === 'PUBLISHED'
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                : doc.status === 'FAILED' || doc.status === 'INDEX_FAILED'
+                  ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+            }`}
+          >
+            {doc.status || 'READY'}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-3">

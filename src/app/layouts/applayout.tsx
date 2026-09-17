@@ -1,57 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import {
-  Sparkles,
-  Bell,
-  Search,
-  Sun,
-  Moon,
-  Menu,
-  Thermometer,
-  X,
-} from 'lucide-react';
+import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Sparkles, Bell, Search, Sun, Moon, Menu, Thermometer, X } from 'lucide-react';
 
 import { useTheme } from '../providers/themeprovider';
+import { useAuth } from '../providers/authprovider';
+import { normalizeUserProfile } from '@/auth/userProfile';
 import { Sidebar } from '../../components/sidebar/Sidebar';
 import { AppFooter } from '../../components/navigation/AppFooter';
+import { aiService } from '../../services/aiService';
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded modals/components
 // ---------------------------------------------------------------------------
 
-const GlobalSearch = React.lazy(
-  () =>
-    import('../../components/search/GlobalSearch').then((module) => ({
-      default: module.GlobalSearch,
-    })),
+const GlobalSearch = React.lazy(() =>
+  import('../../components/search/GlobalSearch').then((module) => ({
+    default: module.GlobalSearch,
+  })),
 );
 
-const NotificationCenter = React.lazy(
-  () =>
-    import('../../components/notifications/NotificationCenter').then(
-      (module) => ({
-        default: module.NotificationCenter,
-      }),
-    ),
+const NotificationCenter = React.lazy(() =>
+  import('../../components/notifications/NotificationCenter').then((module) => ({
+    default: module.NotificationCenter,
+  })),
 );
 
 // Weather component
 // IMPORTANT: Weather.tsx must use:
 // export default function Weather() { ... }
-const Weather = React.lazy(
-  () =>
-    import('../../components/weather/weather').then((module) => ({
-      default: module.default,
-    })),
+const Weather = React.lazy(() =>
+  import('../../components/weather/weather').then((module) => ({
+    default: module.default,
+  })),
 );
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatBreadcrumbs(
-  pathname: string,
-): { label: string; isLast: boolean }[] {
+function formatBreadcrumbs(pathname: string): { label: string; isLast: boolean }[] {
   const parts = pathname.split('/').filter(Boolean);
 
   if (parts.length === 0) {
@@ -66,9 +53,7 @@ function formatBreadcrumbs(
   }
 
   return segments.map((segment, index) => ({
-    label:
-      segment.charAt(0).toUpperCase() +
-      segment.slice(1).replace(/-/g, ' '),
+    label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
     isLast: index === segments.length - 1,
   }));
 }
@@ -99,6 +84,8 @@ const DesktopHeader: React.FC<HeaderProps> = ({
   const location = useLocation();
   const breadcrumbs = formatBreadcrumbs(location.pathname);
   const { resolvedTheme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const normalizedUser = normalizeUserProfile(user as Record<string, unknown> | null | undefined);
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-6">
@@ -106,15 +93,10 @@ const DesktopHeader: React.FC<HeaderProps> = ({
       {/* Breadcrumbs                                                        */}
       {/* ----------------------------------------------------------------- */}
 
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-1.5 text-xs"
-      >
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
         {breadcrumbs.map((crumb, index) => (
           <React.Fragment key={`${crumb.label}-${index}`}>
-            {index > 0 && (
-              <span className="text-aether-muted/40">/</span>
-            )}
+            {index > 0 && <span className="text-aether-muted/40">/</span>}
 
             <span
               className={
@@ -129,10 +111,17 @@ const DesktopHeader: React.FC<HeaderProps> = ({
         ))}
 
         {/* AI Engine status */}
-        <span className="ml-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          AI Engine Active
-        </span>
+        {aiService.isAiEnabled() ? (
+          <span className="ml-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            AI Ready ({aiService.getConfig().activeProvider})
+          </span>
+        ) : (
+          <span className="ml-3 inline-flex items-center gap-1.5 rounded-full border border-aether-border bg-aether-subtle px-2.5 py-0.5 text-[11px] font-semibold text-aether-muted">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            AI Offline
+          </span>
+        )}
       </nav>
 
       {/* ----------------------------------------------------------------- */}
@@ -191,9 +180,7 @@ const DesktopHeader: React.FC<HeaderProps> = ({
 
         <button
           type="button"
-          onClick={() =>
-            setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-          }
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           aria-label="Toggle theme"
           title="Toggle Theme"
           className="rounded-xl border border-aether-border bg-aether-subtle p-2 text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
@@ -204,6 +191,21 @@ const DesktopHeader: React.FC<HeaderProps> = ({
             <Moon className="h-4 w-4 text-indigo-400" />
           )}
         </button>
+
+        {/* User Profile */}
+        <Link
+          to="/app/settings/profile"
+          aria-label={`User Profile: ${normalizedUser.displayName}`}
+          title={`${normalizedUser.displayName} (${normalizedUser.email})`}
+          className="flex items-center gap-2 rounded-xl border border-aether-border bg-aether-subtle p-1 pr-2.5 transition-colors hover:bg-aether-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 via-purple-600 to-cyan-500 text-xs font-bold text-white shadow-xs">
+            {normalizedUser.initials}
+          </div>
+          <span className="hidden xl:inline-block max-w-[110px] truncate text-xs font-medium text-aether-main">
+            {normalizedUser.displayName}
+          </span>
+        </Link>
       </div>
     </header>
   );
@@ -227,9 +229,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
           <Sparkles className="h-3.5 w-3.5 text-white" />
         </div>
 
-        <span className="text-base font-extrabold text-aether-main">
-          Aether OS
-        </span>
+        <span className="text-base font-extrabold text-aether-main">Aether OS</span>
       </div>
 
       {/* Mobile controls */}
@@ -312,13 +312,9 @@ const WeatherOverlay: React.FC<WeatherOverlayProps> = ({ onClose }) => {
             </div>
 
             <div>
-              <h2 className="text-sm font-semibold text-aether-main">
-                Weather
-              </h2>
+              <h2 className="text-sm font-semibold text-aether-main">Weather</h2>
 
-              <p className="text-xs text-aether-muted">
-                Current weather information
-              </p>
+              <p className="text-xs text-aether-muted">Current weather information</p>
             </div>
           </div>
 
@@ -396,10 +392,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === 'k'
-      ) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setSearchOpen(true);
       }
@@ -424,7 +417,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   // -------------------------------------------------------------------------
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg font-sans text-aether-main antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+    <div className="flex h-screen w-screen overflow-hidden bg-aether-bg pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] font-sans text-aether-main antialiased">
       {/* ================================================================= */}
       {/* Mobile Backdrop                                                    */}
       {/* ================================================================= */}
@@ -471,9 +464,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
       <div className="hidden md:block">
         <Sidebar
           collapsed={collapsed}
-          onToggleCollapse={() =>
-            setCollapsed((previousValue) => !previousValue)
-          }
+          onToggleCollapse={() => setCollapsed((previousValue) => !previousValue)}
           isMobile={false}
           onMobileClose={() => {}}
           onSearchOpen={() => setSearchOpen(true)}
@@ -505,23 +496,29 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
         </div>
 
         {/* Dynamic Page Content */}
-        <main className="flex flex-1 flex-col overflow-y-auto bg-aether-bg transition-all duration-200">
-          <div className="flex min-h-full flex-1 flex-col justify-between p-3 pb-0 sm:p-4 sm:pb-0 md:p-6 md:pb-0">
-            <div className="flex-1 pb-4 sm:pb-6">
+        {location.pathname.startsWith('/app/ai/assistant') ? (
+          <main className="flex flex-1 flex-col overflow-hidden bg-aether-bg">
+            <div className="flex h-full flex-1 flex-col overflow-hidden">
               <Outlet />
             </div>
-            <AppFooter />
-          </div>
-        </main>
+          </main>
+        ) : (
+          <main className="flex flex-1 flex-col overflow-y-auto bg-aether-bg transition-all duration-200">
+            <div className="flex min-h-full flex-1 flex-col justify-between p-3 pb-0 sm:p-4 sm:pb-0 md:p-6 md:pb-0">
+              <div className="flex-1 pb-4 sm:pb-6">
+                <Outlet />
+              </div>
+              <AppFooter />
+            </div>
+          </main>
+        )}
       </div>
 
       {/* ================================================================= */}
       {/* Weather                                                            */}
       {/* ================================================================= */}
 
-      {weatherOpen && (
-        <WeatherOverlay onClose={() => setWeatherOpen(false)} />
-      )}
+      {weatherOpen && <WeatherOverlay onClose={() => setWeatherOpen(false)} />}
 
       {/* ================================================================= */}
       {/* Global Search                                                      */}
@@ -539,9 +536,7 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
 
       {notificationsOpen && (
         <React.Suspense fallback={null}>
-          <NotificationCenter
-            onClose={() => setNotificationsOpen(false)}
-          />
+          <NotificationCenter onClose={() => setNotificationsOpen(false)} />
         </React.Suspense>
       )}
     </div>

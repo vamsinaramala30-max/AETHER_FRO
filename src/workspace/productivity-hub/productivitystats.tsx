@@ -9,7 +9,6 @@ interface ProductivityStatsProps {
 export const ProductivityStats: React.FC<ProductivityStatsProps> = ({ stats }) => {
   return (
     <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-3">
-
       {/* Stat block 2 */}
       <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div>

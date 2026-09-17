@@ -51,8 +51,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       >
         <Icon className={`h-7 w-7 ${config.iconClass}`} />
       </div>
-      <h3 className="mb-1 text-sm font-semibold text-slate-200">{title ?? config.defaultTitle}</h3>
-      <p className="max-w-xs text-xs leading-relaxed text-slate-500">
+      <h3 className="mb-1 text-sm font-semibold text-aether-main">{title ?? config.defaultTitle}</h3>
+      <p className="max-w-xs text-xs leading-relaxed text-aether-muted">
         {message ?? config.defaultMessage}
       </p>
       {onRetry && (

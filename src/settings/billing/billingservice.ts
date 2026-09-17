@@ -15,14 +15,13 @@ export function getExactOneYearRenewalDate(startDate: Date = new Date()): string
 export const billingService = {
   getCurrentSubscription(): Promise<SubscriptionTier> {
     const today = new Date();
-    const renewalDate = getExactOneYearRenewalDate(today);
 
     return Promise.resolve({
-      name: 'AETHER Enterprise Suite (Annual)',
-      cost: '$499.00 / year',
+      name: 'AETHER Community Workspace',
+      cost: 'Open Source / Self-Hosted',
       active: true,
       activationDate: today.toISOString().split('T')[0],
-      renewalDate,
+      renewalDate: 'Perpetual / Active',
     });
   },
 };

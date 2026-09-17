@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AutomationTemplate } from '../../automation-types';
 import { AutomationDialog } from '../shared/AutomationDialog';
 import { Button } from '@/components/ui/button';
-import { Zap, Sparkles, CheckCircle2, Clock, ShieldCheck, Database, Target, ArrowRight } from 'lucide-react';
+import { Zap, CheckCircle2, Clock, ShieldCheck, Database, Target, ArrowRight } from 'lucide-react';
 import { formatScheduleText } from '../../automation-utils';
 
 interface Props {
@@ -59,13 +59,16 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
       <div className="space-y-4">
         {step === 'configure' ? (
           <>
-            <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-amber-500" />
-                  Trigger: {template.preset.trigger} {template.preset.schedule ? `(${formatScheduleText(template.preset.schedule)})` : ''}
+                  Trigger: {template.preset.trigger}{' '}
+                  {template.preset.schedule
+                    ? `(${formatScheduleText(template.preset.schedule)})`
+                    : ''}
                 </span>
-                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-amber-700 dark:text-amber-300 font-bold">
+                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 font-bold text-amber-700 dark:text-amber-300">
                   {template.category}
                 </span>
               </div>
@@ -73,7 +76,7 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Automation Name
                 </label>
                 <input
@@ -85,7 +88,7 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Description
                 </label>
                 <textarea
@@ -97,7 +100,7 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
               </div>
             </div>
 
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-2">
+            <h4 className="mt-2 text-xs font-bold uppercase tracking-wider text-slate-400">
               Configured Execution Steps ({template.preset.steps.length}):
             </h4>
             <div className="space-y-2">
@@ -117,11 +120,14 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
               ))}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleNextToPreview} className="bg-amber-500 text-white hover:bg-amber-600">
+              <Button
+                onClick={handleNextToPreview}
+                className="bg-amber-500 text-white hover:bg-amber-600"
+              >
                 <span>Preview Workflow Plan</span>
                 <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
@@ -129,13 +135,16 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
           </>
         ) : (
           <>
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3.5">
+            <div className="space-y-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
               <div className="flex items-center justify-between border-b border-amber-500/20 pb-2.5">
                 <div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white">{name}</h4>
-                  <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-0.5">
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
                     <Clock className="h-3.5 w-3.5" />
-                    Trigger: {template.preset.trigger} {template.preset.schedule ? `(${formatScheduleText(template.preset.schedule)})` : ''}
+                    Trigger: {template.preset.trigger}{' '}
+                    {template.preset.schedule
+                      ? `(${formatScheduleText(template.preset.schedule)})`
+                      : ''}
                   </p>
                 </div>
                 <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
@@ -144,19 +153,23 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-2.5">
-                  <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1 text-[10px]">
+                <div className="rounded-xl border border-slate-200/80 bg-white/60 p-2.5 dark:border-slate-800 dark:bg-slate-900/60">
+                  <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     <Database className="h-3 w-3 text-amber-500" />
                     Target Data
                   </p>
-                  <p className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200 text-xs">AETHER Workspace Repository</p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    AETHER Workspace Repository
+                  </p>
                 </div>
-                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-2.5">
-                  <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1 text-[10px]">
+                <div className="rounded-xl border border-slate-200/80 bg-white/60 p-2.5 dark:border-slate-800 dark:bg-slate-900/60">
+                  <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     <Target className="h-3 w-3 text-emerald-500" />
                     Expected Result
                   </p>
-                  <p className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200 text-xs">Execute real backend action pipeline</p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Execute real backend action pipeline
+                  </p>
                 </div>
               </div>
 
@@ -167,25 +180,30 @@ export const TemplateDetails: React.FC<Props> = ({ template, isOpen, onClose, on
                 {template.preset.steps.map((st, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-200/50 dark:border-slate-800/50"
+                    className="flex items-center gap-2 rounded-lg border border-slate-200/50 bg-white/50 p-2 text-xs font-medium text-slate-700 dark:border-slate-800/50 dark:bg-slate-900/50 dark:text-slate-200"
                   >
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span>{i + 1}. {st.title}</span>
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    <span>
+                      {i + 1}. {st.title}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-2 border-t border-amber-500/20 text-[11px] flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <div className="flex items-center gap-1.5 border-t border-amber-500/20 pt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                 <span>Enforces backend user ownership & security policies</span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 border-t border-slate-100 pt-3 dark:border-slate-800">
               <Button variant="outline" onClick={() => setStep('configure')}>
                 Back to Configure
               </Button>
-              <Button onClick={handleConfirmSave} className="bg-amber-500 text-white hover:bg-amber-600">
+              <Button
+                onClick={handleConfirmSave}
+                className="bg-amber-500 text-white hover:bg-amber-600"
+              >
                 <Zap className="mr-1.5 h-4 w-4" />
                 Save & Activate Automation
               </Button>

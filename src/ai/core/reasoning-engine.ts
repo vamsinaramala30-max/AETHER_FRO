@@ -8,19 +8,46 @@
 import type { ThinkingState, ThinkingStatus, AgentStatus } from '../ai-types';
 import { THINKING_STATUS_LABELS } from '../ai-constants';
 
+export interface BuildThinkingStateOptions {
+  toolName?: string;
+  step?: number;
+  totalSteps?: number;
+  details?: string;
+  customLabel?: string;
+}
+
 /**
  * Build a ThinkingState for display — only safe public labels.
  * Internal reasoning steps, prompts, and chain-of-thought are never included.
  */
 export function buildThinkingState(
   status: ThinkingStatus,
-  toolName?: string,
+  options?: string | BuildThinkingStateOptions,
 ): ThinkingState {
-  let label = THINKING_STATUS_LABELS[status];
-  if (status === 'using_tool' && toolName) {
-    label = `Using ${toolName}…`;
+  const opts: BuildThinkingStateOptions =
+    typeof options === 'string' ? { toolName: options } : options ?? {};
+
+  let label = opts.customLabel ?? THINKING_STATUS_LABELS[status] ?? '';
+  if (status === 'using_tool' && opts.toolName) {
+    label = `Executing ${opts.toolName}…`;
+  } else if (status === 'executing_action' && opts.toolName) {
+    label = `Executing ${opts.toolName}…`;
+  } else if (status === 'planning' && opts.step && opts.totalSteps) {
+    label = `Preparing step ${opts.step} of ${opts.totalSteps}…`;
+  } else if (status === 'executing_action' && opts.step && opts.totalSteps) {
+    label = `Executing step ${opts.step} of ${opts.totalSteps}…`;
+  } else if (status === 'verifying' && opts.step && opts.totalSteps) {
+    label = `Verifying step ${opts.step} of ${opts.totalSteps}…`;
   }
-  return { status, toolName, label };
+
+  return {
+    status,
+    toolName: opts.toolName,
+    label,
+    step: opts.step,
+    totalSteps: opts.totalSteps,
+    details: opts.details,
+  };
 }
 
 /**

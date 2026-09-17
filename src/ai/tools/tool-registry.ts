@@ -7,26 +7,60 @@
 import type { ToolDefinition, ToolCategory, AIResult, ToolRegistryStatus } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 
+import { apiClient } from '../../api/client';
+
 function normalizeToolDefinition(raw: Record<string, unknown>): ToolDefinition {
+  let category: ToolCategory = 'system';
+  const cat = String(raw['category'] || '').toLowerCase();
+  if (cat === 'task' || cat === 'tasks') category = 'task';
+  else if (cat === 'project' || cat === 'projects') category = 'project';
+  else if (cat === 'knowledge') category = 'knowledge';
+  else if (cat === 'workspace' || cat === 'calendar') category = 'workspace';
+  else if (cat === 'system') category = 'system';
+
+  let parameters: ToolDefinition['parameters'] = [];
+  if (Array.isArray(raw['parameters'])) {
+    parameters = raw['parameters'].flatMap((p) => {
+      if (typeof p !== 'object' || p === null) return [];
+      const pr = p as Record<string, unknown>;
+      return [
+        {
+          name: typeof pr['name'] === 'string' ? pr['name'] : '',
+          type: (pr['type'] as ToolDefinition['parameters'][number]['type']) ?? 'string',
+          description: typeof pr['description'] === 'string' ? pr['description'] : undefined,
+          required: pr['required'] === true,
+          enum: Array.isArray(pr['enum']) ? (pr['enum'] as string[]) : undefined,
+        },
+      ];
+    });
+  } else if (raw['inputSchema'] && typeof raw['inputSchema'] === 'object') {
+    const schema = raw['inputSchema'] as Record<string, unknown>;
+    const props = (schema['properties'] && typeof schema['properties'] === 'object')
+      ? (schema['properties'] as Record<string, Record<string, unknown>>)
+      : {};
+    const requiredList = Array.isArray(schema['required']) ? (schema['required'] as string[]) : [];
+
+    parameters = Object.entries(props).map(([propName, propDef]) => ({
+      name: propName,
+      type: (typeof propDef?.type === 'string' && ['string', 'number', 'boolean', 'object', 'array'].includes(propDef.type))
+        ? (propDef.type as ToolDefinition['parameters'][number]['type'])
+        : 'string',
+      description: typeof propDef?.description === 'string' ? propDef.description : undefined,
+      required: requiredList.includes(propName),
+      enum: Array.isArray(propDef?.enum) ? (propDef.enum as string[]) : undefined,
+    }));
+  }
+
+  const name = typeof raw['name'] === 'string' ? raw['name'] : 'Unknown Tool';
+  const id = typeof raw['id'] === 'string' ? raw['id'] : name;
+
   return {
-    id: typeof raw['id'] === 'string' ? raw['id'] : `tool_${Date.now()}`,
-    name: typeof raw['name'] === 'string' ? raw['name'] : 'Unknown Tool',
+    id,
+    name,
     description: typeof raw['description'] === 'string' ? raw['description'] : '',
-    category: (raw['category'] as ToolCategory) ?? 'system',
-    parameters: Array.isArray(raw['parameters'])
-      ? raw['parameters'].flatMap((p) => {
-          if (typeof p !== 'object' || p === null) return [];
-          const pr = p as Record<string, unknown>;
-          return [{
-            name: typeof pr['name'] === 'string' ? pr['name'] : '',
-            type: (pr['type'] as ToolDefinition['parameters'][number]['type']) ?? 'string',
-            description: typeof pr['description'] === 'string' ? pr['description'] : undefined,
-            required: pr['required'] === true,
-            enum: Array.isArray(pr['enum']) ? (pr['enum'] as string[]) : undefined,
-          }];
-        })
-      : [],
-    requiresAuth: raw['requires_auth'] === true,
+    category,
+    parameters,
+    requiresAuth: raw['requires_auth'] === true || raw['requiresAuth'] === true,
     enabled: raw['enabled'] !== false,
   };
 }
@@ -39,24 +73,37 @@ export class ToolRegistry {
   private tools: ToolDefinition[] = [];
 
   async load(): Promise<AIResult<ToolDefinition[]>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.toolsPath}`;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: { code: 'INTERNAL_ERROR', message: 'Failed to load tools.', timestamp: Date.now() },
-        };
+      const res = await apiClient.get<Record<string, unknown> | unknown[]>(
+        this.config.backend.toolsPath,
+        { timeout: 10_000 }
+      );
+
+      let rawArray: unknown[] = [];
+      if (Array.isArray(res)) {
+        rawArray = res;
+      } else if (res && typeof res === 'object') {
+        const payload = res as Record<string, unknown>;
+        if (Array.isArray(payload['data'])) {
+          rawArray = payload['data'];
+        } else if (Array.isArray(payload['tools'])) {
+          rawArray = payload['tools'];
+        }
       }
-      const raw = await res.json() as unknown[];
-      this.tools = raw
+
+      this.tools = rawArray
         .filter((t): t is Record<string, unknown> => typeof t === 'object' && t !== null)
         .map(normalizeToolDefinition);
+
       return { success: true, data: this.tools };
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot load tool registry.', timestamp: Date.now() },
+        error: {
+          code: 'TOOL_FAILED',
+          message: 'Cannot load tool registry from backend.',
+          timestamp: Date.now(),
+        },
       };
     }
   }

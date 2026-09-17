@@ -27,11 +27,13 @@ const MemoryEntryRow = memo<MemoryEntryRowProps>(({ entry, onDelete }) => (
   <div className="group flex items-start gap-3 rounded-lg border border-slate-700/40 bg-slate-800/30 p-3">
     <div className="min-w-0 flex-1">
       <div className="flex items-center gap-2">
-        <span className={`text-[10px] font-semibold uppercase tracking-wider ${SCOPE_COLORS[entry.scope]}`}>
+        <span
+          className={`text-[10px] font-semibold uppercase tracking-wider ${SCOPE_COLORS[entry.scope]}`}
+        >
           {SCOPE_LABELS[entry.scope]}
         </span>
         <span className="text-[10px] text-slate-600">·</span>
-        <span className="text-[10px] text-slate-500 capitalize">{entry.type}</span>
+        <span className="text-[10px] capitalize text-slate-500">{entry.type}</span>
       </div>
       <p className="mt-1 text-xs leading-relaxed text-slate-300">{entry.content}</p>
     </div>
@@ -39,9 +41,16 @@ const MemoryEntryRow = memo<MemoryEntryRowProps>(({ entry, onDelete }) => (
       type="button"
       onClick={() => onDelete(entry.id)}
       aria-label="Delete memory entry"
-      className="mt-0.5 shrink-0 rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100 focus:outline-none focus-visible:opacity-100"
+      className="mt-0.5 shrink-0 rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:opacity-100 group-hover:opacity-100"
     >
-      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <svg
+        className="h-3 w-3"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+        aria-hidden="true"
+      >
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
@@ -72,8 +81,19 @@ export const MemoryPanel = memo(() => {
           aria-label="Refresh memory"
           className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300 focus:outline-none"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
           </svg>
         </button>
       </div>
@@ -84,7 +104,11 @@ export const MemoryPanel = memo(() => {
           {(['working', 'conversation', 'long_term'] as MemoryScope[]).map((scope) => (
             <div key={scope} className="rounded-lg bg-slate-800/50 p-2 text-center">
               <p className={`text-base font-bold ${SCOPE_COLORS[scope]}`}>
-                {scope === 'working' ? status.workingEntries : scope === 'conversation' ? status.conversationEntries : status.longTermEntries}
+                {scope === 'working'
+                  ? status.workingEntries
+                  : scope === 'conversation'
+                    ? status.conversationEntries
+                    : status.longTermEntries}
               </p>
               <p className="text-[10px] text-slate-500">{SCOPE_LABELS[scope]}</p>
             </div>

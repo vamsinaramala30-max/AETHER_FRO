@@ -32,10 +32,7 @@ export function createNewConversation(title = 'New Conversation'): AIConversatio
 /**
  * Build a new user message.
  */
-export function createUserMessage(
-  conversationId: string,
-  content: string,
-): AIMessage {
+export function createUserMessage(conversationId: string, content: string): AIMessage {
   const now = Date.now();
   return {
     id: `msg_${now}_${Math.random().toString(36).slice(2, 9)}`,

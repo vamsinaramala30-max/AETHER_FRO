@@ -12,12 +12,13 @@ import type { AgentDefinition } from '../ai-types';
  * The agent's internal reasoning is kept private on the backend.
  */
 export function buildAgentSystemPrompt(agent: AgentDefinition): string {
-  const toolList = agent.tools.length > 0
-    ? `You have access to the following tools: ${agent.tools.join(', ')}.`
-    : '';
+  const toolList =
+    agent.tools.length > 0
+      ? `You have access to the following tools: ${agent.tools.join(', ')}.`
+      : '';
 
-  const basePrompt = agent.systemPrompt?.trim()
-    ?? `You are ${agent.name}, an AI agent within the AETHER workspace.`;
+  const basePrompt =
+    agent.systemPrompt?.trim() ?? `You are ${agent.name}, an AI agent within the AETHER workspace.`;
 
   return [basePrompt, toolList].filter(Boolean).join('\n\n');
 }
@@ -34,10 +35,7 @@ export function buildAgentGoalDescription(goal: string, agentName: string): stri
  * Format a safe agent status message for display.
  * Never exposes private reasoning or intermediate steps.
  */
-export function formatAgentStatusMessage(
-  agentName: string,
-  stepDescription: string,
-): string {
+export function formatAgentStatusMessage(agentName: string, stepDescription: string): string {
   return `${agentName}: ${stepDescription}`;
 }
 

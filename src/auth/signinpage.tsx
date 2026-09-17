@@ -37,8 +37,7 @@ const FloatingBackground: React.FC = () => (
     <div
       className="absolute inset-0 opacity-[0.15]"
       style={{
-        backgroundImage:
-          'radial-gradient(circle, rgba(148,163,184,0.5) 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle, rgba(148,163,184,0.5) 1px, transparent 1px)',
         backgroundSize: '32px 32px',
       }}
     />
@@ -47,7 +46,7 @@ const FloatingBackground: React.FC = () => (
     <div className="orb-a absolute -left-32 -top-32 h-[26rem] w-[26rem] rounded-full bg-cyan-500/20 blur-3xl" />
     <div className="orb-b absolute -right-24 top-1/3 h-[22rem] w-[22rem] rounded-full bg-emerald-500/15 blur-3xl" />
     <div className="orb-c absolute -bottom-40 left-1/4 h-[30rem] w-[30rem] rounded-full bg-indigo-500/15 blur-3xl" />
-    <div className="orb-b absolute right-1/4 -bottom-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-2xl" />
+    <div className="orb-b absolute -bottom-24 right-1/4 h-64 w-64 rounded-full bg-cyan-400/10 blur-2xl" />
 
     {/* faint circle rings for depth */}
     <div className="absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-800/60" />
@@ -167,7 +166,7 @@ export const SignupPage: React.FC = () => {
                   onChange={(e) => {
                     setFirstName(e.target.value);
                   }}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-slate-100 placeholder-slate-500 backdrop-blur-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -187,7 +186,7 @@ export const SignupPage: React.FC = () => {
                   onChange={(e) => {
                     setLastName(e.target.value);
                   }}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-slate-100 placeholder-slate-500 backdrop-blur-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -209,7 +208,7 @@ export const SignupPage: React.FC = () => {
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
-                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-3 py-2 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-slate-100 placeholder-slate-500 backdrop-blur-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
               />
             </div>
           </div>
@@ -229,7 +228,7 @@ export const SignupPage: React.FC = () => {
                 disabled={isLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 backdrop-blur-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
               />
 
               <button
@@ -259,7 +258,7 @@ export const SignupPage: React.FC = () => {
                 disabled={isLoading}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 pr-11 text-slate-100 placeholder-slate-500 backdrop-blur-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
               />
 
               <button
@@ -276,7 +275,9 @@ export const SignupPage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isLoading || !firstName || !lastName || !email || !password || !confirmPassword}
+            disabled={
+              isLoading || !firstName || !lastName || !email || !password || !confirmPassword
+            }
             className="flex w-full cursor-pointer justify-center rounded-lg border border-transparent bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-40 disabled:hover:bg-cyan-600"
           >
             {isLoading ? 'Provisioning...' : 'Register instance'}
@@ -288,7 +289,7 @@ export const SignupPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-800"></div>
             </div>
-            <span className="relative px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 bg-transparent">
+            <span className="relative bg-transparent px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
               Or
             </span>
           </div>
@@ -304,7 +305,7 @@ export const SignupPage: React.FC = () => {
                 }
               }}
               disabled={isLoading}
-              className="inline-flex w-full items-center justify-center rounded-lg border border-slate-800 bg-slate-950/80 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-slate-800 bg-slate-950/80 px-4 py-2.5 text-sm font-medium text-slate-300 backdrop-blur-sm transition-colors hover:bg-slate-900"
             >
               <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
               Sign up with Google

@@ -20,10 +20,7 @@ import { DEFAULT_AI_CONFIG } from '../ai-config';
  * Trim the message history to fit within context window limits.
  * Always keeps the system-level context and trims oldest messages first.
  */
-export function trimMessages(
-  messages: AIMessage[],
-  maxChars: number,
-): AIMessage[] {
+export function trimMessages(messages: AIMessage[], maxChars: number): AIMessage[] {
   let total = 0;
   const kept: AIMessage[] = [];
   // Traverse in reverse so newest messages are preserved

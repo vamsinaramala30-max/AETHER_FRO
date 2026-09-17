@@ -20,7 +20,7 @@ export const AutomationSearch: React.FC<Props> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-10 pr-9 bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
+        className="border-slate-200/80 bg-white pl-10 pr-9 dark:border-slate-800 dark:bg-slate-900"
       />
       {value && (
         <button

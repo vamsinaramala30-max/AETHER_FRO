@@ -1,6 +1,10 @@
 import React from 'react';
 import { WorkflowStep } from '../../automation-types';
-import { TRIGGER_OPTIONS, AI_ACTION_OPTIONS, SYSTEM_ACTION_OPTIONS } from '../../automation-constants';
+import {
+  TRIGGER_OPTIONS,
+  AI_ACTION_OPTIONS,
+  SYSTEM_ACTION_OPTIONS,
+} from '../../automation-constants';
 import { Input } from '@/components/ui/Input';
 import { VariablePicker } from './VariablePicker';
 

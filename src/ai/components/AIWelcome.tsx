@@ -61,14 +61,15 @@ export const AIWelcome = memo<AIWelcomeProps>(({ onStartConversation, className 
               />
             </svg>
           </div>
-          <div className="absolute -right-1 -top-1 h-4 w-4 animate-pulse rounded-full bg-emerald-400 ring-2 ring-slate-900" aria-hidden="true" />
+          <div
+            className="absolute -right-1 -top-1 h-4 w-4 animate-pulse rounded-full bg-emerald-400 ring-2 ring-slate-900"
+            aria-hidden="true"
+          />
         </div>
 
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white">AETHER AI</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Your intelligent workspace assistant
-          </p>
+          <p className="mt-1 text-sm text-slate-400">Your intelligent workspace assistant</p>
         </div>
       </div>
 

@@ -3,27 +3,27 @@
  */
 
 export type WebsiteCategory =
-  | "Government"
-  | "Education"
-  | "Developers"
-  | "AI"
-  | "Social Media"
-  | "Cloud"
-  | "Payments"
-  | "News"
-  | "Cyber Security"
-  | "Shopping"
-  | "Entertainment"
-  | "Sports"
-  | "Travel"
-  | "Health"
-  | "Productivity"
-  | "Design"
-  | "Finance"
-  | "Jobs & Careers"
-  | "Communication"
-  | "Research"
-  | "Open Source";
+  | 'Government'
+  | 'Education'
+  | 'Developers'
+  | 'AI'
+  | 'Social Media'
+  | 'Cloud'
+  | 'Payments'
+  | 'News'
+  | 'Cyber Security'
+  | 'Shopping'
+  | 'Entertainment'
+  | 'Sports'
+  | 'Travel'
+  | 'Health'
+  | 'Productivity'
+  | 'Design'
+  | 'Finance'
+  | 'Jobs & Careers'
+  | 'Communication'
+  | 'Research'
+  | 'Open Source';
 
 export interface TrustedWebsite {
   id: string;
@@ -53,7 +53,7 @@ export type FavoriteWebsiteIds = string[];
 
 export interface WebDirectoryFilters {
   query: string;
-  category: WebsiteCategory | "All";
+  category: WebsiteCategory | 'All';
 }
 
 export interface UrlValidationResult {
@@ -66,41 +66,41 @@ export interface UrlValidationResult {
  * "Browse by country" view.
  */
 export type CountryCode =
-  | "US"
-  | "GB"
-  | "CA"
-  | "AU"
-  | "DE"
-  | "FR"
-  | "IN"
-  | "JP"
-  | "BR"
-  | "ZA"
-  | "SG"
-  | "AE"
-  | "IT"
-  | "ES"
-  | "MX"
-  | "NZ"
-  | "IE"
-  | "NL"
-  | "SE"
-  | "CH"
-  | "NG"
-  | "CN"
-  | "PL"
-  | "IL"
-  | "KR"
-  | "NO"
-  | "TR"
-  | "ID"
-  | "PH"
-  | "KE"
-  | "AR"
-  | "CO"
-  | "PT"
-  | "GR"
-  | "MY";
+  | 'US'
+  | 'GB'
+  | 'CA'
+  | 'AU'
+  | 'DE'
+  | 'FR'
+  | 'IN'
+  | 'JP'
+  | 'BR'
+  | 'ZA'
+  | 'SG'
+  | 'AE'
+  | 'IT'
+  | 'ES'
+  | 'MX'
+  | 'NZ'
+  | 'IE'
+  | 'NL'
+  | 'SE'
+  | 'CH'
+  | 'NG'
+  | 'CN'
+  | 'PL'
+  | 'IL'
+  | 'KR'
+  | 'NO'
+  | 'TR'
+  | 'ID'
+  | 'PH'
+  | 'KE'
+  | 'AR'
+  | 'CO'
+  | 'PT'
+  | 'GR'
+  | 'MY';
 
 export interface CountryInfo {
   code: CountryCode;
@@ -115,4 +115,4 @@ export interface CountryWebsiteGroup {
   websites: TrustedWebsite[];
 }
 
-export type WebDirectoryViewMode = "category" | "country";
+export type WebDirectoryViewMode = 'category' | 'country';

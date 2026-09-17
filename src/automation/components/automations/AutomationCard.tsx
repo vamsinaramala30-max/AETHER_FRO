@@ -54,7 +54,7 @@ export const AutomationCard: React.FC<Props> = ({
           </div>
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">
+        <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
           {rule.description || 'Automated workspace task sequence.'}
         </p>
 
@@ -81,7 +81,7 @@ export const AutomationCard: React.FC<Props> = ({
             size="sm"
             variant="outline"
             onClick={() => onRunNow(rule.id)}
-            className="h-8 px-2.5 text-xs border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30"
+            className="h-8 border-amber-500/30 px-2.5 text-xs text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30"
           >
             <Play className="mr-1 h-3 w-3 fill-current" />
             Run Now

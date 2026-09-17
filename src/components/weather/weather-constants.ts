@@ -5,19 +5,19 @@
  */
 
 export const API = {
-  FORECAST: "https://api.open-meteo.com/v1/forecast",
-  AIR_QUALITY: "https://air-quality-api.open-meteo.com/v1/air-quality",
-  GEOCODING: "https://geocoding-api.open-meteo.com/v1/search",
+  FORECAST: 'https://api.open-meteo.com/v1/forecast',
+  AIR_QUALITY: 'https://air-quality-api.open-meteo.com/v1/air-quality',
+  GEOCODING: 'https://geocoding-api.open-meteo.com/v1/search',
   // Free, key-less client-side reverse geocoding service.
-  REVERSE_GEOCODE: "https://api.bigdatacloud.net/data/reverse-geocode-client",
+  REVERSE_GEOCODE: 'https://api.bigdatacloud.net/data/reverse-geocode-client',
 } as const;
 
 export const STORAGE_KEYS = {
-  SAVED_LOCATIONS: "weather:saved-locations:v1",
+  SAVED_LOCATIONS: 'weather:saved-locations:v1',
   /** Last successfully-loaded location, so a reload doesn't need a fresh
    *  user gesture to re-request geolocation (many mobile browsers block
    *  geolocation prompts that aren't triggered by a direct tap/click). */
-  LAST_LOCATION: "weather:last-location:v1",
+  LAST_LOCATION: 'weather:last-location:v1',
 } as const;
 
 export const TIMINGS = {
@@ -38,56 +38,61 @@ export const FORECAST_LIMITS = {
 } as const;
 
 export const CURRENT_PARAMS = [
-  "temperature_2m",
-  "relative_humidity_2m",
-  "apparent_temperature",
-  "is_day",
-  "weather_code",
-  "surface_pressure",
-  "wind_speed_10m",
-  "wind_direction_10m",
-].join(",");
+  'temperature_2m',
+  'relative_humidity_2m',
+  'apparent_temperature',
+  'is_day',
+  'weather_code',
+  'surface_pressure',
+  'wind_speed_10m',
+  'wind_direction_10m',
+].join(',');
 
 export const HOURLY_PARAMS = [
-  "temperature_2m",
-  "apparent_temperature",
-  "weather_code",
-  "is_day",
-  "precipitation_probability",
-  "relative_humidity_2m",
-  "wind_speed_10m",
-  "wind_direction_10m",
-  "surface_pressure",
-  "visibility",
-  "uv_index",
-].join(",");
+  'temperature_2m',
+  'apparent_temperature',
+  'weather_code',
+  'is_day',
+  'precipitation_probability',
+  'relative_humidity_2m',
+  'wind_speed_10m',
+  'wind_direction_10m',
+  'surface_pressure',
+  'visibility',
+  'uv_index',
+].join(',');
 
 export const DAILY_PARAMS = [
-  "weather_code",
-  "temperature_2m_max",
-  "temperature_2m_min",
-  "uv_index_max",
-  "sunrise",
-  "sunset",
-].join(",");
+  'weather_code',
+  'temperature_2m_max',
+  'temperature_2m_min',
+  'uv_index_max',
+  'sunrise',
+  'sunset',
+].join(',');
 
 export const AIR_QUALITY_PARAMS = [
-  "european_aqi",
-  "us_aqi",
-  "pm2_5",
-  "pm10",
-  "carbon_monoxide",
-  "sulphur_dioxide",
-].join(",");
+  'european_aqi',
+  'us_aqi',
+  'pm2_5',
+  'pm10',
+  'carbon_monoxide',
+  'sulphur_dioxide',
+].join(',');
 
 /** European AQI bands (1-6 / "I"-"VI"), per Open-Meteo / EEA definitions. */
-export const AQI_BANDS: ReadonlyArray<{ max: number; label: string; band: number; colorVar: string }> = [
-  { max: 20, label: "Good", band: 1, colorVar: "var(--aqi-good)" },
-  { max: 40, label: "Fair", band: 2, colorVar: "var(--aqi-fair)" },
-  { max: 60, label: "Moderate", band: 3, colorVar: "var(--aqi-moderate)" },
-  { max: 80, label: "Poor", band: 4, colorVar: "var(--aqi-poor)" },
-  { max: 100, label: "Very Poor", band: 5, colorVar: "var(--aqi-very-poor)" },
-  { max: Infinity, label: "Extremely Poor", band: 6, colorVar: "var(--aqi-extremely-poor)" },
+export const AQI_BANDS: ReadonlyArray<{
+  max: number;
+  label: string;
+  band: number;
+  colorVar: string;
+}> = [
+  { max: 20, label: 'Good', band: 1, colorVar: 'var(--aqi-good)' },
+  { max: 40, label: 'Fair', band: 2, colorVar: 'var(--aqi-fair)' },
+  { max: 60, label: 'Moderate', band: 3, colorVar: 'var(--aqi-moderate)' },
+  { max: 80, label: 'Poor', band: 4, colorVar: 'var(--aqi-poor)' },
+  { max: 100, label: 'Very Poor', band: 5, colorVar: 'var(--aqi-very-poor)' },
+  { max: Infinity, label: 'Extremely Poor', band: 6, colorVar: 'var(--aqi-extremely-poor)' },
 ];
 
 /** Beaufort scale upper bounds in km/h, used for the "Force N" wind label. */
@@ -96,6 +101,20 @@ export const BEAUFORT_KMH_THRESHOLDS: readonly number[] = [
 ];
 
 export const COMPASS_DIRECTIONS: readonly string[] = [
-  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+  'N',
+  'NNE',
+  'NE',
+  'ENE',
+  'E',
+  'ESE',
+  'SE',
+  'SSE',
+  'S',
+  'SSW',
+  'SW',
+  'WSW',
+  'W',
+  'WNW',
+  'NW',
+  'NNW',
 ];

@@ -31,7 +31,7 @@ export async function requestModelLoad(modelId: string): Promise<LoadModelResult
         },
       };
     }
-    const raw = await res.json() as Record<string, unknown>;
+    const raw = (await res.json()) as Record<string, unknown>;
     return { success: true, data: normalizeModelInfo(raw) };
   } catch {
     return {
@@ -82,11 +82,19 @@ export async function requestModelUnload(modelId: string): Promise<AIResult<void
  * Normalize a raw backend model payload into an AIModelInfo.
  */
 export function normalizeModelInfo(raw: Record<string, unknown>): AIModelInfo {
-  const validStatuses: ModelStatus[] = ['available', 'loading', 'loaded', 'unloading', 'unavailable', 'error'];
+  const validStatuses: ModelStatus[] = [
+    'available',
+    'loading',
+    'loaded',
+    'unloading',
+    'unavailable',
+    'error',
+  ];
   const rawStatus = raw['status'] as string;
-  const status: ModelStatus = validStatuses.includes(rawStatus as ModelStatus)
-    ? (rawStatus as ModelStatus)
-    : 'unavailable';
+  const status: ModelStatus =
+    rawStatus && validStatuses.includes(rawStatus as ModelStatus)
+      ? (rawStatus as ModelStatus)
+      : 'available';
 
   return {
     id: typeof raw['id'] === 'string' ? raw['id'] : 'unknown',

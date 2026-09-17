@@ -7,6 +7,8 @@
 import type { AIModelInfo, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { normalizeModelInfo, requestModelLoad, requestModelUnload } from './model-loader';
+import { apiClient } from '../../api/client';
+import { useAIStore } from '../ai-store';
 
 export class ModelManager {
   private readonly config = DEFAULT_AI_CONFIG;
@@ -15,26 +17,23 @@ export class ModelManager {
    * Fetch all available models from the AETHER backend.
    */
   async listModels(): Promise<AIResult<AIModelInfo[]>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.modelsPath}`;
     try {
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(this.config.backend.timeoutMs),
+      const res = await apiClient.get<any>(this.config.backend.modelsPath, {
+        timeout: this.config.backend.timeoutMs,
       });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: {
-            code: 'MODEL_UNAVAILABLE',
-            message: `Failed to fetch models: HTTP ${res.status}`,
-            timestamp: Date.now(),
-          },
-        };
-      }
-      const raw = await res.json() as { models?: unknown[] } | unknown[];
-      const rawList = Array.isArray(raw) ? raw : (raw as { models?: unknown[] }).models ?? [];
+      const rawList = Array.isArray(res) ? res : (res?.data ?? res?.models ?? []);
       const models = rawList
-        .filter((m): m is Record<string, unknown> => typeof m === 'object' && m !== null)
+        .filter((m: any): m is Record<string, unknown> => typeof m === 'object' && m !== null)
         .map(normalizeModelInfo);
+
+      if (models.length > 0) {
+        useAIStore.getState().setAvailableModels(models);
+        const active = this.selectActive(models);
+        if (active) {
+          useAIStore.getState().setActiveModel(active);
+        }
+      }
+
       return { success: true, data: models };
     } catch {
       return {
@@ -46,6 +45,10 @@ export class ModelManager {
         },
       };
     }
+  }
+
+  async loadModels(): Promise<AIResult<AIModelInfo[]>> {
+    return this.listModels();
   }
 
   /**
@@ -65,8 +68,9 @@ export class ModelManager {
           },
         };
       }
-      const raw = await res.json() as Record<string, unknown>;
-      return { success: true, data: normalizeModelInfo(raw) };
+      const raw = (await res.json()) as Record<string, unknown>;
+      const rawData = (raw as any)?.data ?? raw;
+      return { success: true, data: normalizeModelInfo(rawData) };
     } catch {
       return {
         success: false,
@@ -97,10 +101,18 @@ export class ModelManager {
    * Find the best ready model from a list.
    */
   selectActive(models: AIModelInfo[]): AIModelInfo | null {
+    if (!models || models.length === 0) return null;
     const loaded = models.find((m) => m.status === 'loaded');
     if (loaded) return loaded;
     const available = models.find((m) => m.status === 'available');
-    return available ?? null;
+    if (available) return available;
+    const authoritative = models.find((m) => m.id.includes('authoritative') || m.id === 'default');
+    if (authoritative) return authoritative;
+    return models[0] ?? null;
+  }
+
+  getActive(): AIModelInfo | null {
+    return useAIStore.getState().activeModel;
   }
 }
 

@@ -13,7 +13,7 @@ const STORAGE_KEY = 'aether_ai_config';
 const CACHE_KEY_PREFIX = 'aether_ai_cache_';
 
 const DEFAULT_CONFIG: AIProviderConfig = {
-  activeProvider: 'disabled',
+  activeProvider: 'local',
   apiKeys: {
     openai: '',
     gemini: '',
@@ -24,9 +24,9 @@ const DEFAULT_CONFIG: AIProviderConfig = {
     openai: 'gpt-4o',
     gemini: 'gemini-1.5-pro',
     claude: 'claude-3-5-sonnet',
-    local: 'llama3',
+    local: 'aether',
   },
-  enabled: false,
+  enabled: true,
 };
 
 export class AiService {

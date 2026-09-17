@@ -24,13 +24,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       className={`flex flex-col items-center justify-center px-6 py-16 text-center ${className}`}
     >
       {Icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-700/50 bg-slate-800/60">
-          <Icon className="h-7 w-7 text-slate-500" />
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-aether-border bg-aether-surface-elevated">
+          <Icon className="h-7 w-7 text-aether-muted" />
         </div>
       )}
-      <h3 className="mb-1 text-sm font-semibold text-slate-200">{title}</h3>
+      <h3 className="mb-1 text-sm font-semibold text-aether-main">{title}</h3>
       {description && (
-        <p className="max-w-xs text-xs leading-relaxed text-slate-500">{description}</p>
+        <p className="max-w-xs text-xs leading-relaxed text-aether-muted">{description}</p>
       )}
       {action && (
         <button

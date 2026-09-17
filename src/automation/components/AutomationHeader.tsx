@@ -24,7 +24,8 @@ export const AutomationHeader: React.FC<Props> = ({ onOpenQuickAi, onOpenBuilder
             </span>
           </div>
           <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-            Intelligent daily planning, workspace triggers, autonomous task execution, and background workflows
+            Intelligent daily planning, workspace triggers, autonomous task execution, and
+            background workflows
           </p>
         </div>
       </div>
@@ -37,7 +38,11 @@ export const AutomationHeader: React.FC<Props> = ({ onOpenQuickAi, onOpenBuilder
           <Sparkles className="mr-2 h-4 w-4" />
           AI Creator
         </Button>
-        <Button onClick={onOpenBuilder} variant="outline" className="border-slate-300 dark:border-slate-700">
+        <Button
+          onClick={onOpenBuilder}
+          variant="outline"
+          className="border-slate-300 dark:border-slate-700"
+        >
           <Sliders className="mr-2 h-4 w-4" />
           Advanced Builder
         </Button>

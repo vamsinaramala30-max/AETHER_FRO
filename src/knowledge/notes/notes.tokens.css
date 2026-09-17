@@ -1,0 +1,47 @@
+/*
+  Aether Notes design tokens.
+  ASSUMPTION: I don't have your global design-token file, so these are
+  defined locally and scoped under --notes-*, per spec section 4. If Aether
+  already has a central token file, move these there instead of importing
+  this file directly — the class names in the components reference the
+  same variable names either way.
+
+  Palette direction: indigo/blue primary (distinct from the amber used by
+  the old flat Notes page), a quiet purple for secondary accents, amber
+  kept only as a small highlight (favorites/pins) so it doesn't collide
+  with the new primary.
+*/
+
+:root {
+  --notes-background: #f8fafc;
+  --notes-surface: #ffffff;
+  --notes-surface-raised: #ffffff;
+  --notes-border: #e2e8f0;
+  --notes-border-strong: #cbd5e1;
+  --notes-text: #0f172a;
+  --notes-muted: #64748b;
+  --notes-primary: #4f46e5;
+  --notes-primary-soft: #eef2ff;
+  --notes-secondary: #7c3aed;
+  --notes-accent: #d97706;
+  --notes-accent-soft: #fffbeb;
+  --notes-danger: #e11d48;
+  --notes-success: #059669;
+}
+
+.dark {
+  --notes-background: #0b1220;
+  --notes-surface: #111827;
+  --notes-surface-raised: #161f30;
+  --notes-border: #1f2a3d;
+  --notes-border-strong: #2a3750;
+  --notes-text: #f8fafc;
+  --notes-muted: #94a3b8;
+  --notes-primary: #818cf8;
+  --notes-primary-soft: rgba(129, 140, 248, 0.12);
+  --notes-secondary: #a78bfa;
+  --notes-accent: #f59e0b;
+  --notes-accent-soft: rgba(245, 158, 11, 0.12);
+  --notes-danger: #fb7185;
+  --notes-success: #34d399;
+}

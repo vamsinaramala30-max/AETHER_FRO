@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ProfileForm } from './profileform';
 import { profileService, UserProfile } from './profileservice';
 import { useAuth } from '@/app/providers/authprovider';
@@ -11,7 +11,7 @@ export const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProfileData = async () => {
+  const loadProfileData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -22,7 +22,8 @@ export const ProfilePage: React.FC = () => {
         setProfile({
           id: user.id || 'usr_default',
           email: user.email || '',
-          fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'AETHER User',
+          fullName:
+            user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'AETHER User',
           username: (user as any)?.username || null,
           avatarUrl: user.avatarUrl || null,
           bio: (user as any)?.bio || '',
@@ -39,11 +40,11 @@ export const ProfilePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadProfileData();
-  }, [user]);
+  }, [loadProfileData]);
 
   if (loading) {
     return (
@@ -67,7 +68,10 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  const displayName = profile.fullName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email;
+  const displayName =
+    profile.fullName ||
+    `${profile.firstName || ''} ${profile.lastName || ''}`.trim() ||
+    profile.email;
   const initialChar = displayName ? displayName[0].toUpperCase() : 'U';
 
   return (
@@ -90,7 +94,11 @@ export const ProfilePage: React.FC = () => {
         <div className="flex flex-col items-start gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center">
           <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-2xl font-black uppercase text-white shadow-md">
             {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
+              <img
+                src={profile.avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
             ) : (
               initialChar
             )}
@@ -111,7 +119,9 @@ export const ProfilePage: React.FC = () => {
             </p>
 
             {profile.company && (
-              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{profile.company}</p>
+              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                {profile.company}
+              </p>
             )}
           </div>
         </div>

@@ -10,6 +10,8 @@ import type { ToolExecutionRequest, ToolExecutionResult, AIResult } from '../ai-
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { toolRouter } from './tool-router';
 
+import { apiClient } from '../../api/client';
+
 /**
  * Request the AETHER backend to execute a tool.
  * The frontend sends the request; the backend performs the execution.
@@ -43,55 +45,50 @@ export async function executeToolRequest(
     };
   }
 
-  const url = `${DEFAULT_AI_CONFIG.backend.baseUrl}${DEFAULT_AI_CONFIG.backend.toolsPath}/execute`;
   const startedAt = Date.now();
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const res = await apiClient.post<Record<string, unknown>>(
+      `${DEFAULT_AI_CONFIG.backend.toolsPath}/execute`,
+      {
+        toolName: request.toolName || request.toolId,
         tool_id: request.toolId,
         args: request.args,
+        input: request.args,
         conversation_id: request.conversationId,
         message_id: request.messageId,
-      }),
-      signal: AbortSignal.timeout(30_000),
-    });
+      },
+      { timeout: 30_000 }
+    );
 
-    if (!res.ok) {
-      return {
-        success: false,
-        error: {
-          code: 'TOOL_FAILED',
-          message: `Tool execution failed: HTTP ${res.status}`,
-          timestamp: Date.now(),
-        },
-      };
-    }
+    const raw = (res && typeof res === 'object') ? res : {};
+    const dataObj = (typeof raw['data'] === 'object' && raw['data'] !== null)
+      ? (raw['data'] as Record<string, unknown>)
+      : raw;
 
-    const raw = await res.json() as {
-      success?: boolean;
-      result?: unknown;
-      error?: string;
-    };
+    const isSuccess = raw['success'] !== false && dataObj['status'] !== 'FAILED';
+    const output = dataObj['output'] ?? dataObj['result'] ?? raw['result'];
+    const errorMsg = typeof dataObj['error'] === 'string'
+      ? dataObj['error']
+      : (typeof raw['error'] === 'string' ? raw['error'] : undefined);
 
     return {
       success: true,
       data: {
         toolId: request.toolId,
-        success: raw.success !== false,
-        result: raw.result,
-        error: raw.error,
+        success: isSuccess,
+        result: output,
+        error: errorMsg,
         durationMs: Date.now() - startedAt,
       },
     };
-  } catch {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Cannot reach the AETHER backend to execute tool.';
     return {
       success: false,
       error: {
         code: 'TOOL_FAILED',
-        message: 'Cannot reach the AETHER backend to execute tool.',
+        message,
         timestamp: Date.now(),
       },
     };

@@ -23,7 +23,7 @@ import { FilesPage } from '@/projects/files/filespage';
 
 // ── Knowledge ─────────────────────────────────────────────────────────────────
 import { KnowledgePage } from '@/knowledge/KnowledgePage';
-import { NotesPage } from '@/knowledge/notes/notepage';
+import { NotesPage } from '@/knowledge/notes/NotesPage';
 import { DocumentsPage } from '@/knowledge/documents/documentpage';
 import { KnowledgeBasePage } from '@/knowledge/knowledge-base/KnowledgeBasePage';
 import { SearchPage } from '@/knowledge/search/searchpage';
@@ -33,8 +33,9 @@ import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
 
 // ── Automation ───────────────────────────────────────────────────────────────
 import { AutomationPage } from '@/automation/AutomationPage';
+import { AutomationLogsPage } from '@/automation/logs/automationlogspage';
 
-// ── Workspace ─────────────────────────────────────────────────────────────────
+// ── Workspace & Quick Tools ──────────────────────────────────────────────────
 import { WorkspacePage } from '@/workspace/WorkspacePage';
 import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhubpage';
 import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
@@ -42,6 +43,10 @@ import { FavoritesPage } from '@/workspace/favorites/favoritepage';
 import { MembersPage } from '@/workspace/members/MembersPage';
 import FocusTimer from '@/workspace/timer/focustimer';
 import WebDirectory from '@/workspace/webdirectory/webdirectory';
+import WeeklyPlanner from '@/workspace/weekly planner/weeklyplanner';
+import { QuickToolsPage } from '@/workspace/QuickToolsPage';
+
+
 // ── Settings ─────────────────────────────────────────────────────────────────
 import { ProfilePage } from '@/settings/profile/profilepage';
 import { AppearancePage } from '@/settings/appearance/apperancepage';
@@ -147,10 +152,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'automations', element: <AutomationPage /> },
           { path: 'templates', element: <AutomationPage /> },
           { path: 'activity', element: <AutomationPage /> },
-          { path: 'workflows', element: <AutomationPage /> },
-          { path: 'integrations', element: <AutomationPage /> },
-          { path: 'schedules', element: <AutomationPage /> },
-          { path: 'logs', element: <AutomationPage /> },
+          { path: 'logs', element: <AutomationLogsPage /> },
         ],
       },
 
@@ -165,10 +167,22 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'favorites', element: <FavoritesPage /> },
           { path: 'members', element: <MembersPage /> },
           { path: 'billing', element: <BillingPage /> },
-          { path: 'api-keys', element: <WorkspacePage /> },
-          { path: 'audit-logs', element: <WorkspacePage /> },
+          { path: 'api-keys', element: <Navigate to="/app/settings/security" replace /> },
+          { path: 'audit-logs', element: <Navigate to="/app/automation/logs" replace /> },
           { path: 'focustimer', element: <FocusTimer /> },
           { path: 'webdirectory', element: <WebDirectory /> },
+          { path: 'weeklyplanner', element: <WeeklyPlanner /> },
+          { path: 'weekly-planner', element: <Navigate to="/app/workspace/weeklyplanner" replace /> },
+        ],
+      },
+
+      // ── Quick Tools Module ────────────────────────────────────────────────
+      {
+        path: 'quick-tools',
+        children: [
+          { index: true, element: <QuickToolsPage /> },
+          { path: 'timer', element: <Navigate to="/app/workspace/focustimer" replace /> },
+          { path: 'web-directory', element: <Navigate to="/app/workspace/webdirectory" replace /> },
         ],
       },
 
@@ -184,6 +198,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'preferences', element: <PreferencesPage /> },
           { path: 'accounts', element: <ConnectedAccountsPage /> },
           { path: 'billing', element: <BillingPage /> },
+          { path: 'audit-logs', element: <AutomationLogsPage /> },
         ],
       },
 

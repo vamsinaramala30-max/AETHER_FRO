@@ -50,8 +50,12 @@ export const AutomationStats: React.FC<Props> = ({ stats }) => {
             className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
           >
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{card.title}</p>
-              <h3 className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-white">{card.value}</h3>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {card.title}
+              </p>
+              <h3 className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-white">
+                {card.value}
+              </h3>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{card.subtitle}</p>
             </div>
             <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.color}`}>

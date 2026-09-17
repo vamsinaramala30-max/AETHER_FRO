@@ -10,13 +10,14 @@ import {
   BookOpen,
   Zap,
   Building2,
+  Wrench,
   Settings,
 } from 'lucide-react';
 import { NavGroup } from './types';
 
 export const navigationGroups: NavGroup[] = [
   {
-    id: 'main-group',
+    id: 'core-group',
     items: [
       {
         id: 'home',
@@ -24,21 +25,15 @@ export const navigationGroups: NavGroup[] = [
         icon: React.createElement(Home, { className: 'h-4 w-4' }),
         href: '/app',
       },
-    ],
-  },
-  {
-    id: 'ai-group',
-    groupLabel: 'AI PLATFORM',
-    items: [
       {
         id: 'ai',
-        label: 'AETHER AGENT',
+        label: 'AI',
         icon: React.createElement(Sparkles, { className: 'h-4 w-4' }),
         href: '/app/ai',
         items: [
           {
             id: 'agent',
-            label: 'Agent',
+            label: 'Assistant',
             href: '/app/ai/assistant',
             icon: React.createElement(Sparkles, { className: 'h-3.5 w-3.5' }),
           },
@@ -68,12 +63,6 @@ export const navigationGroups: NavGroup[] = [
           },
         ],
       },
-    ],
-  },
-  {
-    id: 'workspace-group',
-    groupLabel: 'WORKSPACE',
-    items: [
       {
         id: 'workspace',
         label: 'Workspace',
@@ -81,13 +70,12 @@ export const navigationGroups: NavGroup[] = [
         href: '/app/workspace',
         items: [
           { label: 'Overview', href: '/app/workspace' },
+          { label: 'Weekly Planner', href: '/app/workspace/weeklyplanner' },
           { label: 'Calendar', href: '/app/workspace/calendar' },
-          { label: 'Productivity Hub', href: '/app/workspace/productivity-hub' },
+          { label: 'Productivity', href: '/app/workspace/productivity-hub' },
           { label: 'Recent Files', href: '/app/workspace/recent-files' },
           { label: 'Favorites', href: '/app/workspace/favorites' },
           { label: 'Members', href: '/app/workspace/members' },
-          { label: 'Timer', href: '/app/workspace/focustimer' },
-          { label: 'WebDirectory', href: '/app/workspace/webdirectory' },
         ],
       },
       {
@@ -108,17 +96,13 @@ export const navigationGroups: NavGroup[] = [
         icon: React.createElement(BookOpen, { className: 'h-4 w-4' }),
         href: '/app/knowledge',
         items: [
+          { label: 'Overview', href: '/app/knowledge' },
           { label: 'Documents', href: '/app/knowledge/documents' },
           { label: 'Notes', href: '/app/knowledge/notes' },
           { label: 'Knowledge Base', href: '/app/knowledge/base' },
+          { label: 'Search', href: '/app/knowledge/search' },
         ],
       },
-    ],
-  },
-  {
-    id: 'automation-group',
-    groupLabel: 'AUTOMATION',
-    items: [
       {
         id: 'automation',
         label: 'Automation',
@@ -129,14 +113,20 @@ export const navigationGroups: NavGroup[] = [
           { label: 'My Automations', href: '/app/automation/automations' },
           { label: 'Templates', href: '/app/automation/templates' },
           { label: 'Activity', href: '/app/automation/activity' },
+          { label: 'Logs', href: '/app/automation/logs' },
         ],
       },
-    ],
-  },
-  {
-    id: 'system-group',
-    groupLabel: 'SYSTEM',
-    items: [
+      {
+        id: 'quick-tools',
+        label: 'Quick Tools',
+        icon: React.createElement(Wrench, { className: 'h-4 w-4' }),
+        href: '/app/quick-tools',
+        items: [
+          { label: 'Overview', href: '/app/quick-tools' },
+          { label: 'Timer', href: '/app/workspace/focustimer' },
+          { label: 'Web Directory', href: '/app/workspace/webdirectory' },
+        ],
+      },
       {
         id: 'settings',
         label: 'Settings',
@@ -148,6 +138,7 @@ export const navigationGroups: NavGroup[] = [
           { label: 'Security', href: '/app/settings/security' },
           { label: 'Connected Accounts', href: '/app/settings/accounts' },
           { label: 'Billing', href: '/app/settings/billing' },
+          { label: 'Audit Logs', href: '/app/settings/audit-logs' },
         ],
       },
     ],

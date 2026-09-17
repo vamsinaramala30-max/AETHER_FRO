@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NotificationPreferencesData, notificationService } from './notificationservice';
-import { Bell, Mail, ShieldAlert, Cpu, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Bell, ShieldAlert, Cpu, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface NotificationPreferencesProps {
   initialData: NotificationPreferencesData;
@@ -39,7 +39,10 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
     title: string,
     description: string,
   ) => (
-    <div key={key} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-b-0 dark:border-slate-800/60">
+    <div
+      key={key}
+      className="flex items-center justify-between border-b border-slate-100 py-3 last:border-b-0 dark:border-slate-800/60"
+    >
       <div className="pr-4">
         <h5 className="text-xs font-bold text-slate-900 dark:text-white">{title}</h5>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">{description}</p>
@@ -83,9 +86,21 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h4 className="mb-3 text-sm font-bold text-slate-900 dark:text-white">Delivery Channels</h4>
         <div className="space-y-1">
-          {renderToggleRow('emailAlerts', 'Email Delivery Channel', 'Receive email dispatches via Resend service.')}
-          {renderToggleRow('inAppNotifications', 'In-App Alerts', 'Receive real-time notifications in AETHER header & sidebar.')}
-          {renderToggleRow('browserNotifications', 'Browser Notifications', 'Display desktop notification banners when tab is active.')}
+          {renderToggleRow(
+            'emailAlerts',
+            'Email Delivery Channel',
+            'Receive email dispatches via Resend service.',
+          )}
+          {renderToggleRow(
+            'inAppNotifications',
+            'In-App Alerts',
+            'Receive real-time notifications in AETHER header & sidebar.',
+          )}
+          {renderToggleRow(
+            'browserNotifications',
+            'Browser Notifications',
+            'Display desktop notification banners when tab is active.',
+          )}
         </div>
       </div>
 
@@ -93,11 +108,21 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-3 flex items-center gap-2">
           <Cpu className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white">AETHER Activity Notifications</h4>
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+            AETHER Activity Notifications
+          </h4>
         </div>
         <div className="space-y-1">
-          {renderToggleRow('projectNotifications', 'Tasks & Projects', 'Task completions, status changes, and project milestone updates.')}
-          {renderToggleRow('automationNotifications', 'Automations & AI Tasks', 'Automation execution finishes, workflow failures, and AI task reports.')}
+          {renderToggleRow(
+            'projectNotifications',
+            'Tasks & Projects',
+            'Task completions, status changes, and project milestone updates.',
+          )}
+          {renderToggleRow(
+            'automationNotifications',
+            'Automations & AI Tasks',
+            'Automation execution finishes, workflow failures, and AI task reports.',
+          )}
         </div>
       </div>
 
@@ -105,11 +130,21 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-3 flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white">Account & Security Notifications</h4>
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+            Account & Security Notifications
+          </h4>
         </div>
         <div className="space-y-1">
-          {renderToggleRow('securityAlerts', 'Security Alerts', 'Password changes, new device logins, and authentication events.')}
-          {renderToggleRow('workspaceNotifications', 'Connected Accounts & Org', 'Connected account additions, SSO modifications, and workspace changes.')}
+          {renderToggleRow(
+            'securityAlerts',
+            'Security Alerts',
+            'Password changes, new device logins, and authentication events.',
+          )}
+          {renderToggleRow(
+            'workspaceNotifications',
+            'Connected Accounts & Org',
+            'Connected account additions, SSO modifications, and workspace changes.',
+          )}
         </div>
       </div>
 
@@ -117,11 +152,21 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-3 flex items-center gap-2">
           <Bell className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white">Productivity & System Updates</h4>
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+            Productivity & System Updates
+          </h4>
         </div>
         <div className="space-y-1">
-          {renderToggleRow('mentionNotifications', 'Upcoming Reminders & Daily Summary', 'Focus session completes and task due date alerts.')}
-          {renderToggleRow('systemUpdates', 'Product Updates', 'New feature announcements and platform updates.')}
+          {renderToggleRow(
+            'mentionNotifications',
+            'Upcoming Reminders & Daily Summary',
+            'Focus session completes and task due date alerts.',
+          )}
+          {renderToggleRow(
+            'systemUpdates',
+            'Product Updates',
+            'New feature announcements and platform updates.',
+          )}
         </div>
       </div>
     </div>

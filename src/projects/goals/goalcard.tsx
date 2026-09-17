@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Goal, GoalStatus } from './goalservice';
 import { GoalProgress } from './goalprogress';
-import { Check, Edit2, Trash2, Calendar, Target, AlertTriangle } from 'lucide-react';
+import { Check, Edit2, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 
 interface GoalCardProps {
   goal: Goal;
@@ -13,23 +13,28 @@ interface GoalCardProps {
 const STATUS_CONFIG: Record<GoalStatus, { label: string; style: string }> = {
   PLANNED: {
     label: 'PLANNED',
-    style: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+    style:
+      'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
   },
   IN_PROGRESS: {
     label: 'IN PROGRESS',
-    style: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20',
+    style:
+      'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20',
   },
   AT_RISK: {
     label: 'AT RISK',
-    style: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+    style:
+      'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
   },
   COMPLETED: {
     label: 'COMPLETED',
-    style: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+    style:
+      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
   },
   ARCHIVED: {
     label: 'ARCHIVED',
-    style: 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800',
+    style:
+      'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800',
   },
 };
 
@@ -88,7 +93,9 @@ export const GoalCard: React.FC<GoalCardProps> = ({
 
       {goal.metrics && (
         <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-slate-800/50">
-          <strong className="font-bold text-slate-900 dark:text-slate-200">Success Criteria:</strong>{' '}
+          <strong className="font-bold text-slate-900 dark:text-slate-200">
+            Success Criteria:
+          </strong>{' '}
           <span className="text-slate-600 dark:text-slate-400">{goal.metrics}</span>
         </div>
       )}
@@ -184,4 +191,3 @@ export const GoalCard: React.FC<GoalCardProps> = ({
     </div>
   );
 };
-

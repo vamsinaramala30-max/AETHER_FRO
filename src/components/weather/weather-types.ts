@@ -4,30 +4,25 @@
  */
 
 /** Temperature unit. Centralized so a second unit can be added later. */
-export type TemperatureUnit = "celsius" | "fahrenheit";
+export type TemperatureUnit = 'celsius' | 'fahrenheit';
 
 /** High level lifecycle of the whole weather screen. */
 export type WeatherState =
-  | "idle"
-  | "locating"
-  | "loading-weather"
-  | "weather-loaded"
-  | "weather-error"
-  | "location-denied"
-  | "location-unavailable"
-  | "geolocation-unsupported";
+  | 'idle'
+  | 'locating'
+  | 'loading-weather'
+  | 'weather-loaded'
+  | 'weather-error'
+  | 'location-denied'
+  | 'location-unavailable'
+  | 'geolocation-unsupported';
 
 /** Browser geolocation permission lifecycle. */
 export type LocationPermissionState =
-  | "prompt"
-  | "locating"
-  | "granted"
-  | "denied"
-  | "unavailable"
-  | "unsupported";
+  'prompt' | 'locating' | 'granted' | 'denied' | 'unavailable' | 'unsupported';
 
 /** Which top-level screen is currently visible. */
-export type WeatherView = "details" | "city-management";
+export type WeatherView = 'details' | 'city-management';
 
 /** A bare geographic point, as returned by geolocation/geocoding. */
 export interface GeoCoordinates {
@@ -126,18 +121,16 @@ export interface AqiCategory {
 export interface WeatherConditionInfo {
   label: string;
   group:
-  | "clear"
-  | "partly-cloudy"
-  | "cloudy"
-  | "fog"
-  | "drizzle"
-  | "rain"
-  | "snow"
-  | "thunderstorm"
-  | "unknown";
+    | 'clear'
+    | 'partly-cloudy'
+    | 'cloudy'
+    | 'fog'
+    | 'drizzle'
+    | 'rain'
+    | 'snow'
+    | 'thunderstorm'
+    | 'unknown';
 }
 
 /** Discriminated result wrapper used by weather-api.ts calls. */
-export type ApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; aborted?: boolean };
+export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; aborted?: boolean };

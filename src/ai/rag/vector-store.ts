@@ -58,7 +58,8 @@ export function normalizeVectorStoreStatus(raw: Record<string, unknown>): Vector
     totalCollections: typeof raw['total_collections'] === 'number' ? raw['total_collections'] : 0,
     totalVectors: typeof raw['total_vectors'] === 'number' ? raw['total_vectors'] : 0,
     backendType: typeof raw['backend_type'] === 'string' ? raw['backend_type'] : 'unknown',
-    lastOperationAt: typeof raw['last_operation_at'] === 'number' ? raw['last_operation_at'] : undefined,
+    lastOperationAt:
+      typeof raw['last_operation_at'] === 'number' ? raw['last_operation_at'] : undefined,
     error: typeof raw['error'] === 'string' ? raw['error'] : undefined,
   };
 }

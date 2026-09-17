@@ -14,7 +14,12 @@ interface Props {
 }
 
 export const AutomationNavigation: React.FC<Props> = ({ activeTab, onTabChange, counts }) => {
-  const tabs: Array<{ id: AutomationTab; label: string; icon: React.FC<{ className?: string }>; count?: number }> = [
+  const tabs: Array<{
+    id: AutomationTab;
+    label: string;
+    icon: React.FC<{ className?: string }>;
+    count?: number;
+  }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'automations', label: 'My Automations', icon: Zap, count: counts?.automations },
     { id: 'templates', label: 'Templates', icon: Layers, count: counts?.templates },
@@ -23,7 +28,10 @@ export const AutomationNavigation: React.FC<Props> = ({ activeTab, onTabChange, 
 
   return (
     <div className="flex border-b border-slate-200/80 dark:border-slate-800">
-      <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Automation primary navigation">
+      <nav
+        className="-mb-px flex space-x-6 overflow-x-auto"
+        aria-label="Automation primary navigation"
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -39,7 +47,9 @@ export const AutomationNavigation: React.FC<Props> = ({ activeTab, onTabChange, 
             >
               <Icon
                 className={`h-4 w-4 ${
-                  isActive ? 'text-amber-500' : 'text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300'
+                  isActive
+                    ? 'text-amber-500'
+                    : 'text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300'
                 }`}
               />
               <span>{tab.label}</span>

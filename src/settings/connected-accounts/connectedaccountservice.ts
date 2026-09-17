@@ -29,7 +29,8 @@ export const connectedAccountsService = {
   },
 
   connectGoogle: (): void => {
-    const backendUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '') || 'http://localhost:5001/api/v1';
+    const backendUrl =
+      import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '') || 'http://localhost:5001/api/v1';
     const googleAuthUrl = `${backendUrl}/auth/google`;
     window.location.href = googleAuthUrl;
   },

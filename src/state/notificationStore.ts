@@ -95,14 +95,23 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     try {
       const res = await apiClient.get<any>('/notifications');
       const payload = res?.data || res;
-      const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
+      const items = Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload)
+          ? payload
+          : [];
       if (Array.isArray(items) && items.length > 0) {
         const mapped: Notification[] = items.map((item: any) => ({
           id: item.id || `notif_${Date.now()}`,
           type: (item.type?.toLowerCase() as Notification['type']) || 'system',
           title: item.title || 'Notification',
           description: item.message || item.description || '',
-          time: item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+          time: item.createdAt
+            ? new Date(item.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'Just now',
           read: Boolean(item.isRead ?? item.read),
           createdAt: item.createdAt || new Date().toISOString(),
         }));
@@ -198,4 +207,3 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     });
   },
 }));
-

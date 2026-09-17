@@ -4,12 +4,7 @@
 // Coordinates intent → context → memory → RAG → LLM → tools → agents → response
 // ============================================================================
 
-import type {
-  AIContext,
-  GenerationRequest,
-  AIResult,
-  ThinkingStatus,
-} from '../ai-types';
+import type { AIContext, GenerationRequest, AIResult, ThinkingStatus } from '../ai-types';
 import { aiFailure } from '../ai-types';
 import { contextEngine } from './context-engine';
 import { reasoningEngine } from './reasoning-engine';

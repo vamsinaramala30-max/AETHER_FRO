@@ -6,7 +6,11 @@ interface Props {
   className?: string;
 }
 
-export const AutomationBadge: React.FC<Props> = ({ children, variant = 'slate', className = '' }) => {
+export const AutomationBadge: React.FC<Props> = ({
+  children,
+  variant = 'slate',
+  className = '',
+}) => {
   const styles: Record<string, string> = {
     emerald: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
     amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',

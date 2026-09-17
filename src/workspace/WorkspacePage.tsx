@@ -13,6 +13,7 @@ import {
   FileText,
   Star,
   LayoutDashboard,
+  Layers,
 } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useAuth } from '@/app/providers/authprovider';
@@ -21,8 +22,19 @@ import { CalendarPage } from '@/workspace/calendar/pages/CalendarPage';
 import { ProductivityHubPage } from '@/workspace/productivity-hub/productivityhubpage';
 import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
+import { MembersPage } from '@/workspace/members/MembersPage';
+import WeeklyPlanner from '@/workspace/weekly planner/weeklyplanner';
 
 const WORKSPACE_MODULES = [
+  {
+    href: '/app/workspace/weeklyplanner',
+    icon: Layers,
+    label: 'Weekly Planner',
+    description: 'Weekly schedule instrument with 8-8-8 balance gauges and revision cycles.',
+    count: 'Weekly Schedule',
+    iconColor: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+  },
   {
     href: '/app/workspace/calendar',
     icon: CalendarIcon,
@@ -64,7 +76,7 @@ const WORKSPACE_MODULES = [
     icon: Users,
     label: 'Members',
     description: 'Manage team members, roles, and permissions.',
-    count: 'Team seats',
+    count: 'Team Seats',
     iconColor: 'text-blue-600 dark:text-blue-400',
     bg: 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20',
   },
@@ -73,7 +85,7 @@ const WORKSPACE_MODULES = [
     icon: CreditCard,
     label: 'Billing',
     description: 'Subscription, usage, and payment methods.',
-    count: 'Pro plan',
+    count: 'Subscription',
     iconColor: 'text-emerald-600 dark:text-emerald-400',
     bg: 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',
   },
@@ -82,7 +94,7 @@ const WORKSPACE_MODULES = [
     icon: Key,
     label: 'API Keys & Security',
     description: 'Manage API keys and authentication rules.',
-    count: '2 active keys',
+    count: 'Security',
     iconColor: 'text-amber-600 dark:text-amber-400',
     bg: 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
   },
@@ -91,7 +103,7 @@ const WORKSPACE_MODULES = [
     icon: Shield,
     label: 'Audit Logs',
     description: 'Security events and activity audit trail.',
-    count: '247 events',
+    count: 'Audit Trail',
     iconColor: 'text-purple-600 dark:text-purple-400',
     bg: 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20',
   },
@@ -108,6 +120,7 @@ const ROLE_CONFIG: Record<string, string> = {
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/app/workspace' },
+  { id: 'weeklyplanner', label: 'Weekly Planner', icon: Layers, path: '/app/workspace/weeklyplanner' },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon, path: '/app/workspace/calendar' },
   {
     id: 'productivity-hub',
@@ -190,6 +203,7 @@ export const WorkspacePage: React.FC = () => {
 
   const getActiveTab = () => {
     const path = location.pathname;
+    if (path.includes('/workspace/weeklyplanner') || path.includes('/workspace/weekly-planner')) return 'weeklyplanner';
     if (path.includes('/workspace/calendar')) return 'calendar';
     if (path.includes('/workspace/productivity-hub')) return 'productivity-hub';
     if (path.includes('/workspace/recent-files')) return 'recent-files';
@@ -249,6 +263,12 @@ export const WorkspacePage: React.FC = () => {
       </div>
 
       {/* Tab Content rendering */}
+      {activeTab === 'weeklyplanner' && (
+        <div className="mt-4">
+          <WeeklyPlanner />
+        </div>
+      )}
+
       {activeTab === 'calendar' && (
         <div className="mt-4">
           <CalendarPage />
@@ -270,6 +290,12 @@ export const WorkspacePage: React.FC = () => {
       {activeTab === 'favorites' && (
         <div className="mt-4">
           <FavoritesPage />
+        </div>
+      )}
+
+      {activeTab === 'members' && (
+        <div className="mt-4">
+          <MembersPage />
         </div>
       )}
 

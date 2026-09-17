@@ -38,7 +38,8 @@ export function useAutomationActivity() {
         filtered = filtered.filter((log) => {
           const logDate = new Date(log.startedAt);
           if (dateRange === 'TODAY') return logDate >= startOfToday;
-          if (dateRange === 'YESTERDAY') return logDate >= startOfYesterday && logDate < startOfToday;
+          if (dateRange === 'YESTERDAY')
+            return logDate >= startOfYesterday && logDate < startOfToday;
           if (dateRange === 'LAST_7_DAYS') return logDate >= sevenDaysAgo;
           if (dateRange === 'LAST_30_DAYS') return logDate >= thirtyDaysAgo;
           return true;

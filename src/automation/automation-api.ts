@@ -29,16 +29,23 @@ export const automationApi = {
   getAutomations: async (config?: RequestConfig): Promise<AutomationRule[]> => {
     try {
       const res = await apiClient.get<any>(ENDPOINTS.AUTOMATION.WORKFLOWS, config);
-      const rawList = Array.isArray(res) ? res : res?.data ?? [];
+      const rawList = Array.isArray(res) ? res : (res?.data ?? []);
       return rawList.map((item: any) => ({
         id: item.id,
         name: item.name || 'Untitled Automation',
         description: item.description || '',
-        status: item.isEnabled === false || item.status === 'PAUSED' || item.status === 'paused' ? 'paused' : (item.status?.toLowerCase() || 'active'),
+        status:
+          item.isEnabled === false || item.status === 'PAUSED' || item.status === 'paused'
+            ? 'paused'
+            : item.status?.toLowerCase() || 'active',
         trigger: item.trigger || 'SCHEDULE',
         triggerConfig: item.triggerConfig || {},
         schedule: item.schedule || null,
-        steps: Array.isArray(item.steps) ? item.steps : Array.isArray(item.actions) ? item.actions : [],
+        steps: Array.isArray(item.steps)
+          ? item.steps
+          : Array.isArray(item.actions)
+            ? item.actions
+            : [],
         actions: item.actions || {},
         conditions: item.conditions || [],
         lastRunAt: item.lastRunAt || null,
@@ -62,7 +69,7 @@ export const automationApi = {
         id: item.id || id,
         name: item.name || 'Automation',
         description: item.description || '',
-        status: item.isEnabled === false ? 'paused' : (item.status?.toLowerCase() || 'active'),
+        status: item.isEnabled === false ? 'paused' : item.status?.toLowerCase() || 'active',
         trigger: item.trigger || 'SCHEDULE',
         triggerConfig: item.triggerConfig || {},
         schedule: item.schedule || null,
@@ -102,7 +109,10 @@ export const automationApi = {
     }
   },
 
-  createAutomation: async (dto: CreateAutomationDTO, config?: RequestConfig): Promise<AutomationRule> => {
+  createAutomation: async (
+    dto: CreateAutomationDTO,
+    config?: RequestConfig,
+  ): Promise<AutomationRule> => {
     const payload = {
       name: dto.name,
       description: dto.description || '',
@@ -128,7 +138,11 @@ export const automationApi = {
     };
   },
 
-  updateAutomation: async (id: string, dto: UpdateAutomationDTO, config?: RequestConfig): Promise<AutomationRule> => {
+  updateAutomation: async (
+    id: string,
+    dto: UpdateAutomationDTO,
+    config?: RequestConfig,
+  ): Promise<AutomationRule> => {
     const payload = {
       name: dto.name,
       description: dto.description,
@@ -163,7 +177,10 @@ export const automationApi = {
     }
   },
 
-  executeAutomation: async (id: string, config?: RequestConfig): Promise<{ success: boolean; executionId: string; result?: any }> => {
+  executeAutomation: async (
+    id: string,
+    config?: RequestConfig,
+  ): Promise<{ success: boolean; executionId: string; result?: any }> => {
     const res = await apiClient.post<any>(ENDPOINTS.AUTOMATION.EXECUTE(id), {}, config);
     const data = res?.data ?? res;
     return {
@@ -192,7 +209,10 @@ export const automationApi = {
         id: l.id || `log-${Math.random().toString(36).substring(2, 7)}`,
         automationId: l.automationId || 'auto-1',
         automationName: l.automationName || l.message || 'Automation Action',
-        status: (l.status?.toLowerCase() === 'success' || l.type?.includes('COMPLETED') ? 'completed' : l.status?.toLowerCase()) || 'completed',
+        status:
+          (l.status?.toLowerCase() === 'success' || l.type?.includes('COMPLETED')
+            ? 'completed'
+            : l.status?.toLowerCase()) || 'completed',
         trigger: l.trigger || 'Automation Event',
         executedBy: l.executedBy || 'Aether Engine',
         startedAt: l.createdAt || l.startedAt || new Date().toISOString(),
@@ -200,7 +220,8 @@ export const automationApi = {
         duration: l.duration || '0.5s',
         stepLogs: Array.isArray(l.stepLogs) ? l.stepLogs : [],
         resultSummary: l.message || l.resultSummary || 'Action completed successfully',
-        userFriendlyError: l.errorMessage || (l.status === 'FAILED' ? 'Execution step failed' : null),
+        userFriendlyError:
+          l.errorMessage || (l.status === 'FAILED' ? 'Execution step failed' : null),
       }));
 
       return {

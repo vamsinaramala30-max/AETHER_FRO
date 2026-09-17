@@ -10,15 +10,12 @@ import {
   Edit2,
   Eye,
   X,
-  ChevronLeft,
-  ChevronRight,
   AlertCircle,
   FileCheck,
   Download,
   Video,
   Music,
   Archive,
-  Filter,
   CheckSquare,
   Square,
   Sparkles,
@@ -30,13 +27,7 @@ import { useNotificationStore } from '@/state/notificationStore';
 import { onActivityUpdate, triggerActivityUpdate } from '@/shared/activityEvents';
 
 export type FileCategory =
-  | 'All Files'
-  | 'Images'
-  | 'PDFs'
-  | 'Videos'
-  | 'Audio'
-  | 'ZIPs'
-  | 'Other uploads';
+  'All Files' | 'Images' | 'PDFs' | 'Videos' | 'Audio' | 'ZIPs' | 'Other uploads';
 
 export interface FileItem {
   id: string;
@@ -56,7 +47,7 @@ export const FilesPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<FileCategory>('All Files');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [_totalPages, setTotalPages] = useState<number>(1);
   const [uploading, setUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [renameTarget, setRenameTarget] = useState<FileItem | null>(null);
@@ -147,7 +138,9 @@ export const FilesPage: React.FC = () => {
   };
 
   const isZip = (mime: string, name: string) => {
-    return mime.includes('zip') || mime.includes('compressed') || /\.(zip|tar|gz|7z|rar)$/i.test(name);
+    return (
+      mime.includes('zip') || mime.includes('compressed') || /\.(zip|tar|gz|7z|rar)$/i.test(name)
+    );
   };
 
   const filteredFiles = useMemo(() => {
@@ -290,13 +283,15 @@ export const FilesPage: React.FC = () => {
   };
 
   const getFileIcon = (mimeType: string, filename: string) => {
-    if (isImage(mimeType, filename)) return <ImageIcon className="h-5 w-5 text-emerald-500 shrink-0" />;
-    if (isPdf(mimeType, filename)) return <FileText className="h-5 w-5 text-rose-500 shrink-0" />;
-    if (isVideo(mimeType, filename)) return <Video className="h-5 w-5 text-purple-500 shrink-0" />;
-    if (isAudio(mimeType, filename)) return <Music className="h-5 w-5 text-amber-500 shrink-0" />;
-    if (isZip(mimeType, filename)) return <Archive className="h-5 w-5 text-blue-500 shrink-0" />;
-    if (isText(mimeType, filename)) return <FileCode className="h-5 w-5 text-indigo-500 shrink-0" />;
-    return <FileText className="h-5 w-5 text-slate-500 shrink-0" />;
+    if (isImage(mimeType, filename))
+      return <ImageIcon className="h-5 w-5 shrink-0 text-emerald-500" />;
+    if (isPdf(mimeType, filename)) return <FileText className="h-5 w-5 shrink-0 text-rose-500" />;
+    if (isVideo(mimeType, filename)) return <Video className="h-5 w-5 shrink-0 text-purple-500" />;
+    if (isAudio(mimeType, filename)) return <Music className="h-5 w-5 shrink-0 text-amber-500" />;
+    if (isZip(mimeType, filename)) return <Archive className="h-5 w-5 shrink-0 text-blue-500" />;
+    if (isText(mimeType, filename))
+      return <FileCode className="h-5 w-5 shrink-0 text-indigo-500" />;
+    return <FileText className="h-5 w-5 shrink-0 text-slate-500" />;
   };
 
   const getDownloadUrl = (id: string) => `/api/v1/uploads/${id}/download`;
@@ -311,9 +306,7 @@ export const FilesPage: React.FC = () => {
   };
 
   const toggleSelectOne = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   return (
@@ -421,9 +414,7 @@ export const FilesPage: React.FC = () => {
           <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-900">
             <FileCheck className="mb-3 h-10 w-10 text-slate-400" />
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No files yet</p>
-            <p className="mt-1 text-xs text-slate-400">
-              Upload raw assets to your workspace.
-            </p>
+            <p className="mt-1 text-xs text-slate-400">Upload raw assets to your workspace.</p>
             <label className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500">
               <Upload className="h-3.5 w-3.5" />
               <span>Upload File</span>
@@ -433,7 +424,7 @@ export const FilesPage: React.FC = () => {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:block">
               <table className="w-full text-left text-xs">
                 <thead className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
                   <tr>
@@ -475,7 +466,7 @@ export const FilesPage: React.FC = () => {
                               )}
                             </button>
                             {getFileIcon(file.mimeType, file.filename)}
-                            <span className="font-semibold text-slate-900 dark:text-white truncate max-w-xs">
+                            <span className="max-w-xs truncate font-semibold text-slate-900 dark:text-white">
                               {file.filename}
                             </span>
                           </div>
@@ -546,7 +537,7 @@ export const FilesPage: React.FC = () => {
                     <div className="flex items-center gap-3 overflow-hidden">
                       {getFileIcon(file.mimeType, file.filename)}
                       <div className="truncate">
-                        <p className="font-semibold text-slate-900 dark:text-white truncate">
+                        <p className="truncate font-semibold text-slate-900 dark:text-white">
                           {file.filename}
                         </p>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -585,7 +576,7 @@ export const FilesPage: React.FC = () => {
 
       {/* REAL PREVIEW MODAL */}
       {previewTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm duration-200">
           <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
               <div className="flex items-center gap-3 overflow-hidden">
@@ -613,12 +604,12 @@ export const FilesPage: React.FC = () => {
             </div>
 
             {/* Preview Body */}
-            <div className="p-6 flex flex-col items-center justify-center min-h-[300px] max-h-[600px] overflow-y-auto">
+            <div className="flex max-h-[600px] min-h-[300px] flex-col items-center justify-center overflow-y-auto p-6">
               {isImage(previewTarget.mimeType, previewTarget.filename) ? (
                 <img
                   src={getPreviewUrl(previewTarget.id)}
                   alt={previewTarget.filename}
-                  className="max-h-[500px] w-auto object-contain rounded-xl shadow-sm"
+                  className="max-h-[500px] w-auto rounded-xl object-contain shadow-sm"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = 'none';
                   }}
@@ -646,17 +637,17 @@ export const FilesPage: React.FC = () => {
                     Loading file contents...
                   </span>
                 ) : (
-                  <pre className="w-full max-h-[450px] overflow-auto rounded-xl bg-slate-950 p-4 text-xs font-mono text-slate-100 leading-relaxed scrollbar-thin">
+                  <pre className="scrollbar-thin max-h-[450px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
                     {previewTextContent}
                   </pre>
                 )
               ) : (
-                <div className="flex flex-col items-center text-center py-10">
+                <div className="flex flex-col items-center py-10 text-center">
                   <AlertTriangle className="mb-3 h-10 w-10 text-amber-500" />
                   <p className="text-sm font-bold text-slate-900 dark:text-white">
                     Preview unavailable for this file type
                   </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                  <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
                     You can download this raw asset directly to view it on your local device.
                   </p>
                 </div>
@@ -668,7 +659,7 @@ export const FilesPage: React.FC = () => {
 
       {/* RENAME DIALOG */}
       {renameTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">Rename File</h3>
             <input
@@ -697,11 +688,12 @@ export const FilesPage: React.FC = () => {
 
       {/* DELETE CONFIRM DIALOG */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">Delete File</h3>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Are you sure you want to permanently delete "{deleteTarget.filename}"? This action cannot be undone.
+              Are you sure you want to permanently delete "{deleteTarget.filename}"? This action
+              cannot be undone.
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button

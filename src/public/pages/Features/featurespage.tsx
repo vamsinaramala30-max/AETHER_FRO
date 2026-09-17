@@ -18,44 +18,58 @@ const FEATURES: FeatureItem[] = [
     name: 'AI Assistant',
     category: 'Intelligence',
     status: 'Available',
-    whatItDoes: 'Context-aware LLM copilot that directly inspects active workspace documents, code files, and conversation memory.',
-    whyItMatters: 'General AI tools lack access to your specific workspace context, leading to generic and hallucinated outputs.',
-    howItHelps: 'Generates instant accurate responses, drafts code, summarizes project milestones, and writes documentation based on your real data.',
+    whatItDoes:
+      'Context-aware LLM copilot that directly inspects active workspace documents, code files, and conversation memory.',
+    whyItMatters:
+      'General AI tools lack access to your specific workspace context, leading to generic and hallucinated outputs.',
+    howItHelps:
+      'Generates instant accurate responses, drafts code, summarizes project milestones, and writes documentation based on your real data.',
   },
   {
     id: 'intelligent-conversations',
     name: 'Intelligent Conversations',
     category: 'Intelligence',
     status: 'Available',
-    whatItDoes: 'Multi-turn chat threads with memory compaction, system prompt customization, and thread pinning.',
-    whyItMatters: 'Long conversations degrade in quality when context limits expire without intelligent memory tracking.',
-    howItHelps: 'Preserves critical decisions and code context across days of discussion without losing past references.',
+    whatItDoes:
+      'Multi-turn chat threads with memory compaction, system prompt customization, and thread pinning.',
+    whyItMatters:
+      'Long conversations degrade in quality when context limits expire without intelligent memory tracking.',
+    howItHelps:
+      'Preserves critical decisions and code context across days of discussion without losing past references.',
   },
   {
     id: 'projects',
     name: 'Projects & Milestones',
     category: 'Workspace',
     status: 'Available',
-    whatItDoes: 'Structured project board combining task items, deadlines, AI threads, and document attachments.',
-    whyItMatters: 'Tasks disconnected from documentation and AI tools cause misaligned project tracking.',
-    howItHelps: 'Keeps goals, code requirements, and automated task execution grouped in one organized dashboard.',
+    whatItDoes:
+      'Structured project board combining task items, deadlines, AI threads, and document attachments.',
+    whyItMatters:
+      'Tasks disconnected from documentation and AI tools cause misaligned project tracking.',
+    howItHelps:
+      'Keeps goals, code requirements, and automated task execution grouped in one organized dashboard.',
   },
   {
     id: 'knowledge-management',
     name: 'Knowledge Base',
     category: 'Knowledge',
     status: 'Available',
-    whatItDoes: 'High-density vector indexing and hybrid search across uploaded PDF, Markdown, text, and code files.',
-    whyItMatters: 'Finding technical documentation across multiple folders waste hours of engineering time every week.',
-    howItHelps: 'Allows semantic natural language queries like "How do we handle OAuth token refreshes?" and returns exact document references.',
+    whatItDoes:
+      'High-density vector indexing and hybrid search across uploaded PDF, Markdown, text, and code files.',
+    whyItMatters:
+      'Finding technical documentation across multiple folders waste hours of engineering time every week.',
+    howItHelps:
+      'Allows semantic natural language queries like "How do we handle OAuth token refreshes?" and returns exact document references.',
   },
   {
     id: 'file-understanding',
     name: 'File Understanding',
     category: 'Knowledge',
     status: 'Available',
-    whatItDoes: 'Multi-format file parser that extracts entity relationships, code schemas, and key data fields automatically.',
-    whyItMatters: 'Manual document review is slow and error-prone when onboarding new developers or reviewing contracts.',
+    whatItDoes:
+      'Multi-format file parser that extracts entity relationships, code schemas, and key data fields automatically.',
+    whyItMatters:
+      'Manual document review is slow and error-prone when onboarding new developers or reviewing contracts.',
     howItHelps: 'Summarizes complex 100-page specs into structured key takeaways within seconds.',
   },
   {
@@ -63,8 +77,10 @@ const FEATURES: FeatureItem[] = [
     name: 'Cognitive Memory',
     category: 'Intelligence',
     status: 'Available',
-    whatItDoes: 'Persists user preferences, coding patterns, and workspace terminology across all chat sessions.',
-    whyItMatters: 'Having to re-explain project constraints every time you open a new chat is tedious.',
+    whatItDoes:
+      'Persists user preferences, coding patterns, and workspace terminology across all chat sessions.',
+    whyItMatters:
+      'Having to re-explain project constraints every time you open a new chat is tedious.',
     howItHelps: 'Adapts to your coding style and domain vocabulary automatically over time.',
   },
   {
@@ -72,8 +88,10 @@ const FEATURES: FeatureItem[] = [
     name: 'Workspace Ecosystem',
     category: 'Workspace',
     status: 'Available',
-    whatItDoes: 'Multi-tenant organization container with custom roles, member management, and workspace settings.',
-    whyItMatters: 'Teams need clear boundary isolation to prevent unauthorized data exposure between projects.',
+    whatItDoes:
+      'Multi-tenant organization container with custom roles, member management, and workspace settings.',
+    whyItMatters:
+      'Teams need clear boundary isolation to prevent unauthorized data exposure between projects.',
     howItHelps: 'Ensures admins, developers, and guests have appropriate read/write privileges.',
   },
   {
@@ -81,16 +99,20 @@ const FEATURES: FeatureItem[] = [
     name: 'Workflow Automation',
     category: 'Automation',
     status: 'Available',
-    whatItDoes: 'Background queue engine for scheduled cron jobs, webhook events, and multi-step AI tool chains.',
-    whyItMatters: 'Repetitive daily tasks like status reports and data synching consume valuable focus time.',
-    howItHelps: 'Executes automated routines automatically on schedule without requiring manual intervention.',
+    whatItDoes:
+      'Background queue engine for scheduled cron jobs, webhook events, and multi-step AI tool chains.',
+    whyItMatters:
+      'Repetitive daily tasks like status reports and data synching consume valuable focus time.',
+    howItHelps:
+      'Executes automated routines automatically on schedule without requiring manual intervention.',
   },
   {
     id: 'productivity',
     name: 'Productivity Tools',
     category: 'Productivity',
     status: 'Available',
-    whatItDoes: 'Integrated calendar events, task timers, prompt libraries, and quick action palettes.',
+    whatItDoes:
+      'Integrated calendar events, task timers, prompt libraries, and quick action palettes.',
     whyItMatters: 'Switching between 5 different productivity apps destroys workflow momentum.',
     howItHelps: 'Consolidates everyday work tools inside one responsive interface.',
   },
@@ -99,7 +121,8 @@ const FEATURES: FeatureItem[] = [
     name: 'Global Unified Search',
     category: 'Knowledge',
     status: 'Available',
-    whatItDoes: 'Instant search bar (Cmd+K) indexing tasks, chats, knowledge documents, and automations.',
+    whatItDoes:
+      'Instant search bar (Cmd+K) indexing tasks, chats, knowledge documents, and automations.',
     whyItMatters: 'Navigating deeply nested folder hierarchies delays action execution.',
     howItHelps: 'Locates any item across your entire workspace in under 50 milliseconds.',
   },
@@ -108,8 +131,10 @@ const FEATURES: FeatureItem[] = [
     name: 'Notification Center',
     category: 'Workspace',
     status: 'Available',
-    whatItDoes: 'Real-time alert dispatch for task mentions, automation completions, and system events.',
-    whyItMatters: 'Missing critical task updates or failed background jobs leads to project delays.',
+    whatItDoes:
+      'Real-time alert dispatch for task mentions, automation completions, and system events.',
+    whyItMatters:
+      'Missing critical task updates or failed background jobs leads to project delays.',
     howItHelps: 'Delivers actionable in-app and push notifications to keep team members aligned.',
   },
   {
@@ -117,17 +142,21 @@ const FEATURES: FeatureItem[] = [
     name: 'Team Collaboration',
     category: 'Workspace',
     status: 'Coming soon',
-    whatItDoes: 'Real-time multi-cursor document editing, shared AI chat threads, and live comments.',
+    whatItDoes:
+      'Real-time multi-cursor document editing, shared AI chat threads, and live comments.',
     whyItMatters: 'Asynchronous discussion often lacks the speed of real-time co-authoring.',
-    howItHelps: 'Enables developers and product leads to pair-program and edit documents simultaneously.',
+    howItHelps:
+      'Enables developers and product leads to pair-program and edit documents simultaneously.',
   },
   {
     id: 'personalization',
     name: 'AI Agent Personalization',
     category: 'Intelligence',
     status: 'Coming soon',
-    whatItDoes: 'Custom AI agent persona builder with specialized system prompts and restricted tool permissions.',
-    whyItMatters: 'Different workflows (e.g. security audits vs marketing copy) require different reasoning modes.',
+    whatItDoes:
+      'Custom AI agent persona builder with specialized system prompts and restricted tool permissions.',
+    whyItMatters:
+      'Different workflows (e.g. security audits vs marketing copy) require different reasoning modes.',
     howItHelps: 'Creates specialized AI agents tailored to specific departmental workflows.',
   },
   {
@@ -135,8 +164,10 @@ const FEATURES: FeatureItem[] = [
     name: 'Enterprise Security Controls',
     category: 'Security',
     status: 'Available',
-    whatItDoes: 'TLS in-transit encryption, salted password hashing, JWT session security, and rate limiting.',
-    whyItMatters: 'Unsecured SaaS tools expose enterprise intellectual property to credentials leaks.',
+    whatItDoes:
+      'TLS in-transit encryption, salted password hashing, JWT session security, and rate limiting.',
+    whyItMatters:
+      'Unsecured SaaS tools expose enterprise intellectual property to credentials leaks.',
     howItHelps: 'Protects user data with battle-tested cryptographic security standards.',
   },
   {
@@ -144,7 +175,8 @@ const FEATURES: FeatureItem[] = [
     name: 'Privacy Protection',
     category: 'Security',
     status: 'Available',
-    whatItDoes: 'Zero public training policy, data minimization, local storage options, and full data deletion rights.',
+    whatItDoes:
+      'Zero public training policy, data minimization, local storage options, and full data deletion rights.',
     whyItMatters: 'Sending proprietary business data to external LLM trainers violates compliance.',
     howItHelps: 'Guarantees your confidential documents remain 100% private to your team.',
   },
@@ -167,7 +199,8 @@ export const FeaturesPage: React.FC = () => {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              Explore every capability built into AETHER. Every feature is designed with zero fluff and maximum utility.
+              Explore every capability built into AETHER. Every feature is designed with zero fluff
+              and maximum utility.
             </p>
           </div>
 
@@ -176,12 +209,12 @@ export const FeaturesPage: React.FC = () => {
             {FEATURES.map((feature) => (
               <div
                 key={feature.id}
-                className="group flex flex-col justify-between rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10"
+                className="group flex flex-col justify-between rounded-3xl border border-white/10 bg-white/[0.025] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 sm:p-8"
               >
                 <div>
                   {/* Card Badge Header */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-400">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400">
                       {feature.category}
                     </span>
                     <span
@@ -195,31 +228,31 @@ export const FeaturesPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                  <h3 className="mt-4 text-xl font-bold text-white transition-colors group-hover:text-indigo-300">
                     {feature.name}
                   </h3>
 
                   {/* Section Breakdown */}
                   <div className="mt-6 space-y-4 text-xs leading-relaxed">
                     <div>
-                      <span className="font-semibold uppercase tracking-wider text-zinc-300 block mb-1">
+                      <span className="mb-1 block font-semibold uppercase tracking-wider text-zinc-300">
                         What It Does
                       </span>
                       <p className="text-zinc-400">{feature.whatItDoes}</p>
                     </div>
 
                     <div>
-                      <span className="font-semibold uppercase tracking-wider text-zinc-300 block mb-1">
+                      <span className="mb-1 block font-semibold uppercase tracking-wider text-zinc-300">
                         Why It Matters
                       </span>
                       <p className="text-zinc-400">{feature.whyItMatters}</p>
                     </div>
 
                     <div>
-                      <span className="font-semibold uppercase tracking-wider text-zinc-300 block mb-1">
+                      <span className="mb-1 block font-semibold uppercase tracking-wider text-zinc-300">
                         How It Helps You
                       </span>
-                      <p className="text-zinc-300 font-medium">{feature.howItHelps}</p>
+                      <p className="font-medium text-zinc-300">{feature.howItHelps}</p>
                     </div>
                   </div>
                 </div>
@@ -233,18 +266,19 @@ export const FeaturesPage: React.FC = () => {
               Ready to experience AETHER in action?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-zinc-400">
-              Create an account or get in touch with our product support team for custom enterprise workflow demos.
+              Create an account or get in touch with our product support team for custom enterprise
+              workflow demos.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/signup"
-                className="rounded-xl bg-zinc-100 px-6 py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-200 transition-colors"
+                className="rounded-xl bg-zinc-100 px-6 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition-colors hover:bg-zinc-200"
               >
                 Create Free Account
               </Link>
               <Link
                 to="/contact"
-                className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+                className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
               >
                 Contact Sales
               </Link>

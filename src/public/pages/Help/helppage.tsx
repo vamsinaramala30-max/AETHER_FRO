@@ -103,13 +103,12 @@ export const HelpPage: React.FC = () => {
 
   const toggleFAQ = (index: number) => {
     setOpenIndexes((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
 
   const filteredFAQs = FAQS.filter((faq) => {
-    const matchesCategory =
-      selectedCategory === 'All' || faq.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || faq.category === selectedCategory;
     const matchesSearch =
       faq.question.toLowerCase().includes(search.toLowerCase()) ||
       faq.answer.toLowerCase().includes(search.toLowerCase());
@@ -129,17 +128,18 @@ export const HelpPage: React.FC = () => {
               How can we help you today?
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400">
-              Search our help center for instant answers to common questions, platform guides, and troubleshooting steps.
+              Search our help center for instant answers to common questions, platform guides, and
+              troubleshooting steps.
             </p>
 
             {/* Interactive Search Bar */}
-            <div className="mt-8 mx-auto max-w-2xl relative">
+            <div className="relative mx-auto mt-8 max-w-2xl">
               <input
                 type="text"
                 placeholder="Search help topics (e.g. password, vector search, encryption)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 pl-12 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xl"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 pl-12 text-sm text-white placeholder-zinc-500 shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <svg
                 className="absolute left-4 top-4 h-5 w-5 text-zinc-400"
@@ -147,7 +147,12 @@ export const HelpPage: React.FC = () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
           </div>
@@ -192,16 +197,16 @@ export const HelpPage: React.FC = () => {
                 return (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-white/10 bg-white/[0.025] overflow-hidden transition-colors hover:border-white/20"
+                    className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] transition-colors hover:border-white/20"
                   >
                     <button
                       type="button"
                       onClick={() => toggleFAQ(idx)}
-                      className="w-full flex items-center justify-between p-6 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex w-full items-center justify-between p-6 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       aria-expanded={isOpen}
                     >
                       <div className="flex flex-col gap-1 pr-4">
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-400">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400">
                           {faq.category}
                         </span>
                         <h3 className="text-base font-semibold text-white sm:text-lg">
@@ -226,16 +231,15 @@ export const HelpPage: React.FC = () => {
 
           {/* Contact Support Banner */}
           <div className="mt-16 rounded-3xl border border-indigo-500/20 bg-indigo-500/10 p-8 text-center sm:p-12">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              Still have questions?
-            </h2>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">Still have questions?</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-zinc-300">
-              Can&apos;t find what you&apos;re looking for? Reach out directly to our dedicated support and technical engineering team.
+              Can&apos;t find what you&apos;re looking for? Reach out directly to our dedicated
+              support and technical engineering team.
             </p>
             <div className="mt-6">
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition-transform hover:-translate-y-0.5 shadow-lg"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition-transform hover:-translate-y-0.5"
               >
                 Contact Support Team →
               </Link>

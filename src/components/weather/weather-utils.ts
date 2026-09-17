@@ -3,13 +3,13 @@
  * Pure, side-effect-free helper functions. No network calls live here.
  */
 
-import { AQI_BANDS, BEAUFORT_KMH_THRESHOLDS, COMPASS_DIRECTIONS } from "./weather-constants";
+import { AQI_BANDS, BEAUFORT_KMH_THRESHOLDS, COMPASS_DIRECTIONS } from './weather-constants';
 import type {
   AqiCategory,
   HourlyWeatherPoint,
   TemperatureUnit,
   WeatherConditionInfo,
-} from "./weather-types";
+} from './weather-types';
 
 /* -------------------------------------------------------------------------- */
 /* Weather code mapping                                                        */
@@ -21,36 +21,36 @@ import type {
  */
 export function getWeatherCondition(code: number): WeatherConditionInfo {
   const map: Record<number, WeatherConditionInfo> = {
-    0: { label: "Clear", group: "clear" },
-    1: { label: "Mostly Clear", group: "clear" },
-    2: { label: "Partly Cloudy", group: "partly-cloudy" },
-    3: { label: "Cloudy", group: "cloudy" },
-    45: { label: "Foggy", group: "fog" },
-    48: { label: "Rime Fog", group: "fog" },
-    51: { label: "Light Drizzle", group: "drizzle" },
-    53: { label: "Drizzle", group: "drizzle" },
-    55: { label: "Dense Drizzle", group: "drizzle" },
-    56: { label: "Freezing Drizzle", group: "drizzle" },
-    57: { label: "Freezing Drizzle", group: "drizzle" },
-    61: { label: "Light Rain", group: "rain" },
-    63: { label: "Rain", group: "rain" },
-    65: { label: "Heavy Rain", group: "rain" },
-    66: { label: "Freezing Rain", group: "rain" },
-    67: { label: "Freezing Rain", group: "rain" },
-    71: { label: "Light Snow", group: "snow" },
-    73: { label: "Snow", group: "snow" },
-    75: { label: "Heavy Snow", group: "snow" },
-    77: { label: "Snow Grains", group: "snow" },
-    80: { label: "Light Showers", group: "rain" },
-    81: { label: "Showers", group: "rain" },
-    82: { label: "Violent Showers", group: "rain" },
-    85: { label: "Snow Showers", group: "snow" },
-    86: { label: "Heavy Snow Showers", group: "snow" },
-    95: { label: "Thunderstorm", group: "thunderstorm" },
-    96: { label: "Thunderstorm w/ Hail", group: "thunderstorm" },
-    99: { label: "Severe Thunderstorm", group: "thunderstorm" },
+    0: { label: 'Clear', group: 'clear' },
+    1: { label: 'Mostly Clear', group: 'clear' },
+    2: { label: 'Partly Cloudy', group: 'partly-cloudy' },
+    3: { label: 'Cloudy', group: 'cloudy' },
+    45: { label: 'Foggy', group: 'fog' },
+    48: { label: 'Rime Fog', group: 'fog' },
+    51: { label: 'Light Drizzle', group: 'drizzle' },
+    53: { label: 'Drizzle', group: 'drizzle' },
+    55: { label: 'Dense Drizzle', group: 'drizzle' },
+    56: { label: 'Freezing Drizzle', group: 'drizzle' },
+    57: { label: 'Freezing Drizzle', group: 'drizzle' },
+    61: { label: 'Light Rain', group: 'rain' },
+    63: { label: 'Rain', group: 'rain' },
+    65: { label: 'Heavy Rain', group: 'rain' },
+    66: { label: 'Freezing Rain', group: 'rain' },
+    67: { label: 'Freezing Rain', group: 'rain' },
+    71: { label: 'Light Snow', group: 'snow' },
+    73: { label: 'Snow', group: 'snow' },
+    75: { label: 'Heavy Snow', group: 'snow' },
+    77: { label: 'Snow Grains', group: 'snow' },
+    80: { label: 'Light Showers', group: 'rain' },
+    81: { label: 'Showers', group: 'rain' },
+    82: { label: 'Violent Showers', group: 'rain' },
+    85: { label: 'Snow Showers', group: 'snow' },
+    86: { label: 'Heavy Snow Showers', group: 'snow' },
+    95: { label: 'Thunderstorm', group: 'thunderstorm' },
+    96: { label: 'Thunderstorm w/ Hail', group: 'thunderstorm' },
+    99: { label: 'Severe Thunderstorm', group: 'thunderstorm' },
   };
-  return map[code] ?? { label: "Unavailable", group: "unknown" };
+  return map[code] ?? { label: 'Unavailable', group: 'unknown' };
 }
 
 /**
@@ -58,46 +58,46 @@ export function getWeatherCondition(code: number): WeatherConditionInfo {
  * Kept separate from getWeatherCondition so icon choice can consider isDay.
  */
 export type WeatherIconKey =
-  | "sun"
-  | "moon"
-  | "cloud-sun"
-  | "cloud-moon"
-  | "cloud"
-  | "cloud-fog"
-  | "cloud-drizzle"
-  | "cloud-rain"
-  | "cloud-snow"
-  | "cloud-lightning"
-  | "help-circle";
+  | 'sun'
+  | 'moon'
+  | 'cloud-sun'
+  | 'cloud-moon'
+  | 'cloud'
+  | 'cloud-fog'
+  | 'cloud-drizzle'
+  | 'cloud-rain'
+  | 'cloud-snow'
+  | 'cloud-lightning'
+  | 'help-circle';
 
 export function getWeatherIconKey(code: number, isDay: boolean): WeatherIconKey {
   const { group } = getWeatherCondition(code);
   switch (group) {
-    case "clear":
-      return isDay ? "sun" : "moon";
-    case "partly-cloudy":
-      return isDay ? "cloud-sun" : "cloud-moon";
-    case "cloudy":
-      return "cloud";
-    case "fog":
-      return "cloud-fog";
-    case "drizzle":
-      return "cloud-drizzle";
-    case "rain":
-      return "cloud-rain";
-    case "snow":
-      return "cloud-snow";
-    case "thunderstorm":
-      return "cloud-lightning";
+    case 'clear':
+      return isDay ? 'sun' : 'moon';
+    case 'partly-cloudy':
+      return isDay ? 'cloud-sun' : 'cloud-moon';
+    case 'cloudy':
+      return 'cloud';
+    case 'fog':
+      return 'cloud-fog';
+    case 'drizzle':
+      return 'cloud-drizzle';
+    case 'rain':
+      return 'cloud-rain';
+    case 'snow':
+      return 'cloud-snow';
+    case 'thunderstorm':
+      return 'cloud-lightning';
     default:
-      return "help-circle";
+      return 'help-circle';
   }
 }
 
 export function getWeatherAriaLabel(code: number, isDay: boolean): string {
   const { label } = getWeatherCondition(code);
-  if (label === "Unavailable") return "Weather condition unavailable";
-  return `${label}${isDay ? "" : ", night"}`;
+  if (label === 'Unavailable') return 'Weather condition unavailable';
+  return `${label}${isDay ? '' : ', night'}`;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -115,19 +115,19 @@ export function getAqiCategory(europeanAqi: number | null): AqiCategory | null {
 /* -------------------------------------------------------------------------- */
 
 export function convertTemperature(celsius: number, unit: TemperatureUnit): number {
-  return unit === "fahrenheit" ? (celsius * 9) / 5 + 32 : celsius;
+  return unit === 'fahrenheit' ? (celsius * 9) / 5 + 32 : celsius;
 }
 
 export function formatTemperature(
   celsius: number | null | undefined,
-  unit: TemperatureUnit = "celsius",
-  options: { withUnit?: boolean; decimals?: number } = {}
+  unit: TemperatureUnit = 'celsius',
+  options: { withUnit?: boolean; decimals?: number } = {},
 ): string {
-  if (celsius === null || celsius === undefined || Number.isNaN(celsius)) return "--";
+  if (celsius === null || celsius === undefined || Number.isNaN(celsius)) return '--';
   const { withUnit = false, decimals = 0 } = options;
   const value = convertTemperature(celsius, unit);
   const rounded = value.toFixed(decimals);
-  const symbol = unit === "fahrenheit" ? "°F" : "°C";
+  const symbol = unit === 'fahrenheit' ? '°F' : '°C';
   return withUnit ? `${rounded}${symbol}` : rounded;
 }
 
@@ -137,10 +137,10 @@ export function formatTemperature(
 
 export function formatTime(isoTime: string, timezone: string): string {
   const date = new Date(isoTime);
-  if (Number.isNaN(date.getTime())) return "--";
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
+  if (Number.isNaN(date.getTime())) return '--';
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
     hour12: true,
     timeZone: timezone,
   }).format(date);
@@ -148,26 +148,26 @@ export function formatTime(isoTime: string, timezone: string): string {
 
 export function formatShortDate(isoDate: string, timezone: string): string {
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "--";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "2-digit",
-    day: "2-digit",
+  if (Number.isNaN(date.getTime())) return '--';
+  return new Intl.DateTimeFormat('en-US', {
+    month: '2-digit',
+    day: '2-digit',
     timeZone: timezone,
   }).format(date);
 }
 
 export function formatWeekday(isoDate: string, timezone: string): string {
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "--";
-  return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: timezone }).format(date);
+  if (Number.isNaN(date.getTime())) return '--';
+  return new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: timezone }).format(date);
 }
 
 /** Returns the YYYY-MM-DD calendar-day key for a Date, as seen in a given timezone. */
 export function getDateKeyInTimezone(date: Date, timezone: string): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     timeZone: timezone,
   }).formatToParts(date);
   const lookup: Record<string, string> = {};
@@ -187,7 +187,7 @@ export function getTodayInTimezone(timezone: string): string {
  */
 export function groupHourlyByDate(
   hourly: HourlyWeatherPoint[],
-  timezone: string
+  timezone: string,
 ): Map<string, HourlyWeatherPoint[]> {
   const buckets = new Map<string, HourlyWeatherPoint[]>();
   for (const point of hourly) {
@@ -204,11 +204,11 @@ export function groupHourlyByDate(
 
 /** True if the given ISO time falls in the same local hour as right now. */
 export function isCurrentHour(isoTime: string, timezone: string): boolean {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
     hour12: false,
     timeZone: timezone,
   });
@@ -222,14 +222,14 @@ export function getRelativeDayLabel(isoDate: string, timezone: string): string {
   const targetDate = new Date(`${isoDate.slice(0, 10)}T00:00:00`);
   const diffDays = Math.round((targetDate.getTime() - todayDate.getTime()) / 86_400_000);
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Tomorrow";
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
   return formatWeekday(isoDate, timezone);
 }
 
 /** Label for the hourly slot matching the real current hour ("Now") vs. others. */
 export function getHourlySlotLabel(isoTime: string, timezone: string, isCurrent: boolean): string {
-  return isCurrent ? "Now" : formatTime(isoTime, timezone);
+  return isCurrent ? 'Now' : formatTime(isoTime, timezone);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -237,14 +237,14 @@ export function getHourlySlotLabel(isoTime: string, timezone: string, isCurrent:
 /* -------------------------------------------------------------------------- */
 
 export function getWindDirectionLabel(degrees: number | null): string {
-  if (degrees === null || Number.isNaN(degrees)) return "--";
+  if (degrees === null || Number.isNaN(degrees)) return '--';
   const index = Math.round(degrees / 22.5) % 16;
   return COMPASS_DIRECTIONS[(index + 16) % 16];
 }
 
 /** Converts km/h wind speed into a "Force N" Beaufort label, as in the reference UI. */
 export function getBeaufortForce(kmh: number | null): string {
-  if (kmh === null || Number.isNaN(kmh)) return "--";
+  if (kmh === null || Number.isNaN(kmh)) return '--';
   let force = 0;
   for (let i = 0; i < BEAUFORT_KMH_THRESHOLDS.length; i++) {
     if (kmh > BEAUFORT_KMH_THRESHOLDS[i]) force = i + 1;
@@ -253,7 +253,7 @@ export function getBeaufortForce(kmh: number | null): string {
 }
 
 export function formatWindSpeed(kmh: number | null): string {
-  if (kmh === null || Number.isNaN(kmh)) return "Unavailable";
+  if (kmh === null || Number.isNaN(kmh)) return 'Unavailable';
   return `${Math.round(kmh)} km/h`;
 }
 
@@ -262,32 +262,32 @@ export function formatWindSpeed(kmh: number | null): string {
 /* -------------------------------------------------------------------------- */
 
 export function formatPressure(hpa: number | null): string {
-  if (hpa === null || Number.isNaN(hpa)) return "Unavailable";
-  return `${Math.round(hpa).toLocaleString("en-US")} hPa`;
+  if (hpa === null || Number.isNaN(hpa)) return 'Unavailable';
+  return `${Math.round(hpa).toLocaleString('en-US')} hPa`;
 }
 
 export function formatVisibility(meters: number | null): string {
-  if (meters === null || Number.isNaN(meters)) return "Unavailable";
+  if (meters === null || Number.isNaN(meters)) return 'Unavailable';
   const km = meters / 1000;
   return `${km >= 10 ? Math.round(km) : km.toFixed(1)} km`;
 }
 
 export function formatHumidity(percent: number | null): string {
-  if (percent === null || Number.isNaN(percent)) return "Unavailable";
+  if (percent === null || Number.isNaN(percent)) return 'Unavailable';
   return `${Math.round(percent)}%`;
 }
 
 export function formatUvIndex(uv: number | null): string {
-  if (uv === null || Number.isNaN(uv)) return "Unavailable";
-  if (uv < 3) return "Weaker";
-  if (uv < 6) return "Moderate";
-  if (uv < 8) return "High";
-  if (uv < 11) return "Very High";
-  return "Extreme";
+  if (uv === null || Number.isNaN(uv)) return 'Unavailable';
+  if (uv < 3) return 'Weaker';
+  if (uv < 6) return 'Moderate';
+  if (uv < 8) return 'High';
+  if (uv < 11) return 'Very High';
+  return 'Extreme';
 }
 
-export function formatAirQualityValue(value: number | null, unit = ""): string {
-  if (value === null || Number.isNaN(value)) return "--";
+export function formatAirQualityValue(value: number | null, unit = ''): string {
+  if (value === null || Number.isNaN(value)) return '--';
   return `${Math.round(value)}${unit}`;
 }
 
@@ -305,7 +305,7 @@ export interface ChartPoint {
  * Safe against fewer than 2 points (returns an empty string).
  */
 export function buildSmoothPath(points: ChartPoint[]): string {
-  if (points.length < 2) return "";
+  if (points.length < 2) return '';
   if (points.length === 2) {
     return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
   }
@@ -332,7 +332,7 @@ export function mapValuesToPoints(
   values: Array<number | null>,
   width: number,
   height: number,
-  paddingY = 16
+  paddingY = 16,
 ): ChartPoint[] {
   const finiteValues = values.filter((v): v is number => v !== null && !Number.isNaN(v));
   if (finiteValues.length === 0) return [];
@@ -363,14 +363,14 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 export function safeRound(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return "--";
+  if (value === null || value === undefined || Number.isNaN(value)) return '--';
   return `${Math.round(value)}`;
 }
 
 /** localStorage read that never throws (private mode, quota, corrupt JSON, SSR). */
 export function safeGetStorage<T>(key: string, fallback: T): T {
   try {
-    if (typeof window === "undefined" || !window.localStorage) return fallback;
+    if (typeof window === 'undefined' || !window.localStorage) return fallback;
     const raw = window.localStorage.getItem(key);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as T;
@@ -383,7 +383,7 @@ export function safeGetStorage<T>(key: string, fallback: T): T {
 /** localStorage write that never throws. Returns whether it succeeded. */
 export function safeSetStorage<T>(key: string, value: T): boolean {
   try {
-    if (typeof window === "undefined" || !window.localStorage) return false;
+    if (typeof window === 'undefined' || !window.localStorage) return false;
     window.localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {

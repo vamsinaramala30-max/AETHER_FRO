@@ -13,7 +13,16 @@ import { AutomationBuilder } from './components/builder/AutomationBuilder';
 import { AutomationDialog } from './components/shared/AutomationDialog';
 import { ConfirmAutomationAction } from './components/shared/ConfirmAutomationAction';
 import { Button } from '@/components/ui/button';
-import { Sparkles, CheckCircle2, Zap, AlertCircle, ShieldCheck, Database, Target, Clock } from 'lucide-react';
+import {
+  Sparkles,
+  CheckCircle2,
+  Zap,
+  AlertCircle,
+  ShieldCheck,
+  Database,
+  Target,
+  Clock,
+} from 'lucide-react';
 import { automationService } from './services/automation-service';
 import { automationApi } from './automation-api';
 import { AUTOMATION_TEMPLATES } from './automation-constants';
@@ -217,23 +226,23 @@ export const AutomationPage: React.FC = () => {
             </div>
 
             {unsupportedError && (
-              <div className="flex items-start gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-300 animate-in fade-in duration-200">
-                <AlertCircle className="h-5 w-5 shrink-0 text-rose-500 mt-0.5" />
+              <div className="animate-in fade-in flex items-start gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-700 duration-200 dark:text-rose-300">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
                 <div>
-                  <h5 className="font-bold text-sm">Unsupported Automation Request</h5>
+                  <h5 className="text-sm font-bold">Unsupported Automation Request</h5>
                   <p className="mt-1 leading-relaxed">{unsupportedError}</p>
                 </div>
               </div>
             )}
 
             {aiPreview && (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 animate-in fade-in duration-200 space-y-4">
+              <div className="animate-in fade-in space-y-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 duration-200">
                 <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
                   <div>
                     <h4 className="text-base font-bold text-slate-900 dark:text-white">
                       {aiPreview.name}
                     </h4>
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-0.5">
+                    <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
                       <Clock className="h-3.5 w-3.5" />
                       Trigger: {aiPreview.rawTrigger} ({aiPreview.scheduleText})
                     </p>
@@ -243,20 +252,24 @@ export const AutomationPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3">
-                    <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200/80 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+                    <p className="flex items-center gap-1 font-bold uppercase tracking-wider text-slate-400">
                       <Database className="h-3.5 w-3.5 text-amber-500" />
                       Target Data
                     </p>
-                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">{aiPreview.targetData}</p>
+                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">
+                      {aiPreview.targetData}
+                    </p>
                   </div>
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3">
-                    <p className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <div className="rounded-xl border border-slate-200/80 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+                    <p className="flex items-center gap-1 font-bold uppercase tracking-wider text-slate-400">
                       <Target className="h-3.5 w-3.5 text-emerald-500" />
                       Expected Result
                     </p>
-                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">{aiPreview.expectedResult}</p>
+                    <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">
+                      {aiPreview.expectedResult}
+                    </p>
                   </div>
                 </div>
 
@@ -265,15 +278,20 @@ export const AutomationPage: React.FC = () => {
                     Workflow Actions Sequence:
                   </p>
                   {aiPreview.steps.map((st, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white/40 dark:bg-slate-900/40 p-2 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span>{i + 1}. {st}</span>
+                    <div
+                      key={i}
+                      className="flex items-center gap-2.5 rounded-lg border border-slate-200/50 bg-white/40 p-2 text-xs font-medium text-slate-700 dark:border-slate-800/50 dark:bg-slate-900/40 dark:text-slate-200"
+                    >
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                      <span>
+                        {i + 1}. {st}
+                      </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-2 border-t border-amber-500/20 text-xs flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                  <ShieldCheck className="h-4 w-4 text-amber-500 shrink-0" />
+                <div className="flex items-center gap-2 border-t border-amber-500/20 pt-2 text-xs text-slate-500 dark:text-slate-400">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-amber-500" />
                   <span>Required Permissions: {aiPreview.requiredPermissions.join(', ')}</span>
                 </div>
 
@@ -285,7 +303,10 @@ export const AutomationPage: React.FC = () => {
                   >
                     Adjust Request
                   </Button>
-                  <Button onClick={handleSaveAiPreview} className="bg-amber-500 text-white hover:bg-amber-600">
+                  <Button
+                    onClick={handleSaveAiPreview}
+                    className="bg-amber-500 text-white hover:bg-amber-600"
+                  >
                     <Zap className="mr-1.5 h-4 w-4" />
                     Save & Activate Automation
                   </Button>

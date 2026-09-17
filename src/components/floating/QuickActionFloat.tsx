@@ -12,11 +12,14 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && isOpen) {
-      setIsOpen(false);
-    }
-  }, [isOpen]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    },
+    [isOpen],
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -44,7 +47,7 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
           <button
             type="button"
             onClick={() => handleNav('/app/ai')}
-            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-amber-500/10 hover:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:bg-amber-500/10 hover:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
             role="menuitem"
           >
             <Sparkles className="h-4 w-4 text-amber-400" />
@@ -60,7 +63,7 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
                 handleNav('/app/knowledge/search');
               }
             }}
-            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800/80 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800/80 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
             role="menuitem"
           >
             <Search className="h-4 w-4 text-slate-400" />
@@ -70,7 +73,7 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
           <button
             type="button"
             onClick={() => handleNav('/app/automation')}
-            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-emerald-500/10 hover:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:bg-emerald-500/10 hover:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             role="menuitem"
           >
             <Zap className="h-4 w-4 text-emerald-400" />
@@ -85,7 +88,7 @@ export const QuickActionFloat: React.FC<QuickActionFloatProps> = ({ onOpenSearch
         onClick={toggleOpen}
         aria-expanded={isOpen}
         aria-label={isOpen ? 'Close Quick Actions Menu' : 'Open Quick Actions Menu'}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-amber-500/40 transition-all duration-200"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-500/40 active:scale-95"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
       </button>

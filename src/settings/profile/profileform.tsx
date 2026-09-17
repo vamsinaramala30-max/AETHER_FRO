@@ -11,7 +11,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    fullName: initialProfile.fullName || `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
+    fullName:
+      initialProfile.fullName ||
+      `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
     username: initialProfile.username || '',
     email: initialProfile.email || '',
     phone: initialProfile.phone || '',
@@ -30,7 +32,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
 
   useEffect(() => {
     setFormData({
-      fullName: initialProfile.fullName || `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
+      fullName:
+        initialProfile.fullName ||
+        `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
       username: initialProfile.username || '',
       email: initialProfile.email || '',
       phone: initialProfile.phone || '',
@@ -44,7 +48,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
     setHasUnsavedChanges(false);
   }, [initialProfile]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setHasUnsavedChanges(true);
@@ -53,7 +59,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
 
   const handleReset = () => {
     setFormData({
-      fullName: initialProfile.fullName || `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
+      fullName:
+        initialProfile.fullName ||
+        `${initialProfile.firstName || ''} ${initialProfile.lastName || ''}`.trim(),
       username: initialProfile.username || '',
       email: initialProfile.email || '',
       phone: initialProfile.phone || '',
@@ -123,7 +131,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
         setMessage({ type: 'success', text: 'Profile information updated successfully.' });
       })
       .catch((err: any) => {
-        const errorMsg = err?.response?.data?.error || err?.message || 'Failed to update profile. Please try again.';
+        const errorMsg =
+          err?.response?.data?.error ||
+          err?.message ||
+          'Failed to update profile. Please try again.';
         setMessage({ type: 'error', text: errorMsg });
       })
       .finally(() => {
@@ -199,7 +210,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
           )}
 
           {isUploadingPhoto && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-xs">
+            <div className="backdrop-blur-xs absolute inset-0 flex items-center justify-center bg-black/60">
               <RefreshCw className="h-6 w-6 animate-spin text-white" />
             </div>
           )}
@@ -234,7 +245,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
                 type="button"
                 disabled={isUploadingPhoto}
                 onClick={handlePhotoRemove}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-400 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-400"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Remove</span>
@@ -247,7 +258,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
       {/* Form Input Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="fullName" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="fullName"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Full Name <span className="text-rose-500">*</span>
           </label>
           <input
@@ -262,7 +276,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
         </div>
 
         <div>
-          <label htmlFor="username" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="username"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Username
           </label>
           <input
@@ -281,7 +298,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="email" className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="email"
+              className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+            >
               Email Address
             </label>
             <span
@@ -313,7 +333,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
         </div>
 
         <div>
-          <label htmlFor="phone" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="phone"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Phone Number
           </label>
           <input
@@ -331,7 +354,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
       {/* Company & Country */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="company" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="company"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Company / Organization
           </label>
           <input
@@ -345,7 +371,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
         </div>
 
         <div>
-          <label htmlFor="country" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="country"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Country
           </label>
           <input
@@ -362,7 +391,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
       {/* Timezone & Language */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="timezone" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="timezone"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Timezone
           </label>
           <select
@@ -381,7 +413,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
         </div>
 
         <div>
-          <label htmlFor="language" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="language"
+            className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+          >
             Language
           </label>
           <select
@@ -402,7 +437,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
 
       {/* Bio */}
       <div>
-        <label htmlFor="bio" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+        <label
+          htmlFor="bio"
+          className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+        >
           Bio / Description
         </label>
         <textarea
@@ -417,17 +455,21 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialProfile, onUpda
       </div>
 
       {/* Account Info Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
         <div>
           Member Since:{' '}
           <strong className="text-slate-900 dark:text-white">
-            {initialProfile.createdAt ? new Date(initialProfile.createdAt).toLocaleDateString() : 'N/A'}
+            {initialProfile.createdAt
+              ? new Date(initialProfile.createdAt).toLocaleDateString()
+              : 'N/A'}
           </strong>
         </div>
         <div>
           Last Active:{' '}
           <strong className="text-slate-900 dark:text-white">
-            {initialProfile.lastLoginAt ? new Date(initialProfile.lastLoginAt).toLocaleString() : 'Just now'}
+            {initialProfile.lastLoginAt
+              ? new Date(initialProfile.lastLoginAt).toLocaleString()
+              : 'Just now'}
           </strong>
         </div>
       </div>

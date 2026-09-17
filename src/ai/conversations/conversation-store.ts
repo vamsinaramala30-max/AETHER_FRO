@@ -9,20 +9,23 @@ function normalizeConversation(raw: Record<string, unknown>): AIConversation {
   return {
     id: typeof raw['id'] === 'string' ? raw['id'] : `conv_${Date.now()}`,
     title: typeof raw['title'] === 'string' ? raw['title'] : 'Untitled',
-    createdAt: typeof raw['createdAt'] === 'number'
-      ? raw['createdAt']
-      : typeof raw['created_at'] === 'number'
-        ? raw['created_at']
-        : Date.now(),
-    updatedAt: typeof raw['updatedAt'] === 'number'
-      ? raw['updatedAt']
-      : typeof raw['updated_at'] === 'number'
-        ? raw['updated_at']
-        : Date.now(),
+    createdAt:
+      typeof raw['createdAt'] === 'number'
+        ? raw['createdAt']
+        : typeof raw['created_at'] === 'number'
+          ? raw['created_at']
+          : Date.now(),
+    updatedAt:
+      typeof raw['updatedAt'] === 'number'
+        ? raw['updatedAt']
+        : typeof raw['updated_at'] === 'number'
+          ? raw['updated_at']
+          : Date.now(),
     messages: [],
-    metadata: typeof raw['metadata'] === 'object' && raw['metadata'] !== null
-      ? (raw['metadata'] as AIConversation['metadata'])
-      : {},
+    metadata:
+      typeof raw['metadata'] === 'object' && raw['metadata'] !== null
+        ? (raw['metadata'] as AIConversation['metadata'])
+        : {},
     draft: typeof raw['draft'] === 'string' ? raw['draft'] : undefined,
   };
 }
@@ -45,7 +48,11 @@ export class ConversationStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot load conversations.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot load conversations.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -58,7 +65,11 @@ export class ConversationStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot fetch conversation.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot fetch conversation.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -71,20 +82,30 @@ export class ConversationStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot create conversation.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot create conversation.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
 
   async rename(id: string, title: string): Promise<AIResult<AIConversation>> {
     try {
-      const res = await apiClient.patch<any>(`/ai/conversations/${encodeURIComponent(id)}`, { title });
+      const res = await apiClient.patch<any>(`/ai/conversations/${encodeURIComponent(id)}`, {
+        title,
+      });
       const raw = res?.data || res;
       return { success: true, data: normalizeConversation(raw) };
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot rename conversation.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot rename conversation.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -96,7 +117,11 @@ export class ConversationStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot delete conversation.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot delete conversation.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -104,4 +129,3 @@ export class ConversationStore {
 
 export { normalizeConversation };
 export const conversationStore = new ConversationStore();
-

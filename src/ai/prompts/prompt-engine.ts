@@ -25,10 +25,14 @@ export class PromptEngine {
       if (!res.ok) {
         return {
           success: false,
-          error: { code: 'INTERNAL_ERROR', message: 'Failed to load prompts.', timestamp: Date.now() },
+          error: {
+            code: 'INTERNAL_ERROR',
+            message: 'Failed to load prompts.',
+            timestamp: Date.now(),
+          },
         };
       }
-      const raw = await res.json() as unknown[];
+      const raw = (await res.json()) as unknown[];
       return {
         success: true,
         data: raw
@@ -38,7 +42,11 @@ export class PromptEngine {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot load prompts.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot load prompts.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -56,12 +64,16 @@ export class PromptEngine {
           error: { code: 'INTERNAL_ERROR', message: 'Prompt not found.', timestamp: Date.now() },
         };
       }
-      const raw = await res.json() as Record<string, unknown>;
+      const raw = (await res.json()) as Record<string, unknown>;
       return { success: true, data: normalizePromptTemplate(raw) };
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot fetch prompt.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot fetch prompt.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -78,12 +90,14 @@ function normalizePromptTemplate(raw: Record<string, unknown>): PromptTemplate {
       ? raw['variables'].flatMap((v) => {
           if (typeof v !== 'object' || v === null) return [];
           const vr = v as Record<string, unknown>;
-          return [{
-            name: typeof vr['name'] === 'string' ? vr['name'] : '',
-            description: typeof vr['description'] === 'string' ? vr['description'] : undefined,
-            required: vr['required'] === true,
-            defaultValue: typeof vr['default'] === 'string' ? vr['default'] : undefined,
-          }];
+          return [
+            {
+              name: typeof vr['name'] === 'string' ? vr['name'] : '',
+              description: typeof vr['description'] === 'string' ? vr['description'] : undefined,
+              required: vr['required'] === true,
+              defaultValue: typeof vr['default'] === 'string' ? vr['default'] : undefined,
+            },
+          ];
         })
       : [],
     createdAt: typeof raw['created_at'] === 'number' ? raw['created_at'] : Date.now(),

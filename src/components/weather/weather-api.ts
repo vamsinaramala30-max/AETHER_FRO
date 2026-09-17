@@ -12,7 +12,7 @@ import {
   FORECAST_LIMITS,
   HOURLY_PARAMS,
   TIMINGS,
-} from "./weather-constants";
+} from './weather-constants';
 import type {
   AirQuality,
   ApiResult,
@@ -20,7 +20,7 @@ import type {
   GeocodingResult,
   WeatherData,
   WeatherLocation,
-} from "./weather-types";
+} from './weather-types';
 
 /* -------------------------------------------------------------------------- */
 /* In-memory response cache (per lat/lon, short-lived)                        */
@@ -38,20 +38,20 @@ function cacheKey(latitude: number, longitude: number): string {
 }
 
 function getFriendlyErrorMessage(error: unknown): string {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return "aborted";
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return 'aborted';
   }
   if (error instanceof TypeError) {
-    return "Unable to reach the weather service. Check your connection.";
+    return 'Unable to reach the weather service. Check your connection.';
   }
-  return "Something went wrong. Please try again.";
+  return 'Something went wrong. Please try again.';
 }
 
 /* -------------------------------------------------------------------------- */
 /* Device location                                                             */
 /* -------------------------------------------------------------------------- */
 
-export type GeolocationErrorKind = "denied" | "unavailable" | "unsupported" | "timeout";
+export type GeolocationErrorKind = 'denied' | 'unavailable' | 'unsupported' | 'timeout';
 
 export interface GeolocationFailure {
   kind: GeolocationErrorKind;
@@ -63,10 +63,10 @@ export function getCurrentPosition(): Promise<
   { ok: true; coords: GeoCoordinates } | { ok: false; error: GeolocationFailure }
 > {
   return new Promise((resolve) => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       resolve({
         ok: false,
-        error: { kind: "unsupported", message: "Your browser does not support location services." },
+        error: { kind: 'unsupported', message: 'Your browser does not support location services.' },
       });
       return;
     }
@@ -85,17 +85,17 @@ export function getCurrentPosition(): Promise<
         if (error.code === error.PERMISSION_DENIED) {
           resolve({
             ok: false,
-            error: { kind: "denied", message: "Location permission was denied." },
+            error: { kind: 'denied', message: 'Location permission was denied.' },
           });
         } else if (error.code === error.TIMEOUT) {
           resolve({
             ok: false,
-            error: { kind: "timeout", message: "Locating your position took too long." },
+            error: { kind: 'timeout', message: 'Locating your position took too long.' },
           });
         } else {
           resolve({
             ok: false,
-            error: { kind: "unavailable", message: "Unable to access your location." },
+            error: { kind: 'unavailable', message: 'Unable to access your location.' },
           });
         }
       },
@@ -103,7 +103,7 @@ export function getCurrentPosition(): Promise<
         enableHighAccuracy: false,
         timeout: TIMINGS.GEOLOCATION_TIMEOUT_MS,
         maximumAge: TIMINGS.GEOLOCATION_MAX_AGE_MS,
-      }
+      },
     );
   });
 }
@@ -123,27 +123,27 @@ interface BigDataCloudReverseResponse {
 export async function reverseGeocode(
   latitude: number,
   longitude: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<ApiResult<WeatherLocation>> {
   try {
     const url = new URL(API.REVERSE_GEOCODE);
-    url.searchParams.set("latitude", String(latitude));
-    url.searchParams.set("longitude", String(longitude));
-    url.searchParams.set("localityLanguage", "en");
+    url.searchParams.set('latitude', String(latitude));
+    url.searchParams.set('longitude', String(longitude));
+    url.searchParams.set('localityLanguage', 'en');
 
     const response = await fetch(url.toString(), { signal });
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
     if (!response.ok) {
       // Reverse geocoding failing shouldn't block showing weather.
       return {
         ok: true,
-        data: { latitude, longitude, name: "Current Location", timezone },
+        data: { latitude, longitude, name: 'Current Location', timezone },
       };
     }
 
     const json = (await response.json()) as BigDataCloudReverseResponse;
-    const name = json.city || json.locality || "Current Location";
+    const name = json.city || json.locality || 'Current Location';
 
     return {
       ok: true,
@@ -158,12 +158,12 @@ export async function reverseGeocode(
       },
     };
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return { ok: false, error: "aborted", aborted: true };
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { ok: false, error: 'aborted', aborted: true };
     }
     // Non-fatal: fall back to a generic label rather than blocking weather.
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-    return { ok: true, data: { latitude, longitude, name: "Current Location", timezone } };
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    return { ok: true, data: { latitude, longitude, name: 'Current Location', timezone } };
   }
 }
 
@@ -188,7 +188,7 @@ interface OpenMeteoGeocodingResponse {
 
 export async function searchLocations(
   query: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<ApiResult<GeocodingResult[]>> {
   const trimmed = query.trim();
   if (trimmed.length < 2) {
@@ -197,14 +197,14 @@ export async function searchLocations(
 
   try {
     const url = new URL(API.GEOCODING);
-    url.searchParams.set("name", trimmed);
-    url.searchParams.set("count", String(FORECAST_LIMITS.GEOCODING_RESULTS));
-    url.searchParams.set("language", "en");
-    url.searchParams.set("format", "json");
+    url.searchParams.set('name', trimmed);
+    url.searchParams.set('count', String(FORECAST_LIMITS.GEOCODING_RESULTS));
+    url.searchParams.set('language', 'en');
+    url.searchParams.set('format', 'json');
 
     const response = await fetch(url.toString(), { signal });
     if (!response.ok) {
-      return { ok: false, error: "Unable to find this city." };
+      return { ok: false, error: 'Unable to find this city.' };
     }
 
     const json = (await response.json()) as OpenMeteoGeocodingResponse;
@@ -221,8 +221,8 @@ export async function searchLocations(
 
     return { ok: true, data: results };
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return { ok: false, error: "aborted", aborted: true };
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { ok: false, error: 'aborted', aborted: true };
     }
     return { ok: false, error: getFriendlyErrorMessage(error) };
   }
@@ -273,27 +273,29 @@ interface OpenMeteoForecastResponse {
 export async function fetchWeather(
   latitude: number,
   longitude: number,
-  signal?: AbortSignal
-): Promise<ApiResult<Omit<WeatherData, "location" | "airQuality" | "fetchedAt"> & { timezone: string }>> {
+  signal?: AbortSignal,
+): Promise<
+  ApiResult<Omit<WeatherData, 'location' | 'airQuality' | 'fetchedAt'> & { timezone: string }>
+> {
   try {
     const url = new URL(API.FORECAST);
-    url.searchParams.set("latitude", String(latitude));
-    url.searchParams.set("longitude", String(longitude));
-    url.searchParams.set("current", CURRENT_PARAMS);
-    url.searchParams.set("hourly", HOURLY_PARAMS);
-    url.searchParams.set("daily", DAILY_PARAMS);
-    url.searchParams.set("timezone", "auto");
-    url.searchParams.set("forecast_days", "8");
+    url.searchParams.set('latitude', String(latitude));
+    url.searchParams.set('longitude', String(longitude));
+    url.searchParams.set('current', CURRENT_PARAMS);
+    url.searchParams.set('hourly', HOURLY_PARAMS);
+    url.searchParams.set('daily', DAILY_PARAMS);
+    url.searchParams.set('timezone', 'auto');
+    url.searchParams.set('forecast_days', '8');
 
     const response = await fetch(url.toString(), { signal });
     if (!response.ok) {
-      return { ok: false, error: "Weather data is currently unavailable." };
+      return { ok: false, error: 'Weather data is currently unavailable.' };
     }
 
     const json = (await response.json()) as OpenMeteoForecastResponse;
 
     if (!json.current || !json.hourly || !json.daily) {
-      return { ok: false, error: "Weather data is currently unavailable." };
+      return { ok: false, error: 'Weather data is currently unavailable.' };
     }
 
     const current = {
@@ -306,7 +308,11 @@ export async function fetchWeather(
       windDirectionDeg: json.current.wind_direction_10m ?? null,
       pressureHpa: json.current.surface_pressure ?? null,
       // Visibility/UV are hourly-only in Open-Meteo; take the slot matching "now".
-      visibilityMeters: findHourlyValueForNow(json.hourly.time, json.hourly.visibility, json.current.time),
+      visibilityMeters: findHourlyValueForNow(
+        json.hourly.time,
+        json.hourly.visibility,
+        json.current.time,
+      ),
       uvIndex: findHourlyValueForNow(json.hourly.time, json.hourly.uv_index, json.current.time),
       time: json.current.time,
     };
@@ -342,8 +348,8 @@ export async function fetchWeather(
 
     return { ok: true, data: { current, hourly, daily, timezone: json.timezone } };
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return { ok: false, error: "aborted", aborted: true };
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { ok: false, error: 'aborted', aborted: true };
     }
     return { ok: false, error: getFriendlyErrorMessage(error) };
   }
@@ -352,13 +358,13 @@ export async function fetchWeather(
 function findHourlyValueForNow(
   times: string[],
   values: number[] | undefined,
-  nowIso: string
+  nowIso: string,
 ): number | null {
   if (!values || values.length === 0) return null;
   let index = times.findIndex((t) => t >= nowIso);
   if (index === -1) index = 0;
   const value = values[index];
-  return typeof value === "number" && !Number.isNaN(value) ? value : null;
+  return typeof value === 'number' && !Number.isNaN(value) ? value : null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -380,23 +386,23 @@ interface OpenMeteoAirQualityResponse {
 export async function fetchAirQuality(
   latitude: number,
   longitude: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<ApiResult<AirQuality>> {
   try {
     const url = new URL(API.AIR_QUALITY);
-    url.searchParams.set("latitude", String(latitude));
-    url.searchParams.set("longitude", String(longitude));
-    url.searchParams.set("current", AIR_QUALITY_PARAMS);
-    url.searchParams.set("timezone", "auto");
+    url.searchParams.set('latitude', String(latitude));
+    url.searchParams.set('longitude', String(longitude));
+    url.searchParams.set('current', AIR_QUALITY_PARAMS);
+    url.searchParams.set('timezone', 'auto');
 
     const response = await fetch(url.toString(), { signal });
-    if (!response.ok || !response.headers.get("content-type")?.includes("json")) {
-      return { ok: false, error: "Air quality data is unavailable." };
+    if (!response.ok || !response.headers.get('content-type')?.includes('json')) {
+      return { ok: false, error: 'Air quality data is unavailable.' };
     }
 
     const json = (await response.json()) as OpenMeteoAirQualityResponse;
     if (!json.current) {
-      return { ok: false, error: "Air quality data is unavailable." };
+      return { ok: false, error: 'Air quality data is unavailable.' };
     }
 
     return {
@@ -412,10 +418,10 @@ export async function fetchAirQuality(
       },
     };
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return { ok: false, error: "aborted", aborted: true };
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { ok: false, error: 'aborted', aborted: true };
     }
-    return { ok: false, error: "Air quality data is unavailable." };
+    return { ok: false, error: 'Air quality data is unavailable.' };
   }
 }
 
@@ -426,7 +432,7 @@ export async function fetchAirQuality(
 export async function fetchWeatherBundle(
   location: WeatherLocation,
   signal?: AbortSignal,
-  options: { skipCache?: boolean } = {}
+  options: { skipCache?: boolean } = {},
 ): Promise<ApiResult<WeatherData>> {
   const key = cacheKey(location.latitude, location.longitude);
   const cached = weatherCache.get(key);
@@ -441,7 +447,7 @@ export async function fetchWeatherBundle(
 
   if (!weatherResult.ok) {
     return weatherResult.aborted
-      ? { ok: false, error: "aborted", aborted: true }
+      ? { ok: false, error: 'aborted', aborted: true }
       : { ok: false, error: weatherResult.error };
   }
 

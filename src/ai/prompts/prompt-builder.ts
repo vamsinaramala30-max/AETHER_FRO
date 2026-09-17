@@ -9,10 +9,7 @@ import type { PromptTemplate, BuiltPrompt } from '../ai-types';
 /**
  * Substitute variables in a prompt template string.
  */
-export function substituteVariables(
-  template: string,
-  variables: Record<string, string>,
-): string {
+export function substituteVariables(template: string, variables: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
     return variables[key] ?? `{{${key}}}`;
   });

@@ -41,7 +41,8 @@ export const notesService = {
   async saveNote(
     note: Omit<Note, 'createdAt' | 'updatedAt' | 'userId'> & { createdAt?: string; id?: string },
   ): Promise<Note> {
-    const isUpdate = typeof note.id === 'string' && note.id.trim() !== '' && !note.id.startsWith('note-temp');
+    const isUpdate =
+      typeof note.id === 'string' && note.id.trim() !== '' && !note.id.startsWith('note-temp');
 
     try {
       if (isUpdate) {
@@ -121,4 +122,3 @@ export const notesService = {
     triggerActivityUpdate();
   },
 };
-

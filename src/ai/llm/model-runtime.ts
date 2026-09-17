@@ -32,7 +32,8 @@ export function buildModelRuntimeInfo(raw: Record<string, unknown>): ModelRuntim
     loadedModels: Array.isArray(raw['loaded_models']) ? (raw['loaded_models'] as string[]) : [],
     maxConcurrentRequests: typeof raw['max_concurrent'] === 'number' ? raw['max_concurrent'] : 1,
     activeRequests: typeof raw['active_requests'] === 'number' ? raw['active_requests'] : 0,
-    lastHealthCheckAt: typeof raw['last_health_check'] === 'number' ? raw['last_health_check'] : undefined,
+    lastHealthCheckAt:
+      typeof raw['last_health_check'] === 'number' ? raw['last_health_check'] : undefined,
   };
 }
 
@@ -50,12 +51,19 @@ export function isModelReady(model: AIModelInfo, runtime: ModelRuntimeInfo | nul
  */
 export function getModelStatusLabel(status: ModelStatus): string {
   switch (status) {
-    case 'available': return 'Available';
-    case 'loading': return 'Loading…';
-    case 'loaded': return 'Loaded';
-    case 'unloading': return 'Unloading…';
-    case 'unavailable': return 'Unavailable';
-    case 'error': return 'Error';
-    default: return 'Unknown';
+    case 'available':
+      return 'Available';
+    case 'loading':
+      return 'Loading…';
+    case 'loaded':
+      return 'Loaded';
+    case 'unloading':
+      return 'Unloading…';
+    case 'unavailable':
+      return 'Unavailable';
+    case 'error':
+      return 'Error';
+    default:
+      return 'Unknown';
   }
 }

@@ -2,7 +2,13 @@
 // AETHER AI — Agent Types
 // ============================================================================
 
-export type { AgentStatus, AgentStepType, AgentStep, AgentDefinition, AgentSession } from '../ai-types';
+export type {
+  AgentStatus,
+  AgentStepType,
+  AgentStep,
+  AgentDefinition,
+  AgentSession,
+} from '../ai-types';
 
 /**
  * Safe display labels for agent states.

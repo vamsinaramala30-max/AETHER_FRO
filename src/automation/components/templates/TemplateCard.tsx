@@ -45,8 +45,10 @@ export const TemplateCard: React.FC<Props> = ({ template, onUseTemplate, onViewD
           )}
         </div>
 
-        <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">{template.title}</h3>
-        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-3">
+        <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
+          {template.title}
+        </h3>
+        <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
           {template.description}
         </p>
       </div>
@@ -54,7 +56,9 @@ export const TemplateCard: React.FC<Props> = ({ template, onUseTemplate, onViewD
       <div className="mt-5 border-t border-slate-100 pt-3 dark:border-slate-800">
         <div className="flex items-center justify-between text-xs text-slate-400">
           <span>Saves {template.estimatedTimeSaved}</span>
-          <span className="font-semibold text-amber-600 dark:text-amber-400">{template.popularity}% match</span>
+          <span className="font-semibold text-amber-600 dark:text-amber-400">
+            {template.popularity}% match
+          </span>
         </div>
         <div className="mt-3 flex items-center gap-2">
           <Button

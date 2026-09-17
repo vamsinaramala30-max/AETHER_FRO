@@ -46,7 +46,8 @@ export const PrivacyPage: React.FC = () => {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-zinc-300 sm:text-lg">
-              At AETHER, data privacy is not a compliance checkbox—it is a core design constraint embedded directly into our system architecture.
+              At AETHER, data privacy is not a compliance checkbox—it is a core design constraint
+              embedded directly into our system architecture.
             </p>
           </div>
 
@@ -55,7 +56,7 @@ export const PrivacyPage: React.FC = () => {
             {PRIVACY_PILLARS.map((pillar) => (
               <div
                 key={pillar.title}
-                className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-8 backdrop-blur-xl transition-colors hover:border-indigo-500/30"
+                className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 backdrop-blur-xl transition-colors hover:border-indigo-500/30 sm:p-8"
               >
                 <h3 className="text-xl font-bold text-white">{pillar.title}</h3>
                 <p className="mt-3 text-xs leading-relaxed text-zinc-400">{pillar.desc}</p>
@@ -69,7 +70,8 @@ export const PrivacyPage: React.FC = () => {
               Looking for our formal legal privacy policy?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-zinc-300">
-              Read our comprehensive Privacy Policy document covering data collection categories, user rights, cookies, third-party sub-processors, and legal disclosures.
+              Read our comprehensive Privacy Policy document covering data collection categories,
+              user rights, cookies, third-party sub-processors, and legal disclosures.
             </p>
             <div className="mt-6">
               <Link

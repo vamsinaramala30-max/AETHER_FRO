@@ -2,12 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { AutomationRule, AutomationStatus } from '../automation-types';
 import { automationService } from '../services/automation-service';
 
-export function useAutomations(initialFilter: { search?: string; status?: 'ALL' | AutomationStatus } = {}) {
+export function useAutomations(
+  initialFilter: { search?: string; status?: 'ALL' | AutomationStatus } = {},
+) {
   const [automations, setAutomations] = useState<AutomationRule[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>(initialFilter.search || '');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | AutomationStatus>(initialFilter.status || 'ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | AutomationStatus>(
+    initialFilter.status || 'ALL',
+  );
 
   const refreshAutomations = useCallback(async () => {
     setIsLoading(true);

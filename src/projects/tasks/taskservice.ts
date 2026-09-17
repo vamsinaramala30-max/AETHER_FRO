@@ -44,7 +44,9 @@ const mapStatusFromApi = (status?: string): Task['status'] => {
   return 'todo';
 };
 
-const mapPriorityToApi = (priority?: Task['priority']): 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' | undefined => {
+const mapPriorityToApi = (
+  priority?: Task['priority'],
+): 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' | undefined => {
   if (!priority) return undefined;
   return priority.toUpperCase() as any;
 };
@@ -122,4 +124,3 @@ export const taskService = {
     await tasksApi.delete(id);
   },
 };
-

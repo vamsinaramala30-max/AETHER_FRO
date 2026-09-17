@@ -10,9 +10,7 @@ import { memoryEngine } from './memory-engine';
 /**
  * Load all conversation-scoped memory entries.
  */
-export async function loadConversationMemory(
-  conversationId: string,
-): Promise<MemoryEntry[]> {
+export async function loadConversationMemory(conversationId: string): Promise<MemoryEntry[]> {
   const result = await memoryEngine.list('conversation');
   if (!result.success) return [];
   return result.data.filter((e) => e.conversationId === conversationId);

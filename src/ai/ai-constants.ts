@@ -34,11 +34,15 @@ export const AI_PANEL_LABELS: Record<AIPanel, string> = {
 
 export const THINKING_STATUS_LABELS: Record<ThinkingStatus, string> = {
   idle: '',
-  thinking: 'Thinking…',
-  retrieving: 'Retrieving context…',
-  generating: 'Generating response…',
-  using_tool: 'Using tool…',
-  planning: 'Planning…',
+  analyzing: 'Understanding your request…',
+  thinking: 'Reasoning…',
+  retrieving: 'Checking relevant context…',
+  planning: 'Preparing a plan…',
+  waiting_confirmation: 'Waiting for your confirmation…',
+  executing_action: 'Executing action…',
+  verifying: 'Verifying the result…',
+  generating: 'Preparing response…',
+  using_tool: 'Executing tool…',
 };
 
 // ---------------------------------------------------------------------------
@@ -62,6 +66,11 @@ export const AI_ERROR_MESSAGES: Record<AIErrorCode, string> = {
   CANCELLED: 'Generation was cancelled.',
   SERVICE_UNAVAILABLE: 'The AETHER AI service is currently unreachable.',
   INTERNAL_ERROR: 'An unexpected error occurred. Please try again.',
+  VERIFICATION_FAILED: 'Action verification failed safety constraints. Operation aborted safely.',
+  PLANNING_FAILED: 'Could not generate a viable execution plan for this goal.',
+  RATE_LIMIT: 'Too many requests. Please wait a moment before trying again.',
+  QUOTA_EXCEEDED: 'AI usage limit reached. Please check your workspace quota.',
+  UNKNOWN_ERROR: 'An unexpected error occurred. Please try again.',
 };
 
 // ---------------------------------------------------------------------------

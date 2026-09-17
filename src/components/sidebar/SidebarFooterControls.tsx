@@ -10,9 +10,7 @@ interface SidebarFooterControlsProps {
   isMobile?: boolean;
 }
 
-export const SidebarFooterControls: React.FC<
-  SidebarFooterControlsProps
-> = ({
+export const SidebarFooterControls: React.FC<SidebarFooterControlsProps> = ({
   collapsed,
   onWeatherOpen,
   onNotificationsOpen,
@@ -53,9 +51,7 @@ export const SidebarFooterControls: React.FC<
           {/* Theme */}
           <button
             type="button"
-            onClick={() =>
-              setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-            }
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             aria-label="Toggle Theme"
             title="Toggle Theme"
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-aether-border bg-aether-subtle text-aether-muted transition-colors hover:bg-aether-hover hover:text-aether-main"
@@ -109,9 +105,7 @@ export const SidebarFooterControls: React.FC<
         {/* Theme */}
         <button
           type="button"
-          onClick={() =>
-            setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-          }
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           aria-label="Toggle Theme"
           title="Toggle Theme"
           className="flex h-11 w-11 items-center justify-center rounded-xl border border-aether-border bg-aether-subtle text-aether-muted transition-all duration-200 hover:bg-aether-hover hover:text-aether-main hover:shadow-sm"

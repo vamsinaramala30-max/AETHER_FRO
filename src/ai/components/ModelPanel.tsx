@@ -41,7 +41,10 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
     }`}
   >
     <div className="flex items-start gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-700/60 text-xs font-bold text-slate-300" aria-hidden="true">
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-700/60 text-xs font-bold text-slate-300"
+        aria-hidden="true"
+      >
         {model.runtime === 'local' ? '⚡' : '🌐'}
       </div>
       <div className="min-w-0 flex-1">
@@ -54,7 +57,10 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
           )}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5">
-          <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT_COLORS[model.status]}`} aria-hidden="true" />
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT_COLORS[model.status]}`}
+            aria-hidden="true"
+          />
           <span className={`text-[10px] ${STATUS_COLORS[model.status]}`}>
             {getModelStatusLabel(model.status)}
           </span>
@@ -105,7 +111,8 @@ ModelCard.displayName = 'ModelCard';
  * ModelPanel — Displays available models, active model, and status.
  */
 export const ModelPanel = memo(() => {
-  const { availableModels, activeModel, isLoading, setActiveModel, requestLoadModel, loadModels } = useModel();
+  const { availableModels, activeModel, isLoading, setActiveModel, requestLoadModel, loadModels } =
+    useModel();
 
   return (
     <section className="flex flex-col gap-4" aria-labelledby="model-panel-heading">
@@ -128,14 +135,21 @@ export const ModelPanel = memo(() => {
             strokeWidth={2}
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
           </svg>
         </button>
       </div>
 
       {isLoading && availableModels.length === 0 ? (
         <div className="py-8 text-center">
-          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-400" aria-label="Loading models" />
+          <div
+            className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-400"
+            aria-label="Loading models"
+          />
         </div>
       ) : availableModels.length === 0 ? (
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 p-6 text-center">

@@ -7,7 +7,11 @@ interface Props {
   onOpenBuilder: () => void;
 }
 
-export const QuickActions: React.FC<Props> = ({ onOpenQuickAi, onOpenTemplates, onOpenBuilder }) => {
+export const QuickActions: React.FC<Props> = ({
+  onOpenQuickAi,
+  onOpenTemplates,
+  onOpenBuilder,
+}) => {
   const actions = [
     {
       title: 'Daily Planning Briefing',
@@ -18,14 +22,16 @@ export const QuickActions: React.FC<Props> = ({ onOpenQuickAi, onOpenTemplates, 
     },
     {
       title: 'Browse Ready Templates',
-      description: 'Choose pre-built workflows for tasks, projects, document indexing, and AI digests.',
+      description:
+        'Choose pre-built workflows for tasks, projects, document indexing, and AI digests.',
       icon: BookOpen,
       color: 'from-sky-500/10 to-indigo-500/10 text-sky-600 dark:text-sky-400',
       action: onOpenTemplates,
     },
     {
       title: 'Custom Workflow Canvas',
-      description: 'Build multi-step logic linking triggers, condition rules, and AI workspace actions.',
+      description:
+        'Build multi-step logic linking triggers, condition rules, and AI workspace actions.',
       icon: Sliders,
       color: 'from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400',
       action: onOpenBuilder,

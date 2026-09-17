@@ -88,7 +88,7 @@ export interface AIConfig {
 const BACKEND_BASE_URL =
   (typeof import.meta !== 'undefined' && (import.meta as unknown as Record<string, unknown>).env
     ? ((import.meta as unknown as { env: Record<string, string> }).env['VITE_API_BASE_URL'] ?? '')
-    : '') || 'http://localhost:8000';
+    : '') || 'http://localhost:5001/api/v1';
 
 export const DEFAULT_AI_CONFIG: AIConfig = {
   backend: {
@@ -98,8 +98,8 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
     chatPath: '/ai/chat',
     modelsPath: '/ai/models',
     memoryPath: '/ai/memory',
-    knowledgePath: '/ai/knowledge',
-    agentPath: '/ai/agents',
+    knowledgePath: '/knowledge',
+    agentPath: '/ai/agent',
     toolsPath: '/ai/tools',
     promptsPath: '/ai/prompts',
     healthPath: '/ai/health',

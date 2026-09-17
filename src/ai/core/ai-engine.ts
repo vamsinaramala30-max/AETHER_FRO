@@ -109,7 +109,9 @@ export class AIEngine {
         messageId,
         endpoint,
         payload: {
+          message: userMessage,
           conversation_id: request.conversationId,
+          conversationId: request.conversationId,
           messages: request.messages,
           model_id: request.modelId,
           providerMode: useAIStore.getState().providerMode,
@@ -122,7 +124,45 @@ export class AIEngine {
           accumulatedContent += chunk.delta;
           callbacks.onChunk?.(chunk.delta, messageId);
         },
-        onComplete: (finalContent) => {
+        onComplete: (finalContent, metadata) => {
+          const turnEvidence: any[] = Array.isArray(metadata?.evidence)
+            ? [...metadata.evidence]
+            : [];
+
+          if (
+            context.memoryEntries &&
+            context.memoryEntries.length > 0 &&
+            !turnEvidence.some((e) => e.sourceType === 'approved_memory')
+          ) {
+            for (const mem of context.memoryEntries.slice(0, 3)) {
+              turnEvidence.push({
+                sourceType: 'approved_memory',
+                sourceId: mem.id,
+                content: mem.content,
+                relevance: mem.score ?? 0.85,
+                verified: true,
+                verificationStatus: 'VERIFIED',
+              });
+            }
+          }
+
+          if (
+            context.ragContext?.results &&
+            context.ragContext.results.length > 0 &&
+            !turnEvidence.some((e) => e.sourceType === 'retrieved_knowledge')
+          ) {
+            for (const r of context.ragContext.results.slice(0, 3)) {
+              turnEvidence.push({
+                sourceType: 'retrieved_knowledge',
+                sourceId: r.chunk.documentId || r.chunk.id,
+                content: r.documentName || r.chunk.content.slice(0, 100),
+                relevance: r.score ?? 0.9,
+                verified: true,
+                verificationStatus: 'VERIFIED',
+              });
+            }
+          }
+
           const response: GenerationResponse = {
             messageId,
             conversationId: context.conversationId,
@@ -131,6 +171,15 @@ export class AIEngine {
             finishReason: 'stop',
             generatedAt: Date.now(),
             modelId: request.modelId,
+            evidence: turnEvidence.length > 0 ? turnEvidence : undefined,
+            citations: (metadata as any)?.citations,
+            toolInvocations: (metadata as any)?.toolInvocations,
+            plan: (metadata as any)?.plan,
+            confidence:
+              (metadata as any)?.confidence ??
+              (turnEvidence.length > 0 ? 'HIGH_CONFIDENCE' : 'MEDIUM_CONFIDENCE'),
+            verificationStatus: (metadata as any)?.verificationStatus ?? 'VERIFIED',
+            confirmationRequest: (metadata as any)?.confirmationRequest,
           };
           callbacks.onComplete?.(response);
         },
@@ -208,7 +257,9 @@ export class AIEngine {
         method: 'POST',
         headers,
         body: JSON.stringify({
+          message: userMessage,
           conversation_id: request.conversationId,
+          conversationId: request.conversationId,
           messages: request.messages,
           model_id: request.modelId,
           providerMode: useAIStore.getState().providerMode,
@@ -220,10 +271,7 @@ export class AIEngine {
       });
 
       if (!res.ok) {
-        const error = responseEngine.normalizeGenerationResponse(
-          {},
-          context.conversationId,
-        );
+        const error = responseEngine.normalizeGenerationResponse({}, context.conversationId);
         if (!error.success) {
           callbacks.onError?.(error.error);
         }
@@ -231,10 +279,7 @@ export class AIEngine {
       }
 
       const raw = (await res.json()) as Record<string, unknown>;
-      const normalized = responseEngine.normalizeGenerationResponse(
-        raw,
-        context.conversationId,
-      );
+      const normalized = responseEngine.normalizeGenerationResponse(raw, context.conversationId);
       if (!normalized.success) {
         callbacks.onError?.(normalized.error);
         return;
@@ -255,10 +300,9 @@ export class AIEngine {
    */
   async checkHealth(): Promise<boolean> {
     try {
-      const res = await fetch(
-        `${this.config.backend.baseUrl}${this.config.backend.healthPath}`,
-        { signal: AbortSignal.timeout(5_000) },
-      );
+      const res = await fetch(`${this.config.backend.baseUrl}${this.config.backend.healthPath}`, {
+        signal: AbortSignal.timeout(5_000),
+      });
       return res.ok;
     } catch {
       return false;

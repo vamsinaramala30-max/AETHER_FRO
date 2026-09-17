@@ -29,7 +29,9 @@ export const ConnectedAccountCard: React.FC<ConnectedAccountCardProps> = ({
       setStatusMessage(`${account.name} account disconnected.`);
     } catch (err: any) {
       setStatusType('error');
-      setStatusMessage(err?.response?.data?.error || err?.message || `Failed to disconnect ${account.name}.`);
+      setStatusMessage(
+        err?.response?.data?.error || err?.message || `Failed to disconnect ${account.name}.`,
+      );
     } finally {
       setIsProcessing(false);
       setTimeout(() => setStatusMessage(null), 5000);
@@ -44,7 +46,7 @@ export const ConnectedAccountCard: React.FC<ConnectedAccountCardProps> = ({
     <div className="space-y-2">
       <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 font-bold">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
             {account.provider === 'google' ? 'G' : account.name[0]}
           </div>
 
@@ -80,7 +82,11 @@ export const ConnectedAccountCard: React.FC<ConnectedAccountCardProps> = ({
               disabled={isProcessing}
               className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-400"
             >
-              {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unlink className="h-3.5 w-3.5" />}
+              {isProcessing ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Unlink className="h-3.5 w-3.5" />
+              )}
               <span>{isProcessing ? 'Disconnecting...' : 'Disconnect'}</span>
             </button>
           ) : (

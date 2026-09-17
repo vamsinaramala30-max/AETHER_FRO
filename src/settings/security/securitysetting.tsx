@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { securityService, UserSession } from './securityservice';
-import { Eye, EyeOff, Check, X, ShieldAlert, Monitor, Smartphone, Trash2, LogOut, AlertTriangle, Lock } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Check,
+  X,
+  ShieldAlert,
+  Monitor,
+  Smartphone,
+  Trash2,
+  LogOut,
+  AlertTriangle,
+  Lock,
+} from 'lucide-react';
 import { useAuth } from '@/app/providers/authprovider';
 
 export const SecuritySettings: React.FC = () => {
@@ -11,7 +23,9 @@ export const SecuritySettings: React.FC = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [passwordStatus, setPasswordStatus] = useState<{ success: boolean; text: string } | null>(null);
+  const [passwordStatus, setPasswordStatus] = useState<{ success: boolean; text: string } | null>(
+    null,
+  );
   const [submittingPassword, setSubmittingPassword] = useState(false);
 
   // Active Sessions state
@@ -33,7 +47,8 @@ export const SecuritySettings: React.FC = () => {
   const reqNumber = /[0-9]/.test(passwords.new);
   const reqSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(passwords.new);
   const reqMatches = passwords.new.length > 0 && passwords.new === passwords.confirm;
-  const isPasswordValid = reqMinLength && reqUppercase && reqLowercase && reqNumber && reqSpecial && reqMatches;
+  const isPasswordValid =
+    reqMinLength && reqUppercase && reqLowercase && reqNumber && reqSpecial && reqMatches;
 
   const loadSessions = () => {
     setLoadingSessions(true);
@@ -51,7 +66,10 @@ export const SecuritySettings: React.FC = () => {
   const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isPasswordValid) {
-      setPasswordStatus({ success: false, text: 'Please ensure your new password meets all security requirements.' });
+      setPasswordStatus({
+        success: false,
+        text: 'Please ensure your new password meets all security requirements.',
+      });
       return;
     }
 
@@ -65,7 +83,10 @@ export const SecuritySettings: React.FC = () => {
         setPasswords({ current: '', new: '', confirm: '' });
       })
       .catch((err: any) => {
-        const errorMsg = err?.response?.data?.error || err?.message || 'Verification failed. Please check current password.';
+        const errorMsg =
+          err?.response?.data?.error ||
+          err?.message ||
+          'Verification failed. Please check current password.';
         setPasswordStatus({ success: false, text: errorMsg });
       })
       .finally(() => {
@@ -146,7 +167,10 @@ export const SecuritySettings: React.FC = () => {
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Current Password Field */}
           <div>
-            <label htmlFor="currentPassword" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="currentPassword"
+              className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+            >
               Current Password
             </label>
             <div className="relative">
@@ -171,7 +195,10 @@ export const SecuritySettings: React.FC = () => {
 
           {/* New Password Field */}
           <div>
-            <label htmlFor="newPassword" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="newPassword"
+              className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+            >
               New Password
             </label>
             <div className="relative">
@@ -196,7 +223,10 @@ export const SecuritySettings: React.FC = () => {
 
           {/* Confirm New Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="confirmPassword"
+              className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+            >
               Confirm New Password
             </label>
             <div className="relative">
@@ -221,23 +251,65 @@ export const SecuritySettings: React.FC = () => {
 
           {/* Password Requirements Dynamic List */}
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-[11px] font-semibold text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
-            <div className={`flex items-center gap-1.5 ${reqMinLength ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqMinLength ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Minimum 8 characters
+            <div
+              className={`flex items-center gap-1.5 ${reqMinLength ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqMinLength ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Minimum 8 characters
             </div>
-            <div className={`flex items-center gap-1.5 ${reqUppercase ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqUppercase ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Uppercase letter
+            <div
+              className={`flex items-center gap-1.5 ${reqUppercase ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqUppercase ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Uppercase letter
             </div>
-            <div className={`flex items-center gap-1.5 ${reqLowercase ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqLowercase ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Lowercase letter
+            <div
+              className={`flex items-center gap-1.5 ${reqLowercase ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqLowercase ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Lowercase letter
             </div>
-            <div className={`flex items-center gap-1.5 ${reqNumber ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqNumber ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Number (0-9)
+            <div
+              className={`flex items-center gap-1.5 ${reqNumber ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqNumber ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Number (0-9)
             </div>
-            <div className={`flex items-center gap-1.5 ${reqSpecial ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqSpecial ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Special character
+            <div
+              className={`flex items-center gap-1.5 ${reqSpecial ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqSpecial ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Special character
             </div>
-            <div className={`flex items-center gap-1.5 ${reqMatches ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
-              {reqMatches ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5 opacity-50" />} Passwords match
+            <div
+              className={`flex items-center gap-1.5 ${reqMatches ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+            >
+              {reqMatches ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <X className="h-3.5 w-3.5 opacity-50" />
+              )}{' '}
+              Passwords match
             </div>
           </div>
 
@@ -276,7 +348,9 @@ export const SecuritySettings: React.FC = () => {
         )}
 
         {loadingSessions ? (
-          <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Loading active sessions...</div>
+          <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            Loading active sessions...
+          </div>
         ) : sessions.length === 0 ? (
           <p className="text-xs text-slate-500">No active sessions detected.</p>
         ) : (
@@ -328,7 +402,9 @@ export const SecuritySettings: React.FC = () => {
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-2 flex items-center gap-2">
           <ShieldAlert className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">Two-Factor Authentication (2FA)</h3>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            Two-Factor Authentication (2FA)
+          </h3>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Two-factor authentication requires additional server configuration.
@@ -342,7 +418,8 @@ export const SecuritySettings: React.FC = () => {
           <h3 className="text-base font-bold">Danger Zone — Delete Account</h3>
         </div>
         <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-          Permanently remove your account and all associated workspace records. This action cannot be undone.
+          Permanently remove your account and all associated workspace records. This action cannot
+          be undone.
         </p>
 
         <button
@@ -357,11 +434,14 @@ export const SecuritySettings: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+        <div className="backdrop-blur-xs fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Confirm Account Deletion</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+              Confirm Account Deletion
+            </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              This will permanently purge your profile, automations, and personal workspace data. Type <strong className="text-slate-900 dark:text-white">DELETE</strong> to confirm.
+              This will permanently purge your profile, automations, and personal workspace data.
+              Type <strong className="text-slate-900 dark:text-white">DELETE</strong> to confirm.
             </p>
 
             {deleteError && (

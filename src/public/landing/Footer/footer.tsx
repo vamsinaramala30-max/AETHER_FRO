@@ -38,10 +38,7 @@ export const Footer: React.FC = () => {
       aria-label="AETHER footer"
     >
       {/* Background glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 h-80 w-[32rem] -translate-x-1/2 rounded-full bg-indigo-600/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-violet-600/5 blur-3xl" />
         <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-cyan-500/5 blur-3xl" />
@@ -60,15 +57,13 @@ export const Footer: React.FC = () => {
                 <Link
                   to="/"
                   aria-label="AETHER home"
-                  className="inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#030712] rounded-xl"
+                  className="inline-flex items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#030712]"
                 >
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 shadow-lg shadow-indigo-500/10">
                     <span className="text-xl font-bold text-white">A</span>
                   </span>
 
-                  <span className="text-xl font-bold tracking-[0.3em] text-white">
-                    AETHER
-                  </span>
+                  <span className="text-xl font-bold tracking-[0.3em] text-white">AETHER</span>
                 </Link>
 
                 <h2 className="mt-6 max-w-lg text-2xl font-semibold tracking-tight text-white sm:text-3xl">
@@ -79,8 +74,8 @@ export const Footer: React.FC = () => {
                 </h2>
 
                 <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-400 sm:text-base">
-                  AETHER brings AI, productivity, knowledge, automation, and
-                  collaboration together in one intelligent platform.
+                  AETHER brings AI, productivity, knowledge, automation, and collaboration together
+                  in one intelligent platform.
                 </p>
 
                 {/* Status */}
@@ -107,8 +102,8 @@ export const Footer: React.FC = () => {
                 </h3>
 
                 <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  Reach out for product questions, technical support,
-                  partnerships, feedback, or business enquiries.
+                  Reach out for product questions, technical support, partnerships, feedback, or
+                  business enquiries.
                 </p>
 
                 <Link
@@ -193,7 +188,7 @@ const FooterColumn: React.FC<FooterColumnProps> = ({ title, links }) => {
           <li key={`${link.label}-${link.href}`}>
             <Link
               to={link.href}
-              className="text-sm text-zinc-400 transition-colors duration-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+              className="rounded text-sm text-zinc-400 transition-colors duration-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {link.label}
             </Link>

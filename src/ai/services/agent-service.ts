@@ -5,7 +5,11 @@
 import type { AgentDefinition, AgentSession, AIResult } from '../ai-types';
 import { agentEngine } from '../agents/agent-engine';
 import { agentLoop } from '../agents/agent-loop';
-import type { AgentLoopCompleteHandler, AgentLoopUpdateHandler, AgentLoopErrorHandler } from '../agents/agent-loop';
+import type {
+  AgentLoopCompleteHandler,
+  AgentLoopUpdateHandler,
+  AgentLoopErrorHandler,
+} from '../agents/agent-loop';
 
 /**
  * AgentService isolates all agent backend operations from UI components.
@@ -29,6 +33,14 @@ export class AgentService {
 
   async cancelSession(sessionId: string): Promise<AIResult<void>> {
     return agentEngine.cancelSession(sessionId);
+  }
+
+  async approveStep(sessionId: string, stepId: string): Promise<AIResult<void>> {
+    return agentEngine.approveStep(sessionId, stepId);
+  }
+
+  async provideInput(sessionId: string, stepId: string, input: Record<string, unknown>): Promise<AIResult<void>> {
+    return agentEngine.provideInput(sessionId, stepId, input);
   }
 
   /**

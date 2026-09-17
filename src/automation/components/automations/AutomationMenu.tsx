@@ -44,7 +44,7 @@ export const AutomationMenu: React.FC<Props> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-slate-200/80 bg-white py-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900 animate-in fade-in-50 zoom-in-95 duration-100">
+        <div className="animate-in fade-in-50 zoom-in-95 absolute right-0 z-20 mt-1 w-48 rounded-xl border border-slate-200/80 bg-white py-1.5 shadow-xl duration-100 dark:border-slate-800 dark:bg-slate-900">
           <button
             onClick={() => {
               setIsOpen(false);

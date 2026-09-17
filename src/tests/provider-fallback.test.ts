@@ -6,10 +6,10 @@ describe('Frontend AI Provider Fallback Store & Integration', () => {
     useAIStore.getState().resetStore();
   });
 
-  it('should initialize with auto providerMode and gemini activeProvider', () => {
+  it('should initialize with auto providerMode and aether activeProvider', () => {
     const state = useAIStore.getState();
     expect(state.providerMode).toBe('auto');
-    expect(state.activeProvider).toBe('gemini');
+    expect(state.activeProvider).toBe('aether');
     expect(state.fallbackNotice).toBeNull();
   });
 

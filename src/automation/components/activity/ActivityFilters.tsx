@@ -46,7 +46,7 @@ export const ActivityFilters: React.FC<Props> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Filter activity history by automation or trigger..."
-            className="pl-10 bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
+            className="border-slate-200/80 bg-white pl-10 dark:border-slate-800 dark:bg-slate-900"
           />
         </div>
 
@@ -70,8 +70,8 @@ export const ActivityFilters: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 pt-1 border-t border-slate-200/40 dark:border-slate-800/40 text-xs">
-        <span className="flex items-center gap-1 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">
+      <div className="flex items-center gap-2 border-t border-slate-200/40 pt-1 text-xs dark:border-slate-800/40">
+        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           <Calendar className="h-3 w-3" />
           Time Window:
         </span>
@@ -84,7 +84,7 @@ export const ActivityFilters: React.FC<Props> = ({
                 onClick={() => onDateRangeChange(d.id)}
                 className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300 font-bold border border-amber-500/30'
+                    ? 'border border-amber-500/30 bg-amber-500/10 font-bold text-amber-600 dark:bg-amber-500/20 dark:text-amber-300'
                     : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >

@@ -36,7 +36,7 @@ export const MyAutomations: React.FC<Props> = ({
   onOpenCreate,
 }) => {
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="animate-in fade-in space-y-6 duration-300">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <AutomationSearch value={searchQuery} onChange={onSearchChange} />

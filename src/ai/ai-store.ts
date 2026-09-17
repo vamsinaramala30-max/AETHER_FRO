@@ -106,6 +106,7 @@ export interface AIStoreActions {
 
   // --- Reset ---
   resetStore: () => void;
+  reset: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,7 +135,7 @@ function loadPanelPref(): AIPanel {
 
 const INITIAL_STATE: AIStoreState = {
   providerMode: 'auto',
-  activeProvider: 'gemini',
+  activeProvider: 'aether',
   fallbackNotice: null,
   providerStatuses: {},
   conversations: {},
@@ -255,9 +256,7 @@ export const useAIStore = create<AIStoreState & AIStoreActions>()(
           messages: {
             ...state.messages,
             [conversationId]: msgs.map((m) =>
-              m.id === messageId
-                ? { ...m, content: m.content + delta, updatedAt: Date.now() }
-                : m,
+              m.id === messageId ? { ...m, content: m.content + delta, updatedAt: Date.now() } : m,
             ),
           },
         };
@@ -360,5 +359,6 @@ export const useAIStore = create<AIStoreState & AIStoreActions>()(
 
     // ----- Reset -----
     resetStore: () => set({ ...INITIAL_STATE }),
+    reset: () => set({ ...INITIAL_STATE }),
   })),
 );

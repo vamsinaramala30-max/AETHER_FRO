@@ -4,7 +4,7 @@ import { documentsService } from './documentservice';
 import { DocumentCard } from './documentcard';
 import { DocumentViewer } from './documentviewer';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { FileText, FolderPlus, Plus, Search, Tag, Paperclip, X } from 'lucide-react';
+import { FileText, FolderPlus, Plus, Search, Paperclip, X } from 'lucide-react';
 import { AttachFileModal, StorageFile } from '@/shared/AttachFileModal';
 import { onActivityUpdate } from '@/shared/activityEvents';
 
@@ -102,7 +102,11 @@ export const DocumentsPage: React.FC = () => {
 
   const handleDelete = (id: string) => {
     void (async () => {
-      if (confirm('Delete this document? Attached raw files will remain safely stored in Workspace Files.')) {
+      if (
+        confirm(
+          'Delete this document? Attached raw files will remain safely stored in Workspace Files.',
+        )
+      ) {
         await documentsService.deleteDocument(id);
         if (viewingDoc?.id === id) setViewingDoc(null);
         await fetchDocs();
@@ -153,7 +157,7 @@ export const DocumentsPage: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="mt-4 relative">
+      <div className="relative mt-4">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           type="text"
@@ -175,7 +179,9 @@ export const DocumentsPage: React.FC = () => {
         ) : filteredDocs.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-12 text-center dark:border-slate-800 dark:bg-slate-900">
             <FolderPlus className="mb-3 h-10 w-10 text-slate-400" />
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No documents yet</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              No documents yet
+            </p>
             <p className="mt-1 text-xs text-slate-400">
               Create structured documents for your work in {selectedCategory}.
             </p>
@@ -190,12 +196,7 @@ export const DocumentsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredDocs.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                doc={doc}
-                onView={setViewingDoc}
-                onDelete={handleDelete}
-              />
+              <DocumentCard key={doc.id} doc={doc} onView={setViewingDoc} onDelete={handleDelete} />
             ))}
           </div>
         )}
@@ -203,8 +204,8 @@ export const DocumentsPage: React.FC = () => {
 
       {/* CREATE DOCUMENT MODAL */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm duration-150">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Create Structured Document
@@ -219,7 +220,9 @@ export const DocumentsPage: React.FC = () => {
 
             <div className="mt-4 space-y-4 text-xs font-medium">
               <div>
-                <label className="block mb-1 text-slate-600 dark:text-slate-300">Document Title</label>
+                <label className="mb-1 block text-slate-600 dark:text-slate-300">
+                  Document Title
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Monthly Q3 Progress Report"
@@ -230,7 +233,9 @@ export const DocumentsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block mb-1 text-slate-600 dark:text-slate-300">Document Category</label>
+                <label className="mb-1 block text-slate-600 dark:text-slate-300">
+                  Document Category
+                </label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
@@ -245,7 +250,9 @@ export const DocumentsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block mb-1 text-slate-600 dark:text-slate-300">Structured Content</label>
+                <label className="mb-1 block text-slate-600 dark:text-slate-300">
+                  Structured Content
+                </label>
                 <textarea
                   rows={5}
                   placeholder="Enter detailed document content, specifications, or summary..."
@@ -256,7 +263,9 @@ export const DocumentsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block mb-1 text-slate-600 dark:text-slate-300">Tags (comma separated)</label>
+                <label className="mb-1 block text-slate-600 dark:text-slate-300">
+                  Tags (comma separated)
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. report, quarterly, project"
@@ -289,13 +298,15 @@ export const DocumentsPage: React.FC = () => {
                     {attachedFiles.map((f) => (
                       <div
                         key={f.id}
-                        className="flex items-center justify-between rounded-lg bg-white p-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800"
+                        className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-800"
                       >
                         <span className="truncate text-[11px] font-semibold text-slate-800 dark:text-slate-200">
                           {f.filename}
                         </span>
                         <button
-                          onClick={() => setAttachedFiles((prev) => prev.filter((item) => item.id !== f.id))}
+                          onClick={() =>
+                            setAttachedFiles((prev) => prev.filter((item) => item.id !== f.id))
+                          }
                           className="text-red-500 hover:text-red-700"
                         >
                           <X className="h-3.5 w-3.5" />

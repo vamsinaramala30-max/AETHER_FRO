@@ -49,7 +49,7 @@ export async function retrieve(query: RetrieverQuery): Promise<AIResult<RAGConte
       };
     }
 
-    const raw = await res.json() as {
+    const raw = (await res.json()) as {
       results?: Array<Record<string, unknown>>;
       total?: number;
       rerank_applied?: boolean;
@@ -57,16 +57,18 @@ export async function retrieve(query: RetrieverQuery): Promise<AIResult<RAGConte
 
     const results: RetrievalResult[] = (raw.results ?? []).flatMap((r) => {
       if (typeof r !== 'object' || r === null) return [];
-      return [{
-        chunk: {
-          id: typeof r['chunk_id'] === 'string' ? r['chunk_id'] : '',
-          documentId: typeof r['document_id'] === 'string' ? r['document_id'] : '',
-          content: typeof r['content'] === 'string' ? r['content'] : '',
-          index: typeof r['chunk_index'] === 'number' ? r['chunk_index'] : 0,
+      return [
+        {
+          chunk: {
+            id: typeof r['chunk_id'] === 'string' ? r['chunk_id'] : '',
+            documentId: typeof r['document_id'] === 'string' ? r['document_id'] : '',
+            content: typeof r['content'] === 'string' ? r['content'] : '',
+            index: typeof r['chunk_index'] === 'number' ? r['chunk_index'] : 0,
+          },
+          score: typeof r['score'] === 'number' ? r['score'] : 0,
+          documentName: typeof r['document_name'] === 'string' ? r['document_name'] : 'Unknown',
         },
-        score: typeof r['score'] === 'number' ? r['score'] : 0,
-        documentName: typeof r['document_name'] === 'string' ? r['document_name'] : 'Unknown',
-      }];
+      ];
     });
 
     return {

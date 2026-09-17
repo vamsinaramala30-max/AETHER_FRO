@@ -14,7 +14,12 @@ export const KNOWLEDGE_TOOLS: ToolDefinition[] = [
     category: 'knowledge',
     parameters: [
       { name: 'query', type: 'string', description: 'Search query', required: true },
-      { name: 'collection_id', type: 'string', description: 'Knowledge collection ID', required: false },
+      {
+        name: 'collection_id',
+        type: 'string',
+        description: 'Knowledge collection ID',
+        required: false,
+      },
       { name: 'top_k', type: 'number', description: 'Number of results', required: false },
     ],
     requiresAuth: true,

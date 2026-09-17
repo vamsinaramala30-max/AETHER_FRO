@@ -6,7 +6,9 @@ import { triggerActivityUpdate } from '@/shared/activityEvents';
 export const documentsService = {
   async getDocuments(category?: string): Promise<DocumentItem[]> {
     try {
-      const url = category ? `/knowledge/documents?category=${encodeURIComponent(category)}` : '/knowledge/documents';
+      const url = category
+        ? `/knowledge/documents?category=${encodeURIComponent(category)}`
+        : '/knowledge/documents';
       const res = await apiClient.get<any>(url);
       const payload = res.data || res;
       const rawDocs = Array.isArray(payload) ? payload : payload?.data || [];
@@ -26,6 +28,7 @@ export const documentsService = {
           updatedAt: d.updatedAt || new Date().toISOString(),
           userId: d.ownerId || 'user',
           type: 'document',
+          status: d.status || 'READY',
         }));
         localStorage.setItem('aether_docs', JSON.stringify(formatted));
         return formatted;
@@ -82,6 +85,7 @@ export const documentsService = {
         updatedAt: d.updatedAt || new Date().toISOString(),
         userId: d.ownerId || 'user',
         type: 'document',
+        status: d.status || 'READY',
       };
     } catch {
       const docs = await this.getDocuments();
@@ -127,4 +131,3 @@ export const documentsService = {
     localStorage.setItem('aether_docs', JSON.stringify(filtered));
   },
 };
-

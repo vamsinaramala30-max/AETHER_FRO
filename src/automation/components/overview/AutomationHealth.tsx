@@ -23,13 +23,13 @@ export const AutomationHealth: React.FC<Props> = ({
           </div>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           {healthStatus}
         </span>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl bg-slate-800/60 p-4 border border-slate-700/50">
+        <div className="rounded-xl border border-slate-700/50 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
             <Cpu className="h-4 w-4 text-sky-400" />
             AI Execution Engine
@@ -38,7 +38,7 @@ export const AutomationHealth: React.FC<Props> = ({
           <p className="mt-0.5 text-xs text-slate-400">Zero cloud latency</p>
         </div>
 
-        <div className="rounded-xl bg-slate-800/60 p-4 border border-slate-700/50">
+        <div className="rounded-xl border border-slate-700/50 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
             <Activity className="h-4 w-4 text-emerald-400" />
             Execution Reliability
@@ -47,7 +47,7 @@ export const AutomationHealth: React.FC<Props> = ({
           <p className="mt-0.5 text-xs text-slate-400">Passed standard assertions</p>
         </div>
 
-        <div className="rounded-xl bg-slate-800/60 p-4 border border-slate-700/50">
+        <div className="rounded-xl border border-slate-700/50 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
             <Database className="h-4 w-4 text-amber-400" />
             Workspace Context Sync

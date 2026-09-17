@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { TRUSTED_WEBSITES } from "./trusted-websites";
-import { CATEGORY_FILTER_ALL, COUNTRIES, WEBSITE_CATEGORIES } from "./web-directory-constants";
+import { TRUSTED_WEBSITES } from './trusted-websites';
+import { CATEGORY_FILTER_ALL, COUNTRIES, WEBSITE_CATEGORIES } from './web-directory-constants';
 import type {
   CountryInfo,
   TrustedWebsite,
   WebDirectoryViewMode,
   WebsiteCategory,
-} from "./web-directory-types";
+} from './web-directory-types';
 import {
   applyWebDirectoryFilters,
   buildCountryWebsiteGroups,
@@ -21,7 +21,7 @@ import {
   searchCountries,
   toggleFavorite,
   withFavoriteMeta,
-} from "./web-directory-utils";
+} from './web-directory-utils';
 
 /**
  * Design tokens for the "verified archive" identity: a dark ledger shell
@@ -49,10 +49,10 @@ function FavoriteToggle({
   isFavorite: boolean;
   name: string;
   onToggle: () => void;
-  tone: "ink" | "paper";
+  tone: 'ink' | 'paper';
 }): React.ReactElement {
-  const activeColor = tone === "ink" ? "text-amber-400" : "text-amber-600";
-  const idleColor = tone === "ink" ? "text-[#4B5580]" : "text-[#A9936B]";
+  const activeColor = tone === 'ink' ? 'text-amber-400' : 'text-amber-600';
+  const idleColor = tone === 'ink' ? 'text-[#4B5580]' : 'text-[#A9936B]';
   return (
     <button
       type="button"
@@ -63,7 +63,7 @@ function FavoriteToggle({
         isFavorite ? activeColor : idleColor
       }`}
     >
-      {isFavorite ? "★" : "☆"}
+      {isFavorite ? '★' : '☆'}
     </button>
   );
 }
@@ -153,7 +153,9 @@ function CountryStampCard({
     <div
       id={`country-${country.code}`}
       className={`relative overflow-hidden rounded-lg border-2 border-dashed bg-[#F4EEDD] p-5 transition-shadow duration-300 ${
-        isHighlighted ? "border-[#C7A34C] shadow-[0_0_0_4px_rgba(199,163,76,0.35)]" : "border-[#C7A34C]/40"
+        isHighlighted
+          ? 'border-[#C7A34C] shadow-[0_0_0_4px_rgba(199,163,76,0.35)]'
+          : 'border-[#C7A34C]/40'
       }`}
     >
       <span
@@ -177,7 +179,7 @@ function CountryStampCard({
             <li
               key={website.id}
               className={`flex items-center justify-between gap-2 py-2 ${
-                index > 0 ? "border-t border-dashed border-[#D8CBA0]" : ""
+                index > 0 ? 'border-t border-dashed border-[#D8CBA0]' : ''
               }`}
             >
               <div className="min-w-0">
@@ -222,18 +224,18 @@ function CountryStampCard({
 function EmptyState({ label }: { label: string }): React.ReactElement {
   return (
     <div className="rounded-lg border border-dashed border-[#2A3350] px-6 py-14 text-center">
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#8B96BE]">
-        No results
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#8B96BE]">No results</p>
       <p className="mt-2 font-serif text-base text-[#F4EEDD]">{label}</p>
     </div>
   );
 }
 
 export default function WebDirectory(): React.ReactElement {
-  const [viewMode, setViewMode] = useState<WebDirectoryViewMode>(() => loadViewMode() ?? "category");
-  const [query, setQuery] = useState<string>("");
-  const [category, setCategory] = useState<WebsiteCategory | "All">(CATEGORY_FILTER_ALL);
+  const [viewMode, setViewMode] = useState<WebDirectoryViewMode>(
+    () => loadViewMode() ?? 'category',
+  );
+  const [query, setQuery] = useState<string>('');
+  const [category, setCategory] = useState<WebsiteCategory | 'All'>(CATEGORY_FILTER_ALL);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => loadFavoriteIds());
   const [recentEntries, setRecentEntries] = useState(() => loadRecentEntries());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
@@ -267,7 +269,7 @@ export default function WebDirectory(): React.ReactElement {
   );
 
   const countryGroups = useMemo(() => {
-    const matchingCountries = searchCountries(COUNTRIES, viewMode === "country" ? query : "");
+    const matchingCountries = searchCountries(COUNTRIES, viewMode === 'country' ? query : '');
     const groups = buildCountryWebsiteGroups(TRUSTED_WEBSITES, matchingCountries);
     if (!showFavoritesOnly) return groups;
     const favoriteSet = new Set(favoriteIds);
@@ -297,7 +299,7 @@ export default function WebDirectory(): React.ReactElement {
     if (!random) return;
     setHighlightedCountry(random.code);
     const target = document.getElementById(`country-${random.code}`);
-    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     if (highlightTimeout.current) {
       clearTimeout(highlightTimeout.current);
     }
@@ -334,27 +336,27 @@ export default function WebDirectory(): React.ReactElement {
       <div className="mt-6 flex border-b border-[#2A3350]">
         <button
           type="button"
-          onClick={() => handleViewModeChange("category")}
-          aria-pressed={viewMode === "category"}
+          onClick={() => handleViewModeChange('category')}
+          aria-pressed={viewMode === 'category'}
           className={`relative rounded-t px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C] ${
-            viewMode === "category" ? "text-[#F4EEDD]" : "text-[#6B76A0] hover:text-[#B7C0DE]"
+            viewMode === 'category' ? 'text-[#F4EEDD]' : 'text-[#6B76A0] hover:text-[#B7C0DE]'
           }`}
         >
           By category
-          {viewMode === "category" && (
+          {viewMode === 'category' && (
             <span className="absolute inset-x-0 -bottom-px h-0.5 bg-[#C7A34C]" />
           )}
         </button>
         <button
           type="button"
-          onClick={() => handleViewModeChange("country")}
-          aria-pressed={viewMode === "country"}
+          onClick={() => handleViewModeChange('country')}
+          aria-pressed={viewMode === 'country'}
           className={`relative rounded-t px-4 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A34C] ${
-            viewMode === "country" ? "text-[#F4EEDD]" : "text-[#6B76A0] hover:text-[#B7C0DE]"
+            viewMode === 'country' ? 'text-[#F4EEDD]' : 'text-[#6B76A0] hover:text-[#B7C0DE]'
           }`}
         >
           By country
-          {viewMode === "country" && (
+          {viewMode === 'country' && (
             <span className="absolute inset-x-0 -bottom-px h-0.5 bg-[#C7A34C]" />
           )}
         </button>
@@ -367,17 +369,17 @@ export default function WebDirectory(): React.ReactElement {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={
-            viewMode === "category"
-              ? "Search by name, description, or category"
-              : "Search by country name"
+            viewMode === 'category'
+              ? 'Search by name, description, or category'
+              : 'Search by country name'
           }
           className="flex-1 border-b-2 border-[#2A3350] bg-transparent px-1 py-2 font-serif text-base text-[#F4EEDD] outline-none placeholder:text-[#4B5580] focus:border-[#C7A34C]"
-          aria-label={viewMode === "category" ? "Search websites" : "Search countries"}
+          aria-label={viewMode === 'category' ? 'Search websites' : 'Search countries'}
         />
-        {viewMode === "category" && (
+        {viewMode === 'category' && (
           <select
             value={category}
-            onChange={(event) => setCategory(event.target.value as WebsiteCategory | "All")}
+            onChange={(event) => setCategory(event.target.value as WebsiteCategory | 'All')}
             className="border-b-2 border-[#2A3350] bg-transparent px-1 py-2 font-mono text-xs uppercase tracking-widest text-[#B7C0DE] outline-none focus:border-[#C7A34C]"
             aria-label="Filter by category"
           >
@@ -400,7 +402,7 @@ export default function WebDirectory(): React.ReactElement {
           />
           Favorites
         </label>
-        {viewMode === "country" && (
+        {viewMode === 'country' && (
           <button
             type="button"
             onClick={handleSurpriseMe}
@@ -437,7 +439,7 @@ export default function WebDirectory(): React.ReactElement {
 
       {/* Results */}
       <div className="mt-8">
-        {viewMode === "category" ? (
+        {viewMode === 'category' ? (
           websitesWithMeta.length === 0 ? (
             <EmptyState label="No websites match your search." />
           ) : (

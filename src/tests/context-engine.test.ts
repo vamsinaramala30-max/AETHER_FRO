@@ -15,9 +15,33 @@ describe('Frontend ContextEngine', () => {
 
   it('should trim messages to fit token/character window preserving newest messages', () => {
     const messages: AIMessage[] = [
-      { id: '1', conversationId: 'c1', role: 'user', content: 'Old message 1', status: 'delivered', createdAt: 1, updatedAt: 1 },
-      { id: '2', conversationId: 'c1', role: 'assistant', content: 'Old response 1', status: 'delivered', createdAt: 2, updatedAt: 2 },
-      { id: '3', conversationId: 'c1', role: 'user', content: 'Newest query', status: 'delivered', createdAt: 3, updatedAt: 3 },
+      {
+        id: '1',
+        conversationId: 'c1',
+        role: 'user',
+        content: 'Old message 1',
+        status: 'delivered',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+      {
+        id: '2',
+        conversationId: 'c1',
+        role: 'assistant',
+        content: 'Old response 1',
+        status: 'delivered',
+        createdAt: 2,
+        updatedAt: 2,
+      },
+      {
+        id: '3',
+        conversationId: 'c1',
+        role: 'user',
+        content: 'Newest query',
+        status: 'delivered',
+        createdAt: 3,
+        updatedAt: 3,
+      },
     ];
 
     const trimmed = trimMessages(messages, 25);

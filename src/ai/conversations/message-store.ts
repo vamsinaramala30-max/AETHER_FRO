@@ -17,16 +17,18 @@ function normalizeMessage(raw: Record<string, unknown>): AIMessage {
     role: (raw['role'] as AIMessage['role']) ?? 'user',
     content: typeof raw['content'] === 'string' ? raw['content'] : '',
     status: (raw['status'] as AIMessage['status']) ?? 'delivered',
-    createdAt: typeof raw['createdAt'] === 'number'
-      ? raw['createdAt']
-      : typeof raw['created_at'] === 'number'
-        ? raw['created_at']
-        : Date.now(),
-    updatedAt: typeof raw['updatedAt'] === 'number'
-      ? raw['updatedAt']
-      : typeof raw['updated_at'] === 'number'
-        ? raw['updated_at']
-        : Date.now(),
+    createdAt:
+      typeof raw['createdAt'] === 'number'
+        ? raw['createdAt']
+        : typeof raw['created_at'] === 'number'
+          ? raw['created_at']
+          : Date.now(),
+    updatedAt:
+      typeof raw['updatedAt'] === 'number'
+        ? raw['updatedAt']
+        : typeof raw['updated_at'] === 'number'
+          ? raw['updated_at']
+          : Date.now(),
     error: typeof raw['error'] === 'string' ? raw['error'] : undefined,
     citations: Array.isArray(raw['citations'])
       ? raw['citations'].flatMap((c) => {
@@ -46,16 +48,18 @@ function normalizeMessage(raw: Record<string, unknown>): AIMessage {
     tokens:
       typeof raw['tokens'] === 'object' && raw['tokens'] !== null
         ? {
-            prompt: typeof (raw['tokens'] as Record<string, unknown>)['prompt'] === 'number'
-              ? (raw['tokens'] as Record<string, number>)['prompt']
-              : undefined,
+            prompt:
+              typeof (raw['tokens'] as Record<string, unknown>)['prompt'] === 'number'
+                ? (raw['tokens'] as Record<string, number>)['prompt']
+                : undefined,
             completion:
               typeof (raw['tokens'] as Record<string, unknown>)['completion'] === 'number'
                 ? (raw['tokens'] as Record<string, number>)['completion']
                 : undefined,
-            total: typeof (raw['tokens'] as Record<string, unknown>)['total'] === 'number'
-              ? (raw['tokens'] as Record<string, number>)['total']
-              : undefined,
+            total:
+              typeof (raw['tokens'] as Record<string, unknown>)['total'] === 'number'
+                ? (raw['tokens'] as Record<string, number>)['total']
+                : undefined,
           }
         : undefined,
   };
@@ -81,7 +85,11 @@ export class MessageStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot load messages.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot load messages.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -101,7 +109,11 @@ export class MessageStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot send message.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot send message.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -115,7 +127,11 @@ export class MessageStore {
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot delete message.', timestamp: Date.now() },
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Cannot delete message.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -123,4 +139,3 @@ export class MessageStore {
 
 export { normalizeMessage };
 export const messageStore = new MessageStore();
-

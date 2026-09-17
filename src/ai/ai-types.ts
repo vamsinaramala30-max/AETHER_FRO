@@ -22,7 +22,12 @@ export type AIErrorCode =
   | 'TIMEOUT'
   | 'CANCELLED'
   | 'SERVICE_UNAVAILABLE'
-  | 'INTERNAL_ERROR';
+  | 'INTERNAL_ERROR'
+  | 'VERIFICATION_FAILED'
+  | 'PLANNING_FAILED'
+  | 'RATE_LIMIT'
+  | 'QUOTA_EXCEEDED'
+  | 'UNKNOWN_ERROR';
 
 export interface AIError {
   code: AIErrorCode;
@@ -35,19 +40,25 @@ export interface AIError {
 // Service Result Pattern
 // ---------------------------------------------------------------------------
 
-export type AIResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: AIError };
+export type AIResult<T> = { success: true; data: T } | { success: false; error: AIError };
 
 export function aiSuccess<T>(data: T): AIResult<T> {
   return { success: true, data };
 }
 
-export function createAIError(code: AIErrorCode, message: string, details?: Record<string, unknown>): AIError {
+export function createAIError(
+  code: AIErrorCode,
+  message: string,
+  details?: Record<string, unknown>,
+): AIError {
   return { code, message, details, timestamp: Date.now() };
 }
 
-export function aiFailure(code: AIErrorCode, message: string, details?: Record<string, unknown>): AIResult<never> {
+export function aiFailure(
+  code: AIErrorCode,
+  message: string,
+  details?: Record<string, unknown>,
+): AIResult<never> {
   return { success: false, error: createAIError(code, message, details) };
 }
 
@@ -56,12 +67,7 @@ export function aiFailure(code: AIErrorCode, message: string, details?: Record<s
 // ---------------------------------------------------------------------------
 
 export type AIConnectionStatus =
-  | 'connected'
-  | 'connecting'
-  | 'unavailable'
-  | 'error'
-  | 'generating'
-  | 'streaming';
+  'connected' | 'connecting' | 'unavailable' | 'error' | 'generating' | 'streaming';
 
 // ---------------------------------------------------------------------------
 // Message Types
@@ -69,13 +75,7 @@ export type AIConnectionStatus =
 
 export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
-export type MessageStatus =
-  | 'sending'
-  | 'sent'
-  | 'streaming'
-  | 'delivered'
-  | 'error'
-  | 'cancelled';
+export type MessageStatus = 'sending' | 'sent' | 'streaming' | 'delivered' | 'error' | 'cancelled';
 
 export interface SourceCitationRef {
   id: string;
@@ -87,29 +87,164 @@ export interface SourceCitationRef {
   chunkIndex?: number;
 }
 
+export type ActionState =
+  | 'PLANNED'
+  | 'VALIDATING'
+  | 'AUTHORIZED'
+  | 'READY'
+  | 'BLOCKED'
+  | 'NEEDS_CLARIFICATION'
+  | 'EXECUTING'
+  | 'VERIFYING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'TIMED_OUT'
+  | 'DENIED'
+  | 'CANCELLED'
+  | 'REQUESTED'
+  | 'SKIPPED'
+  | 'EXECUTED'
+  | 'SUCCESS'
+  | 'pending'
+  | 'executing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
 export interface ToolInvocationRef {
   id: string;
   toolName: string;
   args: Record<string, unknown>;
   result?: unknown;
-  status: 'pending' | 'executing' | 'completed' | 'failed';
+  status: ActionState;
+  actionState?: ActionState;
   error?: string;
+  verified?: boolean;
+  verificationDetails?: string;
+  riskLevel?:
+    | 'READ_ONLY'
+    | 'LOW_RISK'
+    | 'MODIFY'
+    | 'HIGH_IMPACT'
+    | 'READ'
+    | 'LOW_RISK_WRITE'
+    | 'HIGH_RISK_WRITE'
+    | 'DESTRUCTIVE';
   startedAt?: number;
   completedAt?: number;
 }
 
+export interface ActionInvocationRef {
+  actionId: string;
+  toolName: string;
+  parameters: Record<string, unknown>;
+  status: ActionState;
+  result?: unknown;
+  error?: string;
+  verified?: boolean;
+  verificationDetails?: string;
+  riskLevel?:
+    | 'READ_ONLY'
+    | 'LOW_RISK'
+    | 'MODIFY'
+    | 'HIGH_IMPACT'
+    | 'READ'
+    | 'LOW_RISK_WRITE'
+    | 'HIGH_RISK_WRITE'
+    | 'DESTRUCTIVE';
+  startedAt?: number;
+  completedAt?: number;
+}
+
+export interface PlanStepRef {
+  stepId: string;
+  stepNumber: number;
+  description: string;
+  toolName?: string;
+  status: ActionState;
+  actionState?: ActionState;
+  dependencies?: string[];
+  requiresConfirmation?: boolean;
+  verified?: boolean;
+  verificationDetails?: string;
+  error?: string;
+}
+
+export interface ActionPlanRef {
+  planId: string;
+  objective: string;
+  status:
+    | 'PENDING'
+    | 'UNDERSTANDING'
+    | 'PLANNING'
+    | 'VALIDATING'
+    | 'READY'
+    | 'HANDED_OFF'
+    | 'NEEDS_CLARIFICATION'
+    | 'BLOCKED'
+    | 'EXECUTING'
+    | 'SUCCESS'
+    | 'PARTIAL_SUCCESS'
+    | 'FAILED'
+    | 'CANCELLED';
+  steps: PlanStepRef[];
+  successfulStepsCount?: number;
+  failedStepsCount?: number;
+  summary?: string;
+  constraints?: string[];
+  assumptions?: string[];
+  clarificationRequest?: {
+    question: string;
+    missingInfo: string[];
+    suggestedAnswers?: string[];
+  };
+  planHash?: string;
+  version?: number;
+}
+
 export type ConfidenceLevel =
-  | 'HIGH_CONFIDENCE'
-  | 'MEDIUM_CONFIDENCE'
-  | 'LOW_CONFIDENCE'
-  | 'INSUFFICIENT_INFORMATION';
+  'HIGH_CONFIDENCE' | 'MEDIUM_CONFIDENCE' | 'LOW_CONFIDENCE' | 'INSUFFICIENT_INFORMATION';
+
+export type VerificationStatus =
+  | 'UNVERIFIED'
+  | 'PENDING'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'PARTIALLY_VERIFIED'
+  | 'NOT_VERIFIABLE';
+
+export interface EvidenceItemRef {
+  sourceType:
+    | 'user_input'
+    | 'conversation_context'
+    | 'approved_memory'
+    | 'retrieved_knowledge'
+    | 'tool_result'
+    | 'model_knowledge';
+  sourceId?: string;
+  content: string;
+  relevance: number;
+  verified: boolean;
+  verificationStatus?: VerificationStatus;
+  metadata?: Record<string, unknown>;
+}
 
 export interface PendingConfirmation {
   actionId: string;
   toolName: string;
   description: string;
-  riskLevel: 'READ' | 'LOW_RISK_WRITE' | 'HIGH_RISK_WRITE' | 'DESTRUCTIVE';
+  riskLevel:
+    | 'READ'
+    | 'LOW_RISK_WRITE'
+    | 'HIGH_RISK_WRITE'
+    | 'DESTRUCTIVE'
+    | 'READ_ONLY'
+    | 'LOW_RISK'
+    | 'MODIFY'
+    | 'HIGH_IMPACT';
   args: Record<string, unknown>;
+  executionId?: string;
+  stepId?: string;
 }
 
 export interface AIMessage {
@@ -122,9 +257,14 @@ export interface AIMessage {
   updatedAt: number;
   error?: string;
   confidence?: ConfidenceLevel;
+  verificationStatus?: VerificationStatus;
+  evidence?: EvidenceItemRef[];
+  turnEvidence?: EvidenceItemRef[];
   confirmationRequest?: PendingConfirmation;
   citations?: SourceCitationRef[];
   toolInvocations?: ToolInvocationRef[];
+  plan?: ActionPlanRef;
+  canonicalPlan?: ActionPlanRef;
   ragContext?: string[];
   tokens?: {
     prompt?: number;
@@ -166,12 +306,7 @@ export interface AIConversation {
 export type ModelRuntimeType = 'local' | 'remote' | 'unknown';
 
 export type ModelStatus =
-  | 'available'
-  | 'loading'
-  | 'loaded'
-  | 'unloading'
-  | 'unavailable'
-  | 'error';
+  'available' | 'loading' | 'loaded' | 'unloading' | 'unavailable' | 'error';
 
 export interface AIModelInfo {
   id: string;
@@ -211,6 +346,7 @@ export interface StreamingChunk {
   index: number;
   done: boolean;
   finishReason?: 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'cancelled';
+  metadata?: Record<string, unknown>;
 }
 
 export interface StreamingSession {
@@ -228,13 +364,7 @@ export interface StreamingSession {
 // RAG Types
 // ---------------------------------------------------------------------------
 
-export type DocumentStatus =
-  | 'pending'
-  | 'parsing'
-  | 'chunking'
-  | 'embedding'
-  | 'indexed'
-  | 'error';
+export type DocumentStatus = 'pending' | 'parsing' | 'chunking' | 'embedding' | 'indexed' | 'error';
 
 export interface AIDocument {
   id: string;
@@ -287,12 +417,7 @@ export interface RAGStatus {
 
 export type MemoryScope = 'working' | 'conversation' | 'long_term';
 
-export type MemoryEntryType =
-  | 'fact'
-  | 'preference'
-  | 'context'
-  | 'instruction'
-  | 'summary';
+export type MemoryEntryType = 'fact' | 'preference' | 'context' | 'instruction' | 'summary';
 
 export interface MemoryEntry {
   id: string;
@@ -320,12 +445,7 @@ export interface MemoryStatus {
 // Prompt Types
 // ---------------------------------------------------------------------------
 
-export type PromptCategory =
-  | 'system'
-  | 'rag'
-  | 'agent'
-  | 'user'
-  | 'custom';
+export type PromptCategory = 'system' | 'rag' | 'agent' | 'user' | 'custom';
 
 export interface PromptVariable {
   name: string;
@@ -356,20 +476,10 @@ export interface BuiltPrompt {
 // Tool Types
 // ---------------------------------------------------------------------------
 
-export type ToolCategory =
-  | 'task'
-  | 'project'
-  | 'knowledge'
-  | 'workspace'
-  | 'system';
+export type ToolCategory = 'task' | 'project' | 'knowledge' | 'workspace' | 'system';
 
 export type ToolStatus =
-  | 'available'
-  | 'pending'
-  | 'executing'
-  | 'completed'
-  | 'failed'
-  | 'disabled';
+  'available' | 'pending' | 'executing' | 'completed' | 'failed' | 'disabled';
 
 export interface ToolDefinition {
   id: string;
@@ -417,20 +527,9 @@ export interface ToolRegistryStatus {
 // ---------------------------------------------------------------------------
 
 export type AgentStatus =
-  | 'idle'
-  | 'planning'
-  | 'running'
-  | 'waiting'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+  'idle' | 'planning' | 'running' | 'waiting' | 'completed' | 'failed' | 'cancelled';
 
-export type AgentStepType =
-  | 'plan'
-  | 'tool_call'
-  | 'observation'
-  | 'synthesis'
-  | 'final_answer';
+export type AgentStepType = 'plan' | 'tool_call' | 'observation' | 'synthesis' | 'final_answer';
 
 export interface AgentStep {
   id: string;
@@ -495,7 +594,12 @@ export interface GenerationResponse {
   finishReason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
   citations?: SourceCitationRef[];
   toolInvocations?: ToolInvocationRef[];
+  plan?: ActionPlanRef;
+  canonicalPlan?: ActionPlanRef;
   confidence?: ConfidenceLevel;
+  verificationStatus?: VerificationStatus;
+  evidence?: EvidenceItemRef[];
+  turnEvidence?: EvidenceItemRef[];
   confirmationRequest?: PendingConfirmation;
   usage?: {
     promptTokens: number;
@@ -553,27 +657,34 @@ export interface AIContext {
 // ---------------------------------------------------------------------------
 
 export type ThinkingStatus =
+  | 'idle'
+  | 'analyzing'
   | 'thinking'
   | 'retrieving'
-  | 'generating'
-  | 'using_tool'
   | 'planning'
-  | 'idle';
+  | 'waiting_confirmation'
+  | 'executing_action'
+  | 'verifying'
+  | 'generating'
+  | 'using_tool';
 
 export interface ThinkingState {
   status: ThinkingStatus;
   toolName?: string;
   label: string;
+  step?: number;
+  totalSteps?: number;
+  details?: string;
 }
 
 // ---------------------------------------------------------------------------
 // AI Store State Shape
 // ---------------------------------------------------------------------------
 
-export type AIProviderMode = 'auto' | 'gemini' | 'openai' | 'ollama';
+export type AIProviderMode = 'auto' | 'aether' | 'gemini' | 'openai' | 'ollama';
 
 export interface ProviderStatusInfo {
-  name: 'gemini' | 'openai' | 'ollama';
+  name: 'aether' | 'gemini' | 'openai' | 'ollama';
   status: 'available' | 'unavailable' | 'rate_limited' | 'timeout' | 'config_error';
   message?: string;
   checkedAt?: number;
@@ -643,10 +754,4 @@ export interface AIStoreState {
 }
 
 export type AIPanel =
-  | 'assistant'
-  | 'conversations'
-  | 'memory'
-  | 'knowledge'
-  | 'prompts'
-  | 'models'
-  | 'agents';
+  'assistant' | 'conversations' | 'memory' | 'knowledge' | 'prompts' | 'models' | 'agents';

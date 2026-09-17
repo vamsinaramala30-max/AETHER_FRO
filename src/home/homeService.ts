@@ -1,3 +1,6 @@
+import { taskService } from '../projects/tasks/taskservice';
+import { apiClient } from '../api/client';
+
 export interface HomeMetaData {
   userDisplayName: string;
   greeting: string;
@@ -27,10 +30,30 @@ export async function fetchHomeMetaData(): Promise<HomeMetaData> {
 }
 
 export async function fetchGlobalHomeStats(): Promise<GlobalHomeStats> {
+  let activeProjects = 0;
+  let completedTasks = 0;
+
+  try {
+    const projRes = await apiClient.get<any>('/projects');
+    const projs = Array.isArray(projRes) ? projRes : projRes?.data || [];
+    activeProjects = Array.isArray(projs) ? projs.length : 0;
+  } catch {
+    activeProjects = 0;
+  }
+
+  try {
+    const tasks = await taskService.getTasks();
+    if (Array.isArray(tasks)) {
+      completedTasks = tasks.filter((t) => t.status === 'done').length;
+    }
+  } catch {
+    completedTasks = 0;
+  }
+
   return {
-    activeProjectsCount: 8,
-    completedTasksToday: 14,
-    pendingReviewsCount: 3,
-    unreadNotificationsCount: 5,
+    activeProjectsCount: activeProjects,
+    completedTasksToday: completedTasks,
+    pendingReviewsCount: 0,
+    unreadNotificationsCount: 0,
   };
 }

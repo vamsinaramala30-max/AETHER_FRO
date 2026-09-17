@@ -9,6 +9,7 @@ import type {
   AIMessage,
   SourceCitationRef,
   ToolInvocationRef,
+  ActionState,
   AIResult,
 } from '../ai-types';
 import { aiSuccess, aiFailure } from '../ai-types';
@@ -28,6 +29,10 @@ export interface RawBackendResponse {
   citations?: unknown[];
   tool_invocations?: unknown[];
   confidence?: string;
+  verificationStatus?: string;
+  verification_status?: string;
+  evidence?: unknown[];
+  plan?: unknown;
   confirmationRequest?: unknown;
   confirmation_request?: unknown;
   usage?: {
@@ -57,37 +62,111 @@ function normalizeCitation(raw: unknown): SourceCitationRef | null {
 function normalizeToolInvocation(raw: unknown): ToolInvocationRef | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const r = raw as Record<string, unknown>;
-  if (typeof r['id'] !== 'string' || typeof r['tool_name'] !== 'string') return null;
-  const status = r['status'];
-  const validStatuses = ['pending', 'executing', 'completed', 'failed'] as const;
-  const resolvedStatus: ToolInvocationRef['status'] = validStatuses.includes(
-    status as ToolInvocationRef['status'],
-  )
-    ? (status as ToolInvocationRef['status'])
-    : 'pending';
+  const toolName =
+    typeof r['toolName'] === 'string'
+      ? r['toolName']
+      : typeof r['tool_name'] === 'string'
+        ? r['tool_name']
+        : typeof r['tool'] === 'string'
+          ? r['tool']
+          : typeof r['name'] === 'string'
+            ? r['name']
+            : undefined;
+  if (!toolName) return null;
+
+  const id = typeof r['id'] === 'string' ? r['id'] : `tool_${Date.now()}`;
+
+  const validStatuses: readonly string[] = [
+    'pending',
+    'executing',
+    'completed',
+    'failed',
+    'cancelled',
+    'PLANNED',
+    'VALIDATING',
+    'AUTHORIZED',
+    'READY',
+    'BLOCKED',
+    'NEEDS_CLARIFICATION',
+    'EXECUTING',
+    'VERIFYING',
+    'COMPLETED',
+    'FAILED',
+    'TIMED_OUT',
+    'DENIED',
+    'CANCELLED',
+    'REQUESTED',
+    'SKIPPED',
+    'EXECUTED',
+    'SUCCESS',
+  ];
+  const rawStatus = (r['status'] ?? r['actionState'] ?? r['action_state']) as string;
+  const resolvedStatus: ToolInvocationRef['status'] =
+    typeof rawStatus === 'string' && validStatuses.includes(rawStatus)
+      ? (rawStatus as ToolInvocationRef['status'])
+      : 'pending';
+
+  const rawArgs =
+    typeof r['args'] === 'object' && r['args'] !== null
+      ? (r['args'] as Record<string, unknown>)
+      : typeof r['arguments'] === 'object' && r['arguments'] !== null
+        ? (r['arguments'] as Record<string, unknown>)
+        : typeof r['parameters'] === 'object' && r['parameters'] !== null
+          ? (r['parameters'] as Record<string, unknown>)
+          : typeof r['input'] === 'object' && r['input'] !== null
+            ? (r['input'] as Record<string, unknown>)
+            : {};
+
+  const result = r['result'] ?? r['output'];
 
   return {
-    id: r['id'],
-    toolName: r['tool_name'],
-    args: typeof r['args'] === 'object' && r['args'] !== null
-      ? (r['args'] as Record<string, unknown>)
-      : {},
-    result: r['result'],
+    id,
+    toolName,
+    args: rawArgs,
+    result,
     status: resolvedStatus,
+    actionState: (typeof r['actionState'] === 'string' ? r['actionState'] : (typeof r['action_state'] === 'string' ? r['action_state'] : resolvedStatus)) as ActionState,
+    verified: typeof r['verified'] === 'boolean' ? r['verified'] : undefined,
+    verificationDetails:
+      typeof r['verification_details'] === 'string'
+        ? r['verification_details']
+        : typeof r['verificationDetails'] === 'string'
+          ? r['verificationDetails']
+          : undefined,
     error: typeof r['error'] === 'string' ? r['error'] : undefined,
-    startedAt: typeof r['started_at'] === 'number' ? r['started_at'] : undefined,
-    completedAt: typeof r['completed_at'] === 'number' ? r['completed_at'] : undefined,
+    startedAt:
+      typeof r['startedAt'] === 'number'
+        ? r['startedAt']
+        : typeof r['started_at'] === 'number'
+          ? r['started_at']
+          : undefined,
+    completedAt:
+      typeof r['completedAt'] === 'number'
+        ? r['completedAt']
+        : typeof r['completed_at'] === 'number'
+          ? r['completed_at']
+          : undefined,
   };
 }
 
-/**
- * Normalize a raw backend response into a typed GenerationResponse.
- */
 export function normalizeGenerationResponse(
-  raw: RawBackendResponse,
+  rawInput: RawBackendResponse | Record<string, unknown>,
   conversationId: string,
 ): AIResult<GenerationResponse> {
-  const content = raw.content ?? raw.text;
+  if (!rawInput || typeof rawInput !== 'object') {
+    return aiFailure('GENERATION_FAILED', 'Invalid backend response payload.');
+  }
+
+  const raw: RawBackendResponse =
+    (rawInput as any)?.data?.assistantMessage ||
+    (rawInput as any)?.data ||
+    rawInput;
+
+  const content =
+    raw.content ??
+    raw.text ??
+    (typeof (raw as any).message === 'string' ? (raw as any).message : undefined);
+
   if (typeof content !== 'string') {
     return aiFailure('GENERATION_FAILED', 'Backend response missing content field.');
   }
@@ -100,8 +179,9 @@ export function normalizeGenerationResponse(
       })
     : [];
 
-  const toolInvocations: ToolInvocationRef[] = Array.isArray(raw.tool_invocations)
-    ? raw.tool_invocations.flatMap((t) => {
+  const rawTools = (raw as any).toolInvocations ?? raw.tool_invocations;
+  const toolInvocations: ToolInvocationRef[] = Array.isArray(rawTools)
+    ? rawTools.flatMap((t) => {
         const n = normalizeToolInvocation(t);
         return n ? [n] : [];
       })
@@ -114,6 +194,20 @@ export function normalizeGenerationResponse(
     : undefined;
 
   const confReq = raw.confirmationRequest ?? raw.confirmation_request;
+  const rawVerif = (raw.verificationStatus ?? raw.verification_status) as any;
+  const validVerif = [
+    'UNVERIFIED',
+    'PENDING',
+    'VERIFIED',
+    'FAILED',
+    'PARTIALLY_VERIFIED',
+    'NOT_VERIFIABLE',
+  ];
+  const verificationStatus = validVerif.includes(rawVerif) ? rawVerif : undefined;
+
+  const rawEvidence = (raw as any).turnEvidence ?? (raw as any).turn_evidence ?? (raw as any).evidence;
+  const parsedEvidence = Array.isArray(rawEvidence) ? (rawEvidence as any) : undefined;
+  const rawPlan = (raw as any).canonicalPlan ?? (raw as any).canonical_plan ?? raw.plan;
 
   return aiSuccess<GenerationResponse>({
     messageId,
@@ -123,7 +217,12 @@ export function normalizeGenerationResponse(
     finishReason: resolvedFinish,
     citations: citations.length > 0 ? citations : undefined,
     toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined,
+    plan: rawPlan as any,
+    canonicalPlan: rawPlan as any,
     confidence: raw.confidence as any,
+    verificationStatus,
+    evidence: parsedEvidence,
+    turnEvidence: parsedEvidence,
     confirmationRequest: confReq as any,
     usage: raw.usage
       ? {
@@ -134,6 +233,18 @@ export function normalizeGenerationResponse(
       : undefined,
     modelId: raw.model,
     generatedAt: raw.created_at ?? Date.now(),
+  });
+}
+
+/**
+ * Extract tool invocations from a raw response payload.
+ */
+export function extractToolInvocations(raw: Record<string, unknown>): ToolInvocationRef[] {
+  const rawTools = (raw as any).toolInvocations ?? (raw as any).tool_invocations;
+  if (!Array.isArray(rawTools)) return [];
+  return rawTools.flatMap((t) => {
+    const n = normalizeToolInvocation(t);
+    return n ? [n] : [];
   });
 }
 
@@ -151,7 +262,12 @@ export function generationResponseToMessage(response: GenerationResponse): AIMes
     updatedAt: response.generatedAt,
     citations: response.citations,
     toolInvocations: response.toolInvocations,
+    plan: response.plan,
+    canonicalPlan: response.canonicalPlan ?? response.plan,
     confidence: response.confidence,
+    verificationStatus: response.verificationStatus,
+    evidence: response.evidence,
+    turnEvidence: response.turnEvidence ?? response.evidence,
     confirmationRequest: response.confirmationRequest,
     tokens: response.usage
       ? {
@@ -166,10 +282,7 @@ export function generationResponseToMessage(response: GenerationResponse): AIMes
 /**
  * Build a placeholder streaming message shell.
  */
-export function buildStreamingMessageShell(
-  messageId: string,
-  conversationId: string,
-): AIMessage {
+export function buildStreamingMessageShell(messageId: string, conversationId: string): AIMessage {
   return {
     id: messageId,
     conversationId,

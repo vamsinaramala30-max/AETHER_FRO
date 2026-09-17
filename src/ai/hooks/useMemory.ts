@@ -95,9 +95,7 @@ export function useMemory(): UseMemoryReturn {
         return;
       }
       removeMemoryEntry(id);
-      setMemoryStatus(
-        memoryService.buildStatus(memoryEntries.filter((e) => e.id !== id)),
-      );
+      setMemoryStatus(memoryService.buildStatus(memoryEntries.filter((e) => e.id !== id)));
     },
     [memoryEntries, removeMemoryEntry, setMemoryStatus, setError],
   );

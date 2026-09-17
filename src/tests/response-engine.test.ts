@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeGenerationResponse, generationResponseToMessage } from '../ai/core/response-engine';
+import {
+  normalizeGenerationResponse,
+  generationResponseToMessage,
+} from '../ai/core/response-engine';
 
 describe('Frontend ResponseEngine', () => {
   it('should normalize raw backend response correctly', () => {
@@ -7,9 +10,7 @@ describe('Frontend ResponseEngine', () => {
       message_id: 'msg_100',
       content: 'Here is your response.',
       confidence: 'HIGH_CONFIDENCE',
-      citations: [
-        { id: 'cit_1', title: 'Doc A', score: 0.9 }
-      ],
+      citations: [{ id: 'cit_1', title: 'Doc A', score: 0.9 }],
     };
 
     const res = normalizeGenerationResponse(raw, 'conv_1');

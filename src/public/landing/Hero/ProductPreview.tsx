@@ -80,7 +80,7 @@ export const ProductPreview: React.FC = () => {
       </div>
 
       {/* Main Glass Container */}
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 dark:border-zinc-800/80 light:border-zinc-200/80 bg-zinc-950/85 dark:bg-zinc-950/85 light:bg-white/85 shadow-2xl backdrop-blur-xl">
+      <div className="light:border-zinc-200/80 light:bg-white/85 relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/85 shadow-2xl backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/85">
         {/* Window Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/60 bg-zinc-900/40 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -104,7 +104,7 @@ export const ProductPreview: React.FC = () => {
         </div>
 
         {/* Tab Navigation Toolbar */}
-        <div className="flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-2 py-2 text-xs scrollbar-none sm:px-3">
+        <div className="scrollbar-none flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-2 py-2 text-xs sm:px-3">
           <button
             type="button"
             onClick={() => setActiveTab('ai')}
@@ -265,13 +265,13 @@ export const ProductPreview: React.FC = () => {
                     key={i}
                     className="flex flex-col gap-2 rounded-lg border border-zinc-800/60 bg-zinc-900/60 p-2.5 text-xs transition-colors hover:border-zinc-700 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex min-w-0 items-center gap-2.5">
                       <input
                         type="checkbox"
                         checked={task.status === 'Done'}
                         readOnly
                         aria-label={task.title}
-                        className="rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-0 shrink-0"
+                        className="shrink-0 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-0"
                       />
                       <span
                         className={`truncate font-medium ${
@@ -281,7 +281,7 @@ export const ProductPreview: React.FC = () => {
                         {task.title}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex shrink-0 items-center gap-2">
                       <span className="rounded bg-zinc-800 px-2 py-0.5 font-mono text-[10px] text-zinc-400">
                         {task.tag}
                       </span>

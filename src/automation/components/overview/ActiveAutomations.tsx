@@ -24,9 +24,16 @@ export const ActiveAutomations: React.FC<Props> = ({
       <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white">Active Automations</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Currently running operational schedules & triggers</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Currently running operational schedules & triggers
+          </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onNavigateToAll} className="text-amber-600 dark:text-amber-400">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onNavigateToAll}
+          className="text-amber-600 dark:text-amber-400"
+        >
           View all
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
@@ -39,15 +46,21 @@ export const ActiveAutomations: React.FC<Props> = ({
       ) : (
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {activeList.map((item) => (
-            <div key={item.id} className="flex items-center justify-between py-3.5 first:pt-4 last:pb-0">
+            <div
+              key={item.id}
+              className="flex items-center justify-between py-3.5 first:pt-4 last:pb-0"
+            >
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
                   <Zap className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{item.name}</h4>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    {item.name}
+                  </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {formatScheduleText(item.schedule)} • Last run: {formatRelativeTime(item.lastRunAt)}
+                    {formatScheduleText(item.schedule)} • Last run:{' '}
+                    {formatRelativeTime(item.lastRunAt)}
                   </p>
                 </div>
               </div>

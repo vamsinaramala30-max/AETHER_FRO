@@ -14,7 +14,11 @@ export const AutomationStatusBadge: React.FC<Props> = ({ status }) => {
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          status === 'active' ? 'bg-emerald-500' : status === 'paused' ? 'bg-amber-500' : 'bg-slate-400'
+          status === 'active'
+            ? 'bg-emerald-500'
+            : status === 'paused'
+              ? 'bg-amber-500'
+              : 'bg-slate-400'
         }`}
       />
       {style.label}

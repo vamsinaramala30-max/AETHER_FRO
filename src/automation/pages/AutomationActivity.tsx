@@ -23,7 +23,7 @@ export const AutomationActivity: React.FC = () => {
   const [selectedLog, setSelectedLog] = useState<ExecutionLog | null>(null);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="animate-in fade-in space-y-6 duration-300">
       <ActivityFilters
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
@@ -36,8 +36,10 @@ export const AutomationActivity: React.FC = () => {
       <ActivityList logs={logs} isLoading={isLoading} onSelectLog={setSelectedLog} />
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-slate-200/80 pt-4 dark:border-slate-800 text-xs">
-          <span className="text-slate-500">Page {page} of {totalPages}</span>
+        <div className="flex items-center justify-between border-t border-slate-200/80 pt-4 text-xs dark:border-slate-800">
+          <span className="text-slate-500">
+            Page {page} of {totalPages}
+          </span>
           <div className="flex gap-2">
             <button
               disabled={page <= 1}

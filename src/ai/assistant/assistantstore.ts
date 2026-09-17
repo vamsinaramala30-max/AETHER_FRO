@@ -274,21 +274,66 @@ class AssistantStore {
     this.setState({ abortController });
 
     try {
-      const response = await assistantService.sendMessage(activeId, content, {
-        temperature: 0.7,
-        model: 'default',
-      });
-      if (response && response.content) {
-        this.appendToAssistantMessage(activeId, assistantMessageId, response.content);
-      }
+      await assistantService.streamMessage(
+        activeId,
+        content,
+        {
+          onChunk: (delta: string) => {
+            this.appendToAssistantMessage(activeId!, assistantMessageId, delta);
+          },
+          onError: (streamErr: Error) => {
+            console.warn('[AssistantStore] Stream error:', streamErr.message);
+          },
+        },
+        {
+          temperature: 0.7,
+          model: 'default',
+        },
+        abortController.signal,
+      );
+
       this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
         this.finalizeAssistantMessage(activeId, assistantMessageId, 'sent');
       } else {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
-        this.setState({ error: errorMsg });
-        this.finalizeAssistantMessage(activeId, assistantMessageId, 'error', errorMsg);
+        // Fallback: if streaming endpoint fails, try non-streaming sendMessage once
+        try {
+          const response = await assistantService.sendMessage(
+            activeId,
+            content,
+            { temperature: 0.7, model: 'default' },
+            abortController.signal,
+          );
+          if (response && response.content) {
+            // Replace or append content
+            const conv = this.state.conversations[activeId];
+            if (conv) {
+              const messages = conv.messages.map((m) =>
+                m.id === assistantMessageId
+                  ? { ...m, content: response.content, status: 'delivered' as const }
+                  : m,
+              );
+              this.setState({
+                conversations: {
+                  ...this.state.conversations,
+                  [activeId]: { ...conv, messages, updatedAt: Date.now() },
+                },
+              });
+            }
+          } else {
+            this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
+          }
+        } catch (fallbackErr: unknown) {
+          const errorMsg =
+            fallbackErr instanceof Error
+              ? fallbackErr.message
+              : err instanceof Error
+                ? err.message
+                : 'Failed to generate response';
+          this.setState({ error: errorMsg });
+          this.finalizeAssistantMessage(activeId, assistantMessageId, 'error', errorMsg);
+        }
       }
     } finally {
       this.setState({ isStreaming: false, isTyping: false, abortController: null });

@@ -65,7 +65,9 @@ export class AgentLoop {
 
     // Initial poll immediately
     void poll();
-    this.timerId = setInterval(() => { void poll(); }, pollInterval);
+    this.timerId = setInterval(() => {
+      void poll();
+    }, pollInterval);
   }
 
   stop(): void {

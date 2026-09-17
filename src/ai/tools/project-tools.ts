@@ -13,7 +13,13 @@ export const PROJECT_TOOLS: ToolDefinition[] = [
     description: 'List all projects in the workspace',
     category: 'project',
     parameters: [
-      { name: 'status', type: 'string', description: 'Filter by status', required: false, enum: ['active', 'archived', 'completed'] },
+      {
+        name: 'status',
+        type: 'string',
+        description: 'Filter by status',
+        required: false,
+        enum: ['active', 'archived', 'completed'],
+      },
       { name: 'limit', type: 'number', description: 'Maximum results', required: false },
     ],
     requiresAuth: true,
@@ -24,9 +30,7 @@ export const PROJECT_TOOLS: ToolDefinition[] = [
     name: 'Get Project',
     description: 'Get details for a specific project',
     category: 'project',
-    parameters: [
-      { name: 'project_id', type: 'string', description: 'Project ID', required: true },
-    ],
+    parameters: [{ name: 'project_id', type: 'string', description: 'Project ID', required: true }],
     requiresAuth: true,
     enabled: true,
   },
@@ -47,9 +51,7 @@ export const PROJECT_TOOLS: ToolDefinition[] = [
     name: 'Get Project Summary',
     description: 'Get a summary of project progress and tasks',
     category: 'project',
-    parameters: [
-      { name: 'project_id', type: 'string', description: 'Project ID', required: true },
-    ],
+    parameters: [{ name: 'project_id', type: 'string', description: 'Project ID', required: true }],
     requiresAuth: true,
     enabled: true,
   },

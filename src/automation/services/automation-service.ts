@@ -25,7 +25,10 @@ export class AutomationService {
 
   public async toggleAutomationStatus(id: string, currentStatus: string): Promise<AutomationRule> {
     const isEnabled = currentStatus !== 'active';
-    const res = await automationApi.updateAutomation(id, { isEnabled, status: isEnabled ? 'active' : 'paused' });
+    const res = await automationApi.updateAutomation(id, {
+      isEnabled,
+      status: isEnabled ? 'active' : 'paused',
+    });
     triggerActivityUpdate();
     return res;
   }
@@ -49,4 +52,3 @@ export class AutomationService {
 }
 
 export const automationService = new AutomationService();
-

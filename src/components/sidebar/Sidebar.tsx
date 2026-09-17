@@ -29,16 +29,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       aria-label="Sidebar Navigation"
       className={[
         'relative z-30 flex h-full shrink-0 flex-col',
-        'overflow-hidden select-none',
+        'select-none overflow-hidden',
         'border-r border-aether-border',
         'bg-aether-surface',
         'shadow-xl md:shadow-sm',
         'transition-all duration-300 ease-in-out',
-        isMobile
-          ? 'w-[280px]'
-          : isCollapsed
-            ? 'w-[72px]'
-            : 'w-[280px]',
+        isMobile ? 'w-[280px]' : isCollapsed ? 'w-[72px]' : 'w-[280px]',
       ].join(' ')}
     >
       {/* Sidebar Header */}
@@ -50,16 +46,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
 
       {/* Search */}
-      <SidebarSearch
-        collapsed={isCollapsed}
-        onSearchOpen={onSearchOpen}
-        isMobile={isMobile}
-      />
+      <SidebarSearch collapsed={isCollapsed} onSearchOpen={onSearchOpen} isMobile={isMobile} />
 
       {/* Navigation */}
       <nav
         aria-label="Main Navigation"
-        className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-2 py-2"
+        className="scrollbar-thin flex-1 overflow-y-auto overflow-x-hidden px-2 py-2"
       >
         {navigationGroups.map((group, index) => (
           <SidebarNavGroup
@@ -82,10 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
 
       {/* User Profile */}
-      <SidebarUserProfile
-        collapsed={isCollapsed}
-        isMobile={isMobile}
-      />
+      <SidebarUserProfile collapsed={isCollapsed} isMobile={isMobile} />
     </aside>
   );
 };

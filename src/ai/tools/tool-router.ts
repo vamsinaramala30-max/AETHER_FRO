@@ -17,9 +17,7 @@ export type ToolRoute = {
 /**
  * Resolve a tool execution request to its tool definition.
  */
-export function routeToolRequest(
-  request: ToolExecutionRequest,
-): ToolRoute | null {
+export function routeToolRequest(request: ToolExecutionRequest): ToolRoute | null {
   const tool = toolRegistry.getById(request.toolId);
   if (!tool) return null;
   if (!tool.enabled) return null;
@@ -36,8 +34,7 @@ export function findToolsByKeyword(keyword: string): ToolDefinition[] {
     .filter(
       (t) =>
         t.enabled &&
-        (t.name.toLowerCase().includes(lower) ||
-          t.description.toLowerCase().includes(lower)),
+        (t.name.toLowerCase().includes(lower) || t.description.toLowerCase().includes(lower)),
     );
 }
 

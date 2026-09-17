@@ -131,4 +131,3 @@ export const goalService = {
     await goalsApi.delete(id);
   },
 };
-

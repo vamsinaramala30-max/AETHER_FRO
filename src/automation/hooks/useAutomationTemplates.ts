@@ -19,6 +19,7 @@ export function useAutomationTemplates() {
     setSelectedCategory,
     searchQuery,
     setSearchQuery,
-    instantiateTemplate: automationTemplateService.instantiateTemplate.bind(automationTemplateService),
+    instantiateTemplate:
+      automationTemplateService.instantiateTemplate.bind(automationTemplateService),
   };
 }

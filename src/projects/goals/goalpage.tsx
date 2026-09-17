@@ -167,4 +167,3 @@ export const GoalsPage: React.FC = () => {
     </PageWrapper>
   );
 };
-

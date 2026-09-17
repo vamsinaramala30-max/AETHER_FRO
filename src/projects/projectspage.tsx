@@ -240,7 +240,10 @@ export const ProjectsPage: React.FC = () => {
 
   // Determine Project Health indicator based on real signals
   const healthSignal = useMemo(() => {
-    if (summary.overdue >= 3 || (summary.totalTasks > 0 && summary.done / summary.totalTasks < 0.2)) {
+    if (
+      summary.overdue >= 3 ||
+      (summary.totalTasks > 0 && summary.done / summary.totalTasks < 0.2)
+    ) {
       return {
         badge: 'CRITICAL',
         color: 'bg-rose-500 text-white',
@@ -301,19 +304,21 @@ export const ProjectsPage: React.FC = () => {
 
       {/* Project Health & Quick Command Bar */}
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className={`flex flex-col justify-between rounded-2xl border p-5 shadow-sm ${healthSignal.border}`}>
+        <div
+          className={`flex flex-col justify-between rounded-2xl border p-5 shadow-sm ${healthSignal.border}`}
+        >
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider">
               <Sparkles className="h-4 w-4" />
               Project Health
             </span>
-            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider ${healthSignal.color}`}>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider ${healthSignal.color}`}
+            >
               {healthSignal.badge}
             </span>
           </div>
-          <p className="mt-3 text-xs font-medium leading-relaxed">
-            {healthSignal.insight}
-          </p>
+          <p className="mt-3 text-xs font-medium leading-relaxed">{healthSignal.insight}</p>
         </div>
 
         {/* Quick Actions Panel */}
@@ -326,15 +331,13 @@ export const ProjectsPage: React.FC = () => {
               onClick={() => navigate('/app/projects/tasks')}
               className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/70 px-4 py-2.5 text-xs font-bold text-indigo-700 transition-all hover:bg-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
             >
-              <CheckSquare className="h-4 w-4" />
-              + New Task
+              <CheckSquare className="h-4 w-4" />+ New Task
             </button>
             <button
               onClick={() => navigate('/app/projects/goals')}
               className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-xs font-bold text-emerald-700 transition-all hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
             >
-              <Target className="h-4 w-4" />
-              + New Goal
+              <Target className="h-4 w-4" />+ New Goal
             </button>
             <button
               onClick={() => navigate('/app/projects/files')}
@@ -352,7 +355,9 @@ export const ProjectsPage: React.FC = () => {
         {/* Task Summary Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Tasks</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Total Tasks
+            </span>
             <CheckSquare className="h-4 w-4 text-indigo-500" />
           </div>
           <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -382,7 +387,9 @@ export const ProjectsPage: React.FC = () => {
         {/* Goal Summary Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Macro Goals</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Macro Goals
+            </span>
             <Target className="h-4 w-4 text-emerald-500" />
           </div>
           <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -397,7 +404,9 @@ export const ProjectsPage: React.FC = () => {
         {/* Goal Progress Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Goal Completion Rate</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Goal Completion Rate
+            </span>
             <Activity className="h-4 w-4 text-purple-500" />
           </div>
           <p className="mt-2 text-3xl font-extrabold text-purple-600 dark:text-purple-400">
@@ -414,15 +423,15 @@ export const ProjectsPage: React.FC = () => {
         {/* Files Count Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Workspace Assets</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Workspace Assets
+            </span>
             <FileText className="h-4 w-4 text-blue-500" />
           </div>
           <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
             {summary.totalFiles}
           </p>
-          <p className="mt-3 text-[11px] font-medium text-slate-400">
-            Production files uploaded
-          </p>
+          <p className="mt-3 text-[11px] font-medium text-slate-400">Production files uploaded</p>
         </div>
       </div>
 
@@ -519,9 +528,12 @@ export const ProjectsPage: React.FC = () => {
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Delete Project?</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Delete Project?
+                </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  This will permanently delete the project "{deleteTarget.name}" and its project-specific data.
+                  This will permanently delete the project "{deleteTarget.name}" and its
+                  project-specific data.
                 </p>
               </div>
             </div>
@@ -614,4 +626,3 @@ export const ProjectsPage: React.FC = () => {
     </PageWrapper>
   );
 };
-

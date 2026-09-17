@@ -6,21 +6,96 @@ import {
   AutomationTemplate,
 } from './automation-types';
 
-export const TRIGGER_OPTIONS: Array<{ value: TriggerType; label: string; description: string; category: string }> = [
-  { value: 'SCHEDULE', label: 'Schedule / Cron', description: 'Triggers on periodic intervals or daily/weekly schedules', category: 'Time' },
-  { value: 'CALENDAR_EVENT', label: 'Calendar Event', description: 'Triggers before or after a calendar meeting or event', category: 'Events' },
-  { value: 'TASK_CREATED', label: 'Task Created', description: 'Triggers when a new task is added to workspace', category: 'Tasks' },
-  { value: 'TASK_COMPLETED', label: 'Task Completed', description: 'Triggers when any task is marked done', category: 'Tasks' },
-  { value: 'TASK_OVERDUE', label: 'Task Overdue', description: 'Triggers when a task deadline passes', category: 'Tasks' },
-  { value: 'PROJECT_CREATED', label: 'Project Created', description: 'Triggers when a project is initialized', category: 'Projects' },
-  { value: 'PROJECT_UPDATED', label: 'Project Updated', description: 'Triggers when project status or milestones change', category: 'Projects' },
-  { value: 'GOAL_UPDATED', label: 'Goal Progress Updated', description: 'Triggers when key results or goal metrics update', category: 'Goals' },
-  { value: 'DOCUMENT_CREATED', label: 'Document Created', description: 'Triggers when a document or note is created in Knowledge', category: 'Knowledge' },
-  { value: 'DOCUMENT_UPDATED', label: 'Document Updated', description: 'Triggers when a document is updated', category: 'Knowledge' },
-  { value: 'FILE_UPLOADED', label: 'File Uploaded', description: 'Triggers when a file is uploaded to workspace', category: 'Files' },
-  { value: 'AI_EVENT', label: 'AI Event / Signal', description: 'Triggers when Aether AI detects high priority context', category: 'AI' },
-  { value: 'AGENT_EVENT', label: 'Agent Signal', description: 'Triggers when a background agent finishes execution', category: 'AI' },
-  { value: 'MANUAL', label: 'Manual Trigger', description: 'Triggers on user click or quick shortcut', category: 'General' },
+export const TRIGGER_OPTIONS: Array<{
+  value: TriggerType;
+  label: string;
+  description: string;
+  category: string;
+}> = [
+  {
+    value: 'SCHEDULE',
+    label: 'Schedule / Cron',
+    description: 'Triggers on periodic intervals or daily/weekly schedules',
+    category: 'Time',
+  },
+  {
+    value: 'CALENDAR_EVENT',
+    label: 'Calendar Event',
+    description: 'Triggers before or after a calendar meeting or event',
+    category: 'Events',
+  },
+  {
+    value: 'TASK_CREATED',
+    label: 'Task Created',
+    description: 'Triggers when a new task is added to workspace',
+    category: 'Tasks',
+  },
+  {
+    value: 'TASK_COMPLETED',
+    label: 'Task Completed',
+    description: 'Triggers when any task is marked done',
+    category: 'Tasks',
+  },
+  {
+    value: 'TASK_OVERDUE',
+    label: 'Task Overdue',
+    description: 'Triggers when a task deadline passes',
+    category: 'Tasks',
+  },
+  {
+    value: 'PROJECT_CREATED',
+    label: 'Project Created',
+    description: 'Triggers when a project is initialized',
+    category: 'Projects',
+  },
+  {
+    value: 'PROJECT_UPDATED',
+    label: 'Project Updated',
+    description: 'Triggers when project status or milestones change',
+    category: 'Projects',
+  },
+  {
+    value: 'GOAL_UPDATED',
+    label: 'Goal Progress Updated',
+    description: 'Triggers when key results or goal metrics update',
+    category: 'Goals',
+  },
+  {
+    value: 'DOCUMENT_CREATED',
+    label: 'Document Created',
+    description: 'Triggers when a document or note is created in Knowledge',
+    category: 'Knowledge',
+  },
+  {
+    value: 'DOCUMENT_UPDATED',
+    label: 'Document Updated',
+    description: 'Triggers when a document is updated',
+    category: 'Knowledge',
+  },
+  {
+    value: 'FILE_UPLOADED',
+    label: 'File Uploaded',
+    description: 'Triggers when a file is uploaded to workspace',
+    category: 'Files',
+  },
+  {
+    value: 'AI_EVENT',
+    label: 'AI Event / Signal',
+    description: 'Triggers when Aether AI detects high priority context',
+    category: 'AI',
+  },
+  {
+    value: 'AGENT_EVENT',
+    label: 'Agent Signal',
+    description: 'Triggers when a background agent finishes execution',
+    category: 'AI',
+  },
+  {
+    value: 'MANUAL',
+    label: 'Manual Trigger',
+    description: 'Triggers on user click or quick shortcut',
+    category: 'General',
+  },
 ];
 
 export const CONDITION_OPERATORS: Array<{ value: ConditionOperator; label: string }> = [
@@ -36,38 +111,128 @@ export const CONDITION_OPERATORS: Array<{ value: ConditionOperator; label: strin
   { value: 'NOT', label: 'NOT' },
 ];
 
-export const AI_ACTION_OPTIONS: Array<{ value: AIActionType; label: string; description: string }> = [
-  { value: 'ASK_AETHER', label: 'Ask Aether AI', description: 'Query Aether with custom system instructions' },
-  { value: 'SUMMARIZE', label: 'Summarize Content', description: 'Generate concise executive summary of input' },
-  { value: 'ANALYZE', label: 'Analyze Priorities', description: 'Evaluate urgency, task load, and dependencies' },
-  { value: 'CLASSIFY', label: 'Classify & Tag', description: 'Categorize document, task, or message into tags' },
-  { value: 'GENERATE', label: 'Generate Action Plan', description: 'Draft step-by-step resolution plan' },
-  { value: 'EXTRACT', label: 'Extract Entities', description: 'Pull key dates, contacts, and action items' },
-  { value: 'TRANSFORM', label: 'Transform Format', description: 'Convert text to markdown, JSON, or task structure' },
-];
+export const AI_ACTION_OPTIONS: Array<{ value: AIActionType; label: string; description: string }> =
+  [
+    {
+      value: 'ASK_AETHER',
+      label: 'Ask Aether AI',
+      description: 'Query Aether with custom system instructions',
+    },
+    {
+      value: 'SUMMARIZE',
+      label: 'Summarize Content',
+      description: 'Generate concise executive summary of input',
+    },
+    {
+      value: 'ANALYZE',
+      label: 'Analyze Priorities',
+      description: 'Evaluate urgency, task load, and dependencies',
+    },
+    {
+      value: 'CLASSIFY',
+      label: 'Classify & Tag',
+      description: 'Categorize document, task, or message into tags',
+    },
+    {
+      value: 'GENERATE',
+      label: 'Generate Action Plan',
+      description: 'Draft step-by-step resolution plan',
+    },
+    {
+      value: 'EXTRACT',
+      label: 'Extract Entities',
+      description: 'Pull key dates, contacts, and action items',
+    },
+    {
+      value: 'TRANSFORM',
+      label: 'Transform Format',
+      description: 'Convert text to markdown, JSON, or task structure',
+    },
+  ];
 
-export const SYSTEM_ACTION_OPTIONS: Array<{ value: SystemActionType; label: string; description: string }> = [
-  { value: 'CREATE_TASK', label: 'Create Task', description: 'Add a new task to workspace with assignee & due date' },
-  { value: 'UPDATE_TASK', label: 'Update Task', description: 'Change status, priority, or tags of a task' },
-  { value: 'COMPLETE_TASK', label: 'Complete Task', description: 'Mark matching tasks as completed' },
-  { value: 'CREATE_PROJECT', label: 'Create Project', description: 'Initialize a new project board' },
-  { value: 'UPDATE_PROJECT', label: 'Update Project', description: 'Modify project progress or status' },
-  { value: 'UPDATE_GOAL', label: 'Update Goal Progress', description: 'Record progress on active goal' },
-  { value: 'CREATE_CALENDAR_EVENT', label: 'Create Calendar Event', description: 'Schedule event or block focus time in Calendar' },
-  { value: 'CREATE_REMINDER', label: 'Create Reminder', description: 'Set timed notification reminder' },
-  { value: 'CREATE_KNOWLEDGE_ITEM', label: 'Create Knowledge Note', description: 'Save AI response or digest to Knowledge base' },
-  { value: 'SAVE_AI_RESPONSE', label: 'Save AI Response', description: 'Log AI output into project notes' },
-  { value: 'ORGANIZE_DOCUMENT', label: 'Organize Document', description: 'Tag and move document to knowledge category' },
-  { value: 'ORGANIZE_FILE', label: 'Organize File', description: 'Categorize uploaded file into project directory' },
-  { value: 'RUN_SUPPORTED_AGENT', label: 'Run Autonomous Agent', description: 'Invoke specialized background AI agent' },
-  { value: 'CREATE_NOTIFICATION', label: 'Send Notification', description: 'Alert user via in-app notifications' },
+export const SYSTEM_ACTION_OPTIONS: Array<{
+  value: SystemActionType;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'CREATE_TASK',
+    label: 'Create Task',
+    description: 'Add a new task to workspace with assignee & due date',
+  },
+  {
+    value: 'UPDATE_TASK',
+    label: 'Update Task',
+    description: 'Change status, priority, or tags of a task',
+  },
+  {
+    value: 'COMPLETE_TASK',
+    label: 'Complete Task',
+    description: 'Mark matching tasks as completed',
+  },
+  {
+    value: 'CREATE_PROJECT',
+    label: 'Create Project',
+    description: 'Initialize a new project board',
+  },
+  {
+    value: 'UPDATE_PROJECT',
+    label: 'Update Project',
+    description: 'Modify project progress or status',
+  },
+  {
+    value: 'UPDATE_GOAL',
+    label: 'Update Goal Progress',
+    description: 'Record progress on active goal',
+  },
+  {
+    value: 'CREATE_CALENDAR_EVENT',
+    label: 'Create Calendar Event',
+    description: 'Schedule event or block focus time in Calendar',
+  },
+  {
+    value: 'CREATE_REMINDER',
+    label: 'Create Reminder',
+    description: 'Set timed notification reminder',
+  },
+  {
+    value: 'CREATE_KNOWLEDGE_ITEM',
+    label: 'Create Knowledge Note',
+    description: 'Save AI response or digest to Knowledge base',
+  },
+  {
+    value: 'SAVE_AI_RESPONSE',
+    label: 'Save AI Response',
+    description: 'Log AI output into project notes',
+  },
+  {
+    value: 'ORGANIZE_DOCUMENT',
+    label: 'Organize Document',
+    description: 'Tag and move document to knowledge category',
+  },
+  {
+    value: 'ORGANIZE_FILE',
+    label: 'Organize File',
+    description: 'Categorize uploaded file into project directory',
+  },
+  {
+    value: 'RUN_SUPPORTED_AGENT',
+    label: 'Run Autonomous Agent',
+    description: 'Invoke specialized background AI agent',
+  },
+  {
+    value: 'CREATE_NOTIFICATION',
+    label: 'Send Notification',
+    description: 'Alert user via in-app notifications',
+  },
 ];
 
 export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-daily-planning',
     title: 'Daily Planning Brief',
-    description: 'Every weekday morning, Aether reviews your calendar & tasks, synthesizes priorities, and prepares your daily action plan.',
+    description:
+      'Every weekday morning, Aether reviews your calendar & tasks, synthesizes priorities, and prepares your daily action plan.',
     category: 'Productivity',
     badge: 'Popular',
     iconName: 'Calendar',
@@ -98,7 +263,10 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           type: 'action',
           title: 'Generate Notification Briefing',
           actionType: 'CREATE_NOTIFICATION',
-          config: { title: 'Your Aether Daily Plan is Ready', message: 'Review today top priorities and schedule.' },
+          config: {
+            title: 'Your Aether Daily Plan is Ready',
+            message: 'Review today top priorities and schedule.',
+          },
         },
       ],
     },
@@ -106,7 +274,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-task-follow-up',
     title: 'Task Follow-up',
-    description: 'When a key milestone task is completed, automatically generates a follow-up review task.',
+    description:
+      'When a key milestone task is completed, automatically generates a follow-up review task.',
     category: 'Tasks',
     badge: 'Essential',
     iconName: 'Sparkles',
@@ -144,7 +313,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-overdue-task-reminder',
     title: 'Overdue Task Reminder',
-    description: 'Monitors overdue tasks, sending immediate notifications to elevate priority and avoid missed deadlines.',
+    description:
+      'Monitors overdue tasks, sending immediate notifications to elevate priority and avoid missed deadlines.',
     category: 'Tasks',
     badge: 'Automation',
     iconName: 'Clock',
@@ -173,7 +343,10 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           type: 'action',
           title: 'Send Overdue Reminder Notification',
           actionType: 'CREATE_NOTIFICATION',
-          config: { title: 'Overdue High-Priority Task Alert', message: 'Action required on overdue task.' },
+          config: {
+            title: 'Overdue High-Priority Task Alert',
+            message: 'Action required on overdue task.',
+          },
         },
       ],
     },
@@ -181,7 +354,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-project-progress-summary',
     title: 'Project Progress Summary',
-    description: 'Calculates milestone completion across active projects every Friday afternoon and outputs a status report.',
+    description:
+      'Calculates milestone completion across active projects every Friday afternoon and outputs a status report.',
     category: 'Projects',
     badge: 'Reports',
     iconName: 'Folder',
@@ -220,7 +394,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-knowledge-digest',
     title: 'Knowledge Digest',
-    description: 'Compiles recently created notes and documents into a organized weekly Knowledge Base digest.',
+    description:
+      'Compiles recently created notes and documents into a organized weekly Knowledge Base digest.',
     category: 'Knowledge',
     badge: 'AI Powered',
     iconName: 'BookOpen',
@@ -258,7 +433,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-daily-productivity-summary',
     title: 'Daily Productivity Summary',
-    description: 'Analyzes completed tasks and workspace activity at the end of each workday and logs a daily productivity summary.',
+    description:
+      'Analyzes completed tasks and workspace activity at the end of each workday and logs a daily productivity summary.',
     category: 'Productivity',
     badge: 'Insights',
     iconName: 'Sparkles',
@@ -289,7 +465,10 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           type: 'action',
           title: 'Send Daily Productivity Notification',
           actionType: 'CREATE_NOTIFICATION',
-          config: { title: 'Daily Productivity Summary Ready', message: 'Review your completed tasks and highlights for today.' },
+          config: {
+            title: 'Daily Productivity Summary Ready',
+            message: 'Review your completed tasks and highlights for today.',
+          },
         },
       ],
     },
@@ -297,7 +476,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-weekly-workspace-summary',
     title: 'Weekly Workspace Summary',
-    description: 'Summarizes workspace achievements, pending goals, and high-level progress every Monday morning.',
+    description:
+      'Summarizes workspace achievements, pending goals, and high-level progress every Monday morning.',
     category: 'Productivity',
     badge: 'Weekly',
     iconName: 'Calendar',
@@ -336,7 +516,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-file-to-knowledge-processing',
     title: 'File-to-Knowledge Processing',
-    description: 'When a new file is uploaded, automatically extracts key concepts, tags content, and indexes it into Knowledge.',
+    description:
+      'When a new file is uploaded, automatically extracts key concepts, tags content, and indexes it into Knowledge.',
     category: 'Knowledge',
     badge: 'AI Processing',
     iconName: 'BookOpen',
@@ -374,7 +555,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-meeting-summary',
     title: 'Meeting Summary',
-    description: 'Extracts action items, decisions, and takeaways from calendar events into dedicated meeting notes.',
+    description:
+      'Extracts action items, decisions, and takeaways from calendar events into dedicated meeting notes.',
     category: 'AI',
     badge: 'Smart AI',
     iconName: 'Bot',
@@ -412,7 +594,8 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     id: 'tmpl-project-report-generator',
     title: 'Project Report Generator',
-    description: 'Generates a comprehensive Markdown project status report on demand, including active tasks and health metrics.',
+    description:
+      'Generates a comprehensive Markdown project status report on demand, including active tasks and health metrics.',
     category: 'Projects',
     badge: 'On-Demand',
     iconName: 'Folder',

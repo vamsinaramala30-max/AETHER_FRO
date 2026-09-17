@@ -68,7 +68,7 @@ export const AutomationOverview: React.FC<Props> = ({
 
   if (automations.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 text-center dark:border-slate-800 dark:bg-slate-900 animate-in fade-in duration-200">
+      <div className="animate-in fade-in flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 text-center duration-200 dark:border-slate-800 dark:bg-slate-900">
         <Zap className="mb-4 h-12 w-12 text-amber-500" />
         <h3 className="text-base font-bold text-slate-900 dark:text-white">No automations yet</h3>
         <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
@@ -76,7 +76,7 @@ export const AutomationOverview: React.FC<Props> = ({
         </p>
         <button
           onClick={onOpenQuickAi}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition-colors"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-amber-600"
         >
           <Plus className="h-4 w-4" />
           <span>Create Automation</span>
@@ -86,7 +86,7 @@ export const AutomationOverview: React.FC<Props> = ({
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="animate-in fade-in space-y-6 duration-300">
       <AutomationStats stats={stats} />
 
       <QuickActions

@@ -17,7 +17,7 @@ import { CTA } from './CTA/CTA';
 export const LandingIndex: React.FC = () => {
   return (
     <PublicPageLayout>
-      <div className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-[#0B0D12] text-zinc-100 transition-colors duration-300 dark:bg-[#0B0D12] dark:text-zinc-100 light:bg-slate-50 light:text-zinc-900">
+      <div className="light:bg-slate-50 light:text-zinc-900 relative min-h-screen w-full max-w-full overflow-x-hidden bg-[#0B0D12] text-zinc-100 transition-colors duration-300 dark:bg-[#0B0D12] dark:text-zinc-100">
         {/* Continuous Interactive 3D / Floating Background Environment */}
         <Landing3DBackground />
 

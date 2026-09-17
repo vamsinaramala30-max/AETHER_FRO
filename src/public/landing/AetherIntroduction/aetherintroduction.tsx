@@ -22,7 +22,7 @@ const features = [
 export const AetherIntroduction: React.FC = () => {
   return (
     <section
-      className="relative isolate overflow-hidden border-b border-zinc-800/40 dark:border-zinc-800/40 light:border-zinc-200/60 bg-zinc-950/20 dark:bg-zinc-950/20 light:bg-white/30 backdrop-blur-md py-16 sm:py-24 lg:py-28"
+      className="light:border-zinc-200/60 light:bg-white/30 relative isolate overflow-hidden border-b border-zinc-800/40 bg-zinc-950/20 py-16 backdrop-blur-md dark:border-zinc-800/40 dark:bg-zinc-950/20 sm:py-24 lg:py-28"
       aria-labelledby="intro-heading"
     >
       {/* Floating background ambient glow */}
@@ -35,29 +35,28 @@ export const AetherIntroduction: React.FC = () => {
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
           {/* Left */}
           <div className="lg:col-span-5">
-            <span className="inline-flex rounded-full border border-zinc-800/80 dark:border-zinc-800/80 light:border-zinc-300/80 bg-zinc-900/70 dark:bg-zinc-900/70 light:bg-white/80 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-400 light:text-zinc-600 backdrop-blur-xl">
+            <span className="light:border-zinc-300/80 light:bg-white/80 light:text-zinc-600 inline-flex rounded-full border border-zinc-800/80 bg-zinc-900/70 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-400 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:text-zinc-400">
               Aether Workspace
             </span>
 
             <h2
               id="intro-heading"
-              className="mt-5 max-w-xl text-2xl font-semibold tracking-tight text-zinc-100 dark:text-zinc-100 light:text-zinc-900 sm:text-4xl"
+              className="light:text-zinc-900 mt-5 max-w-xl text-2xl font-semibold tracking-tight text-zinc-100 dark:text-zinc-100 sm:text-4xl"
             >
               A Connected
-              <span className="block bg-gradient-to-r from-zinc-100 via-zinc-300 to-zinc-500 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500 light:from-zinc-900 light:via-indigo-900 light:to-violet-700 bg-clip-text text-transparent">
+              <span className="light:from-zinc-900 light:via-indigo-900 light:to-violet-700 block bg-gradient-to-r from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500">
                 Workspace Paradigm
               </span>
             </h2>
 
-            <p className="mt-4 max-w-lg text-xs leading-6 text-zinc-400 dark:text-zinc-400 light:text-zinc-600 sm:text-base sm:leading-7">
-              Modern professional output requires more than discrete applications.
-              Point solutions create communication boundaries, high contextual
-              penalties, and fragmented memory.
+            <p className="light:text-zinc-600 mt-4 max-w-lg text-xs leading-6 text-zinc-400 dark:text-zinc-400 sm:text-base sm:leading-7">
+              Modern professional output requires more than discrete applications. Point solutions
+              create communication boundaries, high contextual penalties, and fragmented memory.
             </p>
 
-            <p className="mt-3 max-w-lg text-xs leading-6 text-zinc-400 dark:text-zinc-400 light:text-zinc-600 sm:text-base sm:leading-7">
-              Aether natively unifies core primitives within a singular workspace
-              layer. It operates locally, connects explicitly, and remains predictable.
+            <p className="light:text-zinc-600 mt-3 max-w-lg text-xs leading-6 text-zinc-400 dark:text-zinc-400 sm:text-base sm:leading-7">
+              Aether natively unifies core primitives within a singular workspace layer. It operates
+              locally, connects explicitly, and remains predictable.
             </p>
           </div>
 
@@ -66,24 +65,24 @@ export const AetherIntroduction: React.FC = () => {
             {features.map((feature, index) => (
               <article
                 key={feature.title}
-                className="group relative overflow-hidden rounded-2xl border border-zinc-800/70 dark:border-zinc-800/70 light:border-zinc-200/80 bg-zinc-900/40 dark:bg-zinc-900/40 light:bg-white/70 p-5 sm:p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:bg-zinc-900/60 dark:hover:bg-zinc-900/60 light:hover:bg-white/90 shadow-sm"
+                className="light:border-zinc-200/80 light:bg-white/70 light:hover:bg-white/90 group relative overflow-hidden rounded-2xl border border-zinc-800/70 bg-zinc-900/40 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:bg-zinc-900/60 dark:border-zinc-800/70 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/60 sm:p-6"
               >
                 <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-violet-500/5 blur-2xl transition-all duration-500 group-hover:bg-violet-500/15" />
 
                 <div className="relative">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 light:text-zinc-500">
+                    <span className="light:text-zinc-500 font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                       0{index + 1}
                     </span>
 
                     <span className="h-1.5 w-1.5 rounded-full bg-zinc-700 transition-colors group-hover:bg-violet-400" />
                   </div>
 
-                  <h3 className="mt-4 text-sm font-semibold text-zinc-100 dark:text-zinc-100 light:text-zinc-900">
+                  <h3 className="light:text-zinc-900 mt-4 text-sm font-semibold text-zinc-100 dark:text-zinc-100">
                     {feature.title}
                   </h3>
 
-                  <p className="mt-2 text-xs leading-5 text-zinc-400 dark:text-zinc-400 light:text-zinc-600 sm:text-sm sm:leading-6">
+                  <p className="light:text-zinc-600 mt-2 text-xs leading-5 text-zinc-400 dark:text-zinc-400 sm:text-sm sm:leading-6">
                     {feature.text}
                   </p>
                 </div>

@@ -8,6 +8,8 @@ import { uploadDocument } from '../rag/document-parser';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { normalizeDocument } from '../rag/document-parser';
 
+import { apiClient } from '../../api/client';
+
 /**
  * KnowledgeService isolates all knowledge/RAG backend operations.
  */
@@ -19,26 +21,38 @@ export class KnowledgeService {
   }
 
   async listDocuments(): Promise<AIResult<AIDocument[]>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.knowledgePath}/documents`;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: { code: 'RAG_FAILED', message: 'Failed to load documents.', timestamp: Date.now() },
-        };
+      const res = await apiClient.get<Record<string, unknown> | unknown[]>(
+        `${this.config.backend.knowledgePath}/documents`,
+        { timeout: 10_000 }
+      );
+
+      let rawArray: unknown[] = [];
+      if (Array.isArray(res)) {
+        rawArray = res;
+      } else if (res && typeof res === 'object') {
+        const payload = res as Record<string, unknown>;
+        if (Array.isArray(payload['data'])) {
+          rawArray = payload['data'];
+        } else if (Array.isArray(payload['documents'])) {
+          rawArray = payload['documents'];
+        }
       }
-      const raw = await res.json() as unknown[];
+
       return {
         success: true,
-        data: raw
+        data: rawArray
           .filter((d): d is Record<string, unknown> => typeof d === 'object' && d !== null)
           .map(normalizeDocument),
       };
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot load documents.', timestamp: Date.now() },
+        error: {
+          code: 'RAG_FAILED',
+          message: 'Cannot load documents from knowledge service.',
+          timestamp: Date.now(),
+        },
       };
     }
   }
@@ -48,20 +62,20 @@ export class KnowledgeService {
   }
 
   async deleteDocument(id: string): Promise<AIResult<void>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.knowledgePath}/documents/${encodeURIComponent(id)}`;
     try {
-      const res = await fetch(url, { method: 'DELETE', signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: { code: 'RAG_FAILED', message: 'Failed to delete document.', timestamp: Date.now() },
-        };
-      }
+      await apiClient.delete(
+        `${this.config.backend.knowledgePath}/documents/${encodeURIComponent(id)}`,
+        { timeout: 10_000 }
+      );
       return { success: true, data: undefined };
     } catch {
       return {
         success: false,
-        error: { code: 'SERVICE_UNAVAILABLE', message: 'Cannot delete document.', timestamp: Date.now() },
+        error: {
+          code: 'RAG_FAILED',
+          message: 'Cannot delete document.',
+          timestamp: Date.now(),
+        },
       };
     }
   }

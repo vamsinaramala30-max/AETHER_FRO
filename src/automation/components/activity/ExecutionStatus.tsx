@@ -17,10 +17,10 @@ export const ExecutionStatusBadge: React.FC<Props> = ({ status }) => {
           status === 'completed'
             ? 'bg-emerald-500'
             : status === 'failed'
-            ? 'bg-rose-500'
-            : status === 'running'
-            ? 'bg-sky-500 animate-ping'
-            : 'bg-amber-500'
+              ? 'bg-rose-500'
+              : status === 'running'
+                ? 'animate-ping bg-sky-500'
+                : 'bg-amber-500'
         }`}
       />
       {style.label}

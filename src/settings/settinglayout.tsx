@@ -7,7 +7,16 @@ import { PreferencesPage } from './preferences/preferencepage';
 import { ConnectedAccountsPage } from './connected-accounts/connectedaccountpage';
 import { BillingPage } from './billing/billingpage';
 import { ContactPage } from './contact/contactpage';
-import { User, Palette, Bell, ShieldCheck, Sliders, Link2, CreditCard, HelpCircle } from 'lucide-react';
+import {
+  User,
+  Palette,
+  Bell,
+  ShieldCheck,
+  Sliders,
+  Link2,
+  CreditCard,
+  HelpCircle,
+} from 'lucide-react';
 
 type SettingsTab =
   | 'profile'

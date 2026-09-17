@@ -212,17 +212,17 @@ const CSSFallbackBackground: React.FC<{ isLightMode: boolean }> = ({ isLightMode
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* Ambient Gradient Orbs */}
       <div
-        className={`absolute -left-20 top-1/6 h-[500px] w-[500px] animate-pulse rounded-full blur-[120px] transition-all duration-1000 ${
+        className={`top-1/6 absolute -left-20 h-[500px] w-[500px] animate-pulse rounded-full blur-[120px] transition-all duration-1000 ${
           isLightMode ? 'bg-indigo-300/30' : 'bg-indigo-600/15'
         }`}
       />
       <div
-        className={`absolute -right-20 top-1/3 h-[600px] w-[600px] animate-pulse rounded-full blur-[140px] [animation-duration:8s] transition-all duration-1000 ${
+        className={`absolute -right-20 top-1/3 h-[600px] w-[600px] animate-pulse rounded-full blur-[140px] transition-all duration-1000 [animation-duration:8s] ${
           isLightMode ? 'bg-cyan-300/30' : 'bg-cyan-500/15'
         }`}
       />
       <div
-        className={`absolute left-1/3 top-2/3 h-[550px] w-[550px] animate-pulse rounded-full blur-[130px] [animation-duration:10s] transition-all duration-1000 ${
+        className={`absolute left-1/3 top-2/3 h-[550px] w-[550px] animate-pulse rounded-full blur-[130px] transition-all duration-1000 [animation-duration:10s] ${
           isLightMode ? 'bg-purple-300/25' : 'bg-purple-600/12'
         }`}
       />
@@ -379,7 +379,11 @@ export const Landing3DBackground: React.FC = () => {
       {isTabActive && (
         <Canvas
           camera={{ position: [0, 0, 15], fov: 60 }}
-          gl={{ antialias: deviceTier === 'desktop', alpha: true, powerPreference: 'high-performance' }}
+          gl={{
+            antialias: deviceTier === 'desktop',
+            alpha: true,
+            powerPreference: 'high-performance',
+          }}
           onCreated={({ gl }) => {
             gl.setClearColor(0x000000, 0);
           }}
@@ -387,7 +391,11 @@ export const Landing3DBackground: React.FC = () => {
         >
           <ambientLight intensity={isLightMode ? 0.9 : 0.5} />
           <pointLight position={[10, 10, 10]} intensity={isLightMode ? 1.5 : 2} color={color1} />
-          <pointLight position={[-10, -10, -10]} intensity={isLightMode ? 1.2 : 1.5} color={color2} />
+          <pointLight
+            position={[-10, -10, -10]}
+            intensity={isLightMode ? 1.2 : 1.5}
+            color={color2}
+          />
           <directionalLight position={[0, 15, 5]} intensity={1} color={color3} />
 
           {/* Mouse & Scroll Parallax Controller */}

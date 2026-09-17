@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { Mail, MessageSquare, Send, CheckCircle, AlertCircle, Phone, HelpCircle, Shield, FileText } from 'lucide-react';
+import { Mail, MessageSquare, Send, CheckCircle, AlertCircle, Phone } from 'lucide-react';
 import { contactService } from './contactservice';
 import { useAuth } from '@/app/providers/authprovider';
 
@@ -16,7 +16,9 @@ export const ContactPage: React.FC = () => {
   });
 
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; text: string; refId?: string } | null>(null);
+  const [result, setResult] = useState<{ success: boolean; text: string; refId?: string } | null>(
+    null,
+  );
 
   const categories = [
     'General',
@@ -30,7 +32,12 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+    if (
+      !formData.fullName.trim() ||
+      !formData.email.trim() ||
+      !formData.subject.trim() ||
+      !formData.message.trim()
+    ) {
       setResult({ success: false, text: 'Please fill in all required fields.' });
       return;
     }
@@ -55,7 +62,8 @@ export const ContactPage: React.FC = () => {
         });
       })
       .catch((err: any) => {
-        const errorMsg = err?.response?.data?.error || err?.message || 'Unable to send message. Please try again.';
+        const errorMsg =
+          err?.response?.data?.error || err?.message || 'Unable to send message. Please try again.';
         setResult({ success: false, text: errorMsg });
       })
       .finally(() => {
@@ -64,7 +72,9 @@ export const ContactPage: React.FC = () => {
   };
 
   const handleWhatsAppAction = () => {
-    const text = encodeURIComponent(`Hello AETHER Support, I am contacting you from the AETHER application.\nName: ${user?.name || 'User'}\nEmail: ${user?.email || ''}`);
+    const text = encodeURIComponent(
+      `Hello AETHER Support, I am contacting you from the AETHER application.\nName: ${user?.name || 'User'}\nEmail: ${user?.email || ''}`,
+    );
     window.open(`https://wa.me/919390223123?text=${text}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -93,7 +103,9 @@ export const ContactPage: React.FC = () => {
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Primary Contact Email</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Primary Contact Email
+                </h4>
                 <a
                   href="mailto:vkgroups127@gmail.com"
                   className="text-sm font-extrabold text-indigo-600 hover:underline dark:text-indigo-400"
@@ -112,8 +124,12 @@ export const ContactPage: React.FC = () => {
                   <Phone className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">WhatsApp Support</h4>
-                  <p className="text-sm font-extrabold text-slate-900 dark:text-white">+91 9390223123</p>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    WhatsApp Support
+                  </h4>
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    +91 9390223123
+                  </p>
                 </div>
               </div>
               <button
@@ -129,7 +145,9 @@ export const ContactPage: React.FC = () => {
 
         {/* Contact / Feedback Form Container */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h3 className="mb-4 text-base font-bold text-slate-900 dark:text-white">Submit Feedback or Support Request</h3>
+          <h3 className="mb-4 text-base font-bold text-slate-900 dark:text-white">
+            Submit Feedback or Support Request
+          </h3>
 
           {result && (
             <div
@@ -146,7 +164,11 @@ export const ContactPage: React.FC = () => {
               )}
               <div>
                 <p>{result.text}</p>
-                {result.refId && <p className="mt-1 font-mono text-[11px] text-slate-500">Reference ID: {result.refId}</p>}
+                {result.refId && (
+                  <p className="mt-1 font-mono text-[11px] text-slate-500">
+                    Reference ID: {result.refId}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -154,7 +176,10 @@ export const ContactPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="fullName" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="fullName"
+                  className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
                   Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -169,7 +194,10 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="contactEmail" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="contactEmail"
+                  className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
                   Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -186,7 +214,10 @@ export const ContactPage: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="category" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="category"
+                  className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
                   Category
                 </label>
                 <select
@@ -204,7 +235,10 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="subject" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="subject"
+                  className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
                   Subject <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -220,7 +254,10 @@ export const ContactPage: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="message" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label
+                htmlFor="message"
+                className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
                 Message <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -246,9 +283,11 @@ export const ContactPage: React.FC = () => {
         </div>
 
         {/* Footer Navigation Links */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60 text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
           <div className="flex items-center gap-4">
-            <span className="font-bold text-slate-900 dark:text-white">AETHER Operating System</span>
+            <span className="font-bold text-slate-900 dark:text-white">
+              AETHER Operating System
+            </span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
             <span>Help Center</span>

@@ -20,4 +20,3 @@ export class AutomationExecutionService {
 }
 
 export const automationExecutionService = new AutomationExecutionService();
-

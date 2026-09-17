@@ -23,18 +23,21 @@ export function useAutomationActions(onSuccess?: () => void) {
     [onSuccess],
   );
 
-  const runNow = useCallback(async (id: string) => {
-    setIsSubmitting(true);
-    setActionError(null);
-    try {
-      await automationExecutionService.executeRule(id);
-      if (onSuccess) onSuccess();
-    } catch (err: any) {
-      setActionError(err?.message || 'Failed to trigger automation execution');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [onSuccess]);
+  const runNow = useCallback(
+    async (id: string) => {
+      setIsSubmitting(true);
+      setActionError(null);
+      try {
+        await automationExecutionService.executeRule(id);
+        if (onSuccess) onSuccess();
+      } catch (err: any) {
+        setActionError(err?.message || 'Failed to trigger automation execution');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [onSuccess],
+  );
 
   const duplicate = useCallback(
     async (rule: AutomationRule) => {
