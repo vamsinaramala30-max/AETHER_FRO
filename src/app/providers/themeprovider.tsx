@@ -14,12 +14,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('aether-theme') as Theme;
-      return saved || 'system';
+      return saved || 'light';
     }
-    return 'system';
+    return 'light';
   });
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

@@ -27,7 +27,9 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   const isRootActive =
     location.pathname === item.href ||
     (item.id === 'home' && location.pathname === '/app') ||
-    (item.href !== '/app' && location.pathname.startsWith(item.href) && !hasChildren);
+    (item.href !== '/app' && location.pathname.startsWith(item.href) && !hasChildren) ||
+    // Activate parent when on any sub-path (including unlisted children like game routes)
+    (hasChildren && item.href !== '/app' && location.pathname.startsWith(item.href + '/'));
 
   const isActive = isAnyChildActive || isRootActive;
 

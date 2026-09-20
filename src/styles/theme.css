@@ -27,6 +27,24 @@
   --aether-glass-border: rgba(226, 232, 240, 0.9);
   --aether-backdrop-blur: 12px;
   --aether-shadow-glow: 0 0 15px rgba(99, 102, 241, 0.15);
+
+  /* AI-specific tokens */
+  --aether-code-bg: #1e293b;
+  --aether-code-text: #e2e8f0;
+  --aether-code-header-bg: #0f172a;
+  --aether-code-header-text: #94a3b8;
+  --aether-code-border: #334155;
+  --aether-blockquote-bg: rgba(79, 70, 229, 0.06);
+  --aether-blockquote-border: rgba(79, 70, 229, 0.4);
+  --aether-blockquote-text: #4338ca;
+  --aether-ai-panel-bg: #f8fafc;
+  --aether-ai-panel-border: #e2e8f0;
+  --aether-ai-panel-item-bg: #f1f5f9;
+  --aether-ai-panel-item-hover: #e2e8f0;
+  --aether-table-header-bg: #f1f5f9;
+  --aether-table-border: #e2e8f0;
+  --aether-table-text: #0f172a;
+  --aether-table-text-muted: #475569;
 }
 
 /* Dark Theme Overrides */
@@ -56,6 +74,24 @@
   --aether-glass-bg: rgba(14, 20, 34, 0.95);
   --aether-glass-border: rgba(255, 255, 255, 0.1);
   --aether-shadow-glow: 0 0 20px rgba(129, 140, 248, 0.25);
+
+  /* AI-specific tokens */
+  --aether-code-bg: #0f172a;
+  --aether-code-text: #e2e8f0;
+  --aether-code-header-bg: #020617;
+  --aether-code-header-text: #94a3b8;
+  --aether-code-border: rgba(51, 65, 85, 0.6);
+  --aether-blockquote-bg: rgba(99, 102, 241, 0.08);
+  --aether-blockquote-border: rgba(99, 102, 241, 0.4);
+  --aether-blockquote-text: #a5b4fc;
+  --aether-ai-panel-bg: #0e1422;
+  --aether-ai-panel-border: rgba(51, 65, 85, 0.4);
+  --aether-ai-panel-item-bg: rgba(30, 41, 59, 0.3);
+  --aether-ai-panel-item-hover: rgba(30, 41, 59, 0.6);
+  --aether-table-header-bg: rgba(30, 41, 59, 0.8);
+  --aether-table-border: rgba(51, 65, 85, 0.6);
+  --aether-table-text: #e2e8f0;
+  --aether-table-text-muted: #94a3b8;
 }
 
 /* Automatic System Preference Integration */

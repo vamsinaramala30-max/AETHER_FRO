@@ -8,7 +8,7 @@ import { useKnowledge } from '../hooks/useKnowledge';
 import { getDocumentStatusLabel } from '../rag/document-parser';
 
 const STATUS_COLORS: Record<DocumentStatus, string> = {
-  pending: 'text-slate-400',
+  pending: 'text-aether-muted',
   parsing: 'text-amber-400',
   chunking: 'text-amber-400',
   embedding: 'text-blue-400',
@@ -22,9 +22,9 @@ interface DocumentRowProps {
 }
 
 const DocumentRow = memo<DocumentRowProps>(({ document: doc, onDelete }) => (
-  <div className="group flex items-start gap-3 rounded-lg border border-slate-700/40 bg-slate-800/30 p-3">
+  <div className="group flex items-start gap-3 rounded-lg border border-aether-border bg-aether-ai-panel-item p-3">
     <div
-      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-700/60 text-slate-400"
+      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-aether-subtle text-aether-muted"
       aria-hidden="true"
     >
       <svg
@@ -42,15 +42,15 @@ const DocumentRow = memo<DocumentRowProps>(({ document: doc, onDelete }) => (
       </svg>
     </div>
     <div className="min-w-0 flex-1">
-      <p className="truncate text-xs font-medium text-slate-200">{doc.name}</p>
+      <p className="truncate text-xs font-medium text-aether-main">{doc.name}</p>
       <div className="mt-0.5 flex items-center gap-2">
         <span className={`text-[10px] font-medium ${STATUS_COLORS[doc.status]}`}>
           {getDocumentStatusLabel(doc.status)}
         </span>
         {doc.chunkCount !== undefined && doc.status === 'indexed' && (
           <>
-            <span className="text-slate-600">·</span>
-            <span className="text-[10px] text-slate-500">{doc.chunkCount} chunks</span>
+            <span className="text-aether-subtleText">·</span>
+            <span className="text-[10px] text-aether-muted">{doc.chunkCount} chunks</span>
           </>
         )}
       </div>
@@ -60,7 +60,7 @@ const DocumentRow = memo<DocumentRowProps>(({ document: doc, onDelete }) => (
       type="button"
       onClick={() => onDelete(doc.id)}
       aria-label={`Delete document: ${doc.name}`}
-      className="mt-0.5 shrink-0 rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:opacity-100 group-hover:opacity-100"
+      className="mt-0.5 shrink-0 rounded p-1 text-aether-subtleText opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:opacity-100 group-hover:opacity-100"
     >
       <svg
         className="h-3 w-3"
@@ -98,14 +98,14 @@ export const KnowledgePanel = memo(() => {
   return (
     <section className="flex flex-col gap-4" aria-labelledby="knowledge-panel-heading">
       <div className="flex items-center justify-between">
-        <h2 id="knowledge-panel-heading" className="text-sm font-semibold text-slate-200">
+        <h2 id="knowledge-panel-heading" className="text-sm font-semibold text-aether-main">
           Knowledge Base
         </h2>
         <button
           type="button"
           onClick={() => void refresh()}
           aria-label="Refresh knowledge"
-          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300 focus:outline-none"
+          className="rounded-lg p-1.5 text-aether-muted hover:bg-aether-hover hover:text-aether-main focus:outline-none"
         >
           <svg
             className="h-3.5 w-3.5"
@@ -127,13 +127,13 @@ export const KnowledgePanel = memo(() => {
       {/* RAG Status */}
       {ragStatus && (
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-slate-800/50 p-2 text-center">
+          <div className="rounded-lg bg-aether-subtle p-2 text-center">
             <p className="text-base font-bold text-emerald-400">{ragStatus.indexedCount}</p>
-            <p className="text-[10px] text-slate-500">Indexed</p>
+            <p className="text-[10px] text-aether-muted">Indexed</p>
           </div>
-          <div className="rounded-lg bg-slate-800/50 p-2 text-center">
-            <p className="text-base font-bold text-slate-300">{ragStatus.documentCount}</p>
-            <p className="text-[10px] text-slate-500">Total Docs</p>
+          <div className="rounded-lg bg-aether-subtle p-2 text-center">
+            <p className="text-base font-bold text-aether-main">{ragStatus.documentCount}</p>
+            <p className="text-[10px] text-aether-muted">Total Docs</p>
           </div>
         </div>
       )}
@@ -152,7 +152,7 @@ export const KnowledgePanel = memo(() => {
         />
         <label
           htmlFor="knowledge-file-upload"
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 p-3 text-xs text-slate-400 transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-300"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-aether-border p-3 text-xs text-aether-muted transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300"
         >
           <svg
             className="h-4 w-4"
@@ -174,9 +174,9 @@ export const KnowledgePanel = memo(() => {
 
       {/* Documents */}
       {documents.length === 0 ? (
-        <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 p-6 text-center">
-          <p className="text-xs text-slate-500">No documents indexed.</p>
-          <p className="mt-1 text-[11px] text-slate-600">
+        <div className="rounded-xl border border-aether-border bg-aether-subtle p-6 text-center">
+          <p className="text-xs text-aether-muted">No documents indexed.</p>
+          <p className="mt-1 text-[11px] text-aether-subtleText">
             Upload documents to enable RAG retrieval.
           </p>
         </div>

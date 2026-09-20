@@ -8,20 +8,20 @@ import { useModel } from '../hooks/useModel';
 import { getModelStatusLabel } from '../llm/model-runtime';
 
 const STATUS_COLORS: Record<AIModelInfo['status'], string> = {
-  available: 'text-slate-300',
+  available: 'text-aether-muted',
   loading: 'text-amber-400',
   loaded: 'text-emerald-400',
   unloading: 'text-amber-400',
-  unavailable: 'text-slate-500',
+  unavailable: 'text-aether-subtleText',
   error: 'text-red-400',
 };
 
 const STATUS_DOT_COLORS: Record<AIModelInfo['status'], string> = {
-  available: 'bg-slate-400',
+  available: 'bg-aether-muted',
   loading: 'bg-amber-400',
   loaded: 'bg-emerald-400',
   unloading: 'bg-amber-400',
-  unavailable: 'bg-slate-600',
+  unavailable: 'bg-aether-subtleText',
   error: 'bg-red-400',
 };
 
@@ -37,19 +37,19 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
     className={`rounded-xl border p-3 transition-colors ${
       isActive
         ? 'border-indigo-500/40 bg-indigo-500/10'
-        : 'border-slate-700/40 bg-slate-800/30 hover:bg-slate-800/60'
+        : 'border-aether-border bg-aether-ai-panel-item hover:bg-aether-ai-panel-item-hover'
     }`}
   >
     <div className="flex items-start gap-3">
       <div
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-700/60 text-xs font-bold text-slate-300"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-aether-subtle text-xs font-bold text-aether-muted"
         aria-hidden="true"
       >
         {model.runtime === 'local' ? '⚡' : '🌐'}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-xs font-semibold text-slate-200">{model.name}</p>
+          <p className="truncate text-xs font-semibold text-aether-main">{model.name}</p>
           {isActive && (
             <span className="shrink-0 rounded bg-indigo-500/20 px-1.5 py-0.5 text-[9px] font-semibold text-indigo-300">
               Active
@@ -67,15 +67,15 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
         </div>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {model.contextWindow && (
-            <span className="text-[9px] text-slate-500">
+            <span className="text-[9px] text-aether-subtleText">
               {(model.contextWindow / 1000).toFixed(0)}k ctx
             </span>
           )}
           {model.parametersB && (
-            <span className="text-[9px] text-slate-500">{model.parametersB}B params</span>
+            <span className="text-[9px] text-aether-subtleText">{model.parametersB}B params</span>
           )}
           {model.quantization && (
-            <span className="text-[9px] text-slate-500">{model.quantization}</span>
+            <span className="text-[9px] text-aether-subtleText">{model.quantization}</span>
           )}
         </div>
       </div>
@@ -95,7 +95,7 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
             type="button"
             onClick={() => onLoad(model.id)}
             aria-label={`Load model ${model.name}`}
-            className="rounded-lg px-2 py-1 text-[10px] font-medium text-slate-400 hover:bg-slate-700 focus:outline-none"
+            className="rounded-lg px-2 py-1 text-[10px] font-medium text-aether-muted hover:bg-aether-hover focus:outline-none"
           >
             Load
           </button>
@@ -117,14 +117,14 @@ export const ModelPanel = memo(() => {
   return (
     <section className="flex flex-col gap-4" aria-labelledby="model-panel-heading">
       <div className="flex items-center justify-between">
-        <h2 id="model-panel-heading" className="text-sm font-semibold text-slate-200">
+        <h2 id="model-panel-heading" className="text-sm font-semibold text-aether-main">
           Models
         </h2>
         <button
           type="button"
           onClick={() => void loadModels()}
           aria-label="Refresh models"
-          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300 focus:outline-none"
+          className="rounded-lg p-1.5 text-aether-muted hover:bg-aether-hover hover:text-aether-main focus:outline-none"
           disabled={isLoading}
         >
           <svg
@@ -152,9 +152,9 @@ export const ModelPanel = memo(() => {
           />
         </div>
       ) : availableModels.length === 0 ? (
-        <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 p-6 text-center">
-          <p className="text-xs text-slate-500">No models available.</p>
-          <p className="mt-1 text-[11px] text-slate-600">Ensure the AETHER backend is running.</p>
+        <div className="rounded-xl border border-aether-border bg-aether-subtle p-6 text-center">
+          <p className="text-xs text-aether-muted">No models available.</p>
+          <p className="mt-1 text-[11px] text-aether-subtleText">Ensure the AETHER backend is running.</p>
         </div>
       ) : (
         <ul className="space-y-2" role="list" aria-label="Available models">

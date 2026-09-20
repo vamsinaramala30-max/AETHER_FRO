@@ -74,11 +74,11 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
         <div
           role="alert"
           aria-live="assertive"
-          className="aria-error-screen flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 p-6 font-sans text-slate-100"
+          className="aria-error-screen flex min-h-screen w-full flex-col items-center justify-center bg-aether-bg p-6 font-sans text-aether-main"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-md">
+          <div className="w-full max-w-md rounded-xl border border-aether-border bg-aether-surface p-8 shadow-2xl backdrop-blur-md">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
                 <svg
                   className="h-6 w-6"
                   fill="none"
@@ -94,20 +94,20 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
                   />
                 </svg>
               </div>
-              <h1 className="text-xl font-semibold tracking-tight text-white">System Exception</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-aether-main">System Exception</h1>
             </div>
-            <p className="mb-6 text-sm leading-relaxed text-slate-400">
+            <p className="mb-6 text-sm leading-relaxed text-aether-muted">
               A critical runtime issue occurred. The application state was preserved safely.
             </p>
             {this.state.error && (
-              <pre className="mb-6 max-h-32 overflow-x-auto rounded-md border border-slate-800/80 bg-slate-950 p-3 font-mono text-xs text-slate-300">
+              <pre className="mb-6 max-h-32 overflow-x-auto rounded-md border border-aether-border bg-aether-subtle p-3 font-mono text-xs text-aether-main">
                 {this.state.error.message}
               </pre>
             )}
             <button
               type="button"
               onClick={this.handleReload}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Reload Application
             </button>
@@ -132,13 +132,13 @@ function RootLoadingFallback(): ReactNode {
     <div
       role="status"
       aria-label="Loading AETHER application"
-      className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 text-slate-100"
+      className="flex min-h-screen w-full flex-col items-center justify-center bg-aether-bg text-aether-main"
     >
       <div className="relative flex items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-2 border-indigo-500/20 border-t-indigo-500" />
         <div className="absolute h-6 w-6 animate-spin flex-row-reverse rounded-full border-2 border-cyan-500/20 border-b-cyan-400" />
       </div>
-      <p className="mt-4 text-xs font-medium uppercase tracking-widest text-slate-400">
+      <p className="mt-4 text-xs font-medium uppercase tracking-widest text-aether-muted">
         Initializing AETHER...
       </p>
     </div>

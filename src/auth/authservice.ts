@@ -20,7 +20,7 @@ export interface AuthResponse {
   error: Error | null;
 }
 
-type AuthChangeEvent = 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED';
+type AuthChangeEvent = 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED' | 'TOKEN_EXPIRED';
 type AuthChangeListener = (event: AuthChangeEvent, session: AuthSession | null) => void;
 
 const listeners = new Set<AuthChangeListener>();
@@ -85,6 +85,9 @@ function setStoredTokens(
 ): void {
   try {
     localStorage.setItem(authConfig.tokenKey, tokens.accessToken);
+    // Keep backward-compatible keys in sync
+    localStorage.setItem('aether-auth-token', tokens.accessToken);
+    localStorage.setItem('auth_token', tokens.accessToken);
     if (tokens.refreshToken) {
       localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
     } else {
@@ -103,20 +106,20 @@ function setStoredTokens(
 }
 
 function clearStoredTokens(): void {
-  try {
-    localStorage.removeItem(authConfig.tokenKey);
-  } catch {
-    /* ignore */
-  }
-  try {
-    localStorage.removeItem(authConfig.refreshTokenKey);
-  } catch {
-    /* ignore */
-  }
-  try {
-    localStorage.removeItem(USER_CACHE_KEY);
-  } catch {
-    /* ignore */
+  const keysToRemove = [
+    authConfig.tokenKey,
+    authConfig.refreshTokenKey,
+    USER_CACHE_KEY,
+    'aether-auth-token',
+    'auth_token',
+    'aether_token',
+  ];
+  for (const key of keysToRemove) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -194,26 +197,34 @@ async function refreshSessionUsingRefreshToken(
     setStoredTokens(result.tokens, user);
 
     const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
+    currentSession = session;
     notifyListeners('TOKEN_REFRESHED', session);
     console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS (authservice)');
     return { session, error: null };
   } catch (error: unknown) {
-    const cachedUser = getStoredUser();
-    const isAuthError = error instanceof ApiError && (error.status === 401 || error.status === 403);
+    const isAuthError =
+      error instanceof ApiError &&
+      (error.status === 400 || error.status === 401 || error.status === 403 || error.status === 422);
 
-    if (!isAuthError && cachedUser) {
+    const cachedUser = getStoredUser();
+    const currentAccessToken = getStoredAccessToken();
+
+    // If it's a temporary network/server error and the existing access token is still valid, retain session
+    if (!isAuthError && currentAccessToken && !isTokenExpired(currentAccessToken) && cachedUser) {
       console.warn(
-        '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving cached user session',
+        '[AUTH_DIAG] Temporary refresh failure; active access token remains valid.',
       );
-      const accessToken = getStoredAccessToken() || 'cached_token';
-      const session = createSession(cachedUser, accessToken, refreshToken);
+      const session = createSession(cachedUser, currentAccessToken, refreshToken);
       currentSession = session;
       return { session, error: null };
     }
 
-    console.error('[AUTH_DIAG] TOKEN_REFRESH_FAILED - Clearing stored auth tokens (authservice)');
+    console.error(
+      '[AUTH_DIAG] TOKEN_REFRESH_FAILED - Session expired or invalid. Clearing tokens (authservice)',
+    );
     clearStoredTokens();
     currentSession = null;
+    notifyListeners('TOKEN_EXPIRED', null);
     return {
       session: null,
       error: error instanceof Error ? error : new Error('Token refresh failed'),
@@ -260,15 +271,7 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
     return await refreshSessionUsingRefreshToken(refreshToken);
   }
 
-  // If cached user exists and token isn't invalid, try using cached user session
-  if (cachedUser && accessToken) {
-    console.warn('[AUTH_DIAG] AUTH_RESTORED - Restoring session from cached user & access token');
-    const session = createSession(cachedUser, accessToken, refreshToken ?? undefined);
-    currentSession = session;
-    return { session, error: null };
-  }
-
-  console.warn('[AUTH_DIAG] SESSION_INVALID - No valid tokens or user session found');
+  console.warn('[AUTH_DIAG] SESSION_INVALID - No valid tokens found');
   clearStoredTokens();
   currentSession = null;
   return { session: null, error: null };

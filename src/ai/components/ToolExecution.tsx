@@ -19,20 +19,20 @@ const STATUS_CONFIG: Record<
   pending: {
     label: 'Pending',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'border-slate-700 bg-slate-800 text-slate-400',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   PLANNED: {
     label: 'Planned',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'border-slate-700 bg-slate-800 text-slate-400',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   REQUESTED: {
     label: 'Requested',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'border-slate-700 bg-slate-800 text-slate-400',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   VALIDATING: {
     label: 'Validating…',
@@ -121,20 +121,20 @@ const STATUS_CONFIG: Record<
   SKIPPED: {
     label: 'Skipped',
     icon: '↷',
-    colorClass: 'text-slate-500',
-    badgeClass: 'border-slate-800 bg-slate-900 text-slate-500',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   cancelled: {
     label: 'Cancelled',
     icon: '⊘',
-    colorClass: 'text-slate-500',
-    badgeClass: 'border-slate-800 bg-slate-900 text-slate-500',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   CANCELLED: {
     label: 'Cancelled',
     icon: '⊘',
-    colorClass: 'text-slate-500',
-    badgeClass: 'border-slate-800 bg-slate-900 text-slate-500',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'border-aether-border bg-aether-subtle text-aether-muted',
   },
   EXECUTED: {
     label: 'Executed',
@@ -159,11 +159,11 @@ export const ToolExecution = memo<ToolExecutionProps>(({ toolInvocations, classN
 
   return (
     <section
-      className={`mt-3 space-y-2 rounded-2xl border border-slate-700/60 bg-slate-800/50 p-3.5 backdrop-blur-sm ${className}`}
+      className={`mt-3 space-y-2 rounded-2xl border border-aether-border bg-aether-surface p-3.5 backdrop-blur-sm ${className}`}
       aria-label="Tool executions"
     >
-      <header className="flex items-center justify-between border-b border-slate-700/40 pb-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+      <header className="flex items-center justify-between border-b border-aether-border pb-2">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-aether-muted">
           Tools Executed ({toolInvocations.length})
         </h3>
       </header>
@@ -179,7 +179,7 @@ export const ToolExecution = memo<ToolExecutionProps>(({ toolInvocations, classN
           return (
             <div
               key={inv.id}
-              className="flex items-start gap-2.5 rounded-xl border border-slate-700/40 bg-slate-900/40 p-2.5"
+              className="flex items-start gap-2.5 rounded-xl border border-aether-border bg-aether-subtle p-2.5"
               role="status"
               aria-label={`${inv.toolName}: ${config.label}`}
             >
@@ -192,13 +192,13 @@ export const ToolExecution = memo<ToolExecutionProps>(({ toolInvocations, classN
 
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-1.5">
-                  <span className="font-mono text-xs font-semibold text-slate-200">
+                  <span className="font-mono text-xs font-semibold text-aether-main">
                     {inv.toolName}
                   </span>
 
                   <div className="flex items-center gap-1.5">
                     {duration && (
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-[10px] text-aether-muted font-mono">
                         {duration}
                       </span>
                     )}

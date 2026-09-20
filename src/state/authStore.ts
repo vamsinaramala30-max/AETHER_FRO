@@ -39,6 +39,7 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (user, token) => {
         set({ user, token, isAuthenticated: true, error: null, isLoading: false });
         try {
+          localStorage.setItem('aether_access_token', token);
           localStorage.setItem('aether-auth-token', token);
           localStorage.setItem('auth_token', token);
           void useNotificationStore.getState().fetchNotifications();
@@ -55,6 +56,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         try {
+          localStorage.removeItem('aether_access_token');
+          localStorage.removeItem('aether_refresh_token');
+          localStorage.removeItem('aether_auth_user');
           localStorage.removeItem('aether-auth-token');
           localStorage.removeItem('auth_token');
           localStorage.removeItem('aether_notifications');
@@ -78,7 +82,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated,
+        isAuthenticated: Boolean(state.token && state.isAuthenticated),
       }),
     },
   ),

@@ -100,43 +100,18 @@ export class AiService {
 
   public async sendMessage(payload: AiChatPayload): Promise<AiChatResponse> {
     if (!this.isAiEnabled()) {
-      return {
-        id: 'fallback-' + Date.now(),
-        message: {
-          role: 'assistant',
-          content:
-            'AI Service is currently disabled or unconfigured. Please enable a provider in AI Models settings.',
-        },
-        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      };
+      throw new Error('AI Service is currently disabled or unconfigured.');
     }
 
-    try {
-      return await aiApi.sendMessage(payload);
-    } catch {
-      return {
-        id: 'fallback-' + Date.now(),
-        message: {
-          role: 'assistant',
-          content:
-            'I encountered an issue connecting to the AI provider. Operating in standard mode.',
-        },
-        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      };
-    }
+    return await aiApi.sendMessage(payload);
   }
 
   public async *streamMessage(payload: AiChatPayload): AsyncGenerator<string, void, unknown> {
     if (!this.isAiEnabled()) {
-      yield 'AI Provider is disabled or no API key is set. Operating in offline standard mode.';
-      return;
+      throw new Error('AI Provider is disabled or no API key is set.');
     }
 
-    try {
-      yield* aiApi.streamMessage(payload);
-    } catch {
-      yield 'Offline response: Standard backend mode active.';
-    }
+    yield* aiApi.streamMessage(payload);
   }
 
   public async getAvailableModels(): Promise<AiModelDTO[]> {
@@ -306,21 +281,28 @@ export class AiService {
   public async generateDashboardInsights(): Promise<string[]> {
     if (this.isAiEnabled()) {
       try {
-        return [
-          '⚡ Productivity peak: Most tasks completed between 10 AM - 12 PM.',
-          '📌 Recommended action: Review Project Alpha milestone deliverables.',
-          '🗓️ Schedule tip: 2 hours of open focus time available this afternoon.',
-        ];
+        const response = await this.sendMessage({
+          model: 'default',
+          messages: [
+            {
+              role: 'system',
+              content: 'Provide 2 brief bullet insights about the user workspace activity.',
+            },
+            { role: 'user', content: 'Summarize today workspace status.' },
+          ],
+        });
+        if (response?.message?.content) {
+          return response.message.content
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean);
+        }
       } catch {
-        // Fallback below
+        // Return empty array when AI service is unavailable
       }
     }
 
-    // Deterministic fallback
-    return [
-      'Overview: Workspace activity remains steady.',
-      'Check pending tasks for upcoming deadlines.',
-    ];
+    return [];
   }
 }
 

@@ -74,14 +74,14 @@ const ConversationItem = memo<ConversationItemProps>(
           onClick={() => onSelect(conversation.id)}
           className={`flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
             isActive
-              ? 'bg-indigo-500/20 text-white'
-              : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+              ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-medium'
+              : 'text-aether-muted hover:bg-aether-hover hover:text-aether-main'
           }`}
           aria-current={isActive ? 'true' : undefined}
           aria-label={`Conversation: ${conversation.title}`}
         >
           <svg
-            className="mt-0.5 h-4 w-4 shrink-0 text-slate-500"
+            className="mt-0.5 h-4 w-4 shrink-0 text-aether-muted"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -103,14 +103,14 @@ const ConversationItem = memo<ConversationItemProps>(
                 onBlur={handleRename}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full bg-transparent text-xs font-medium text-white outline-none ring-0"
+                className="w-full bg-transparent text-xs font-medium text-aether-main outline-none ring-0"
                 aria-label="Edit conversation title"
                 maxLength={80}
               />
             ) : (
-              <p className="truncate text-xs font-medium">{conversation.title}</p>
+              <p className="truncate text-xs font-medium text-aether-main">{conversation.title}</p>
             )}
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-aether-muted">
               {formatConversationDate(conversation.updatedAt)}
             </p>
           </div>
@@ -128,7 +128,7 @@ const ConversationItem = memo<ConversationItemProps>(
                 e.stopPropagation();
                 setMenuOpen((m) => !m);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-slate-700 hover:text-slate-300 focus:outline-none"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-aether-muted hover:bg-aether-hover hover:text-aether-main focus:outline-none"
               aria-label="Conversation options"
               aria-expanded={menuOpen}
             >
@@ -146,7 +146,7 @@ const ConversationItem = memo<ConversationItemProps>(
 
             {menuOpen && (
               <div
-                className="absolute right-0 top-7 z-20 min-w-[120px] rounded-xl border border-slate-700 bg-slate-800 py-1 shadow-xl"
+                className="absolute right-0 top-7 z-20 min-w-[120px] rounded-xl border border-aether-border bg-aether-surface py-1 shadow-xl"
                 role="menu"
                 aria-label="Conversation options"
               >
@@ -158,7 +158,7 @@ const ConversationItem = memo<ConversationItemProps>(
                     setMenuOpen(false);
                     setEditing(true);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-aether-main hover:bg-aether-hover"
                 >
                   Rename
                 </button>
@@ -170,7 +170,7 @@ const ConversationItem = memo<ConversationItemProps>(
                     setMenuOpen(false);
                     onDelete(conversation.id);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-red-400 hover:bg-slate-700"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-red-500 dark:text-red-400 hover:bg-aether-hover"
                 >
                   Delete
                 </button>
@@ -208,7 +208,7 @@ export const ConversationList = memo<ConversationListProps>(
             type="button"
             onClick={onNew}
             id="ai-new-conversation"
-            className="flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-400 transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="flex w-full items-center gap-2 rounded-lg border border-dashed border-aether-border px-3 py-2 text-xs text-aether-muted transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <svg
               className="h-3.5 w-3.5"
@@ -226,8 +226,8 @@ export const ConversationList = memo<ConversationListProps>(
 
         {sorted.length === 0 ? (
           <div className="px-4 py-6 text-center">
-            <p className="text-xs text-slate-500">No conversations yet.</p>
-            <p className="mt-1 text-xs text-slate-600">Start a new conversation above.</p>
+            <p className="text-xs text-aether-muted">No conversations yet.</p>
+            <p className="mt-1 text-xs text-aether-muted opacity-80">Start a new conversation above.</p>
           </div>
         ) : (
           <ul className="space-y-0.5 overflow-y-auto p-2" role="list" aria-label="Conversations">

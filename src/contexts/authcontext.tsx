@@ -1,14 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from 'react';
+import React, { useMemo, ReactNode } from 'react';
 import { RoleType, Role } from '../permissions/roles';
-import { PermissionType } from '../permissions/permissions';
+import { PermissionType, Permission } from '../permissions/permissions';
+import { useAuth as useAppAuth } from '../app/providers/authprovider';
+import { authService, AuthUser as ServiceUser } from '../auth/authservice';
 
 export interface AuthUser {
   id: string;
@@ -32,87 +26,90 @@ export interface AuthContextValue {
   refreshSession: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+function mapToContextUser(user: ServiceUser | null): AuthUser | null {
+  if (!user) return null;
+
+  const roleStr = (user.role || 'USER').toLowerCase();
+  let role: RoleType = Role.USER;
+  if (roleStr === 'admin' || roleStr === 'superadmin') {
+    role = Role.ADMIN;
+  } else if (roleStr === 'premium') {
+    role = Role.PREMIUM;
+  }
+
+  const defaultUserPermissions: PermissionType[] = [
+    Permission.PROJECTS_READ,
+    Permission.PROJECTS_CREATE,
+    Permission.PROJECTS_UPDATE,
+    Permission.KNOWLEDGE_READ,
+    Permission.AI_EXECUTE,
+    Permission.WORKSPACE_READ,
+  ];
+
+  const adminPermissions: PermissionType[] = [
+    ...defaultUserPermissions,
+    Permission.PROJECTS_DELETE,
+    Permission.PROJECTS_EXPORT,
+    Permission.KNOWLEDGE_UPLOAD,
+    Permission.KNOWLEDGE_MANAGE,
+    Permission.AI_CONFIGURE,
+    Permission.AUTOMATION_CREATE,
+    Permission.AUTOMATION_EXECUTE,
+    Permission.AUTOMATION_MANAGE,
+    Permission.WORKSPACE_MANAGE,
+    Permission.SETTINGS_UPDATE,
+    Permission.USERS_MANAGE,
+    Permission.BILLING_MANAGE,
+    Permission.SYSTEM_CONFIGURE,
+  ];
+
+  const permissions: PermissionType[] =
+    role === Role.ADMIN
+      ? adminPermissions
+      : (user.permissions as PermissionType[]) || defaultUserPermissions;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name || user.fullName || user.email.split('@')[0],
+    role,
+    permissions,
+    isSubscribed: Boolean(user.isSubscribed || role === Role.PREMIUM || role === Role.ADMIN),
+    avatarUrl: user.avatarUrl || undefined,
+  };
+}
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>('loading');
-
-  const refreshSession = useCallback(() => {
-    setStatus('loading');
-    try {
-      const token = localStorage.getItem('aether_token');
-      if (typeof token === 'string' && token.trim() !== '') {
-        setUser({
-          id: 'usr_01',
-          email: 'operator@aether.ai',
-          name: 'Aether Operator',
-          role: Role.USER,
-          permissions: ['projects:read', 'knowledge:read', 'ai_models:execute'],
-          isSubscribed: false,
-        });
-        setStatus('authenticated');
-      } else {
-        setUser(null);
-        setStatus('unauthenticated');
-      }
-    } catch {
-      setUser(null);
-      setStatus('unauthenticated');
-    }
-    return Promise.resolve();
-  }, []);
-
-  useEffect(() => {
-    void refreshSession();
-  }, [refreshSession]);
-
-  const login = useCallback(
-    (credentials: Record<string, unknown>) => {
-      setStatus('loading');
-      void (async () => {
-        try {
-          const token =
-            typeof credentials.token === 'string' ? credentials.token : 'mock_jwt_token';
-          localStorage.setItem('aether_token', token);
-          await refreshSession();
-        } catch (err) {
-          setStatus('unauthenticated');
-          throw err;
-        }
-      })();
-      return Promise.resolve();
-    },
-    [refreshSession],
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('aether_token');
-    setUser(null);
-    setStatus('unauthenticated');
-    return Promise.resolve();
-  }, []);
-
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      status,
-      isAuthenticated: status === 'authenticated' && user !== null,
-      isLoading: status === 'loading',
-      login,
-      logout,
-      refreshSession,
-    }),
-    [user, status, login, logout, refreshSession],
-  );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <>{children}</>;
 };
 
 export const useAuth = (): AuthContextValue => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const appAuth = useAppAuth();
+
+  const user = useMemo(() => mapToContextUser(appAuth.user), [appAuth.user]);
+
+  const login = async (credentials: Record<string, unknown>) => {
+    const email = String(credentials.email || '');
+    const password = String(credentials.password || '');
+    const result = await authService.signIn(email, password);
+    if (result.error) {
+      throw result.error;
+    }
+  };
+
+  const status: AuthStatus = appAuth.isLoading
+    ? 'loading'
+    : appAuth.isAuthenticated
+      ? 'authenticated'
+      : 'unauthenticated';
+
+  return {
+    user,
+    status,
+    isAuthenticated: appAuth.isAuthenticated,
+    isLoading: appAuth.isLoading,
+    login,
+    logout: appAuth.logout,
+    refreshSession: appAuth.refreshSession,
+  };
 };

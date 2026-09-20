@@ -26,69 +26,69 @@ const STATUS_THEME: Record<
   idle: {
     bg: 'bg-transparent',
     border: 'border-transparent',
-    text: 'text-slate-400',
-    dotColor: 'bg-slate-400',
+    text: 'text-aether-muted',
+    dotColor: 'bg-aether-muted',
   },
   analyzing: {
-    bg: 'bg-indigo-950/40',
-    border: 'border-indigo-500/20',
-    text: 'text-indigo-300',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/40',
+    border: 'border-indigo-200 dark:border-indigo-500/20',
+    text: 'text-indigo-600 dark:text-indigo-300',
     dotColor: 'bg-indigo-400',
     badgeText: 'Analyzing',
   },
   retrieving: {
-    bg: 'bg-cyan-950/40',
-    border: 'border-cyan-500/20',
-    text: 'text-cyan-300',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/40',
+    border: 'border-cyan-200 dark:border-cyan-500/20',
+    text: 'text-cyan-600 dark:text-cyan-300',
     dotColor: 'bg-cyan-400',
     badgeText: 'Context',
   },
   planning: {
-    bg: 'bg-blue-950/40',
-    border: 'border-blue-500/20',
-    text: 'text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/40',
+    border: 'border-blue-200 dark:border-blue-500/20',
+    text: 'text-blue-600 dark:text-blue-300',
     dotColor: 'bg-blue-400',
     badgeText: 'Planning',
   },
   waiting_confirmation: {
-    bg: 'bg-amber-950/40',
-    border: 'border-amber-500/20',
-    text: 'text-amber-300',
+    bg: 'bg-amber-50 dark:bg-amber-950/40',
+    border: 'border-amber-200 dark:border-amber-500/20',
+    text: 'text-amber-600 dark:text-amber-300',
     dotColor: 'bg-amber-400',
     badgeText: 'Confirming',
   },
   executing_action: {
-    bg: 'bg-purple-950/40',
-    border: 'border-purple-500/20',
-    text: 'text-purple-300',
+    bg: 'bg-purple-50 dark:bg-purple-950/40',
+    border: 'border-purple-200 dark:border-purple-500/20',
+    text: 'text-purple-600 dark:text-purple-300',
     dotColor: 'bg-purple-400',
     badgeText: 'Executing',
   },
   verifying: {
-    bg: 'bg-emerald-950/40',
-    border: 'border-emerald-500/20',
-    text: 'text-emerald-300',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+    border: 'border-emerald-200 dark:border-emerald-500/20',
+    text: 'text-emerald-600 dark:text-emerald-300',
     dotColor: 'bg-emerald-400',
     badgeText: 'Verifying',
   },
   generating: {
-    bg: 'bg-indigo-950/30',
-    border: 'border-indigo-500/20',
-    text: 'text-indigo-300',
+    bg: 'bg-indigo-50/70 dark:bg-indigo-950/30',
+    border: 'border-indigo-200 dark:border-indigo-500/20',
+    text: 'text-indigo-600 dark:text-indigo-300',
     dotColor: 'bg-indigo-400',
     badgeText: 'Responding',
   },
   thinking: {
-    bg: 'bg-slate-900/60',
-    border: 'border-slate-700/40',
-    text: 'text-slate-300',
-    dotColor: 'bg-slate-400',
+    bg: 'bg-aether-subtle dark:bg-slate-900/60',
+    border: 'border-aether-border dark:border-slate-700/40',
+    text: 'text-aether-muted dark:text-slate-300',
+    dotColor: 'bg-aether-muted',
     badgeText: 'Reasoning',
   },
   using_tool: {
-    bg: 'bg-purple-950/40',
-    border: 'border-purple-500/20',
-    text: 'text-purple-300',
+    bg: 'bg-purple-50 dark:bg-purple-950/40',
+    border: 'border-purple-200 dark:border-purple-500/20',
+    text: 'text-purple-600 dark:text-purple-300',
     dotColor: 'bg-purple-400',
     badgeText: 'Tool',
   },
@@ -129,7 +129,7 @@ export const AIThinking = memo<AIThinkingProps>(({ state, className = '' }) => {
       {/* Stage Badge */}
       {theme.badgeText && (
         <span
-          className={`rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${theme.text} bg-white/5 border border-white/10 shrink-0`}
+          className={`rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${theme.text} bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 shrink-0`}
         >
           {theme.badgeText}
         </span>
@@ -142,7 +142,7 @@ export const AIThinking = memo<AIThinkingProps>(({ state, className = '' }) => {
 
       {/* Step counter if available */}
       {state.step !== undefined && state.totalSteps !== undefined && (
-        <span className="ml-auto text-[10px] text-slate-500 font-mono shrink-0">
+        <span className="ml-auto text-[10px] text-aether-muted font-mono shrink-0">
           [{state.step}/{state.totalSteps}]
         </span>
       )}

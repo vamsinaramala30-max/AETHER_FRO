@@ -496,9 +496,10 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
         </div>
 
         {/* Dynamic Page Content */}
-        {location.pathname.startsWith('/app/ai/assistant') ? (
+        {location.pathname.startsWith('/app/ai/assistant') ||
+        location.pathname.startsWith('/app/cognitive-hub') ? (
           <main className="flex flex-1 flex-col overflow-hidden bg-aether-bg">
-            <div className="flex h-full flex-1 flex-col overflow-hidden">
+            <div className="flex h-full flex-1 flex-col overflow-y-auto">
               <Outlet />
             </div>
           </main>

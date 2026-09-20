@@ -178,7 +178,7 @@ export const AISidebar = memo<AISidebarProps>(({ className = '' }) => {
               />
             </svg>
           </div>
-          <span className="text-sm font-bold text-white">AETHER AI</span>
+          <span className="text-sm font-bold text-aether-main">AETHER AI</span>
         </div>
       </div>
 
@@ -192,8 +192,8 @@ export const AISidebar = memo<AISidebarProps>(({ className = '' }) => {
               aria-current={activePanel === panel ? 'page' : undefined}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activePanel === panel
-                  ? 'bg-indigo-500/20 text-white'
-                  : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'
+                  ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-semibold'
+                  : 'text-aether-muted hover:bg-aether-hover hover:text-aether-main'
               }`}
               id={`ai-nav-${panel}`}
             >

@@ -32,16 +32,16 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
   }, [code]);
 
   return (
-    <div className="group/code relative my-3 overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900 shadow-md">
-      <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-3.5 py-1.5 text-[11px] font-mono text-slate-400">
-        <span className="font-semibold uppercase tracking-wider text-slate-400">
+    <div className="group/code relative my-3 overflow-hidden rounded-xl border border-aether-code-border bg-aether-code shadow-md">
+      <div className="flex items-center justify-between border-b border-aether-code-border bg-aether-code-header px-3.5 py-1.5 text-[11px] font-mono text-aether-code-header-text">
+        <span className="font-semibold uppercase tracking-wider text-aether-code-header-text">
           {language || 'code'}
         </span>
         <button
           type="button"
           onClick={handleCopy}
           aria-label="Copy code to clipboard"
-          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400"
+          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-aether-code-header-text transition-colors hover:bg-white/10 hover:text-aether-code-text focus:outline-none focus-visible:ring-1 focus-visible:ring-indigo-400"
         >
           {copied ? (
             <>
@@ -65,7 +65,7 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-3.5 text-xs leading-relaxed text-slate-200">
+      <pre className="overflow-x-auto p-3.5 text-xs leading-relaxed text-aether-code-text">
         <code>{code}</code>
       </pre>
     </div>
@@ -168,16 +168,16 @@ function renderContent(content: string): React.ReactNode {
         elements.push(
           <div
             key={`table-${i}`}
-            className="my-3 overflow-x-auto rounded-xl border border-slate-700/60 bg-slate-900/60"
+            className="my-3 overflow-x-auto rounded-xl border border-aether-table-border bg-aether-surface"
           >
-            <table className="min-w-full divide-y divide-slate-800 text-xs">
+            <table className="min-w-full divide-y divide-aether-table-border text-xs">
               {headerRow && (
-                <thead className="bg-slate-800/80">
+                <thead className="bg-aether-table-header">
                   <tr>
                     {headerRow.map((cell, cIdx) => (
                       <th
                         key={cIdx}
-                        className="px-3 py-2 text-left font-semibold text-slate-200"
+                        className="px-3 py-2 text-left font-semibold text-aether-table-text"
                       >
                         {cell}
                       </th>
@@ -185,11 +185,11 @@ function renderContent(content: string): React.ReactNode {
                   </tr>
                 </thead>
               )}
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-aether-table-border/50">
                 {bodyRows.map((row, rIdx) => (
-                  <tr key={rIdx} className="hover:bg-slate-800/30">
+                  <tr key={rIdx} className="hover:bg-aether-hover/30">
                     {row.map((cell, cIdx) => (
-                      <td key={cIdx} className="px-3 py-2 text-slate-300">
+                      <td key={cIdx} className="px-3 py-2 text-aether-table-text-muted">
                         {renderInlineFormatting(cell)}
                       </td>
                     ))}
@@ -206,7 +206,7 @@ function renderContent(content: string): React.ReactNode {
       elements.push(
         <div key={`li-${i}`} className="flex items-start gap-2 my-1 pl-1">
           <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
-          <span className="leading-relaxed text-slate-200">
+          <span className="leading-relaxed text-aether-main">
             {renderInlineFormatting(line.slice(2))}
           </span>
         </div>,
@@ -217,10 +217,10 @@ function renderContent(content: string): React.ReactNode {
       if (numMatch) {
         elements.push(
           <div key={`oli-${i}`} className="flex items-start gap-2 my-1 pl-1">
-            <span className="font-mono text-xs font-semibold text-indigo-400 shrink-0">
+            <span className="font-mono text-xs font-semibold text-indigo-500 dark:text-indigo-400 shrink-0">
               {numMatch[1]}.
             </span>
-            <span className="leading-relaxed text-slate-200">
+            <span className="leading-relaxed text-aether-main">
               {renderInlineFormatting(numMatch[2] ?? '')}
             </span>
           </div>,
@@ -231,26 +231,26 @@ function renderContent(content: string): React.ReactNode {
       elements.push(
         <blockquote
           key={`quote-${i}`}
-          className="my-2 border-l-2 border-indigo-500/60 bg-indigo-950/20 pl-3 py-1 text-xs italic text-indigo-200 rounded-r"
+          className="my-2 border-l-2 border-aether-blockquote-border bg-aether-blockquote-bg pl-3 py-1 text-xs italic text-aether-blockquote-text rounded-r"
         >
           {renderInlineFormatting(line.slice(2))}
         </blockquote>,
       );
     } else if (line !== undefined && line.startsWith('### ')) {
       elements.push(
-        <h4 key={`h3-${i}`} className="mt-3 mb-1 text-xs font-bold uppercase tracking-wider text-slate-200">
+        <h4 key={`h3-${i}`} className="mt-3 mb-1 text-xs font-bold uppercase tracking-wider text-aether-main">
           {line.slice(4)}
         </h4>,
       );
     } else if (line !== undefined && line.startsWith('## ')) {
       elements.push(
-        <h3 key={`h2-${i}`} className="mt-4 mb-1.5 text-sm font-bold text-slate-100">
+        <h3 key={`h2-${i}`} className="mt-4 mb-1.5 text-sm font-bold text-aether-main">
           {line.slice(3)}
         </h3>,
       );
     } else if (line !== undefined && line.startsWith('# ')) {
       elements.push(
-        <h2 key={`h1-${i}`} className="mt-4 mb-2 text-base font-extrabold text-white">
+        <h2 key={`h1-${i}`} className="mt-4 mb-2 text-base font-extrabold text-aether-main">
           {line.slice(2)}
         </h2>,
       );
@@ -277,32 +277,32 @@ function VerificationBadge({ status }: { status: VerificationStatus }) {
     VERIFIED: {
       label: 'Verified Evidence',
       icon: '✓',
-      classes: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+      classes: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
     },
     PARTIALLY_VERIFIED: {
       label: 'Partially Verified',
       icon: '◐',
-      classes: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+      classes: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
     },
     FAILED: {
       label: 'Verification Failed',
       icon: '✗',
-      classes: 'border-rose-500/30 bg-rose-500/10 text-rose-400',
+      classes: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400',
     },
     PENDING: {
       label: 'Verifying…',
       icon: '○',
-      classes: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+      classes: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
     },
     NOT_VERIFIABLE: {
       label: 'Unverified Information',
       icon: '·',
-      classes: 'border-slate-700 bg-slate-800 text-slate-400',
+      classes: 'border-aether-border bg-aether-subtle text-aether-muted',
     },
     UNVERIFIED: {
       label: 'Unverified',
       icon: '·',
-      classes: 'border-slate-700 bg-slate-800 text-slate-400',
+      classes: 'border-aether-border bg-aether-subtle text-aether-muted',
     },
   };
 
@@ -366,7 +366,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
             ? 'bg-indigo-600 text-white'
             : isAssistant
               ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
-              : 'bg-slate-700 text-slate-300'
+              : 'bg-aether-subtle text-aether-muted'
         }`}
         aria-hidden="true"
       >
@@ -382,7 +382,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
             isUser
               ? 'rounded-tr-sm bg-indigo-600 text-white'
               : isError
-                ? 'rounded-tl-sm border border-rose-500/30 bg-rose-950/40 text-rose-300'
+                ? 'rounded-tl-sm border border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
                 : 'rounded-tl-sm border border-aether-border bg-aether-surface text-aether-main shadow-xs'
           }`}
         >
@@ -397,12 +397,12 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
                 <span
                   className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                     message.confidence === 'HIGH_CONFIDENCE'
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                       : message.confidence === 'MEDIUM_CONFIDENCE'
-                        ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
+                        ? 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400'
                         : message.confidence === 'LOW_CONFIDENCE'
-                          ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-                          : 'border-purple-500/30 bg-purple-500/10 text-purple-400'
+                          ? 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                          : 'border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400'
                   }`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -419,7 +419,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
               {/* Memory Status Badges (Prompt 4 UX) */}
               {isMemoryStore && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300"
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-300"
                   title="Fact successfully saved to persistent memory"
                 >
                   <span className="text-[11px]">💾</span>
@@ -429,7 +429,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
 
               {isMemoryForget && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-300"
+                  className="inline-flex items-center gap-1 rounded-full border border-aether-border bg-aether-subtle px-2 py-0.5 text-[10px] font-medium text-aether-muted"
                   title="Memory item removed"
                 >
                   <span className="text-[11px]">🗑️</span>
@@ -439,7 +439,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
 
               {!isMemoryStore && !isMemoryForget && hasRecalledMemory && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[10px] font-medium text-teal-300"
+                  className="inline-flex items-center gap-1 rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[10px] font-medium text-teal-600 dark:text-teal-300"
                   title="Relevant context was recalled from persistent memory"
                 >
                   <span className="text-[11px]">🧠</span>
@@ -450,7 +450,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
               {/* Knowledge Status Badge (Prompt 5 UX) */}
               {hasKnowledge && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-medium text-sky-300"
+                  className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-medium text-sky-600 dark:text-sky-300"
                   title="Evidence retrieved from your workspace knowledge"
                 >
                   <span className="text-[11px]">📚</span>
@@ -463,13 +463,13 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
           {/* Message Body */}
           {isError ? (
             <div className="flex items-start gap-2">
-              <svg className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 shrink-0 text-rose-500 dark:text-rose-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-xs text-rose-300">{message.error ?? 'An error occurred during response generation.'}</p>
+              <p className="text-xs text-rose-600 dark:text-rose-300">{message.error ?? 'An error occurred during response generation.'}</p>
             </div>
           ) : (
-            <div className="space-y-1 overflow-hidden break-words text-slate-100">
+            <div className="space-y-1 overflow-hidden break-words text-aether-main">
               {renderContent(message.content)}
             </div>
           )}
@@ -489,7 +489,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
         )}
 
         {/* Footer actions: Timestamp, Copy, Retry */}
-        <div className="mt-1 flex items-center gap-2 px-1 text-[10px] text-slate-500">
+        <div className="mt-1 flex items-center gap-2 px-1 text-[10px] text-aether-muted">
           <time dateTime={new Date(message.createdAt).toISOString()}>
             {formatTime(message.createdAt)}
           </time>
@@ -504,10 +504,10 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
               type="button"
               onClick={handleCopyMessage}
               aria-label="Copy message content"
-              className="rounded p-0.5 text-slate-500 opacity-0 transition-opacity hover:text-slate-300 group-hover:opacity-100 focus:opacity-100"
+              className="rounded p-0.5 text-aether-muted opacity-0 transition-opacity hover:text-aether-main group-hover:opacity-100 focus:opacity-100"
             >
               {copied ? (
-                <span className="text-emerald-400">Copied</span>
+                <span className="text-emerald-500 dark:text-emerald-400">Copied</span>
               ) : (
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -527,7 +527,7 @@ export const AIMessage = memo<AIMessageProps>(({ message, onRetry, className = '
               type="button"
               onClick={() => onRetry(message.id)}
               aria-label="Retry generation"
-              className="flex items-center gap-1 font-medium text-rose-400 hover:text-rose-300 hover:underline focus:outline-none"
+              className="flex items-center gap-1 font-medium text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 hover:underline focus:outline-none"
             >
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

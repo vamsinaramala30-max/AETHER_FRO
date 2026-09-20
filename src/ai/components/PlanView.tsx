@@ -20,20 +20,20 @@ const STEP_STATUS_CONFIG: Record<
   pending: {
     label: 'Pending',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   PLANNED: {
     label: 'Planned',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   REQUESTED: {
     label: 'Requested',
     icon: '○',
-    colorClass: 'text-slate-400',
-    badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   VALIDATING: {
     label: 'Validating…',
@@ -62,8 +62,8 @@ const STEP_STATUS_CONFIG: Record<
   SKIPPED: {
     label: 'Skipped',
     icon: '↷',
-    colorClass: 'text-slate-500',
-    badgeClass: 'bg-slate-900 text-slate-500 border-slate-800',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   AUTHORIZED: {
     label: 'Authorized',
@@ -128,14 +128,14 @@ const STEP_STATUS_CONFIG: Record<
   cancelled: {
     label: 'Cancelled',
     icon: '⊘',
-    colorClass: 'text-slate-500',
-    badgeClass: 'bg-slate-900 text-slate-500 border-slate-800',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   CANCELLED: {
     label: 'Cancelled',
     icon: '⊘',
-    colorClass: 'text-slate-500',
-    badgeClass: 'bg-slate-900 text-slate-500 border-slate-800',
+    colorClass: 'text-aether-muted',
+    badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
   },
   EXECUTED: {
     label: 'Executed',
@@ -179,16 +179,16 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
 
   return (
     <section
-      className={`mt-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 backdrop-blur-md ${className}`}
+      className={`mt-3 rounded-2xl border border-aether-border bg-aether-surface p-4 backdrop-blur-md ${className}`}
       aria-label="Multi-step Action Plan"
     >
-      <div className="mb-3 flex items-center justify-between border-b border-slate-800/60 pb-2.5">
+      <div className="mb-3 flex items-center justify-between border-b border-aether-border pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500/20 text-xs font-bold text-indigo-400">
             ⚡
           </span>
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-aether-main">
               Agent Plan
             </h3>
             {plan.version && plan.version > 1 && (
@@ -206,7 +206,7 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
         </span>
       </div>
 
-      <p className="mb-3 text-xs font-medium italic text-slate-300">"{plan.objective}"</p>
+      <p className="mb-3 text-xs font-medium italic text-aether-muted">"{plan.objective}"</p>
 
       {/* Clarification Request Card */}
       {plan.clarificationRequest && (
@@ -215,7 +215,7 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
             <span>❓</span>
             <span>Clarification Needed:</span>
           </div>
-          <p className="text-slate-200 mb-2">{plan.clarificationRequest.question}</p>
+          <p className="text-aether-main mb-2">{plan.clarificationRequest.question}</p>
           {plan.clarificationRequest.missingInfo && plan.clarificationRequest.missingInfo.length > 0 && (
             <div className="text-[11px] text-amber-300/80 mb-2">
               <span className="font-medium">Missing: </span>
@@ -240,13 +240,13 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
       {/* Constraints & Assumptions Badges */}
       {plan.constraints && plan.constraints.length > 0 && (
         <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-aether-muted">
             Constraints:
           </span>
           {plan.constraints.map((c, i) => (
             <span
               key={i}
-              className="rounded bg-slate-800/80 border border-slate-700/60 px-1.5 py-0.5 text-[10px] text-slate-300"
+              className="rounded bg-aether-subtle border border-aether-border px-1.5 py-0.5 text-[10px] text-aether-muted"
             >
               🛡️ {c}
             </span>
@@ -260,13 +260,13 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
           const config = STEP_STATUS_CONFIG[step.status] || {
             label: step.status,
             icon: '○',
-            colorClass: 'text-slate-400',
-            badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+            colorClass: 'text-aether-muted',
+            badgeClass: 'bg-aether-subtle text-aether-muted border-aether-border',
           };
           return (
             <div
               key={step.stepId}
-              className="flex items-start gap-2.5 rounded-xl border border-slate-800/50 bg-slate-950/40 p-2.5 transition-colors"
+              className="flex items-start gap-2.5 rounded-xl border border-aether-border bg-aether-subtle p-2.5 transition-colors"
             >
               <span
                 className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${config.colorClass}`}
@@ -277,12 +277,12 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-medium text-slate-200">
-                    <span className="mr-1.5 font-mono text-slate-500">#{step.stepNumber}</span>
+                  <p className="text-xs font-medium text-aether-main">
+                    <span className="mr-1.5 font-mono text-aether-muted">#{step.stepNumber}</span>
                     {step.description}
                   </p>
                   {step.toolName && (
-                    <span className="shrink-0 rounded bg-slate-800/60 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 border border-slate-700/50">
+                    <span className="shrink-0 rounded bg-aether-subtle px-1.5 py-0.5 font-mono text-[10px] text-aether-muted border border-aether-border">
                       🔧 {step.toolName}
                     </span>
                   )}
@@ -302,7 +302,7 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
                   )}
 
                   {step.dependencies && step.dependencies.length > 0 && (
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-aether-muted font-mono">
                       ↳ Depends on: {step.dependencies.join(', ')}
                     </span>
                   )}
@@ -314,7 +314,7 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
                   )}
 
                   {step.verificationDetails && (
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[10px] text-aether-muted font-mono">
                       · {step.verificationDetails}
                     </span>
                   )}
@@ -332,8 +332,8 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
       </div>
 
       {plan.summary && (
-        <div className="mt-3 rounded-xl border border-slate-800/50 bg-slate-950/50 p-2.5 text-xs text-slate-300">
-          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="mt-3 rounded-xl border border-aether-border bg-aether-subtle p-2.5 text-xs text-aether-muted">
+          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-aether-muted">
             Plan Summary:
           </span>
           <p>{plan.summary}</p>
@@ -343,7 +343,7 @@ export const PlanView: React.FC<PlanViewProps> = memo(({ plan, className = '' })
       {/* Plan Integrity Hash */}
       {plan.planHash && (
         <div className="mt-2.5 flex items-center justify-end">
-          <span className="font-mono text-[9px] text-slate-500">
+          <span className="font-mono text-[9px] text-aether-muted">
             SHA-256: {plan.planHash.substring(0, 16)}…
           </span>
         </div>

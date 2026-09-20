@@ -59,6 +59,12 @@ import { BillingPage } from '@/settings/billing/billingpage';
 // ── 404 ──────────────────────────────────────────────────────────────────────
 import { AppNotFoundPage } from '@/components/ui/AppNotFoundPage';
 
+// ── Cognitive Hub ─────────────────────────────────────────────────────────────
+import { CognitiveHubPage } from '@/cognitive-hub/CognitiveHubPage';
+import { CognitiveHubGamePage } from '@/cognitive-hub/CognitiveHubGamePage';
+import { CognitiveHubDailyPage } from '@/cognitive-hub/CognitiveHubDailyPage';
+import { CognitiveHubDashboardPage } from '@/cognitive-hub/CognitiveHubDashboardPage';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Spinner for Suspense boundaries
 // ─────────────────────────────────────────────────────────────────────────────
@@ -184,6 +190,23 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'timer', element: <Navigate to="/app/workspace/focustimer" replace /> },
           { path: 'web-directory', element: <Navigate to="/app/workspace/webdirectory" replace /> },
         ],
+      },
+
+      // ── Cognitive Hub Module ──────────────────────────────────────────────
+      {
+        path: 'cognitive-hub',
+        children: [
+          { index: true, element: <CognitiveHubPage /> },
+          { path: 'daily', element: <CognitiveHubDailyPage /> },
+          { path: 'dashboard', element: <CognitiveHubDashboardPage /> },
+          { path: ':gameId', element: <CognitiveHubGamePage /> },
+        ],
+      },
+
+      // ── Cognitive Hub legacy redirect ─────────────────────────────────────
+      {
+        path: 'cognitive-lab',
+        element: <Navigate to="/app/cognitive-hub" replace />,
       },
 
       // ── Settings Module ───────────────────────────────────────────────────

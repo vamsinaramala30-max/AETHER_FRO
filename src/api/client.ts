@@ -24,9 +24,9 @@ async function _performTokenRefresh(): Promise<{
       body: JSON.stringify({ refreshToken }),
     });
 
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 400 || res.status === 401 || res.status === 403 || res.status === 422) {
       console.error(
-        `[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked (HTTP ${res.status})`,
+        `[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked/malformed (HTTP ${res.status})`,
       );
       return { accessToken: null, isAuthError: true };
     }
@@ -292,10 +292,12 @@ class HttpClient {
             localStorage.removeItem(authConfig.tokenKey);
             localStorage.removeItem(authConfig.refreshTokenKey);
             localStorage.removeItem('aether_auth_user');
+            localStorage.removeItem('aether-auth-token');
+            localStorage.removeItem('auth_token');
             window.dispatchEvent(new CustomEvent('aether-auth-expired'));
           } else {
             console.warn(
-              '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Preserving authenticated state.',
+              '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
             );
           }
         }
@@ -315,14 +317,36 @@ class HttpClient {
           };
           try {
             const body = await response.json();
+            
+            // Normalized message extraction guaranteeing a string, preventing [object Object]
+            let serverMessage: string | undefined;
+            if (typeof body?.error === 'string') {
+              serverMessage = body.error;
+            } else if (typeof body?.error?.message === 'string') {
+              serverMessage = body.error.message;
+            } else if (typeof body?.message === 'string') {
+              serverMessage = body.message;
+            }
+
+            let serverCode: string | undefined;
+            if (typeof body?.error?.code === 'string') {
+              serverCode = body.error.code;
+            } else if (typeof body?.code === 'string') {
+              serverCode = body.code;
+            } else if (typeof body?.errorCode === 'string') {
+              serverCode = body.errorCode;
+            }
+
             errorData = {
-              message: body.message || body.error || errorData.message,
-              code: body.code,
+              message: serverMessage || errorData.message,
+              code: serverCode,
               status: response.status,
               endpoint,
               method: fetchOptions.method || 'GET',
               requestId: correlationId,
-              details: body.details,
+              details:
+                body?.details ||
+                (typeof body?.error === 'object' && body?.error !== null ? body.error.details : undefined),
             };
           } catch {
             // Non-JSON response body (e.g. HTML 404/500 page)

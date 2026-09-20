@@ -2,11 +2,11 @@ import { useSyncExternalStore, useCallback, useRef, useEffect } from 'react';
 import { assistantStore } from './assistantstore';
 import { AssistantState, Conversation, Message } from './assistanttype';
 
+const subscribe = (callback: () => void) => assistantStore.subscribe(callback);
+const getSnapshot = () => assistantStore.getState();
+
 export const useAssistantState = (): AssistantState => {
-  return useSyncExternalStore(
-    (callback) => assistantStore.subscribe(callback),
-    () => assistantStore.getState(),
-  );
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 };
 
 export const useActiveConversation = (): Conversation | null => {
@@ -15,9 +15,11 @@ export const useActiveConversation = (): Conversation | null => {
   return state.conversations[state.activeConversationId] || null;
 };
 
+const EMPTY_MESSAGES: Message[] = [];
+
 export const useAssistantMessages = (): Message[] => {
   const activeConv = useActiveConversation();
-  return activeConv ? activeConv.messages : [];
+  return activeConv ? activeConv.messages : EMPTY_MESSAGES;
 };
 
 export const useAssistantActions = () => {
@@ -88,9 +90,12 @@ export const useAutoScroll = <T extends HTMLElement>(dependencies: unknown[]) =>
     }
   }, []);
 
+  const prevDepsLengthRef = useRef<number>(dependencies.length);
   useEffect(() => {
     scrollToBottom();
-  }, [dependencies, scrollToBottom]);
+    prevDepsLengthRef.current = dependencies.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies);
 
   return { elementRef, scrollToBottom };
 };

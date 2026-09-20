@@ -37,6 +37,11 @@
   "include": [
     "src"
   ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/ether-thought-hub"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

@@ -45,22 +45,22 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/75 p-4 backdrop-blur-md animate-in fade-in duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirmation-dialog-title"
         aria-describedby="confirmation-dialog-desc"
       >
-        <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl backdrop-blur-2xl sm:p-7">
+        <div className="w-full max-w-lg rounded-2xl border border-aether-border bg-aether-surface p-6 shadow-2xl backdrop-blur-2xl sm:p-7">
           {/* Header with Risk Icon */}
           <div className="flex items-start gap-3.5">
             <div
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
                 isDestructive
-                  ? 'border border-rose-500/30 bg-rose-500/20 text-rose-400'
+                  ? 'border border-rose-500/30 bg-rose-500/20 text-rose-500 dark:text-rose-400'
                   : isHighRisk
-                    ? 'border border-amber-500/30 bg-amber-500/20 text-amber-400'
-                    : 'border border-indigo-500/30 bg-indigo-500/20 text-indigo-400'
+                    ? 'border border-amber-500/30 bg-amber-500/20 text-amber-500 dark:text-amber-400'
+                    : 'border border-indigo-500/30 bg-indigo-500/20 text-indigo-500 dark:text-indigo-400'
               }`}
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
             </div>
 
             <div className="min-w-0 flex-1">
-              <h3 id="confirmation-dialog-title" className="text-base font-bold text-slate-100">
+              <h3 id="confirmation-dialog-title" className="text-base font-bold text-aether-main">
                 {isDestructive
                   ? 'Confirm Destructive Action'
                   : isHighRisk
@@ -93,12 +93,12 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
               <div className="mt-0.5 flex items-center gap-2">
                 <span
                   className={`inline-block font-mono text-xs font-semibold ${
-                    isDestructive ? 'text-rose-400' : isHighRisk ? 'text-amber-400' : 'text-indigo-400'
+                    isDestructive ? 'text-rose-500 dark:text-rose-400' : isHighRisk ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-500 dark:text-indigo-400'
                   }`}
                 >
                   {confirmation.toolName}
                 </span>
-                <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 border border-slate-700">
+                <span className="rounded bg-aether-subtle px-1.5 py-0.5 font-mono text-[10px] text-aether-muted border border-aether-border">
                   {confirmation.riskLevel}
                 </span>
               </div>
@@ -106,7 +106,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
           </div>
 
           {/* Description / Explanation */}
-          <div id="confirmation-dialog-desc" className="mt-4 space-y-2 text-sm text-slate-300">
+          <div id="confirmation-dialog-desc" className="mt-4 space-y-2 text-sm text-aether-muted">
             {descriptionLines.map((line, idx) => (
               <p key={idx} className="leading-relaxed">
                 {line}
@@ -118,8 +118,8 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
           <div
             className={`mt-4 rounded-xl border p-3 text-xs ${
               isDestructive
-                ? 'border-rose-500/30 bg-rose-950/30 text-rose-300'
-                : 'border-slate-800 bg-slate-950/40 text-slate-400'
+                ? 'border-rose-500/30 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-300'
+                : 'border-aether-border bg-aether-subtle text-aether-muted'
             }`}
           >
             <span className="font-semibold">Reversibility: </span>
@@ -130,11 +130,11 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
 
           {/* Parameters View */}
           {confirmation.args && Object.keys(confirmation.args).length > 0 && (
-            <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3 font-mono text-xs text-slate-400">
-              <span className="mb-1 block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+            <div className="mt-3 rounded-xl border border-aether-border bg-aether-code p-3 font-mono text-xs text-aether-code-text">
+              <span className="mb-1 block text-[10px] uppercase tracking-wider text-aether-code-header-text font-semibold">
                 Action Parameters:
               </span>
-              <pre className="max-h-32 overflow-x-auto overflow-y-auto text-[11px] leading-relaxed text-slate-300">
+              <pre className="max-h-32 overflow-x-auto overflow-y-auto text-[11px] leading-relaxed text-aether-code-text">
                 {JSON.stringify(confirmation.args, null, 2)}
               </pre>
             </div>
@@ -146,7 +146,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = memo(
               ref={cancelButtonRef}
               type="button"
               onClick={onCancel}
-              className="rounded-xl border border-slate-700/60 bg-slate-800/60 px-4 py-2.5 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 active:scale-95"
+              className="rounded-xl border border-aether-border bg-aether-subtle px-4 py-2.5 text-xs font-semibold text-aether-main transition-all hover:bg-aether-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-aether-muted active:scale-95"
             >
               Cancel
             </button>

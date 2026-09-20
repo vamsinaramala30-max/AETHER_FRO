@@ -24,7 +24,7 @@ interface MemoryEntryRowProps {
 }
 
 const MemoryEntryRow = memo<MemoryEntryRowProps>(({ entry, onDelete }) => (
-  <div className="group flex items-start gap-3 rounded-lg border border-slate-700/40 bg-slate-800/30 p-3">
+  <div className="group flex items-start gap-3 rounded-lg border border-aether-border bg-aether-ai-panel-item p-3">
     <div className="min-w-0 flex-1">
       <div className="flex items-center gap-2">
         <span
@@ -32,16 +32,16 @@ const MemoryEntryRow = memo<MemoryEntryRowProps>(({ entry, onDelete }) => (
         >
           {SCOPE_LABELS[entry.scope]}
         </span>
-        <span className="text-[10px] text-slate-600">·</span>
-        <span className="text-[10px] capitalize text-slate-500">{entry.type}</span>
+        <span className="text-[10px] text-aether-subtleText">·</span>
+        <span className="text-[10px] capitalize text-aether-muted">{entry.type}</span>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-slate-300">{entry.content}</p>
+      <p className="mt-1 text-xs leading-relaxed text-aether-main">{entry.content}</p>
     </div>
     <button
       type="button"
       onClick={() => onDelete(entry.id)}
       aria-label="Delete memory entry"
-      className="mt-0.5 shrink-0 rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:opacity-100 group-hover:opacity-100"
+      className="mt-0.5 shrink-0 rounded p-1 text-aether-subtleText opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:opacity-100 group-hover:opacity-100"
     >
       <svg
         className="h-3 w-3"
@@ -72,14 +72,14 @@ export const MemoryPanel = memo(() => {
   return (
     <section className="flex flex-col gap-4" aria-labelledby="memory-panel-heading">
       <div className="flex items-center justify-between">
-        <h2 id="memory-panel-heading" className="text-sm font-semibold text-slate-200">
+        <h2 id="memory-panel-heading" className="text-sm font-semibold text-aether-main">
           Memory
         </h2>
         <button
           type="button"
           onClick={() => void refresh()}
           aria-label="Refresh memory"
-          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300 focus:outline-none"
+          className="rounded-lg p-1.5 text-aether-muted hover:bg-aether-hover hover:text-aether-main focus:outline-none"
         >
           <svg
             className="h-3.5 w-3.5"
@@ -102,7 +102,7 @@ export const MemoryPanel = memo(() => {
       {status && (
         <div className="grid grid-cols-3 gap-2">
           {(['working', 'conversation', 'long_term'] as MemoryScope[]).map((scope) => (
-            <div key={scope} className="rounded-lg bg-slate-800/50 p-2 text-center">
+            <div key={scope} className="rounded-lg bg-aether-subtle p-2 text-center">
               <p className={`text-base font-bold ${SCOPE_COLORS[scope]}`}>
                 {scope === 'working'
                   ? status.workingEntries
@@ -110,7 +110,7 @@ export const MemoryPanel = memo(() => {
                     ? status.conversationEntries
                     : status.longTermEntries}
               </p>
-              <p className="text-[10px] text-slate-500">{SCOPE_LABELS[scope]}</p>
+              <p className="text-[10px] text-aether-muted">{SCOPE_LABELS[scope]}</p>
             </div>
           ))}
         </div>
@@ -127,7 +127,7 @@ export const MemoryPanel = memo(() => {
             className={`rounded-lg px-2.5 py-1 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               filter === scope
                 ? 'bg-indigo-600 text-white'
-                : 'bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                : 'bg-aether-subtle text-aether-muted hover:bg-aether-hover hover:text-aether-main'
             }`}
           >
             {scope === 'all' ? 'All' : SCOPE_LABELS[scope]}
@@ -137,9 +137,9 @@ export const MemoryPanel = memo(() => {
 
       {/* Entries */}
       {sorted.length === 0 ? (
-        <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 p-6 text-center">
-          <p className="text-xs text-slate-500">No memory entries found.</p>
-          <p className="mt-1 text-[11px] text-slate-600">
+        <div className="rounded-xl border border-aether-border bg-aether-subtle p-6 text-center">
+          <p className="text-xs text-aether-muted">No memory entries found.</p>
+          <p className="mt-1 text-[11px] text-aether-subtleText">
             Memory is populated as you interact with the AI.
           </p>
         </div>

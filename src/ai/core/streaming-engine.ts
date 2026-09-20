@@ -8,6 +8,7 @@
 import type { StreamingChunk, StreamingSession, AIError } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { createAIError } from '../ai-types';
+import { authConfig } from '../../config/auth.config';
 
 export type StreamingChunkHandler = (chunk: StreamingChunk) => void;
 export type StreamingCompleteHandler = (
@@ -119,19 +120,40 @@ export class StreamingEngine {
   private readonly config = DEFAULT_AI_CONFIG.streaming;
 
   async startStream(request: StreamingRequest): Promise<void> {
-    const firstChunkTimer = setTimeout(() => {
-      request.onError(
-        createAIError('TIMEOUT', 'No response received from AI service within the expected time.'),
-      );
-    }, this.config.firstChunkTimeoutMs);
-
     let firstChunkReceived = false;
     let fullContent = '';
     let chunkIndex = 0;
     let accumulatedMetadata: Record<string, unknown> = {};
 
+    const internalController = new AbortController();
+    let timedOut = false;
+
+    const onExternalAbort = () => {
+      clearTimeout(firstChunkTimer);
+      internalController.abort();
+    };
+
+    if (request.signal.aborted) {
+      request.onError(createAIError('CANCELLED', 'Streaming was cancelled by user.'));
+      return;
+    }
+
+    request.signal.addEventListener('abort', onExternalAbort, { once: true });
+
+    const firstChunkTimer = setTimeout(() => {
+      if (!firstChunkReceived && !request.signal.aborted) {
+        timedOut = true;
+        internalController.abort();
+        request.onError(
+          createAIError('TIMEOUT', 'No response received from AI service within the expected time.'),
+        );
+      }
+    }, this.config.firstChunkTimeoutMs);
+
     try {
       let token =
+        localStorage.getItem(authConfig.tokenKey) ||
+        localStorage.getItem('aether_access_token') ||
         localStorage.getItem('aether_auth_token') ||
         localStorage.getItem('aether-auth-token') ||
         localStorage.getItem('auth_token');
@@ -155,14 +177,14 @@ export class StreamingEngine {
         Accept: 'text/event-stream',
       };
       if (token && typeof token === 'string' && token.trim() !== '') {
-        headers['Authorization'] = `Bearer ${token.trim()}`;
+        headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token.trim()}`;
       }
 
       const response = await fetch(request.endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(request.payload),
-        signal: request.signal,
+        signal: internalController.signal,
       });
 
       if (!response.ok) {
@@ -194,7 +216,7 @@ export class StreamingEngine {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        if (request.signal.aborted) break;
+        if (request.signal.aborted || internalController.signal.aborted) break;
 
         if (!firstChunkReceived) {
           firstChunkReceived = true;
@@ -253,7 +275,9 @@ export class StreamingEngine {
 
       request.onComplete(fullContent, accumulatedMetadata);
     } catch (err: unknown) {
-      clearTimeout(firstChunkTimer);
+      if (timedOut) {
+        return;
+      }
       if (request.signal.aborted) {
         request.onError(createAIError('CANCELLED', 'Streaming was cancelled by user.'));
       } else if (err instanceof TypeError && err.message.includes('fetch')) {
@@ -263,6 +287,9 @@ export class StreamingEngine {
       } else {
         request.onError(createAIError('STREAM_FAILED', 'Streaming failed unexpectedly.'));
       }
+    } finally {
+      clearTimeout(firstChunkTimer);
+      request.signal.removeEventListener('abort', onExternalAbort);
     }
   }
 
