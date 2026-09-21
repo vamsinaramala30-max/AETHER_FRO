@@ -11,14 +11,21 @@ import {
 import {
   generateFocusLockChallenge,
   validateFocusLockAnswer,
+  type FocusLockSymbol,
 } from '../ether-thought-hub/src/lib/cognitive-lab/engines/focus-lock';
-import { generateSequenceCoreChallenge } from '../ether-thought-hub/src/lib/cognitive-lab/engines/sequence-core';
+import {
+  generateSequenceCoreChallenge,
+  validateSequenceCoreAnswer,
+} from '../ether-thought-hub/src/lib/cognitive-lab/engines/sequence-core';
 import { generateLogicForgeChallenge } from '../ether-thought-hub/src/lib/cognitive-lab/engines/logic-forge';
 import {
   generateMemoryMatrixChallenge,
   validateMemoryMatrixAnswer,
 } from '../ether-thought-hub/src/lib/cognitive-lab/engines/memory-matrix';
-import { generateReactionControlChallenge } from '../ether-thought-hub/src/lib/cognitive-lab/engines/reaction-control';
+import {
+  generateReactionControlChallenge,
+  type ReactionTrial,
+} from '../ether-thought-hub/src/lib/cognitive-lab/engines/reaction-control';
 import {
   generatePatternShiftChallenge,
   validatePatternShiftAnswer,
@@ -32,13 +39,13 @@ import {
   generateSudokuChallenge,
   getSudokuConflicts,
   isSudokuComplete,
+  type SudokuCell,
 } from '../ether-thought-hub/src/lib/cognitive-lab/engines/sudoku';
 import {
   generateLogicGridChallenge,
   validateLogicSolution,
   checkLogicGridContradiction,
 } from '../ether-thought-hub/src/lib/cognitive-lab/engines/logic-grid';
-import { validateSequenceCoreAnswer } from '../ether-thought-hub/src/lib/cognitive-lab/engines/sequence-core';
 import { useCognitiveLabStore } from '../ether-thought-hub/src/stores/cognitive-lab-store';
 import { ALL_GAME_IDS } from '../ether-thought-hub/src/lib/cognitive-lab/constants';
 import { GameResults } from '../ether-thought-hub/src/components/cognitive-lab/GameResults';
@@ -52,7 +59,7 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
   describe('Visual System & Color Tokens', () => {
     it('provides all 8 semantic game color tokens with high contrast values', () => {
       const colors: VisualColor[] = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
-      colors.forEach((c) => {
+      colors.forEach((c: VisualColor) => {
         const token = GAME_COLORS[c];
         expect(token).toBeDefined();
         expect(token.fill).toMatch(/^#[0-9A-Fa-f]{6}$/);
@@ -71,7 +78,7 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
 
     it('renders ShapeIcon for all 6 SVG geometric shapes', () => {
       const shapes: VisualShape[] = ['circle', 'square', 'triangle', 'diamond', 'star', 'pentagon'];
-      shapes.forEach((shape) => {
+      shapes.forEach((shape: VisualShape) => {
         const { container } = render(<ShapeIcon shape={shape} color="green" size="md" showLabel />);
         const svg = container.querySelector('svg');
         expect(svg).toBeTruthy();
@@ -88,7 +95,9 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
       expect(challenge.targetColor).toBeTruthy();
       expect(challenge.targetCount).toBeGreaterThanOrEqual(1);
 
-      const targetIds = challenge.grid.filter((item) => item.isTarget).map((item) => item.id);
+      const targetIds = challenge.grid
+        .filter((item: FocusLockSymbol) => item.isTarget)
+        .map((item: FocusLockSymbol) => item.id);
       expect(targetIds.length).toBe(challenge.targetCount);
 
       const isCorrect = validateFocusLockAnswer(challenge, new Set(targetIds));
@@ -139,7 +148,7 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
       expect(challenge.gridSize).toBeGreaterThanOrEqual(3);
       expect(challenge.activeCells.length).toBeGreaterThan(0);
       const maxIndex = challenge.gridSize * challenge.gridSize;
-      challenge.activeCells.forEach((index) => {
+      challenge.activeCells.forEach((index: number) => {
         expect(index).toBeGreaterThanOrEqual(0);
         expect(index).toBeLessThan(maxIndex);
       });
@@ -152,8 +161,8 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
     it('generates target or distractor stimulus', () => {
       const challenge = generateReactionControlChallenge(3);
       expect(challenge.trials.length).toBeGreaterThan(0);
-      const goTrials = challenge.trials.filter((t) => t.type === 'go');
-      const noGoTrials = challenge.trials.filter((t) => t.type === 'nogo');
+      const goTrials = challenge.trials.filter((t: ReactionTrial) => t.type === 'go');
+      const noGoTrials = challenge.trials.filter((t: ReactionTrial) => t.type === 'nogo');
       expect(goTrials.length).toBeGreaterThan(0);
       expect(noGoTrials.length).toBeGreaterThan(0);
       expect(challenge.showDurationMs).toBeGreaterThan(0);
@@ -214,8 +223,8 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
       expect(conflicts.size).toBe(0); // Initial board has no conflicting clues
 
       // Solved state check
-      const solvedGrid = challenge.solution.map((row, r) =>
-        row.map((val, c) => ({
+      const solvedGrid = challenge.solution.map((row: number[], r: number) =>
+        row.map((val: number, c: number) => ({
           row: r,
           col: c,
           value: val,
@@ -228,7 +237,9 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
     it('flags conflicting entries in same row, column, or 3x3 block', () => {
       const challenge = generateSudokuChallenge(2);
       // Clone grid and insert duplicate in row 0
-      const testGrid = challenge.initialGrid.map((row) => row.map((cell) => ({ ...cell })));
+      const testGrid = challenge.initialGrid.map((row: SudokuCell[]) =>
+        row.map((cell: SudokuCell) => ({ ...cell }))
+      );
       testGrid[0]![0]!.value = 5;
       testGrid[0]![1]!.value = 5;
 
@@ -385,7 +396,7 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
         // The person's true location is in the solution
         const correctLoc = challenge.solution.assignments[person]?.["Location"];
         // Other locations are impossible
-        const wrongLoc = challenge.secondaryCategory.items.find((loc) => loc !== correctLoc);
+        const wrongLoc = challenge.secondaryCategory.items.find((loc: string) => loc !== correctLoc);
 
         if (wrongLoc) {
           // If the challenge clues forbid this pair
@@ -513,3 +524,4 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
     });
   });
 });
+
