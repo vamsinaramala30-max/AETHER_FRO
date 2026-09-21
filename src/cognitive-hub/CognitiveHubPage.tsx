@@ -135,7 +135,7 @@ export const CognitiveHubPage: React.FC = () => {
 
   const overall = store.getOverallStats();
   const todayTraining = getTodayDailyTraining(store.dailyTraining);
-  const gamesList = Object.values(GAME_META);
+  const gamesList: GameMeta[] = Object.values(GAME_META);
 
   const handleResetStats = () => {
     if (confirm('Reset all game stats and personal bests?')) {
@@ -316,8 +316,8 @@ export const CognitiveHubPage: React.FC = () => {
 
           {/* 8 Games Grid */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {gamesList.map((game) => {
-              const isDaily = todayTraining.recommendedGames.includes(game.id as GameId);
+            {gamesList.map((game: GameMeta) => {
+              const isDaily = todayTraining.recommendedGames.includes(game.id);
               const bestScore = store.getBestScore(game.id) ?? 0;
               const stats = store.getPlayerStats(game.id);
               return (
