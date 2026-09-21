@@ -13,6 +13,7 @@ import { ArrowLeft, Calendar, CheckCircle, Play, Sparkles } from 'lucide-react';
 import { useCognitiveLabStore } from '../ether-thought-hub/src/stores/cognitive-lab-store';
 import { getTodayDailyTraining } from '../ether-thought-hub/src/lib/cognitive-lab/daily';
 import { GAME_META } from '../ether-thought-hub/src/lib/cognitive-lab/constants';
+import type { GameId } from '../ether-thought-hub/src/lib/cognitive-lab/types';
 
 export const CognitiveHubDailyPage: React.FC = () => {
   const store = useCognitiveLabStore();
@@ -99,7 +100,7 @@ export const CognitiveHubDailyPage: React.FC = () => {
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Prescribed Workouts</h3>
 
           <div className="grid grid-cols-1 gap-4">
-            {todayTraining.recommendedGames.map((gameId, idx) => {
+            {todayTraining.recommendedGames.map((gameId: GameId, idx: number) => {
               const game = GAME_META[gameId];
               const isDone = todayTraining.gamesCompleted.includes(gameId);
 
