@@ -179,6 +179,7 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'webdirectory', element: <WebDirectory /> },
           { path: 'weeklyplanner', element: <WeeklyPlanner /> },
           { path: 'weekly-planner', element: <Navigate to="/app/workspace/weeklyplanner" replace /> },
+
         ],
       },
 

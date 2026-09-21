@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, Zap, Layers, Activity } from 'lucide-react';
+import { LayoutDashboard, Zap, Layers, Activity, Cpu, Sparkles } from 'lucide-react';
 
-export type AutomationTab = 'overview' | 'automations' | 'templates' | 'activity';
+export type AutomationTab = 'studio' | 'overview' | 'automations' | 'templates' | 'activity';
 
 interface Props {
   activeTab: AutomationTab;
@@ -20,6 +20,7 @@ export const AutomationNavigation: React.FC<Props> = ({ activeTab, onTabChange, 
     icon: React.FC<{ className?: string }>;
     count?: number;
   }> = [
+    { id: 'studio', label: 'Rule Engine Studio', icon: Sparkles },
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'automations', label: 'My Automations', icon: Zap, count: counts?.automations },
     { id: 'templates', label: 'Templates', icon: Layers, count: counts?.templates },

@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Crown,
   Calendar as CalendarIcon,
+  CalendarDays,
   Zap,
   FileText,
   Star,
