@@ -49,3 +49,10 @@ temp/
 # Editor settings
 *.swp
 *.swo
+
+# ether-thought-hub build & backup
+src/ether-thought-hub/.output/
+src/ether-thought-hub/.tanstack/
+src/ether-thought-hub/.wrangler/
+src/ether-thought-hub/node_modules/
+src/ether-thought-hub/.git.bak/
