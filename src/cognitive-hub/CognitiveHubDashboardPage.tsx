@@ -16,7 +16,7 @@ import {
   CognitiveRadarChart,
 } from '../ether-thought-hub/src/components/cognitive-lab/ProgressChart';
 import { GAME_META } from '../ether-thought-hub/src/lib/cognitive-lab/constants';
-import type { GameId } from '../ether-thought-hub/src/lib/cognitive-lab/types';
+import type { GameId, GameResult } from '../ether-thought-hub/src/lib/cognitive-lab/types';
 
 export const CognitiveHubDashboardPage: React.FC = () => {
   const store = useCognitiveLabStore();
@@ -38,7 +38,7 @@ export const CognitiveHubDashboardPage: React.FC = () => {
     deduction: 0,
   };
 
-  resultsHistory.forEach((r) => {
+  resultsHistory.forEach((r: GameResult) => {
     const meta = GAME_META[r.gameId as GameId];
     if (meta) {
       const catKey = meta.category;
@@ -159,7 +159,7 @@ export const CognitiveHubDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-slate-700 dark:text-slate-200">
-                {resultsHistory.slice(0, 10).map((res) => {
+                {resultsHistory.slice(0, 10).map((res: GameResult) => {
                   const meta = GAME_META[res.gameId as GameId];
                   return (
                     <tr key={res.id} className="hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors">
