@@ -91,6 +91,8 @@ export const ProjectsPage: React.FC = () => {
             : Array.isArray(payload?.data)
               ? payload.data
               : [];
+      } else {
+        setError(projRes.reason?.message || 'Failed to load projects from server.');
       }
 
       const mappedProjects: Project[] = rawProjects.map((p: any) => ({
@@ -227,12 +229,11 @@ export const ProjectsPage: React.FC = () => {
         description: 'Project and associated metadata removed.',
         type: 'project',
       });
-    } catch {
-      setProjects((prev) => prev.filter((p) => p.id !== id));
+    } catch (err: any) {
       setDeleteTarget(null);
       useNotificationStore.getState().addNotification({
-        title: 'Project Removed',
-        description: 'Project removed from interface.',
+        title: 'Deletion Failed',
+        description: err?.message || 'Unable to delete project from server.',
         type: 'project',
       });
     }
@@ -296,9 +297,17 @@ export const ProjectsPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-500">
-          <AlertCircle className="h-4 w-4" />
-          <span>{error}</span>
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-500">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => void fetchProjectData()}
+            className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs text-white hover:bg-rose-500 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       )}
 

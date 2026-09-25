@@ -17,8 +17,8 @@ export const documentsService = {
         const formatted: DocumentItem[] = rawDocs.map((d: any) => ({
           id: d.id,
           name: d.title || d.fileName || 'Untitled Document',
-          size: d.metadata?.fileSize || 0,
-          mimeType: d.metadata?.mimeType || 'application/json',
+          size: d.metadata?.fileSize || d.fileSize || 0,
+          mimeType: d.metadata?.mimeType || d.mimeType || 'application/json',
           url: d.fileKey || '',
           category: d.category || 'Reports',
           content: d.description || '',
@@ -30,22 +30,18 @@ export const documentsService = {
           type: 'document',
           status: d.status || 'READY',
         }));
-        localStorage.setItem('aether_docs', JSON.stringify(formatted));
+        try {
+          localStorage.setItem('aether_docs', JSON.stringify(formatted));
+        } catch {
+          /* ignore quota */
+        }
         return formatted;
       }
-    } catch {
-      // Local fallback
-      const stored = localStorage.getItem('aether_docs');
-      if (typeof stored === 'string' && stored.trim() !== '') {
-        try {
-          const parsed = JSON.parse(stored) as DocumentItem[];
-          return Array.isArray(parsed) ? parsed : [];
-        } catch {
-          /* ignore parse error */
-        }
-      }
+      return [];
+    } catch (err) {
+      // Re-throw so callers can accurately reflect failed synchronization
+      throw err;
     }
-    return [];
   },
 
   async createDocument(data: {
@@ -55,79 +51,72 @@ export const documentsService = {
     tags?: string[];
     attachedFileIds?: string[];
   }): Promise<DocumentItem> {
-    try {
-      const res = await apiClient.post<any>('/knowledge/documents', {
-        title: data.title,
-        description: data.content || '',
-        category: data.category || 'Reports',
-        tags: data.tags || [],
-        fileKey: '',
-        fileSize: 0,
-        mimeType: 'application/json',
-        originalName: data.title,
-        metadata: {
-          attachedFileIds: data.attachedFileIds || [],
-        },
-      });
-      const d = res.data || res;
-      triggerActivityUpdate();
-      return {
-        id: d.id,
-        name: d.title || data.title,
-        size: 0,
-        mimeType: 'application/json',
-        url: '',
-        category: d.category || data.category,
-        content: d.description || data.content,
-        tags: d.tags || data.tags || [],
+    const res = await apiClient.post<any>('/knowledge/documents', {
+      title: data.title,
+      description: data.content || '',
+      category: data.category || 'Reports',
+      tags: data.tags || [],
+      fileKey: '',
+      fileSize: 0,
+      mimeType: 'application/json',
+      originalName: data.title,
+      metadata: {
         attachedFileIds: data.attachedFileIds || [],
-        createdAt: d.createdAt || new Date().toISOString(),
-        updatedAt: d.updatedAt || new Date().toISOString(),
-        userId: d.ownerId || 'user',
-        type: 'document',
-        status: d.status || 'READY',
-      };
-    } catch {
-      const docs = await this.getDocuments();
-      const now = new Date().toISOString();
-      const newDoc: DocumentItem = {
-        id: crypto.randomUUID(),
-        name: data.title,
-        size: 0,
-        mimeType: 'application/json',
-        url: '',
-        category: data.category,
-        content: data.content,
-        tags: data.tags || [],
-        attachedFileIds: data.attachedFileIds || [],
-        createdAt: now,
-        updatedAt: now,
-        userId: 'current-user',
-        type: 'document',
-      };
-      docs.unshift(newDoc);
-      localStorage.setItem('aether_docs', JSON.stringify(docs));
-      return newDoc;
-    }
+      },
+    });
+    const d = res.data || res;
+    triggerActivityUpdate();
+    return {
+      id: d.id,
+      name: d.title || data.title,
+      size: 0,
+      mimeType: 'application/json',
+      url: '',
+      category: d.category || data.category,
+      content: d.description || data.content,
+      tags: d.tags || data.tags || [],
+      attachedFileIds: data.attachedFileIds || [],
+      createdAt: d.createdAt || new Date().toISOString(),
+      updatedAt: d.updatedAt || new Date().toISOString(),
+      userId: d.ownerId || 'user',
+      type: 'document',
+      status: d.status || 'READY',
+    };
   },
 
   async uploadDocument(file: File, tags: string[]): Promise<DocumentItem> {
+    if (!file || file.size === 0) {
+      throw new Error('Cannot upload an empty file.');
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadRes = await apiClient.post<any>('/uploads/single', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const uploadData = uploadRes.data || uploadRes;
+    const fileId = uploadData.id;
+
     return this.createDocument({
       title: file.name,
       category: 'Project Documents',
       tags,
+      attachedFileIds: fileId ? [fileId] : [],
     });
   },
 
   async deleteDocument(id: string): Promise<void> {
+    await apiClient.delete(`/knowledge/documents/${id}`);
+    triggerActivityUpdate();
     try {
-      await apiClient.delete(`/knowledge/documents/${id}`);
-      triggerActivityUpdate();
+      const stored = localStorage.getItem('aether_docs');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          localStorage.setItem('aether_docs', JSON.stringify(parsed.filter((d: any) => d.id !== id)));
+        }
+      }
     } catch {
-      /* ignore api error */
+      /* ignore storage error */
     }
-    const docs = await this.getDocuments();
-    const filtered = docs.filter((d) => d.id !== id);
-    localStorage.setItem('aether_docs', JSON.stringify(filtered));
   },
 };

@@ -93,6 +93,7 @@ class AssistantService {
     };
 
     let accumulatedText = '';
+    let terminalStatus: string | null = null;
 
     try {
       const streamGenerator = apiClient.stream('/ai/stream', {
@@ -106,44 +107,71 @@ class AssistantService {
           break;
         }
 
+        let parsed: any = null;
         try {
-          const parsed = JSON.parse(chunkString);
-
-          if (parsed.error) {
-            const err = new Error(
-              typeof parsed.error === 'string'
-                ? parsed.error
-                : parsed.error.message || 'Stream processing error',
-            );
-            callbacks.onError?.(err);
-            throw err;
-          }
-
-          if (parsed.delta) {
-            accumulatedText += parsed.delta;
-            callbacks.onChunk?.(parsed.delta);
-          }
-
-          if (parsed.status && parsed.status !== 'streaming') {
-            callbacks.onStatus?.(parsed.status, parsed.toolName);
-          }
-
-          if (parsed.isLast || parsed.done) {
-            break;
-          }
+          parsed = JSON.parse(chunkString);
         } catch {
           // If chunk is raw text delta
           if (chunkString && !chunkString.startsWith('{') && !chunkString.startsWith('[')) {
             accumulatedText += chunkString;
             callbacks.onChunk?.(chunkString);
           }
+          continue;
         }
+
+        if (parsed.error) {
+          const err = new Error(
+            typeof parsed.error === 'string'
+              ? parsed.error
+              : parsed.error.message || 'Stream processing error',
+          );
+          callbacks.onError?.(err);
+          throw err;
+        }
+
+        if (parsed.delta) {
+          accumulatedText += parsed.delta;
+          callbacks.onChunk?.(parsed.delta);
+        }
+
+        if (parsed.status && parsed.status !== 'streaming') {
+          callbacks.onStatus?.(parsed.status, parsed.toolName);
+        }
+
+        if (parsed.isLast || parsed.done) {
+          terminalStatus = parsed.status || (parsed.done ? 'completed' : null);
+          if (parsed.status === 'failed') {
+            const err = new Error(
+              typeof parsed.error === 'string'
+                ? parsed.error
+                : parsed.details || 'Stream execution failed',
+            );
+            callbacks.onError?.(err);
+            throw err;
+          }
+          if (parsed.status === 'cancelled') {
+            const err = new Error('Stream execution was cancelled');
+            (err as any).name = 'AbortError';
+            throw err;
+          }
+          break;
+        }
+      }
+
+      if (terminalStatus === 'failed') {
+        throw new Error('Stream execution failed');
+      }
+      if (terminalStatus === 'cancelled' || signal?.aborted) {
+        const abortErr = new Error('Stream was cancelled');
+        abortErr.name = 'AbortError';
+        throw abortErr;
       }
 
       callbacks.onComplete?.(accumulatedText);
       return accumulatedText;
     } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      if ((err as any)?.name === 'AbortError' || signal?.aborted) {
+        callbacks.onStatus?.('cancelled');
         throw err;
       }
       callbacks.onError?.(err instanceof Error ? err : new Error(String(err)));

@@ -3,7 +3,9 @@ import { ExecutionLog } from '../automation-types';
 import { triggerActivityUpdate } from '@/shared/activityEvents';
 
 export class AutomationExecutionService {
-  public async executeRule(id: string): Promise<{ success: boolean; executionId: string }> {
+  public async executeRule(
+    id: string,
+  ): Promise<{ success: boolean; executionId: string; status?: string }> {
     const res = await automationApi.executeAutomation(id);
     triggerActivityUpdate();
     return res;

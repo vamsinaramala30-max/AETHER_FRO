@@ -299,7 +299,14 @@ export function useChat(): UseChatReturn {
     aiService.stopStreaming();
     setStreamingStatus('cancelled');
     setThinkingState(null);
-  }, [setStreamingStatus, setThinkingState]);
+    if (streamingMessageIdRef.current && activeConversationId) {
+      updateMessage(activeConversationId, streamingMessageIdRef.current, {
+        status: 'error',
+        error: 'Generation cancelled',
+      });
+    }
+    streamingMessageIdRef.current = null;
+  }, [setStreamingStatus, setThinkingState, updateMessage, activeConversationId]);
 
   return {
     conversations,

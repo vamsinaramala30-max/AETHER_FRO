@@ -95,7 +95,8 @@ export const FilesPage: React.FC = () => {
       } else {
         setFiles([]);
       }
-    } catch {
+    } catch (err: any) {
+      setError(err?.message || 'Unable to retrieve workspace files from server.');
       setFiles([]);
     } finally {
       setLoading(false);
@@ -230,9 +231,13 @@ export const FilesPage: React.FC = () => {
         description: `"${file.filename}" permanently removed.`,
         type: 'project',
       });
-    } catch {
-      setFiles((prev) => prev.filter((f) => f.id !== file.id));
+    } catch (err: any) {
       setDeleteTarget(null);
+      useNotificationStore.getState().addNotification({
+        title: 'Deletion Failed',
+        description: err?.message || `Unable to delete "${file.filename}" from server.`,
+        type: 'project',
+      });
     }
   };
 
@@ -251,12 +256,14 @@ export const FilesPage: React.FC = () => {
         description: `Updated filename to "${newName}".`,
         type: 'project',
       });
-    } catch {
-      setFiles((prev) =>
-        prev.map((f) => (f.id === renameTarget.id ? { ...f, filename: newName } : f)),
-      );
+    } catch (err: any) {
       setRenameTarget(null);
       setNewName('');
+      useNotificationStore.getState().addNotification({
+        title: 'Rename Failed',
+        description: err?.message || `Failed to rename "${renameTarget.filename}" on server.`,
+        type: 'project',
+      });
     }
   };
 
@@ -398,9 +405,17 @@ export const FilesPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-semibold text-red-500">
-          <AlertCircle className="h-4 w-4" />
-          <span>{error}</span>
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-semibold text-red-500">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => void fetchFiles()}
+            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-500 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       )}
 

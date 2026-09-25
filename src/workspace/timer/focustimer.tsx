@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { productivityService } from '../productivity-hub/productivityservice';
+import { productivityService, getLocalDateKey } from '../productivity-hub/productivityservice';
 
 type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
@@ -412,10 +412,35 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
     }
   }, []);
 
-  // Load saved history once on mount.
+  // Load saved history once on mount: fast cache first, then server database reconcile
   useEffect(() => {
     setHistory(loadHistory());
     setHistoryLoaded(true);
+
+    let isMounted = true;
+    productivityService
+      .getSessions()
+      .then((sessions) => {
+        if (!isMounted) return;
+        const normalized: DailyHistory = {};
+        for (const s of sessions) {
+          const key = getLocalDateKey(new Date(s.createdAt));
+          if (!normalized[key]) normalized[key] = [];
+          normalized[key].push({
+            id: s.id,
+            minutes: s.minutes,
+            createdAt: s.createdAt,
+          });
+        }
+        setHistory(normalized);
+      })
+      .catch((err) => {
+        console.warn('Failed to load server sessions:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const persistHistory = useCallback((nextHistory: DailyHistory) => {
@@ -424,62 +449,97 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
   }, []);
 
   const recordSession = useCallback(
-    (minutes: number) => {
-      void productivityService.logFocusSession(minutes);
-      setHistory((prev) => {
-        const key = todayKey();
-        const newSession: FocusSessionItem = {
-          id: `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          minutes,
-          createdAt: Date.now(),
-        };
-        const existing = prev[key] || [];
-        const next: DailyHistory = { ...prev, [key]: [newSession, ...existing] };
-        persistHistory(next);
-        return next;
-      });
-      notifyUpdate();
+    async (minutes: number) => {
+      setHistoryError(null);
+      try {
+        await productivityService.logFocusSession(minutes);
+        const sessions = await productivityService.getSessions();
+        const normalized: DailyHistory = {};
+        for (const s of sessions) {
+          const key = getLocalDateKey(new Date(s.createdAt));
+          if (!normalized[key]) normalized[key] = [];
+          normalized[key].push({
+            id: s.id,
+            minutes: s.minutes,
+            createdAt: s.createdAt,
+          });
+        }
+        setHistory(normalized);
+        notifyUpdate();
+      } catch {
+        setHistoryError('Failed to persist focus session to server database.');
+      }
     },
-    [persistHistory, notifyUpdate],
+    [notifyUpdate],
   );
 
   const deleteSession = useCallback(
-    (dateKey: string, sessionId: string) => {
-      setHistory((prev) => {
-        const currentList = prev[dateKey] || [];
-        const updatedList = currentList.filter((s) => s.id !== sessionId);
-        const next = { ...prev };
-        if (updatedList.length > 0) {
-          next[dateKey] = updatedList;
-        } else {
-          delete next[dateKey];
-        }
-        persistHistory(next);
-        return next;
-      });
+    async (dateKey: string, sessionId: string) => {
+      setHistoryError(null);
+      const prevHistory = history;
+      const currentList = history[dateKey] || [];
+      const updatedList = currentList.filter((s) => s.id !== sessionId);
+      const next = { ...history };
+      if (updatedList.length > 0) {
+        next[dateKey] = updatedList;
+      } else {
+        delete next[dateKey];
+      }
+      setHistory(next);
+      persistHistory(next);
       notifyUpdate();
+
+      try {
+        await productivityService.deleteFocusSession(sessionId);
+      } catch {
+        setHistory(prevHistory);
+        persistHistory(prevHistory);
+        setHistoryError('Failed to delete session from server database.');
+        notifyUpdate();
+      }
     },
-    [persistHistory, notifyUpdate],
+    [history, persistHistory, notifyUpdate],
   );
 
   const deleteDay = useCallback(
-    (key: string) => {
-      setHistory((prev) => {
-        const next: DailyHistory = { ...prev };
-        delete next[key];
-        persistHistory(next);
-        return next;
-      });
+    async (key: string) => {
+      setHistoryError(null);
+      const daySessions = history[key] || [];
+      const prevHistory = history;
+      const next: DailyHistory = { ...history };
+      delete next[key];
+      setHistory(next);
+      persistHistory(next);
       notifyUpdate();
+
+      try {
+        await Promise.all(daySessions.map((s) => productivityService.deleteFocusSession(s.id)));
+      } catch {
+        setHistory(prevHistory);
+        persistHistory(prevHistory);
+        setHistoryError('Failed to delete day history from server database.');
+        notifyUpdate();
+      }
     },
-    [persistHistory, notifyUpdate],
+    [history, persistHistory, notifyUpdate],
   );
 
-  const clearAllHistory = useCallback(() => {
+  const clearAllHistory = useCallback(async () => {
+    const prevHistory = history;
+    const allSessionIds = Object.values(history).flat().map((s) => s.id);
     setHistory({});
     persistHistory({});
     notifyUpdate();
-  }, [persistHistory, notifyUpdate]);
+
+    try {
+      await Promise.all(allSessionIds.map((id) => productivityService.deleteFocusSession(id)));
+    } catch {
+      setHistory(prevHistory);
+      persistHistory(prevHistory);
+      setHistoryError('Failed to clear sessions from server database.');
+      notifyUpdate();
+    }
+  }, [history, persistHistory, notifyUpdate]);
 
   const clearTick = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -488,7 +548,7 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
     }
   }, []);
 
-  const finishTimer = useCallback(() => {
+  const finishTimer = useCallback(async () => {
     clearTick();
     endTimestampRef.current = null;
     setStatus('finished');
@@ -496,7 +556,7 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
 
     playCompletionSound();
     notifyCompletion();
-    recordSession(selectedMinutes);
+    await recordSession(selectedMinutes);
     onSessionComplete?.(selectedMinutes);
 
     setStatus('idle');
@@ -689,6 +749,18 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
         </p>
 
         <div className="mt-8 border-t border-gray-100 pt-5 dark:border-gray-700">
+          {historyError && (
+            <div className="mb-3 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+              <span>⚠ {historyError}</span>
+              <button
+                type="button"
+                onClick={() => setHistoryError(null)}
+                className="ml-2 font-bold text-red-500 hover:text-red-700"
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">History</h2>
             {sortedDays.length > 0 && (

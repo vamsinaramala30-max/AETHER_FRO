@@ -208,10 +208,28 @@ class AssistantStore {
     if (this.state.abortController) {
       this.state.abortController.abort();
     }
+    const { activeConversationId, conversations } = this.state;
+    if (activeConversationId && conversations[activeConversationId]) {
+      const conv = conversations[activeConversationId];
+      const streamingMsg = conv.messages.find((m) => m.status === 'streaming');
+      if (streamingMsg) {
+        this.finalizeAssistantMessage(
+          activeConversationId,
+          streamingMsg.id,
+          'error',
+          'Generation cancelled',
+        );
+      }
+    }
     this.setState({ isStreaming: false, isTyping: false, abortController: null });
+    this.saveToStorage();
   };
 
   public sendMessage = async (content: string): Promise<void> => {
+    if (this.state.isStreaming) {
+      this.cancelStreaming();
+    }
+
     let activeId = this.state.activeConversationId;
 
     if (!activeId || !this.state.conversations[activeId]) {
@@ -281,6 +299,11 @@ class AssistantStore {
           onChunk: (delta: string) => {
             this.appendToAssistantMessage(activeId!, assistantMessageId, delta);
           },
+          onStatus: (status: string) => {
+            if (status === 'executing' || status === 'planning') {
+              this.setState({ isTyping: true });
+            }
+          },
           onError: (streamErr: Error) => {
             console.warn('[AssistantStore] Stream error:', streamErr.message);
           },
@@ -294,46 +317,18 @@ class AssistantStore {
 
       this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        this.finalizeAssistantMessage(activeId, assistantMessageId, 'sent');
+      const isAbort =
+        (err as any)?.name === 'AbortError' ||
+        abortController.signal.aborted ||
+        (err instanceof Error && err.message.toLowerCase().includes('cancel'));
+
+      if (isAbort) {
+        this.finalizeAssistantMessage(activeId, assistantMessageId, 'error', 'Generation cancelled');
       } else {
-        // Fallback: if streaming endpoint fails, try non-streaming sendMessage once
-        try {
-          const response = await assistantService.sendMessage(
-            activeId,
-            content,
-            { temperature: 0.7, model: 'default' },
-            abortController.signal,
-          );
-          if (response && response.content) {
-            // Replace or append content
-            const conv = this.state.conversations[activeId];
-            if (conv) {
-              const messages = conv.messages.map((m) =>
-                m.id === assistantMessageId
-                  ? { ...m, content: response.content, status: 'delivered' as const }
-                  : m,
-              );
-              this.setState({
-                conversations: {
-                  ...this.state.conversations,
-                  [activeId]: { ...conv, messages, updatedAt: Date.now() },
-                },
-              });
-            }
-          } else {
-            this.finalizeAssistantMessage(activeId, assistantMessageId, 'delivered');
-          }
-        } catch (fallbackErr: unknown) {
-          const errorMsg =
-            fallbackErr instanceof Error
-              ? fallbackErr.message
-              : err instanceof Error
-                ? err.message
-                : 'Failed to generate response';
-          this.setState({ error: errorMsg });
-          this.finalizeAssistantMessage(activeId, assistantMessageId, 'error', errorMsg);
-        }
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to generate response';
+        this.setState({ error: errorMsg });
+        this.finalizeAssistantMessage(activeId, assistantMessageId, 'error', errorMsg);
       }
     } finally {
       this.setState({ isStreaming: false, isTyping: false, abortController: null });

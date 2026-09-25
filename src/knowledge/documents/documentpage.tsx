@@ -4,9 +4,10 @@ import { documentsService } from './documentservice';
 import { DocumentCard } from './documentcard';
 import { DocumentViewer } from './documentviewer';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { FileText, FolderPlus, Plus, Search, Paperclip, X } from 'lucide-react';
+import { FileText, FolderPlus, Plus, Search, Paperclip, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { AttachFileModal, StorageFile } from '@/shared/AttachFileModal';
 import { onActivityUpdate } from '@/shared/activityEvents';
+import { useNotificationStore } from '@/state/notificationStore';
 
 export type DocumentCategory =
   | 'All Documents'
@@ -19,6 +20,8 @@ export type DocumentCategory =
 export const DocumentsPage: React.FC = () => {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<DocumentCategory>('All Documents');
   const [search, setSearch] = useState('');
   const [viewingDoc, setViewingDoc] = useState<DocumentItem | null>(null);
@@ -44,9 +47,11 @@ export const DocumentsPage: React.FC = () => {
   const fetchDocs = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await documentsService.getDocuments();
       setDocs(data);
-    } catch {
+    } catch (err: any) {
+      setError(err?.message || 'Failed to retrieve documents from server.');
       setDocs([]);
     } finally {
       setLoading(false);
@@ -83,21 +88,37 @@ export const DocumentsPage: React.FC = () => {
 
     const fileIds = attachedFiles.map((f) => f.id);
 
-    await documentsService.createDocument({
-      title: newTitle,
-      category: newCategory,
-      content: newContent,
-      tags: tagArray,
-      attachedFileIds: fileIds,
-    });
+    try {
+      setIsSubmitting(true);
+      await documentsService.createDocument({
+        title: newTitle,
+        category: newCategory,
+        content: newContent,
+        tags: tagArray,
+        attachedFileIds: fileIds,
+      });
 
-    setIsCreateOpen(false);
-    setNewTitle('');
-    setNewCategory('Reports');
-    setNewContent('');
-    setNewTags('');
-    setAttachedFiles([]);
-    await fetchDocs();
+      setIsCreateOpen(false);
+      setNewTitle('');
+      setNewCategory('Reports');
+      setNewContent('');
+      setNewTags('');
+      setAttachedFiles([]);
+      await fetchDocs();
+      useNotificationStore.getState().addNotification({
+        title: 'Document Created',
+        description: `"${newTitle}" successfully saved to knowledge base.`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      useNotificationStore.getState().addNotification({
+        title: 'Creation Failed',
+        description: err?.message || 'Failed to save document to server.',
+        type: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -107,9 +128,22 @@ export const DocumentsPage: React.FC = () => {
           'Delete this document? Attached raw files will remain safely stored in Workspace Files.',
         )
       ) {
-        await documentsService.deleteDocument(id);
-        if (viewingDoc?.id === id) setViewingDoc(null);
-        await fetchDocs();
+        try {
+          await documentsService.deleteDocument(id);
+          if (viewingDoc?.id === id) setViewingDoc(null);
+          await fetchDocs();
+          useNotificationStore.getState().addNotification({
+            title: 'Document Deleted',
+            description: 'Document removed from knowledge base.',
+            type: 'success',
+          });
+        } catch (err: any) {
+          useNotificationStore.getState().addNotification({
+            title: 'Deletion Failed',
+            description: err?.message || 'Unable to delete document from server.',
+            type: 'error',
+          });
+        }
       }
     })();
   };
@@ -167,6 +201,23 @@ export const DocumentsPage: React.FC = () => {
           className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition-all focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
         />
       </div>
+
+      {/* Sync Error Banner */}
+      {error && (
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => void fetchDocs()}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs text-white hover:bg-rose-500 transition-colors"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
 
       {/* Document View / Grid */}
       <div className="mt-6">
@@ -327,10 +378,10 @@ export const DocumentsPage: React.FC = () => {
               </button>
               <button
                 onClick={() => void handleCreateDocument()}
-                disabled={!newTitle.trim()}
+                disabled={!newTitle.trim() || isSubmitting}
                 className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 disabled:opacity-50"
               >
-                Save Document
+                {isSubmitting ? 'Saving...' : 'Save Document'}
               </button>
             </div>
           </div>

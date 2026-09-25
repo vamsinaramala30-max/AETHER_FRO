@@ -28,7 +28,10 @@ export function useAutomationActions(onSuccess?: () => void) {
       setIsSubmitting(true);
       setActionError(null);
       try {
-        await automationExecutionService.executeRule(id);
+        const res = await automationExecutionService.executeRule(id);
+        if (res && res.success === false) {
+          throw new Error('Automation execution failed on server.');
+        }
         if (onSuccess) onSuccess();
       } catch (err: any) {
         setActionError(err?.message || 'Failed to trigger automation execution');

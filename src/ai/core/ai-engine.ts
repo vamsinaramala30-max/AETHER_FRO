@@ -122,46 +122,18 @@ export class AIEngine {
         signal: abortController.signal,
         onChunk: (chunk) => {
           accumulatedContent += chunk.delta;
+          if (chunk.metadata?.status) {
+            callbacks.onThinkingUpdate?.(
+              chunk.metadata.status as any,
+              chunk.metadata.toolName as string | undefined,
+            );
+          }
           callbacks.onChunk?.(chunk.delta, messageId);
         },
         onComplete: (finalContent, metadata) => {
           const turnEvidence: any[] = Array.isArray(metadata?.evidence)
             ? [...metadata.evidence]
             : [];
-
-          if (
-            context.memoryEntries &&
-            context.memoryEntries.length > 0 &&
-            !turnEvidence.some((e) => e.sourceType === 'approved_memory')
-          ) {
-            for (const mem of context.memoryEntries.slice(0, 3)) {
-              turnEvidence.push({
-                sourceType: 'approved_memory',
-                sourceId: mem.id,
-                content: mem.content,
-                relevance: mem.score ?? 0.85,
-                verified: true,
-                verificationStatus: 'VERIFIED',
-              });
-            }
-          }
-
-          if (
-            context.ragContext?.results &&
-            context.ragContext.results.length > 0 &&
-            !turnEvidence.some((e) => e.sourceType === 'retrieved_knowledge')
-          ) {
-            for (const r of context.ragContext.results.slice(0, 3)) {
-              turnEvidence.push({
-                sourceType: 'retrieved_knowledge',
-                sourceId: r.chunk.documentId || r.chunk.id,
-                content: r.documentName || r.chunk.content.slice(0, 100),
-                relevance: r.score ?? 0.9,
-                verified: true,
-                verificationStatus: 'VERIFIED',
-              });
-            }
-          }
 
           const response: GenerationResponse = {
             messageId,
@@ -178,7 +150,7 @@ export class AIEngine {
             confidence:
               (metadata as any)?.confidence ??
               (turnEvidence.length > 0 ? 'HIGH_CONFIDENCE' : 'MEDIUM_CONFIDENCE'),
-            verificationStatus: (metadata as any)?.verificationStatus ?? 'VERIFIED',
+            verificationStatus: (metadata as any)?.verificationStatus ?? 'UNVERIFIED',
             confirmationRequest: (metadata as any)?.confirmationRequest,
           };
           callbacks.onComplete?.(response);
