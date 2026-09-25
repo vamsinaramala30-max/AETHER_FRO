@@ -169,23 +169,21 @@ export const automationApi = {
   },
 
   deleteAutomation: async (id: string, config?: RequestConfig): Promise<boolean> => {
-    try {
-      await apiClient.delete(`/automation/${id}`, config);
-      return true;
-    } catch {
-      return true;
-    }
+    await apiClient.delete(`/automation/${id}`, config);
+    return true;
   },
 
   executeAutomation: async (
     id: string,
     config?: RequestConfig,
-  ): Promise<{ success: boolean; executionId: string; result?: any }> => {
+  ): Promise<{ success: boolean; executionId: string; result?: any; status?: string }> => {
     const res = await apiClient.post<any>(ENDPOINTS.AUTOMATION.EXECUTE(id), {}, config);
     const data = res?.data ?? res;
+    const isSuccess = data?.status !== 'FAILED' && data?.success !== false;
     return {
-      success: true,
-      executionId: data?.executionId || `exec-${Date.now()}`,
+      success: isSuccess,
+      executionId: data?.executionId || data?.id || `exec-${Date.now()}`,
+      status: data?.status || (isSuccess ? 'COMPLETED' : 'FAILED'),
       result: data?.result || data,
     };
   },

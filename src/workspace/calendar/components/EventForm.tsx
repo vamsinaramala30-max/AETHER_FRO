@@ -61,6 +61,7 @@ export const EventForm: React.FC = () => {
   const [attachments, setAttachments] = useState(editingEvent?.attachments ?? []);
   const [reminders, setReminders] = useState(editingEvent?.reminders ?? []);
   const [errors, setErrors] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isEventFormOpen) return null;
 
@@ -109,7 +110,7 @@ export const EventForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
     const startObj = isAllDay
@@ -161,23 +162,29 @@ export const EventForm: React.FC = () => {
       return;
     }
 
-    if (typeof editingEvent?.id === 'string' && editingEvent.id.trim() !== '') {
-      updateEvent(editingEvent.id, payload);
-      useNotificationStore.getState().addNotification({
-        title: 'Calendar Event Updated',
-        description: `Event "${payload.title}" was updated.`,
-        type: 'calendar',
-      });
-    } else {
-      addEvent({ ...payload, id: `evt_${String(Date.now())}` } as CalendarEvent);
-      useNotificationStore.getState().addNotification({
-        title: 'Calendar Event Created',
-        description: `Event "${payload.title}" scheduled for ${startDate}.`,
-        type: 'calendar',
-      });
+    try {
+      setIsSaving(true);
+      if (typeof editingEvent?.id === 'string' && editingEvent.id.trim() !== '') {
+        await updateEvent(editingEvent.id, payload);
+        useNotificationStore.getState().addNotification({
+          title: 'Calendar Event Updated',
+          description: `Event "${payload.title}" was updated.`,
+          type: 'calendar',
+        });
+      } else {
+        await addEvent({ ...payload, id: `evt_${String(Date.now())}` } as CalendarEvent);
+        useNotificationStore.getState().addNotification({
+          title: 'Calendar Event Created',
+          description: `Event "${payload.title}" scheduled for ${startDate}.`,
+          type: 'calendar',
+        });
+      }
+      closeEventForm();
+    } catch (err: any) {
+      setErrors([err.message || 'Failed to save calendar event to server.']);
+    } finally {
+      setIsSaving(false);
     }
-
-    closeEventForm();
   };
 
   return (
@@ -395,9 +402,10 @@ export const EventForm: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled={isSaving}
+              className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              Save Event
+              {isSaving ? 'Saving...' : 'Save Event'}
             </button>
           </div>
         </form>

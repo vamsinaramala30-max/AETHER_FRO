@@ -12,9 +12,9 @@ interface EventState {
 
   // Actions
   setEvents: (events: CalendarEvent[]) => void;
-  addEvent: (event: CalendarEvent) => void;
-  updateEvent: (id: string, updates: Partial<CalendarEvent>) => void;
-  deleteEvent: (id: string) => void;
+  addEvent: (event: CalendarEvent) => Promise<CalendarEvent>;
+  updateEvent: (id: string, updates: Partial<CalendarEvent>) => Promise<CalendarEvent>;
+  deleteEvent: (id: string) => Promise<void>;
   setSelectedEvent: (event: CalendarEvent | null) => void;
   openEventForm: (initialData?: Partial<CalendarEvent>) => void;
   closeEventForm: () => void;
@@ -37,15 +37,30 @@ export const useEventStore = create<EventState>((set, get) => ({
     set({ events });
   },
 
-  addEvent: (event) => {
+  addEvent: async (event) => {
+    const tempId = event.id;
     set((state) => ({
       historyStack: [...state.historyStack, state.events],
       events: [...state.events, event],
     }));
-    void eventService.createEvent(event);
+    try {
+      const persisted = await eventService.createEvent(event);
+      set((state) => ({
+        events: state.events.map((e) => (e.id === tempId ? persisted : e)),
+        selectedEvent: state.selectedEvent?.id === tempId ? persisted : state.selectedEvent,
+      }));
+      return persisted;
+    } catch (error) {
+      set((state) => ({
+        events: state.events.filter((e) => e.id !== tempId),
+        selectedEvent: state.selectedEvent?.id === tempId ? null : state.selectedEvent,
+      }));
+      throw error;
+    }
   },
 
-  updateEvent: (id, updates) => {
+  updateEvent: async (id, updates) => {
+    const previousEvents = get().events;
     set((state) => ({
       historyStack: [...state.historyStack, state.events],
       events: state.events.map((e) =>
@@ -56,17 +71,33 @@ export const useEventStore = create<EventState>((set, get) => ({
           ? { ...state.selectedEvent, ...updates }
           : state.selectedEvent,
     }));
-    void eventService.updateEvent(id, updates);
+    try {
+      const updated = await eventService.updateEvent(id, updates);
+      set((state) => ({
+        events: state.events.map((e) => (e.id === id ? updated : e)),
+        selectedEvent: state.selectedEvent?.id === id ? updated : state.selectedEvent,
+      }));
+      return updated;
+    } catch (error) {
+      set({ events: previousEvents });
+      throw error;
+    }
   },
 
-  deleteEvent: (id) => {
+  deleteEvent: async (id) => {
+    const previousEvents = get().events;
     set((state) => ({
       historyStack: [...state.historyStack, state.events],
       events: state.events.filter((e) => e.id !== id),
       selectedEvent: state.selectedEvent?.id === id ? null : state.selectedEvent,
       isEventDetailsOpen: false,
     }));
-    void eventService.deleteEvent(id);
+    try {
+      await eventService.deleteEvent(id);
+    } catch (error) {
+      set({ events: previousEvents });
+      throw error;
+    }
   },
 
   setSelectedEvent: (selectedEvent) => {

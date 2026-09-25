@@ -92,6 +92,32 @@ export interface ApiErrorPayload {
   details?: Record<string, unknown>;
 }
 
+export function sanitizeErrorMessage(rawMessage: string, status: number): string {
+  if (!rawMessage || typeof rawMessage !== 'string') {
+    return `Request failed with status ${status}`;
+  }
+
+  const isSensitive =
+    /\b(select\s+\*|insert\s+into|update\s+\w+\s+set|delete\s+from|drop\s+table)\b/i.test(rawMessage) ||
+    /\b(prisma:\w+|prismaclientknownrequesterror|prismaclientinitializationerror)\b/i.test(rawMessage) ||
+    /\b(at\s+(?:async\s+)?[\w$.<>]+(?:\s+\[as\s+[\w$.]+\])?\s+\([^\n)]+:\d+:\d+\))/i.test(rawMessage) ||
+    /(?:[a-zA-Z]:[\\/](?:Users|Windows|Program Files)|(?:\/home\/|\/var\/|\/tmp\/|\/etc\/)[\w/.-]+)/i.test(rawMessage) ||
+    /\b(pg_hba\.conf|relation "[^"]+" does not exist|column "[^"]+" of relation|violates foreign key constraint|violates not-null constraint)\b/i.test(rawMessage);
+
+  if (!isSensitive) {
+    return rawMessage;
+  }
+
+  if (status === 400) return 'Invalid request data provided. Please check your inputs.';
+  if (status === 401) return 'Authentication failed. Please verify credentials or sign in again.';
+  if (status === 403) return 'Access denied. You do not have permission to access this resource.';
+  if (status === 404) return 'The requested resource could not be found.';
+  if (status === 409) return 'A resource conflict occurred. Please refresh and try again.';
+  if (status === 429) return 'Too many requests. Please slow down and try again later.';
+  if (status >= 500) return 'The server encountered an error processing your request. Please try again.';
+  return `An error occurred while processing the request (${status}).`;
+}
+
 export class ApiError extends Error {
   public readonly status: number;
   public readonly code?: string;
@@ -101,7 +127,8 @@ export class ApiError extends Error {
   public readonly details?: Record<string, unknown>;
 
   constructor(payload: ApiErrorPayload) {
-    super(payload.message);
+    const safeMessage = sanitizeErrorMessage(payload.message, payload.status || 500);
+    super(safeMessage);
     this.name = 'ApiError';
     this.status = payload.status || 500;
     this.code = payload.code;
@@ -452,27 +479,63 @@ class HttpClient {
       throw new ApiError({ message: 'Response body is not readable', status: 500 });
     }
 
-    const decoder = new TextDecoder();
+    const decoder = new TextDecoder('utf-8');
     let buffer = '';
 
     try {
-      while (true) {
+      while (!fetchOptions.signal?.aborted) {
         const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('data: ')) {
-            yield trimmed.replace(/^data:\s*/, '');
+        // SSE messages are separated by double newlines (\n\n or \r\n\r\n)
+        let boundaryIndex: number;
+        while ((boundaryIndex = buffer.indexOf('\n\n')) !== -1 || (boundaryIndex = buffer.indexOf('\r\n\r\n')) !== -1) {
+          const delimiterLength = buffer.startsWith('\r\n\r\n', boundaryIndex) ? 4 : 2;
+          const block = buffer.slice(0, boundaryIndex);
+          buffer = buffer.slice(boundaryIndex + delimiterLength);
+
+          const lines = block.split(/\r?\n/);
+          const dataLines: string[] = [];
+
+          for (const line of lines) {
+            const trimmed = line.trimStart();
+            if (trimmed.startsWith(':')) {
+              // Comment / heartbeat, ignore
+              continue;
+            }
+            if (trimmed.startsWith('data:')) {
+              dataLines.push(trimmed.slice(5).replace(/^\s/, ''));
+            }
+          }
+
+          if (dataLines.length > 0) {
+            yield dataLines.join('\n');
           }
         }
       }
+
+      // Process any trailing complete data if delimiter was omitted at the very end
+      if (buffer.trim()) {
+        const lines = buffer.split(/\r?\n/);
+        const dataLines: string[] = [];
+        for (const line of lines) {
+          const trimmed = line.trimStart();
+          if (!trimmed.startsWith(':') && trimmed.startsWith('data:')) {
+            dataLines.push(trimmed.slice(5).replace(/^\s/, ''));
+          }
+        }
+        if (dataLines.length > 0) {
+          yield dataLines.join('\n');
+        }
+      }
     } finally {
-      reader.releaseLock();
+      try {
+        await reader.cancel().catch(() => {});
+      } finally {
+        reader.releaseLock();
+      }
     }
   }
 

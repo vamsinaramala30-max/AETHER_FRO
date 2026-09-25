@@ -1,31 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { goalService, Goal, GoalStatus } from './goalservice';
 import { GoalCard } from './goalcard';
 import { GoalForm } from './golaform';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { Target } from 'lucide-react';
+import { Target, AlertCircle, RefreshCw } from 'lucide-react';
 import { useNotificationStore } from '@/state/notificationStore';
 
 export const GoalsPage: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadGoals = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await goalService.getGoals();
+      setGoals(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sync goals from server.');
+      useNotificationStore.getState().addNotification({
+        title: 'Goal Sync Failed',
+        description: 'Could not load project goals from the backend server.',
+        type: 'project',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const data = await goalService.getGoals();
-        setGoals(data);
-      } catch {
-        useNotificationStore.getState().addNotification({
-          title: 'Goal Sync Failed',
-          description: 'Could not load project goals from the backend server.',
-          type: 'project',
-        });
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    void loadGoals();
+  }, [loadGoals]);
 
   const handleUpdateProgress = (id: string, nextProgress: number) => {
     void (async () => {
@@ -139,6 +145,22 @@ export const GoalsPage: React.FC = () => {
       </div>
 
       <div className="space-y-6">
+        {error && (
+          <div className="flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              onClick={() => void loadGoals()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs text-white hover:bg-rose-500 transition-colors"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Retry</span>
+            </button>
+          </div>
+        )}
+
         <GoalForm onSubmit={handleCreateGoal} />
         {Array.isArray(goals) && goals.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -152,7 +174,7 @@ export const GoalsPage: React.FC = () => {
               />
             ))}
           </div>
-        ) : (
+        ) : !error ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
             <Target className="mx-auto mb-3 h-10 w-10 text-slate-400 dark:text-slate-600" />
             <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">
@@ -162,7 +184,7 @@ export const GoalsPage: React.FC = () => {
               Define your first macro milestone above to start tracking progress.
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </PageWrapper>
   );

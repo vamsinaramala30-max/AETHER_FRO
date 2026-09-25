@@ -1,6 +1,6 @@
 // frontend/src/knowledge/documents/FileUpload.tsx
 import React, { useState, useRef } from 'react';
-import { UploadCloud, Tag } from 'lucide-react';
+import { UploadCloud, Tag, AlertCircle, X } from 'lucide-react';
 
 interface FileUploadProps {
   onUploadComplete: (file: File, tags: string[]) => Promise<void> | void;
@@ -9,11 +9,13 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [tagsInput, setTagsInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
     setUploading(true);
+    setUploadError(null);
     void (async () => {
       try {
         const parsedTags = tagsInput
@@ -22,8 +24,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
           .filter((t) => t.length > 0);
         await onUploadComplete(file, parsedTags);
         setTagsInput('');
-      } catch {
-        alert('File upload failed.');
+      } catch (err: any) {
+        setUploadError(err?.message || 'File upload failed. Ensure server connection is active.');
       } finally {
         setUploading(false);
       }
@@ -53,6 +55,21 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
 
   return (
     <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      {uploadError && (
+        <div className="flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs font-semibold text-rose-600 dark:text-rose-400">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{uploadError}</span>
+          </div>
+          <button
+            onClick={() => setUploadError(null)}
+            className="text-rose-500 hover:text-rose-700"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       <div className="space-y-1.5">
         <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
           <Tag className="h-3.5 w-3.5 text-indigo-500" />

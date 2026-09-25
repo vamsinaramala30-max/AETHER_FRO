@@ -46,20 +46,28 @@ function parseSseLine(line: string): { chunk?: StreamingChunk; error?: AIError }
       index?: number;
       done?: boolean;
       isLast?: boolean;
+      status?: string;
+      toolName?: string;
       finish_reason?: string;
       error?: { code?: string; message?: string } | string;
     };
 
-    if (parsed.error) {
+    if (parsed.status === 'failed' || parsed.error) {
       const errObj =
         typeof parsed.error === 'object' && parsed.error !== null
           ? parsed.error
-          : { message: String(parsed.error) };
+          : { message: String(parsed.error || (parsed as any).details || 'Stream execution failed.') };
       return {
         error: createAIError(
           (errObj.code as any) || 'STREAM_FAILED',
           errObj.message || 'An error occurred during response streaming.',
         ),
+      };
+    }
+
+    if (parsed.status === 'cancelled') {
+      return {
+        error: createAIError('CANCELLED', 'Streaming was cancelled.'),
       };
     }
 
@@ -72,7 +80,10 @@ function parseSseLine(line: string): { chunk?: StreamingChunk; error?: AIError }
     const done = parsed.done ?? parsed.isLast ?? false;
 
     let metadata: Record<string, unknown> | undefined;
-    if (
+    const hasMetadata =
+      (parsed as any).status ||
+      (parsed as any).toolName ||
+      (parsed as any).tool_name ||
       (parsed as any).plan ||
       (parsed as any).evidence ||
       (parsed as any).citations ||
@@ -82,9 +93,12 @@ function parseSseLine(line: string): { chunk?: StreamingChunk; error?: AIError }
       (parsed as any).confirmation_request ||
       (parsed as any).verificationStatus ||
       (parsed as any).verification_status ||
-      (parsed as any).confidence
-    ) {
+      (parsed as any).confidence;
+
+    if (hasMetadata) {
       metadata = {
+        status: (parsed as any).status,
+        toolName: (parsed as any).toolName ?? (parsed as any).tool_name,
         plan: (parsed as any).plan,
         evidence: (parsed as any).evidence,
         citations: (parsed as any).citations,
@@ -180,105 +194,144 @@ export class StreamingEngine {
         headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token.trim()}`;
       }
 
-      const response = await fetch(request.endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(request.payload),
-        signal: internalController.signal,
-      });
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+      try {
+        const response = await fetch(request.endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(request.payload),
+          signal: internalController.signal,
+        });
 
-      if (!response.ok) {
-        clearTimeout(firstChunkTimer);
-        if (response.status === 401) {
-          request.onError(createAIError('UNAUTHORIZED', 'Unauthorized to access the AI service.'));
-        } else if (response.status === 403) {
-          request.onError(createAIError('FORBIDDEN', 'Access to the AI service is forbidden.'));
-        } else if (response.status === 503) {
-          request.onError(createAIError('SERVICE_UNAVAILABLE', 'AI service is unavailable.'));
-        } else {
-          request.onError(
-            createAIError('STREAM_FAILED', `Backend returned HTTP ${response.status}.`),
-          );
-        }
-        return;
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        clearTimeout(firstChunkTimer);
-        request.onError(createAIError('STREAM_FAILED', 'Backend response body is not readable.'));
-        return;
-      }
-
-      const decoder = new TextDecoder('utf-8');
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (request.signal.aborted || internalController.signal.aborted) break;
-
-        if (!firstChunkReceived) {
-          firstChunkReceived = true;
+        if (!response.ok) {
           clearTimeout(firstChunkTimer);
+          if (response.status === 401) {
+            request.onError(createAIError('UNAUTHORIZED', 'Unauthorized to access the AI service.'));
+          } else if (response.status === 403) {
+            request.onError(createAIError('FORBIDDEN', 'Access to the AI service is forbidden.'));
+          } else if (response.status === 503) {
+            request.onError(createAIError('SERVICE_UNAVAILABLE', 'AI service is unavailable.'));
+          } else {
+            request.onError(
+              createAIError('STREAM_FAILED', `Backend returned HTTP ${response.status}.`),
+            );
+          }
+          return;
         }
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
+        reader = response.body?.getReader();
+        if (!reader) {
+          clearTimeout(firstChunkTimer);
+          request.onError(createAIError('STREAM_FAILED', 'Backend response body is not readable.'));
+          return;
+        }
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          const parsed = parseSseLine(trimmed);
-          if (!parsed) continue;
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
 
-          if (parsed.error) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (request.signal.aborted || internalController.signal.aborted) {
+            request.onError(createAIError('CANCELLED', 'Streaming was cancelled by user.'));
+            return;
+          }
+
+          if (!firstChunkReceived) {
+            firstChunkReceived = true;
+            clearTimeout(firstChunkTimer);
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            const parsed = parseSseLine(trimmed);
+            if (!parsed) continue;
+
+            if (parsed.error) {
+              request.onError(parsed.error);
+              return;
+            }
+
+            const chunk = parsed.chunk;
+            if (!chunk) continue;
+
+            if (chunk.metadata) {
+              accumulatedMetadata = { ...accumulatedMetadata, ...chunk.metadata };
+            }
+
+            if (chunk.done) {
+              if (chunk.metadata?.status === 'failed') {
+                request.onError(createAIError('STREAM_FAILED', (chunk.metadata?.error as string) || 'Stream execution failed.'));
+                return;
+              }
+              if (chunk.metadata?.status === 'cancelled') {
+                request.onError(createAIError('CANCELLED', 'Stream execution was cancelled.'));
+                return;
+              }
+              request.onComplete(fullContent, accumulatedMetadata);
+              return;
+            }
+
+            fullContent += chunk.delta;
+            request.onChunk({ ...chunk, index: chunkIndex++ });
+          }
+        }
+
+        if (request.signal.aborted || internalController.signal.aborted) {
+          request.onError(createAIError('CANCELLED', 'Streaming was cancelled by user.'));
+          return;
+        }
+
+        if (timedOut) {
+          return;
+        }
+
+        // Handle any remaining buffer
+        if (buffer.trim()) {
+          const parsed = parseSseLine(buffer.trim());
+          if (parsed?.error) {
             request.onError(parsed.error);
             return;
           }
-
-          const chunk = parsed.chunk;
-          if (!chunk) continue;
-
-          if (chunk.metadata) {
-            accumulatedMetadata = { ...accumulatedMetadata, ...chunk.metadata };
+          if (parsed?.chunk) {
+            if (parsed.chunk.metadata) {
+              accumulatedMetadata = { ...accumulatedMetadata, ...parsed.chunk.metadata };
+            }
+            if (parsed.chunk.metadata?.status === 'failed') {
+              request.onError(createAIError('STREAM_FAILED', (parsed.chunk.metadata?.error as string) || 'Stream execution failed.'));
+              return;
+            }
+            if (parsed.chunk.metadata?.status === 'cancelled') {
+              request.onError(createAIError('CANCELLED', 'Stream execution was cancelled.'));
+              return;
+            }
+            if (!parsed.chunk.done) {
+              fullContent += parsed.chunk.delta;
+              request.onChunk({ ...parsed.chunk, index: chunkIndex++ });
+            }
           }
-
-          if (chunk.done) {
-            request.onComplete(fullContent, accumulatedMetadata);
-            return;
-          }
-
-          fullContent += chunk.delta;
-          request.onChunk({ ...chunk, index: chunkIndex++ });
         }
-      }
 
-      // Handle any remaining buffer
-      if (buffer.trim()) {
-        const parsed = parseSseLine(buffer.trim());
-        if (parsed?.error) {
-          request.onError(parsed.error);
-          return;
-        }
-        if (parsed?.chunk) {
-          if (parsed.chunk.metadata) {
-            accumulatedMetadata = { ...accumulatedMetadata, ...parsed.chunk.metadata };
-          }
-          if (!parsed.chunk.done) {
-            fullContent += parsed.chunk.delta;
-            request.onChunk({ ...parsed.chunk, index: chunkIndex++ });
+        request.onComplete(fullContent, accumulatedMetadata);
+      } finally {
+        if (reader) {
+          try {
+            await reader.cancel().catch(() => {});
+          } finally {
+            reader.releaseLock();
           }
         }
       }
-
-      request.onComplete(fullContent, accumulatedMetadata);
     } catch (err: unknown) {
       if (timedOut) {
         return;
       }
-      if (request.signal.aborted) {
+      if (request.signal.aborted || internalController.signal.aborted) {
         request.onError(createAIError('CANCELLED', 'Streaming was cancelled by user.'));
       } else if (err instanceof TypeError && err.message.includes('fetch')) {
         request.onError(

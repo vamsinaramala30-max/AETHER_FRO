@@ -4,6 +4,8 @@ import {
   Flame, AlertTriangle, ChevronRight, ChevronLeft, X, Sparkles,
   Pencil, Trash2, CalendarDays, RotateCcw
 } from "lucide-react";
+import { plannerService } from "./plannerService";
+import { taskService } from "../../projects/tasks/taskservice";
 
 /* ---------------------------------------------------------------------
    TYPES
@@ -31,6 +33,8 @@ interface Block {
   revision: Revision | null;
   groupId: string | null; // links a 1-4-7 revision chain together
   completed: boolean;
+  taskId?: string | null;
+  calendarEventId?: string | null;
 }
 
 interface DayData {
@@ -50,6 +54,8 @@ interface BlockOpts {
   revision?: Revision | null;
   groupId?: string | null;
   completed?: boolean;
+  taskId?: string | null;
+  calendarEventId?: string | null;
 }
 
 interface DayTotals {
@@ -579,14 +585,35 @@ export default function AetherWeeklyPlanner() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingSleep, setEditingSleep] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [isOfflineCache, setIsOfflineCache] = useState<boolean>(false);
   const loadedOnce = useRef(false);
 
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekAnchor, i)), [weekAnchor]);
   const weekKeys = useMemo(() => weekDates.map(dateKey), [weekDates]);
 
-  // load
+  // load — database is authoritative source of truth, localStorage is fallback cache
   useEffect(() => {
+    let isMounted = true;
     (async () => {
+      try {
+        const serverDays = await plannerService.fetchPlanner();
+        if (isMounted && serverDays && Object.keys(serverDays).length > 0) {
+          setDaysData(serverDays);
+          setLoaded(true);
+          setIsOfflineCache(false);
+          setSyncError(null);
+          return;
+        }
+      } catch (err: any) {
+        console.warn("[WeeklyPlanner] Failed to load from backend, checking local cache", err);
+        if (isMounted) {
+          setSyncError(err?.message || "Could not load planner from server. Using local offline cache.");
+        }
+      }
+
       try {
         let raw: string | null = null;
         if (typeof window !== "undefined" && window.storage) {
@@ -596,30 +623,81 @@ export default function AetherWeeklyPlanner() {
         if (!raw && typeof window !== "undefined") {
           raw = localStorage.getItem(STORAGE_KEY);
         }
-        if (raw) {
+        if (raw && isMounted) {
           const parsed = JSON.parse(raw);
-          if (parsed?.daysData) setDaysData(parsed.daysData);
+          if (parsed?.daysData) {
+            setDaysData(parsed.daysData);
+            setIsOfflineCache(true);
+          }
         }
       } catch { /* nothing saved yet */ }
-      setLoaded(true);
+
+      if (isMounted) setLoaded(true);
     })();
+    return () => { isMounted = false; };
   }, []);
 
-  // save
+  const retrySave = useCallback(async () => {
+    setSaveStatus("saving");
+    setSaveError(null);
+    try {
+      await plannerService.savePlanner(daysData);
+      setSaveStatus("saved");
+      setSyncError(null);
+      setIsOfflineCache(false);
+    } catch (e: any) {
+      setSaveStatus("error");
+      setSaveError(e?.message || "Failed to persist planner to database");
+    }
+  }, [daysData]);
+
+  const retryLoad = useCallback(async () => {
+    try {
+      const serverDays = await plannerService.fetchPlanner();
+      if (serverDays && Object.keys(serverDays).length > 0) {
+        setDaysData(serverDays);
+      }
+      setSyncError(null);
+      setIsOfflineCache(false);
+    } catch (err: any) {
+      setSyncError(err?.message || "Could not connect to server database.");
+    }
+  }, []);
+
+  // save — writes to backend database and maintains offline local cache
   useEffect(() => {
     if (!loaded) return;
     if (!loadedOnce.current) { loadedOnce.current = true; return; }
-    (async () => {
-      const payload = JSON.stringify({ daysData });
+
+    const timeoutId = setTimeout(async () => {
+      setSaveStatus("saving");
+      setSaveError(null);
       try {
+        await plannerService.savePlanner(daysData);
+        setSaveStatus("saved");
+
+        const payload = JSON.stringify({ daysData });
         if (typeof window !== "undefined" && window.storage) {
           await window.storage.set(STORAGE_KEY, payload);
         }
         if (typeof window !== "undefined") {
           localStorage.setItem(STORAGE_KEY, payload);
         }
-      } catch (e) { console.error("Save failed", e); }
-    })();
+      } catch (e: any) {
+        console.error("Save failed", e);
+        setSaveStatus("error");
+        setSaveError(e?.message || "Failed to persist planner to database");
+
+        try {
+          const payload = JSON.stringify({ daysData });
+          if (typeof window !== "undefined") {
+            localStorage.setItem(STORAGE_KEY, payload);
+          }
+        } catch {}
+      }
+    }, 600);
+
+    return () => clearTimeout(timeoutId);
   }, [daysData, loaded]);
 
   const updateDay = useCallback((key: string, updater: (d: DayData) => DayData) => {
@@ -627,7 +705,24 @@ export default function AetherWeeklyPlanner() {
   }, []);
 
   const toggleTask = useCallback((key: string, id: string) => {
-    updateDay(key, d => ({ ...d, blocks: d.blocks.map(b => b.id === id ? { ...b, completed: !b.completed } : b) }));
+    let toggledBlock: Block | undefined;
+    updateDay(key, d => {
+      const updatedBlocks = d.blocks.map(b => {
+        if (b.id === id) {
+          toggledBlock = { ...b, completed: !b.completed };
+          return toggledBlock;
+        }
+        return b;
+      });
+      return { ...d, blocks: updatedBlocks };
+    });
+
+    if (toggledBlock?.taskId) {
+      const newStatus = toggledBlock.completed ? "done" : "todo";
+      taskService.updateTask(toggledBlock.taskId, { status: newStatus as any }).catch((err) => {
+        console.warn("[WeeklyPlanner] Failed to sync task completion:", err);
+      });
+    }
   }, [updateDay]);
 
   const deleteBlock = useCallback((key: string, block: Block) => {
@@ -755,7 +850,44 @@ export default function AetherWeeklyPlanner() {
             </div>
             <div className="display" style={{ fontSize: 32, fontWeight: 600, marginTop: 4 }}>This week's balance</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            {saveStatus === "saving" && (
+              <span className="mono" style={{ fontSize: 11, color: COLORS.p1, marginRight: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: COLORS.p1 }} />
+                SAVING TO DB...
+              </span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="mono" style={{ fontSize: 11, color: COLORS.other, marginRight: 4 }}>✓ PERSISTED</span>
+            )}
+            {saveStatus === "error" && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginRight: 4 }}>
+                <span className="mono" style={{ fontSize: 11, color: COLORS.p0 }} title={saveError || "Database save failed"}>
+                  ⚠ SAVE FAILED
+                </span>
+                <button
+                  type="button"
+                  onClick={retrySave}
+                  className="dial-btn"
+                  style={{
+                    background: `${COLORS.p0}20`,
+                    border: `1px solid ${COLORS.p0}60`,
+                    color: COLORS.p0,
+                    borderRadius: 6,
+                    padding: "3px 8px",
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  Retry Save
+                </button>
+              </div>
+            )}
+            {isOfflineCache && (
+              <span className="mono" style={{ fontSize: 10, color: COLORS.muted, background: `${COLORS.panel2}`, border: `1px solid ${COLORS.line}`, borderRadius: 6, padding: "2px 6px", marginRight: 4 }}>
+                OFFLINE CACHE
+              </span>
+            )}
             <button onClick={goPrevWeek} aria-label="Previous week" className="icon-btn" style={{ background: COLORS.panel, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: 7 }}>
               <ChevronLeft size={15} />
             </button>
@@ -770,6 +902,52 @@ export default function AetherWeeklyPlanner() {
             )}
           </div>
         </div>
+
+        {/* SYNC ERROR BANNER */}
+        {syncError && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: `${COLORS.p0}18`,
+            border: `1px solid ${COLORS.p0}40`,
+            borderRadius: 10,
+            padding: "8px 14px",
+            marginBottom: 16,
+            fontSize: 12,
+            color: COLORS.p0,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span>⚠</span>
+              <span>{syncError}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                type="button"
+                onClick={retryLoad}
+                style={{
+                  background: COLORS.p0,
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Retry Connection
+              </button>
+              <button
+                type="button"
+                onClick={() => setSyncError(null)}
+                style={{ background: "none", border: "none", color: COLORS.p0, cursor: "pointer", fontSize: 14 }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* WEEKLY 8-8-8 GAUGES */}
         <div style={{
