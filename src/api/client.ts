@@ -98,7 +98,8 @@ export function sanitizeErrorMessage(rawMessage: string, status: number): string
   }
 
   const isSensitive =
-    /\b(select\s+\*|insert\s+into|update\s+\w+\s+set|delete\s+from|drop\s+table)\b/i.test(rawMessage) ||
+    /\b(select\s+(\*|[\w,\s]+)\s+from|insert\s+into|update\s+\w+\s+set|delete\s+from|drop\s+table|syntax\s+error\s+at\s+or\s+near)\b/i.test(rawMessage) ||
+    /\bselect\s+\*/i.test(rawMessage) ||
     /\b(prisma:\w+|prismaclientknownrequesterror|prismaclientinitializationerror)\b/i.test(rawMessage) ||
     /\b(at\s+(?:async\s+)?[\w$.<>]+(?:\s+\[as\s+[\w$.]+\])?\s+\([^\n)]+:\d+:\d+\))/i.test(rawMessage) ||
     /(?:[a-zA-Z]:[\\/](?:Users|Windows|Program Files)|(?:\/home\/|\/var\/|\/tmp\/|\/etc\/)[\w/.-]+)/i.test(rawMessage) ||
