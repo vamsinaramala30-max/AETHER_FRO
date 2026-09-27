@@ -10,6 +10,70 @@ import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { createAIError } from '../ai-types';
 import { authConfig } from '../../config/auth.config';
 
+// ── Token helpers ──────────────────────────────────────────────────────────────
+
+/** Read the freshest access token from all known localStorage locations. */
+function readStoredToken(): string | null {
+  try {
+    const direct =
+      localStorage.getItem(authConfig.tokenKey) ||
+      localStorage.getItem('aether_access_token') ||
+      localStorage.getItem('aether-auth-token') ||
+      localStorage.getItem('auth_token');
+    if (direct) return direct;
+
+    const zustandRaw = localStorage.getItem('aether-auth-storage');
+    if (zustandRaw) {
+      const parsed = JSON.parse(zustandRaw);
+      if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+        return parsed.state.token;
+      }
+    }
+  } catch {
+    // Ignore
+  }
+  return null;
+}
+
+/** Attempt to refresh the access token using the stored refresh token. */
+async function attemptTokenRefresh(): Promise<string | null> {
+  try {
+    const refreshToken =
+      localStorage.getItem(authConfig.refreshTokenKey) ||
+      localStorage.getItem('aether_refresh_token');
+    if (!refreshToken) return null;
+
+    const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const refreshUrl = rawBase.replace(/\/+$/, '') + '/auth/refresh';
+
+    const res = await fetch(refreshUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (!res.ok) return null;
+
+    const body = await res.json();
+    const tokens = body?.data?.tokens ?? body?.tokens ?? body?.data;
+    const accessToken: string | undefined = tokens?.accessToken ?? body?.accessToken;
+    if (typeof accessToken !== 'string' || !accessToken) return null;
+
+    // Persist the new token
+    localStorage.setItem(authConfig.tokenKey, accessToken);
+    localStorage.setItem('aether_access_token', accessToken);
+    localStorage.setItem('aether-auth-token', accessToken);
+    localStorage.setItem('auth_token', accessToken);
+    if (tokens?.refreshToken) {
+      localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
+    }
+    return accessToken;
+  } catch {
+    return null;
+  }
+}
+
 export type StreamingChunkHandler = (chunk: StreamingChunk) => void;
 export type StreamingCompleteHandler = (
   finalContent: string,
@@ -164,49 +228,50 @@ export class StreamingEngine {
       }
     }, this.config.firstChunkTimeoutMs);
 
+
     try {
-      let token =
-        localStorage.getItem(authConfig.tokenKey) ||
-        localStorage.getItem('aether_access_token') ||
-        localStorage.getItem('aether_auth_token') ||
-        localStorage.getItem('aether-auth-token') ||
-        localStorage.getItem('auth_token');
-
-      if (!token) {
-        try {
-          const store = localStorage.getItem('aether-auth-storage');
-          if (store) {
-            const parsed = JSON.parse(store);
-            if (parsed?.state?.token && typeof parsed.state.token === 'string') {
-              token = parsed.state.token;
-            }
-          }
-        } catch {
-          // Ignore storage parse error
-        }
-      }
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-      };
-      if (token && typeof token === 'string' && token.trim() !== '') {
-        headers[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${token.trim()}`;
-      }
-
       let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+
       try {
-        const response = await fetch(request.endpoint, {
+        const buildHeaders = (tok: string | null): Record<string, string> => {
+          const h: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+          };
+          if (tok && tok.trim()) {
+            h[authConfig.tokenHeader] = `${authConfig.tokenPrefix}${tok.trim()}`;
+          }
+          return h;
+        };
+
+        let token = readStoredToken();
+        let response = await fetch(request.endpoint, {
           method: 'POST',
-          headers,
+          headers: buildHeaders(token),
           body: JSON.stringify(request.payload),
           signal: internalController.signal,
         });
 
+        // ── 401 Auto-Refresh (mirrors apiClient behaviour) ────────────────────
+        if (response.status === 401) {
+          const refreshed = await attemptTokenRefresh();
+          if (refreshed) {
+            // Retry once with the fresh token
+            response = await fetch(request.endpoint, {
+              method: 'POST',
+              headers: buildHeaders(refreshed),
+              body: JSON.stringify(request.payload),
+              signal: internalController.signal,
+            });
+          }
+        }
+
         if (!response.ok) {
           clearTimeout(firstChunkTimer);
           if (response.status === 401) {
-            request.onError(createAIError('UNAUTHORIZED', 'Unauthorized to access the AI service.'));
+            // Signal session expiry to the rest of the app
+            window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+            request.onError(createAIError('UNAUTHORIZED', 'Session expired. Please sign in again.'));
           } else if (response.status === 403) {
             request.onError(createAIError('FORBIDDEN', 'Access to the AI service is forbidden.'));
           } else if (response.status === 503) {

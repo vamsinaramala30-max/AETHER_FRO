@@ -84,35 +84,54 @@ export const ContactPage: React.FC = () => {
 
     setIsSubmitting(true);
 
+    // Use the configured backend base URL to ensure correct routing in all environments
+    const apiBase =
+      (typeof import.meta !== 'undefined' &&
+        (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_BASE_URL) ||
+      '/api/v1';
+    const contactUrl = `${apiBase.replace(/\/+$/, '')}/contact`;
+
     try {
-      const response = await fetch('/api/v1/contact', {
+      const response = await fetch(contactUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          fullName: formData.fullName.trim(),
+          email: formData.email.trim().toLowerCase(),
+          company: formData.company?.trim() || undefined,
+          category: formData.inquiryType,
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+        }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data?.success !== false) {
         setIsSubmitted(true);
-        setReferenceId(
-          data?.data?.referenceId || `ATH-CNT-${Date.now().toString(36).toUpperCase()}`,
-        );
+        setReferenceId(data?.data?.referenceId || '');
       } else {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData?.message || 'Failed to submit inquiry to server.');
+        // Surface real backend error — never show false success
+        const errMsg =
+          data?.error?.message ||
+          data?.message ||
+          `Submission failed (HTTP ${response.status}). Please try again or contact us directly.`;
+        setSubmitError(errMsg);
       }
     } catch (err: unknown) {
-      // Clean error handling fallback for API connection
-      console.warn('API endpoint connection notice:', err);
-      // Fallback client simulation if offline
-      setIsSubmitted(true);
-      setReferenceId(`ATH-CNT-${Date.now().toString(36).toUpperCase()}`);
+      // Network error — show actionable message, do NOT simulate success
+      const msg =
+        err instanceof Error && err.message
+          ? `Network error: ${err.message}. Please check your connection and try again.`
+          : 'Unable to reach the server. Please check your connection and try again.';
+      setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
