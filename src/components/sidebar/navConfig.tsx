@@ -167,18 +167,6 @@ export const navigationGroups: NavGroup[] = [
             href: '/app/workspace/members',
             icon: React.createElement(Users, { className: 'h-3.5 w-3.5' }),
           },
-          {
-            id: 'workspace-timer',
-            label: 'Focus Timer',
-            href: '/app/workspace/focustimer',
-            icon: React.createElement(Clock, { className: 'h-3.5 w-3.5' }),
-          },
-          {
-            id: 'workspace-webdirectory',
-            label: 'Web Directory',
-            href: '/app/workspace/webdirectory',
-            icon: React.createElement(Globe, { className: 'h-3.5 w-3.5' }),
-          },
         ],
       },
     ],
