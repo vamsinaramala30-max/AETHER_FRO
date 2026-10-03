@@ -36,6 +36,8 @@ export function MemoryMatrixGame() {
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [finalResult, setFinalResult] = useState<GameResult | null>(null);
+  /** 1-based round counter — drives progressive display timing. Resets each game. */
+  const [roundNumber, setRoundNumber] = useState(1);
 
   const store = useCognitiveLabStore();
   const bestScore = store.getBestScore("memory-matrix");
@@ -53,7 +55,8 @@ export function MemoryMatrixGame() {
     setIsPaused(false);
     setUserSelected([]);
     setStatusMessage(null);
-    const initialChallenge = generateMemoryMatrixChallenge(diff);
+    setRoundNumber(1);
+    const initialChallenge = generateMemoryMatrixChallenge(diff, 1);
     setChallenge(initialChallenge);
     setGameState("memorize");
   }, []);
@@ -152,7 +155,11 @@ export function MemoryMatrixGame() {
       setTimeout(() => {
         setFeedback(null);
         setUserSelected([]);
-        setChallenge(generateMemoryMatrixChallenge(difficulty));
+        setRoundNumber((r) => {
+          const next = r + 1;
+          setChallenge(generateMemoryMatrixChallenge(difficulty, next));
+          return next;
+        });
         setGameState("memorize");
       }, 500);
     }
@@ -191,7 +198,11 @@ export function MemoryMatrixGame() {
       setTimeout(() => {
         setFeedback(null);
         setUserSelected([]);
-        setChallenge(generateMemoryMatrixChallenge(difficulty));
+        setRoundNumber((r) => {
+          const next = r + 1;
+          setChallenge(generateMemoryMatrixChallenge(difficulty, next));
+          return next;
+        });
         setGameState("memorize");
       }, 500);
     }
