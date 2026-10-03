@@ -104,6 +104,46 @@ export const documentsService = {
     });
   },
 
+  async updateDocument(
+    id: string,
+    data: {
+      title?: string;
+      category?: string;
+      content?: string;
+      tags?: string[];
+      attachedFileIds?: string[];
+    },
+  ): Promise<DocumentItem> {
+    const payload: any = {};
+    if (data.title !== undefined) payload.title = data.title;
+    if (data.content !== undefined) payload.description = data.content;
+    if (data.category !== undefined) payload.category = data.category;
+    if (data.tags !== undefined) payload.tags = data.tags;
+    if (data.attachedFileIds !== undefined) {
+      payload.metadata = { attachedFileIds: data.attachedFileIds };
+    }
+
+    const res = await apiClient.patch<any>(`/knowledge/documents/${id}`, payload);
+    const d = res.data || res;
+    triggerActivityUpdate();
+    return {
+      id: d.id,
+      name: d.title || data.title || 'Untitled Document',
+      size: d.metadata?.fileSize || d.fileSize || 0,
+      mimeType: d.metadata?.mimeType || d.mimeType || 'application/json',
+      url: d.fileKey || '',
+      category: d.category || data.category || 'Reports',
+      content: d.description || data.content || '',
+      tags: d.tags || data.tags || [],
+      attachedFileIds: d.metadata?.attachedFileIds || data.attachedFileIds || [],
+      createdAt: d.createdAt || new Date().toISOString(),
+      updatedAt: d.updatedAt || new Date().toISOString(),
+      userId: d.ownerId || 'user',
+      type: 'document',
+      status: d.status || 'READY',
+    };
+  },
+
   async deleteDocument(id: string): Promise<void> {
     await apiClient.delete(`/knowledge/documents/${id}`);
     triggerActivityUpdate();

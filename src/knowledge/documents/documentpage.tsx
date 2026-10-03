@@ -25,6 +25,7 @@ export const DocumentsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<DocumentCategory>('All Documents');
   const [search, setSearch] = useState('');
   const [viewingDoc, setViewingDoc] = useState<DocumentItem | null>(null);
+  const [editDirectly, setEditDirectly] = useState<boolean>(false);
 
   // New Document modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -222,7 +223,15 @@ export const DocumentsPage: React.FC = () => {
       {/* Document View / Grid */}
       <div className="mt-6">
         {viewingDoc ? (
-          <DocumentViewer doc={viewingDoc} onClose={() => setViewingDoc(null)} />
+          <DocumentViewer
+            doc={viewingDoc}
+            initialEditMode={editDirectly}
+            onClose={() => {
+              setViewingDoc(null);
+              setEditDirectly(false);
+              void fetchDocs();
+            }}
+          />
         ) : loading ? (
           <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white text-xs font-semibold text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-emerald-400">
             <span className="animate-pulse">Loading document vault...</span>
@@ -247,7 +256,19 @@ export const DocumentsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredDocs.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} onView={setViewingDoc} onDelete={handleDelete} />
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                onView={(d) => {
+                  setEditDirectly(false);
+                  setViewingDoc(d);
+                }}
+                onEdit={(d) => {
+                  setEditDirectly(true);
+                  setViewingDoc(d);
+                }}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

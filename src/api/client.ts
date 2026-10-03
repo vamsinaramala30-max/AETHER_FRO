@@ -1,4 +1,5 @@
 import { authConfig } from '../config/auth.config';
+import { env } from '../config/environment';
 
 // ---- Token refresh state (module-level singleton) ----
 let _refreshPromise: Promise<{ accessToken: string | null; isAuthError: boolean }> | null = null;
@@ -15,7 +16,7 @@ async function _performTokenRefresh(): Promise<{
       return { accessToken: null, isAuthError: true };
     }
 
-    const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const rawBase = env.VITE_API_BASE_URL;
     const refreshUrl = rawBase.replace(/\/+$/, '') + '/auth/refresh';
 
     const res = await fetch(refreshUrl, {
@@ -150,7 +151,7 @@ class HttpClient {
   private responseInterceptors: ResponseInterceptor[] = [];
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    this.baseUrl = env.VITE_API_BASE_URL;
     this.defaultTimeout = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
 
     // --- Global Auth Token Interceptor Wiring ---

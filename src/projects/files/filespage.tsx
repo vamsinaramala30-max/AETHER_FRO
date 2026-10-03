@@ -22,6 +22,9 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { useSearchParams } from 'react-router-dom';
+import { env } from '@/config/environment';
+import { UnifiedFilePreviewModal } from '@/shared/UnifiedFilePreviewModal';
 import { apiClient } from '../../api/client';
 import { useNotificationStore } from '@/state/notificationStore';
 import { onActivityUpdate, triggerActivityUpdate } from '@/shared/activityEvents';
@@ -39,7 +42,14 @@ export interface FileItem {
   tags?: string[];
 }
 
-export const FilesPage: React.FC = () => {
+interface FilesPageProps {
+  projectId?: string;
+}
+
+export const FilesPage: React.FC<FilesPageProps> = ({ projectId: propProjectId }) => {
+  const [searchParams] = useSearchParams();
+  const effectiveProjectId = propProjectId || searchParams.get('projectId') || undefined;
+
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +81,9 @@ export const FilesPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const projParam = effectiveProjectId ? `&projectId=${encodeURIComponent(effectiveProjectId)}` : '';
       const data = await apiClient.get<any>(
-        `/uploads?search=${encodeURIComponent(search)}&page=${page}&limit=50`,
+        `/uploads?search=${encodeURIComponent(search)}&page=${page}&limit=50${projParam}`,
       );
       const payload = data.data || data;
       const rawFiles = Array.isArray(payload) ? payload : payload?.files || payload?.data || [];
@@ -101,7 +112,7 @@ export const FilesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, page]);
+  }, [search, page, effectiveProjectId]);
 
   useEffect(() => {
     void fetchFiles();
@@ -181,6 +192,9 @@ export const FilesPage: React.FC = () => {
 
     const formData = new FormData();
     formData.append('file', selectedFiles[0]);
+    if (effectiveProjectId) {
+      formData.append('projectId', effectiveProjectId);
+    }
 
     try {
       setUploadProgress(60);
@@ -295,7 +309,7 @@ export const FilesPage: React.FC = () => {
   };
 
   const getApiBaseUrl = (): string => {
-    const raw = (import.meta.env.VITE_API_BASE_URL as string) || '/api/v1';
+    const raw = env.VITE_API_BASE_URL || '/api/v1';
     return raw.replace(/\/+$/, '');
   };
 
@@ -634,88 +648,13 @@ export const FilesPage: React.FC = () => {
         )}
       </div>
 
-      {/* REAL PREVIEW MODAL */}
-      {previewTarget && (
-        <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm duration-200">
-          <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-              <div className="flex items-center gap-3 overflow-hidden">
-                {getFileIcon(previewTarget.mimeType, previewTarget.filename)}
-                <h3 className="truncate text-base font-bold text-slate-900 dark:text-white">
-                  {previewTarget.filename}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <a
-                  href={getDownloadUrl(previewTarget.id)}
-                  download={previewTarget.filename}
-                  className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Download</span>
-                </a>
-                <button
-                  onClick={() => setPreviewTarget(null)}
-                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Preview Body */}
-            <div className="flex max-h-[600px] min-h-[300px] flex-col items-center justify-center overflow-y-auto p-6">
-              {isImage(previewTarget.mimeType, previewTarget.filename) ? (
-                <img
-                  src={getPreviewUrl(previewTarget.id)}
-                  alt={previewTarget.filename}
-                  className="max-h-[500px] w-auto rounded-xl object-contain shadow-sm"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              ) : isPdf(previewTarget.mimeType, previewTarget.filename) ? (
-                <iframe
-                  src={getPreviewUrl(previewTarget.id)}
-                  title={previewTarget.filename}
-                  className="h-[500px] w-full rounded-xl border border-slate-200 dark:border-slate-800"
-                />
-              ) : isVideo(previewTarget.mimeType, previewTarget.filename) ? (
-                <video
-                  controls
-                  src={getPreviewUrl(previewTarget.id)}
-                  className="max-h-[450px] w-full rounded-xl shadow-sm"
-                />
-              ) : isAudio(previewTarget.mimeType, previewTarget.filename) ? (
-                <div className="w-full py-8 text-center">
-                  <Music className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-                  <audio controls src={getPreviewUrl(previewTarget.id)} className="w-full" />
-                </div>
-              ) : isText(previewTarget.mimeType, previewTarget.filename) ? (
-                previewTextLoading ? (
-                  <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                    Loading file contents...
-                  </span>
-                ) : (
-                  <pre className="scrollbar-thin max-h-[450px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                    {previewTextContent}
-                  </pre>
-                )
-              ) : (
-                <div className="flex flex-col items-center py-10 text-center">
-                  <AlertTriangle className="mb-3 h-10 w-10 text-amber-500" />
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    Preview unavailable for this file type
-                  </p>
-                  <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-                    You can download this raw asset directly to view it on your local device.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* UNIFIED PREVIEW MODAL */}
+      <UnifiedFilePreviewModal
+        isOpen={!!previewTarget}
+        target={previewTarget}
+        onClose={() => setPreviewTarget(null)}
+        projectId={effectiveProjectId}
+      />
 
       {/* RENAME DIALOG */}
       {renameTarget && (
