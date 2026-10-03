@@ -16,22 +16,59 @@ export interface MemoryMatrixChallenge {
 interface DiffConfig {
   gridSize: number;
   activeCellCount: number;
-  showDurationMs: number;
+  // Note: showDurationMs is intentionally absent — timing is round-driven, not difficulty-driven.
 }
 
+/** Grid size and active-cell density scale with difficulty (unchanged). */
 const DIFF_CONFIG: Record<DifficultyLevel, DiffConfig> = {
-  1: { gridSize: 3, activeCellCount: 3, showDurationMs: 3000 }, // Round 1 → 3.0 s
-  2: { gridSize: 4, activeCellCount: 4, showDurationMs: 2500 }, // Round 2 → 2.5 s
-  3: { gridSize: 4, activeCellCount: 6, showDurationMs: 2000 }, // Round 3 → 2.0 s
-  4: { gridSize: 5, activeCellCount: 7, showDurationMs: 1500 }, // Round 4 → 1.5 s
-  5: { gridSize: 5, activeCellCount: 9, showDurationMs: 1200 }, // Round 5+ → 1.2 s (mid of 1.0–1.5 s range)
+  1: { gridSize: 3, activeCellCount: 3 },
+  2: { gridSize: 4, activeCellCount: 4 },
+  3: { gridSize: 4, activeCellCount: 6 },
+  4: { gridSize: 5, activeCellCount: 7 },
+  5: { gridSize: 5, activeCellCount: 9 },
 };
+
+/**
+ * Progressive pattern-display durations indexed by round (1-based).
+ * Index 0 is unused; index 1 = Round 1, …, index 9+ collapses to the last entry.
+ * Once a session reaches MIN_SHOW_DURATION_MS it is locked there for the
+ * remainder of that game — timing only ever decreases.
+ */
+const ROUND_DURATIONS: readonly number[] = [
+  0,    // [0] unused
+  3000, // Round 1  → 3.0 s
+  2500, // Round 2  → 2.5 s
+  2200, // Round 3  → 2.2 s
+  1800, // Round 4  → 1.8 s
+  1500, // Round 5  → 1.5 s
+  1300, // Round 6  → 1.3 s
+  1100, // Round 7  → 1.1 s
+  1000, // Round 8  → 1.0 s
+   900, // Round 9+ → 0.9 s
+];
+
+/** Hard floor — once reached, timing locks here for the rest of the session. */
+export const MIN_SHOW_DURATION_MS = 500;
+
+/**
+ * Returns the pattern-display duration (ms) for the given 1-based round number.
+ * Never returns a value below MIN_SHOW_DURATION_MS.
+ */
+export function getShowDurationForRound(round: number): number {
+  const maxIndex = ROUND_DURATIONS.length - 1; // 8
+  const index = Math.min(Math.max(round, 1), maxIndex);
+  const scheduled = ROUND_DURATIONS[index] ?? MIN_SHOW_DURATION_MS;
+  return Math.max(scheduled, MIN_SHOW_DURATION_MS);
+}
 
 export function generateMemoryMatrixChallenge(
   difficulty: DifficultyLevel,
+  /** 1-based round counter for the current game session (drives display timing). */
+  round: number = 1,
 ): MemoryMatrixChallenge {
   const config = DIFF_CONFIG[difficulty];
-  const { gridSize, activeCellCount, showDurationMs } = config;
+  const { gridSize, activeCellCount } = config;
+  const showDurationMs = getShowDurationForRound(round);
   const total = gridSize * gridSize;
 
   // Shuffle all cell indices and pick activeCellCount
