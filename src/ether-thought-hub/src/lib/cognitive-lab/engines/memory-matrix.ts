@@ -20,11 +20,11 @@ interface DiffConfig {
 }
 
 const DIFF_CONFIG: Record<DifficultyLevel, DiffConfig> = {
-  1: { gridSize: 3, activeCellCount: 3, showDurationMs: 2000 },
-  2: { gridSize: 4, activeCellCount: 4, showDurationMs: 2000 },
-  3: { gridSize: 4, activeCellCount: 6, showDurationMs: 1800 },
-  4: { gridSize: 5, activeCellCount: 7, showDurationMs: 1600 },
-  5: { gridSize: 5, activeCellCount: 9, showDurationMs: 1400 },
+  1: { gridSize: 3, activeCellCount: 3, showDurationMs: 3000 }, // Round 1 → 3.0 s
+  2: { gridSize: 4, activeCellCount: 4, showDurationMs: 2500 }, // Round 2 → 2.5 s
+  3: { gridSize: 4, activeCellCount: 6, showDurationMs: 2000 }, // Round 3 → 2.0 s
+  4: { gridSize: 5, activeCellCount: 7, showDurationMs: 1500 }, // Round 4 → 1.5 s
+  5: { gridSize: 5, activeCellCount: 9, showDurationMs: 1200 }, // Round 5+ → 1.2 s (mid of 1.0–1.5 s range)
 };
 
 export function generateMemoryMatrixChallenge(
