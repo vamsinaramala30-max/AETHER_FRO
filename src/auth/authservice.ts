@@ -334,9 +334,13 @@ export const authService = {
   },
 
   signInWithGoogle(): void {
+    const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+    const fallbackBase = isProd
+      ? (typeof window !== 'undefined' ? window.location.origin : '')
+      : 'http://localhost:5001';
     const rawBaseUrl =
       import.meta.env.VITE_API_BASE_URL?.replace(/\/api(\/v\d)?\/?$/, '') ||
-      'http://localhost:5001';
+      fallbackBase;
     window.location.href = `${rawBaseUrl}/api/auth/google`;
   },
 

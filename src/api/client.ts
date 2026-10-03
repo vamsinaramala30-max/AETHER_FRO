@@ -221,8 +221,20 @@ class HttpClient {
       url = new URL(fullUrlString, window.location.origin);
     }
 
-    // If running in browser and pointing to localhost, but accessing via IP/hostname (e.g. mobile testing), resolve host dynamically
-    if (
+    // In production, ensure no calls ever accidentally route to localhost or development ports
+    const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+    if (isProd && typeof window !== 'undefined') {
+      if (
+        url.hostname === 'localhost' ||
+        url.hostname === '127.0.0.1' ||
+        url.port === '5001' ||
+        url.port === '5002'
+      ) {
+        url.hostname = window.location.hostname;
+        url.port = window.location.port;
+        url.protocol = window.location.protocol;
+      }
+    } else if (
       typeof window !== 'undefined' &&
       window.location &&
       window.location.hostname &&
@@ -446,17 +458,20 @@ class HttpClient {
     throw new ApiError({ message: 'Unknown request failure', status: 500 });
   }
 
-  public async *stream(
+  public async fetchWithAuth(
     endpoint: string,
     config: RequestConfig = {},
-  ): AsyncGenerator<string, void, unknown> {
+  ): Promise<Response> {
+    return this._fetchWithAuthInternal(endpoint, config, false);
+  }
+
+  private async _fetchWithAuthInternal(
+    endpoint: string,
+    config: RequestConfig,
+    isRetryAfterRefresh: boolean,
+  ): Promise<Response> {
     let currentConfig: RequestConfig = {
       ...config,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-        ...config.headers,
-      },
     };
 
     for (const interceptor of this.requestInterceptors) {
@@ -466,7 +481,52 @@ class HttpClient {
     const { params, skipAuth: _skipAuth, ...fetchOptions } = currentConfig;
     const url = this.buildUrl(endpoint, params);
 
-    const response = await fetch(url, fetchOptions);
+    let response = await fetch(url, fetchOptions);
+
+    for (const interceptor of this.responseInterceptors) {
+      response = await interceptor(response);
+    }
+
+    // 401 Auto-Refresh Logic
+    if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
+      console.warn(
+        `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
+      );
+      const refreshResult = await getOrStartRefresh();
+      if (refreshResult.accessToken) {
+        return this._fetchWithAuthInternal(endpoint, config, true);
+      } else if (refreshResult.isAuthError) {
+        console.error(
+          '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+        );
+        localStorage.removeItem(authConfig.tokenKey);
+        localStorage.removeItem(authConfig.refreshTokenKey);
+        localStorage.removeItem('aether_auth_user');
+        localStorage.removeItem('aether-auth-token');
+        localStorage.removeItem('auth_token');
+        window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+      } else {
+        console.warn(
+          '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
+        );
+      }
+    }
+
+    return response;
+  }
+
+  public async *stream(
+    endpoint: string,
+    config: RequestConfig = {},
+  ): AsyncGenerator<string, void, unknown> {
+    const response = await this.fetchWithAuth(endpoint, {
+      ...config,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        ...config.headers,
+      },
+    });
 
     if (!response.ok) {
       throw new ApiError({
@@ -484,7 +544,7 @@ class HttpClient {
     let buffer = '';
 
     try {
-      while (!fetchOptions.signal?.aborted) {
+      while (!config.signal?.aborted) {
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -574,3 +634,4 @@ class HttpClient {
 }
 
 export const apiClient = new HttpClient();
+export { getOrStartRefresh };

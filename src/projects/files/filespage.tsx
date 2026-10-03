@@ -275,14 +275,62 @@ export const FilesPage: React.FC = () => {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
+  const getAuthToken = (): string => {
+    let token =
+      localStorage.getItem('aether-auth-token') ||
+      localStorage.getItem('auth_token') ||
+      localStorage.getItem('token');
+    if (!token) {
+      try {
+        const zustandStore = localStorage.getItem('aether-auth-storage');
+        if (zustandStore) {
+          const parsed = JSON.parse(zustandStore);
+          if (parsed?.state?.token && typeof parsed.state.token === 'string') {
+            token = parsed.state.token;
+          }
+        }
+      } catch {}
+    }
+    return token || '';
+  };
+
+  const getApiBaseUrl = (): string => {
+    const raw = (import.meta.env.VITE_API_BASE_URL as string) || '/api/v1';
+    return raw.replace(/\/+$/, '');
+  };
+
+  const getDownloadUrl = (id: string) => {
+    const base = getApiBaseUrl();
+    const token = getAuthToken();
+    return token
+      ? `${base}/uploads/${id}/download?token=${encodeURIComponent(token)}`
+      : `${base}/uploads/${id}/download`;
+  };
+
+  const getPreviewUrl = (id: string) => {
+    const base = getApiBaseUrl();
+    const token = getAuthToken();
+    return token
+      ? `${base}/uploads/${id}/preview?token=${encodeURIComponent(token)}`
+      : `${base}/uploads/${id}/preview`;
+  };
+
   const handleOpenPreview = (file: FileItem) => {
     setPreviewTarget(file);
     setPreviewTextContent(null);
 
     if (isText(file.mimeType, file.filename)) {
       setPreviewTextLoading(true);
-      fetch(`/api/v1/uploads/${file.id}/preview`)
-        .then((r) => r.text())
+      const url = getPreviewUrl(file.id);
+      const token = getAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      fetch(url, { headers })
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.text();
+        })
         .then((t) => setPreviewTextContent(t))
         .catch(() => setPreviewTextContent('Unable to load text contents.'))
         .finally(() => setPreviewTextLoading(false));
@@ -300,9 +348,6 @@ export const FilesPage: React.FC = () => {
       return <FileCode className="h-5 w-5 shrink-0 text-indigo-500" />;
     return <FileText className="h-5 w-5 shrink-0 text-slate-500" />;
   };
-
-  const getDownloadUrl = (id: string) => `/api/v1/uploads/${id}/download`;
-  const getPreviewUrl = (id: string) => `/api/v1/uploads/${id}/preview`;
 
   const toggleSelectAll = () => {
     if (selectedIds.length === filteredFiles.length) {

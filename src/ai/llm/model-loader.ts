@@ -1,82 +1,10 @@
 // ============================================================================
 // AETHER AI — Model Loader (Frontend Abstraction)
 // ============================================================================
-// Represents load/unload request state for models managed by the AETHER backend.
-// The frontend does NOT load model weights — it requests the backend to do so.
+// Normalizes model descriptors managed by the authoritative AETHER backend.
 // ============================================================================
 
-import type { AIModelInfo, AIResult, ModelStatus } from '../ai-types';
-import { DEFAULT_AI_CONFIG } from '../ai-config';
-
-export type LoadModelResult = AIResult<AIModelInfo>;
-
-/**
- * Request the backend to load a model into the runtime.
- */
-export async function requestModelLoad(modelId: string): Promise<LoadModelResult> {
-  const url = `${DEFAULT_AI_CONFIG.backend.baseUrl}${DEFAULT_AI_CONFIG.backend.modelsPath}/${encodeURIComponent(modelId)}/load`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(DEFAULT_AI_CONFIG.backend.timeoutMs),
-    });
-    if (!res.ok) {
-      return {
-        success: false,
-        error: {
-          code: 'MODEL_LOAD_FAILED',
-          message: `Failed to load model "${modelId}": HTTP ${res.status}`,
-          timestamp: Date.now(),
-        },
-      };
-    }
-    const raw = (await res.json()) as Record<string, unknown>;
-    return { success: true, data: normalizeModelInfo(raw) };
-  } catch {
-    return {
-      success: false,
-      error: {
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Cannot reach the AETHER backend to load model.',
-        timestamp: Date.now(),
-      },
-    };
-  }
-}
-
-/**
- * Request the backend to unload a model from the runtime.
- */
-export async function requestModelUnload(modelId: string): Promise<AIResult<void>> {
-  const url = `${DEFAULT_AI_CONFIG.backend.baseUrl}${DEFAULT_AI_CONFIG.backend.modelsPath}/${encodeURIComponent(modelId)}/unload`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) {
-      return {
-        success: false,
-        error: {
-          code: 'MODEL_LOAD_FAILED',
-          message: `Failed to unload model "${modelId}": HTTP ${res.status}`,
-          timestamp: Date.now(),
-        },
-      };
-    }
-    return { success: true, data: undefined };
-  } catch {
-    return {
-      success: false,
-      error: {
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Cannot reach the AETHER backend to unload model.',
-        timestamp: Date.now(),
-      },
-    };
-  }
-}
+import type { AIModelInfo, ModelStatus } from '../ai-types';
 
 /**
  * Normalize a raw backend model payload into an AIModelInfo.

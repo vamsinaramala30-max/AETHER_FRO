@@ -6,7 +6,7 @@
 
 import type { AIModelInfo, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
-import { normalizeModelInfo, requestModelLoad, requestModelUnload } from './model-loader';
+import { normalizeModelInfo } from './model-loader';
 import { apiClient } from '../../api/client';
 import { useAIStore } from '../ai-store';
 
@@ -55,21 +55,10 @@ export class ModelManager {
    * Fetch a single model by ID.
    */
   async getModel(modelId: string): Promise<AIResult<AIModelInfo>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.modelsPath}/${encodeURIComponent(modelId)}`;
+    const endpoint = `${this.config.backend.modelsPath}/${encodeURIComponent(modelId)}`;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: {
-            code: 'MODEL_UNAVAILABLE',
-            message: `Model "${modelId}" not found.`,
-            timestamp: Date.now(),
-          },
-        };
-      }
-      const raw = (await res.json()) as Record<string, unknown>;
-      const rawData = (raw as any)?.data ?? raw;
+      const res = await apiClient.get<any>(endpoint, { timeout: 10_000 });
+      const rawData = res?.data ?? res;
       return { success: true, data: normalizeModelInfo(rawData) };
     } catch {
       return {
@@ -84,17 +73,22 @@ export class ModelManager {
   }
 
   /**
-   * Request load of a specific model.
+   * Select and activate a specific model.
+   * Model lifecycle is backend-authoritative.
    */
-  async loadModel(modelId: string): ReturnType<typeof requestModelLoad> {
-    return requestModelLoad(modelId);
+  async loadModel(modelId: string): Promise<AIResult<AIModelInfo>> {
+    const res = await this.getModel(modelId);
+    if (res.success) {
+      useAIStore.getState().setActiveModel(res.data);
+    }
+    return res;
   }
 
   /**
-   * Request unload of a specific model.
+   * Model unload stub. Model lifecycle is backend-authoritative.
    */
-  async unloadModel(modelId: string): ReturnType<typeof requestModelUnload> {
-    return requestModelUnload(modelId);
+  async unloadModel(_modelId: string): Promise<AIResult<void>> {
+    return { success: true, data: undefined };
   }
 
   /**
