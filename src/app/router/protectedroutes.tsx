@@ -129,8 +129,20 @@ export const protectedRoutes: RouteObject[] = [
           { path: 'goals', element: <GoalsPage /> },
           { path: 'board', element: <ProjectsPage /> },
           { path: 'files', element: <FilesPage /> },
+          { path: 'file-manager', element: <FilesPage /> },
+          { path: ':projectId', element: <Navigate to="/app/projects" replace /> },
         ],
       },
+
+      // ── Tasks Legacy / Direct Redirect ─────────────────────────────────────
+      {
+        path: 'tasks',
+        children: [
+          { index: true, element: <Navigate to="/app/projects/tasks" replace /> },
+          { path: ':taskId', element: <Navigate to="/app/projects/tasks" replace /> },
+        ],
+      },
+
 
       // ── Knowledge Module ──────────────────────────────────────────────────
       {

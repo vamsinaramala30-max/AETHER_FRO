@@ -25,6 +25,7 @@ import { RecentFilesPage } from '@/workspace/recent-files/recentfilepage';
 import { FavoritesPage } from '@/workspace/favorites/favoritepage';
 import { MembersPage } from '@/workspace/members/MembersPage';
 import WeeklyPlanner from '@/workspace/weekly planner/weeklyplanner';
+import { workspaceService } from '@/services/workspaceService';
 
 const WORKSPACE_MODULES = [
   {
@@ -156,50 +157,62 @@ export const WorkspacePage: React.FC = () => {
   const [membersList, setMembersList] = useState<MemberItem[]>([]);
 
   useEffect(() => {
-    const initials = (
-      user?.name
-        ? user.name
-            .split(' ')
-            .map((p) => p[0])
-            .join('')
-            .substring(0, 2)
-        : user?.email
-          ? user.email.substring(0, 2)
-          : 'US'
-    ).toUpperCase();
+    let isMounted = true;
+    const fetchMembers = async () => {
+      try {
+        const wsList = await workspaceService.getWorkspaces();
+        const activeWs = wsList[0];
+        if (activeWs) {
+          const serverMembers = await workspaceService.getMembers(activeWs.id);
+          if (isMounted && serverMembers && serverMembers.length > 0) {
+            const mapped: MemberItem[] = serverMembers.map((m: any, idx: number) => {
+              const u = m.user || ({} as any);
+              const fullName = u.fullName || u.email?.split('@')[0] || 'User';
+              const inits = (
+                fullName
+                  ? fullName.split(' ').map((p: string) => p[0]).join('').substring(0, 2)
+                  : u.email ? u.email.substring(0, 2) : 'US'
+              ).toUpperCase();
+              return {
+                id: m.id,
+                name: fullName,
+                email: u.email || '',
+                role: m.role,
+                initials: inits,
+                color: idx === 0 ? 'from-indigo-600 to-purple-600' : 'from-blue-600 to-cyan-600',
+              };
+            });
+            setMembersList(mapped);
+            return;
+          }
+        }
+      } catch {
+        // Fallback to active user representation
+      }
 
-    const currentUserObj: MemberItem = {
-      id: user?.id || 'usr_current',
-      name:
-        user?.name ||
-        (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
-      email: user?.email || 'user@aether.os',
-      role: 'Owner',
-      initials,
-      color: 'from-indigo-600 to-purple-600',
+      if (isMounted) {
+        const initials = (
+          user?.name
+            ? user.name.split(' ').map((p) => p[0]).join('').substring(0, 2)
+            : user?.email ? user.email.substring(0, 2) : 'US'
+        ).toUpperCase();
+        setMembersList([
+          {
+            id: user?.id || 'usr_current',
+            name: user?.name || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
+            email: user?.email || 'user@aether.os',
+            role: 'Owner',
+            initials,
+            color: 'from-indigo-600 to-purple-600',
+          },
+        ]);
+      }
     };
 
-    let invited: MemberItem[] = [];
-    try {
-      const stored = localStorage.getItem('aether_workspace_invited_members');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          invited = parsed.map((m: any) => ({
-            id: m.id,
-            name: m.name,
-            email: m.email,
-            role: m.role || 'Member',
-            initials: m.initials || 'US',
-            color: 'from-blue-600 to-cyan-600',
-          }));
-        }
-      }
-    } catch {
-      // Ignore
-    }
-
-    setMembersList([currentUserObj, ...invited]);
+    void fetchMembers();
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const getActiveTab = () => {

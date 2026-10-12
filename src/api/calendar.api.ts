@@ -25,6 +25,8 @@ export interface CalendarEventDTO {
   description?: string | null;
   color?: string;
   status: string;
+  recurrence?: string | null;
+  recurrenceRule?: any;
   organizer: {
     id: string;
     displayName: string;
@@ -48,6 +50,8 @@ export interface CreateCalendarEventPayload {
   projectId?: string;
   taskId?: string;
   calendarId?: string;
+  recurrence?: string;
+  recurrenceRule?: any;
 }
 
 export interface UpdateCalendarEventPayload {
@@ -58,6 +62,11 @@ export interface UpdateCalendarEventPayload {
   color?: string;
   location?: string;
   description?: string;
+  calendarId?: string;
+  taskId?: string | null;
+  projectId?: string | null;
+  recurrence?: string | null;
+  recurrenceRule?: any;
 }
 
 export interface CreateCalendarPayload {

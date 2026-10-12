@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { RecentFileCard } from './recentfilecard';
 import { recentFilesService, RecentFileData } from './recentfilesservices';
+import { UnifiedFilePreviewModal } from '@/shared/UnifiedFilePreviewModal';
 
 export const RecentFilesPage: React.FC = () => {
   const [files, setFiles] = useState<RecentFileData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<RecentFileData | null>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -53,10 +55,28 @@ export const RecentFilesPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {files.map((file) => (
-            <RecentFileCard key={file.id} file={file} />
+            <RecentFileCard key={file.id} file={file} onPreview={setPreviewTarget} />
           ))}
         </div>
       )}
+
+      {/* UNIFIED PREVIEW MODAL */}
+      <UnifiedFilePreviewModal
+        isOpen={!!previewTarget}
+        target={
+          previewTarget
+            ? {
+                id: previewTarget.id,
+                fileId: previewTarget.id,
+                filename: previewTarget.name,
+                mimeType: previewTarget.mimeType,
+                size: previewTarget.size,
+                projectId: previewTarget.projectId,
+              }
+            : null
+        }
+        onClose={() => setPreviewTarget(null)}
+      />
     </PageWrapper>
   );
 };

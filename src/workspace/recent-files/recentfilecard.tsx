@@ -4,9 +4,10 @@ import { FileCode, FileSpreadsheet, FileText } from 'lucide-react';
 
 interface RecentFileCardProps {
   file: RecentFileData;
+  onPreview?: (file: RecentFileData) => void;
 }
 
-export const RecentFileCard: React.FC<RecentFileCardProps> = ({ file }) => {
+export const RecentFileCard: React.FC<RecentFileCardProps> = ({ file, onPreview }) => {
   const getIcon = () => {
     switch (file.type) {
       case 'code':
@@ -36,7 +37,10 @@ export const RecentFileCard: React.FC<RecentFileCardProps> = ({ file }) => {
   });
 
   return (
-    <div className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500/40">
+    <div
+      onClick={() => onPreview && onPreview(file)}
+      className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500/40"
+    >
       <div className="flex min-w-0 items-center gap-3">
         {getIcon()}
         <div className="min-w-0">

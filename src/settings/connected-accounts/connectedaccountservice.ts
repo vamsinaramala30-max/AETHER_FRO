@@ -1,4 +1,5 @@
 import { api } from '../../shared/api';
+import { env } from '@/config/environment';
 
 export interface ConnectedAccount {
   provider: string;
@@ -29,8 +30,12 @@ export const connectedAccountsService = {
   },
 
   connectGoogle: (): void => {
+    const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+    const fallbackBase = isProd
+      ? (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '/api/v1')
+      : 'http://localhost:5001/api/v1';
     const backendUrl =
-      import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '') || 'http://localhost:5001/api/v1';
+      env.VITE_API_BASE_URL?.replace(/\/+$/, '') || fallbackBase;
     const googleAuthUrl = `${backendUrl}/auth/google`;
     window.location.href = googleAuthUrl;
   },

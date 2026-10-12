@@ -497,7 +497,9 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
 
         {/* Dynamic Page Content */}
         {location.pathname.startsWith('/app/ai/assistant') ||
-        location.pathname.startsWith('/app/cognitive-hub') ? (
+        location.pathname.startsWith('/app/cognitive-hub') ||
+        location.pathname.startsWith('/app/projects/files') ||
+        location.pathname.startsWith('/app/projects/file-manager') ? (
           <main className="flex flex-1 flex-col overflow-hidden bg-aether-bg">
             <div className="flex h-full flex-1 flex-col overflow-y-auto">
               <Outlet />

@@ -1,48 +1,30 @@
 import { Conversation } from '../assistant/assistantservice';
-import { api } from '../../shared/api';
+import { apiClient } from '../../api/client';
 
 class ConversationService {
   private baseRoute = '/ai/conversations';
-  private storageKey = 'aether_conversations_registry';
 
   public async getConversations(): Promise<Conversation[]> {
     try {
-      const response = await api.get<Conversation[] | { data: Conversation[] }>(this.baseRoute);
-      const data = Array.isArray(response.data)
-        ? response.data
-        : (response.data as any)?.data || [];
-      if (data.length > 0) {
-        localStorage.setItem(this.storageKey, JSON.stringify(data));
-      }
+      const response = await apiClient.get<Conversation[] | { data: Conversation[] }>(this.baseRoute);
+      const data = Array.isArray(response)
+        ? response
+        : Array.isArray((response as any)?.data)
+          ? (response as any).data
+          : [];
       return data;
-    } catch {
-      const stored = localStorage.getItem(this.storageKey);
-      return stored ? JSON.parse(stored) : [];
+    } catch (err) {
+      console.error('[ConversationService] getConversations error:', err);
+      return [];
     }
   }
 
   public async createConversation(title: string): Promise<Conversation> {
-    const fresh: Conversation = {
-      id: `conv_${crypto.randomUUID()}`,
+    const response = await apiClient.post<Conversation | { data: Conversation }>(this.baseRoute, {
       title,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messageCount: 0,
-    };
-    try {
-      const response = await api.post<Conversation | { data: Conversation }>(this.baseRoute, {
-        title,
-      });
-      const created = (response.data as any)?.data || response.data || fresh;
-      const current = await this.getConversations();
-      localStorage.setItem(this.storageKey, JSON.stringify([created, ...current]));
-      return created;
-    } catch {
-      const current = await this.getConversations();
-      const updated = [fresh, ...current];
-      localStorage.setItem(this.storageKey, JSON.stringify(updated));
-      return fresh;
-    }
+    });
+    const created = (response as any)?.data || response;
+    return created;
   }
 }
 

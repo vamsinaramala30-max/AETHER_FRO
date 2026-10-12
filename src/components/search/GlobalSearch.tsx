@@ -43,6 +43,9 @@ interface SearchResult {
     | 'calendar'
     | 'task'
     | 'setting'
+    | 'planner'
+    | 'workflow'
+    | 'workspace'
     | 'nav';
   title: string;
   description?: string;
@@ -102,12 +105,28 @@ const TYPE_CONFIG: Record<
     label: 'Task',
     color: 'text-orange-600 dark:text-orange-400',
   },
+  planner: {
+    icon: <Calendar className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />,
+    label: 'Planner',
+    color: 'text-cyan-600 dark:text-cyan-400',
+  },
+  workflow: {
+    icon: <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />,
+    label: 'Workflow',
+    color: 'text-amber-600 dark:text-amber-400',
+  },
+  workspace: {
+    icon: <Building2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />,
+    label: 'Workspace',
+    color: 'text-indigo-600 dark:text-indigo-400',
+  },
   setting: {
     icon: <Settings className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />,
     label: 'Setting',
     color: 'text-slate-500 dark:text-slate-400',
   },
 };
+
 
 // ─── Comprehensive AETHER Navigation Index ────────────────────────────────────
 // This is the single source of truth for all static nav/page search.
@@ -587,14 +606,46 @@ const QUICK_LINKS: { label: string; href: string; icon: React.ReactNode }[] = [
   },
 ];
 
-import { searchService as knowledgeSearch } from '../../knowledge/search/searchservice';
-import { projectService } from '../../services/projectService';
+import { apiClient } from '../../api/client';
 import { chatService } from '../../services/chatService';
-import { recentFilesService } from '../../workspace/recent-files/recentfilesservices';
-import { taskService } from '../../projects/tasks/taskservice';
-import { useEventStore } from '../../workspace/calendar/store/eventStore';
 import { storageService } from '../../services/storageService';
-import { aiService } from '../../services/aiService';
+
+// ─── Route Normalization Helper ──────────────────────────────────────────────
+
+export function normalizeSearchResultRoute(rawHref: string): string {
+  if (!rawHref) return '/app';
+
+  // Task: /app/tasks/:id -> /app/projects/tasks?taskId=:id
+  const taskMatch = rawHref.match(/^\/app\/tasks\/([^/?#]+)/);
+  if (taskMatch) {
+    return `/app/projects/tasks?taskId=${taskMatch[1]}`;
+  }
+  if (rawHref === '/app/tasks' || rawHref === '/app/tasks/') {
+    return '/app/projects/tasks';
+  }
+
+  // Project: /app/projects/:id -> /app/projects?projectId=:id
+  const projectSubroutes = ['tasks', 'goals', 'board', 'files', 'file-manager'];
+  const projectMatch = rawHref.match(/^\/app\/projects\/([^/?#]+)/);
+  if (projectMatch && !projectSubroutes.includes(projectMatch[1])) {
+    return `/app/projects?projectId=${projectMatch[1]}`;
+  }
+
+  // Planner: /app/workspace/planner -> /app/workspace/weeklyplanner
+  if (rawHref.startsWith('/app/workspace/planner')) {
+    return '/app/workspace/weeklyplanner';
+  }
+  if (rawHref.startsWith('/app/planner')) {
+    return '/app/workspace/weeklyplanner';
+  }
+
+  // Calendar: /app/calendar -> /app/workspace/calendar
+  if (rawHref === '/app/calendar' || rawHref === '/app/calendar/') {
+    return '/app/workspace/calendar';
+  }
+
+  return rawHref;
+}
 
 // ─── Nav search (instant, no API) ────────────────────────────────────────────
 
@@ -645,7 +696,7 @@ function searchNavIndex(query: string): SearchResult[] {
 
 // ─── Backend data search ──────────────────────────────────────────────────────
 
-async function performSearch(query: string): Promise<SearchResult[]> {
+async function performSearch(query: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const q = query.trim();
   if (!q) return [];
 
@@ -653,199 +704,121 @@ async function performSearch(query: string): Promise<SearchResult[]> {
   const navResults = searchNavIndex(q);
 
   try {
-    const [knowledgeResults, projects, chats, files, tasks, events] = await Promise.all([
-      (async () => {
-        try {
-          return await knowledgeSearch.queryAll(q);
-        } catch {
-          return [] as any;
-        }
-      })(),
-      (async () => {
-        try {
-          const workspaces = await import('../../services/workspaceService').then((m) =>
-            m.workspaceService.getWorkspaces().catch(() => []),
-          );
-          const workspaceId =
-            Array.isArray(workspaces) && workspaces[0] ? (workspaces[0] as any).id : '';
-          return (await projectService.listProjects(workspaceId)).slice(0, 20);
-        } catch {
-          return [] as any;
-        }
-      })(),
-      (async () => {
-        try {
-          return chatService.getSessions();
-        } catch {
-          return [] as any;
-        }
-      })(),
-      (async () => {
-        try {
-          return await recentFilesService.getRecentFiles();
-        } catch {
-          return [] as any;
-        }
-      })(),
-      (async () => {
-        try {
-          return await taskService.getTasks();
-        } catch {
-          return [] as any;
-        }
-      })(),
-      (async () => {
-        try {
-          return useEventStore.getState().events || [];
-        } catch {
-          return [] as any;
-        }
-      })(),
-    ]);
-
-    const candidates: SearchResult[] = [];
-
-    for (const k of knowledgeResults) {
-      candidates.push({
-        id: `knowledge_${k.id}`,
-        type: k.type === 'note' ? 'note' : 'document',
-        title: k.title,
-        description: k.snippet || '',
-        href: `/app/knowledge`,
-        meta: new Date(k.date || Date.now()).toLocaleDateString(),
-      });
-    }
-
-    for (const p of projects || []) {
-      const title = p.name || p.title || p.displayName || 'Project';
-      candidates.push({
-        id: `project_${p.id}`,
-        type: 'project',
-        title,
-        description: p.description || `Workspace: ${p.workspace || ''}`,
-        href: `/app/projects/${p.id}`,
-        meta: p.updatedAt || '',
-      });
-    }
-
-    for (const c of chats || []) {
-      candidates.push({
-        id: `conv_${c.id}`,
-        type: 'conversation',
-        title: c.title || `Conversation ${c.id}`,
-        description: `${(c.messages || []).length || 0} messages`,
-        href: `/app/ai/conversations/${c.id}`,
-        meta: c.createdAt ? new Date(c.createdAt).toLocaleString() : '',
-      });
-    }
-
-    for (const f of files || []) {
-      candidates.push({
-        id: `file_${f.id}`,
-        type: 'document',
-        title: f.name,
-        description: `${f.type} • ${f.location}`,
-        href: `/app/workspace/recent-files`,
-        meta: new Date(f.lastAccessed).toLocaleDateString(),
-      });
-    }
-
-    for (const t of tasks || []) {
-      candidates.push({
-        id: `task_${t.id}`,
-        type: 'task',
-        title: t.title,
-        description: t.description || '',
-        href: `/app/projects/tasks/${t.id}`,
-        meta: t.dueDate ? `Due ${new Date(t.dueDate).toLocaleDateString()}` : '',
-      });
-    }
-
-    for (const e of events || []) {
-      candidates.push({
-        id: `event_${e.id}`,
-        type: 'calendar',
-        title: e.title,
-        description: e.isAllDay ? 'All day' : new Date(e.start).toLocaleTimeString(),
-        href: `/app/workspace/calendar`,
-        meta: e.start ? new Date(e.start).toLocaleDateString() : '',
-      });
-    }
-
-    const settingsCandidates: SearchResult[] = [
-      {
-        id: 'setting_profile',
-        type: 'setting',
-        title: 'Profile Settings',
-        description: 'Update your profile metadata and preferences',
-        href: '/app/settings/profile',
-      },
-      {
-        id: 'setting_prefs',
-        type: 'setting',
-        title: 'Preferences',
-        description: 'Appearance, notifications, and dark mode controls',
-        href: '/app/settings/preferences',
-      },
-      {
-        id: 'setting_accounts',
-        type: 'setting',
-        title: 'Connected Accounts',
-        description: 'Single sign-on & OAuth integrations',
-        href: '/app/settings/accounts',
-      },
-    ];
-    candidates.push(...settingsCandidates);
-
-    const nlIntent = await aiService.parseNaturalLanguageSearch(q).catch(() => ({ intent: 'all' }));
-    const tokens = q
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((t) => t.toLowerCase());
-
-    function scoreItem(item: SearchResult): number {
-      const hay = `${item.title} ${item.description} ${item.meta}`.toLowerCase();
-      let score = 0;
-      for (const tok of tokens) {
-        if (hay.includes(tok)) score += 10;
-        else {
-          let idx = 0;
-          for (const ch of tok) {
-            idx = hay.indexOf(ch, idx);
-            if (idx === -1) {
-              score -= 1;
-              break;
-            }
-            idx++;
-            score += 0.1;
-          }
-        }
+    let backendResults: any[] = [];
+    try {
+      const res = await apiClient.post<any>(
+        '/search',
+        { query: q, limit: 20 },
+        { signal },
+      );
+      const payload = res?.data || res;
+      backendResults = Array.isArray(payload?.results)
+        ? payload.results
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload)
+            ? payload
+            : [];
+    } catch (searchErr: any) {
+      if (searchErr?.name === 'CanceledError' || searchErr?.name === 'AbortError') {
+        throw searchErr;
       }
-      if (tokens.some((t) => item.title.toLowerCase().includes(t))) score += 5;
-
-      if (nlIntent.intent === 'calendar' && item.type === 'calendar') score += 15;
-      if (nlIntent.intent === 'projects' && item.type === 'project') score += 15;
-      if (nlIntent.intent === 'files' && (item.type === 'document' || item.type === 'note'))
-        score += 15;
-
-      return score;
+      // Fallback to /knowledge/search
+      try {
+        const fallbackRes = await apiClient.post<any>(
+          '/knowledge/search',
+          { query: q, limit: 20 },
+          { signal },
+        );
+        const payload = fallbackRes?.data || fallbackRes;
+        backendResults = Array.isArray(payload?.results)
+          ? payload.results
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+              ? payload
+              : [];
+      } catch (fbErr: any) {
+        if (fbErr?.name === 'CanceledError' || fbErr?.name === 'AbortError') {
+          throw fbErr;
+        }
+        backendResults = [];
+      }
     }
 
-    const matchedData = candidates
-      .map((c) => ({ c, score: scoreItem(c) }))
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 30)
-      .map((x) => x.c);
+    // Optional chat session matches
+    let chatResults: SearchResult[] = [];
+    try {
+      const sessions = chatService.getSessions();
+      if (Array.isArray(sessions)) {
+        chatResults = sessions
+          .filter((c: any) => (c.title || '').toLowerCase().includes(q.toLowerCase()))
+          .slice(0, 4)
+          .map((c: any) => ({
+            id: `conv_${c.id}`,
+            type: 'conversation' as const,
+            title: c.title || `Conversation ${c.id}`,
+            description: `${(c.messages || []).length || 0} messages`,
+            href: `/app/ai/assistant`,
+            meta: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
+          }));
+      }
+    } catch {
+      // Ignore
+    }
 
-    // Deduplicate: nav results first (instant), then backend data
-    const seen = new Set(navResults.map((r) => r.id));
-    const uniqueData = matchedData.filter((r) => !seen.has(r.id));
+    const typeMapping: Record<string, SearchResult['type']> = {
+      NOTE: 'note',
+      DOCUMENT: 'document',
+      ARTICLE: 'document',
+      TASK: 'task',
+      PROJECT: 'project',
+      FILE: 'document',
+      CALENDAR: 'calendar',
+      PLANNER: 'planner',
+      AUTOMATION: 'workflow',
+      WORKSPACE: 'workspace',
+    };
 
-    return [...navResults, ...uniqueData].slice(0, 50);
-  } catch (err) {
+    const mappedBackend: SearchResult[] = backendResults.map((item: any) => {
+      const normalizedType =
+        typeMapping[item.type?.toUpperCase()] ||
+        (item.type?.toLowerCase() as SearchResult['type']) ||
+        'document';
+
+      return {
+        id: item.id || `search_${Math.random()}`,
+        type: normalizedType,
+        title: item.title || 'Untitled',
+        description: item.snippet || item.description || '',
+        href: normalizeSearchResultRoute(item.href || '/app'),
+        meta: item.metadata?.projectName
+          ? `Project: ${item.metadata.projectName}`
+          : item.metadata?.status
+            ? `Status: ${item.metadata.status}`
+            : item.metadata?.category ||
+              (item.score ? `${Math.round(item.score * 100)}% match` : undefined),
+      };
+    });
+
+    // Deduplicate: nav results first, then backend results, then chats
+    const seen = new Set<string>();
+    const combined: SearchResult[] = [];
+
+    for (const r of [...navResults, ...mappedBackend, ...chatResults]) {
+      const key = `${r.type}_${r.id}_${r.href}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        combined.push(r);
+      }
+    }
+
+    return combined.slice(0, 40);
+  } catch (err: any) {
+    if (err?.name === 'CanceledError' || err?.name === 'AbortError') {
+      throw err;
+    }
     console.error('performSearch error', err);
-    // Return at least nav results even if backend fails
     return navResults;
   }
 }
@@ -862,6 +835,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
 
   const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -900,6 +874,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
 
   useEffect(() => {
     if (!query.trim()) {
+      abortControllerRef.current?.abort();
       setResults([]);
       setLoading(false);
       setError(null);
@@ -917,19 +892,37 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
     setLoading(true);
     setError(null);
 
+    // Cancel any previous in-flight request
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const timer = setTimeout(async () => {
       try {
-        const res = await performSearch(query);
-        setResults(res);
-        setSelectedIndex(0);
+        const res = await performSearch(query, controller.signal);
+        if (!controller.signal.aborted) {
+          setResults(res);
+          setSelectedIndex(0);
+          setLoading(false);
+        }
       } catch (err: any) {
+        if (
+          err?.name === 'CanceledError' ||
+          err?.name === 'AbortError' ||
+          controller.signal.aborted
+        ) {
+          return;
+        }
         setError('Search failed. Please try again.');
         console.error(err);
-      } finally {
         setLoading(false);
       }
-    }, 200);
-    return () => clearTimeout(timer);
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query]);
 
   const saveRecent = (q: string) => {

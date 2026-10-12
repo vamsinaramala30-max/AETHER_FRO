@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { productivityService, getLocalDateKey } from '../productivity-hub/productivityservice';
+import { taskService, Task } from '../../projects/tasks/taskservice';
 
 type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
@@ -7,14 +8,17 @@ export interface FocusSessionItem {
   id: string;
   minutes: number;
   createdAt: number;
+  taskId?: string | null;
 }
 
 export type DailyHistory = Record<string, FocusSessionItem[]>;
 
 const MIN_MINUTES = 1;
 const MAX_MINUTES = 240;
-const DEFAULT_MINUTES = 0;
+const DEFAULT_MINUTES = 25;
 const HISTORY_KEY = 'focus-timer-history';
+const ACTIVE_SESSION_KEY = 'aether_active_focus_session';
+const PENDING_SESSIONS_KEY = 'aether_pending_focus_sessions';
 
 function formatTime(totalSeconds: number): string {
   const safeSeconds = Math.max(0, totalSeconds);
@@ -361,9 +365,10 @@ function loadHistory(): DailyHistory {
                 id: (item as any).id || `${key}-${idx}`,
                 minutes: (item as any).minutes,
                 createdAt: (item as any).createdAt || Date.now(),
+                taskId: (item as any).taskId || null,
               };
             }
-            return { id: `${key}-${idx}`, minutes: 0, createdAt: Date.now() };
+            return { id: `${key}-${idx}`, minutes: 0, createdAt: Date.now(), taskId: null };
           })
           .filter((s) => s.minutes > 0)
           .sort((a, b) => b.createdAt - a.createdAt);
@@ -385,6 +390,75 @@ function saveHistory(history: DailyHistory): boolean {
   }
 }
 
+// --- Active Session & Offline Persistence --------------------------------
+
+interface PersistedActiveSession {
+  selectedMinutes: number;
+  status: 'running' | 'paused';
+  endTimestamp: number | null;
+  remainingSeconds: number;
+  taskId: string | null;
+  startTimestamp: number;
+}
+
+function saveActiveSession(data: PersistedActiveSession | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (data) {
+      window.localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(data));
+    } else {
+      window.localStorage.removeItem(ACTIVE_SESSION_KEY);
+    }
+  } catch {
+    // Ignore quota errors
+  }
+}
+
+function loadActiveSession(): PersistedActiveSession | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as PersistedActiveSession;
+  } catch {
+    return null;
+  }
+}
+
+interface PendingFocusSession {
+  id: string;
+  minutes: number;
+  taskId: string | null;
+  createdAt: number;
+}
+
+function loadPendingSessions(): PendingFocusSession[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(PENDING_SESSIONS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function savePendingSessions(list: PendingFocusSession[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (list.length > 0) {
+      window.localStorage.setItem(PENDING_SESSIONS_KEY, JSON.stringify(list));
+    } else {
+      window.localStorage.removeItem(PENDING_SESSIONS_KEY);
+    }
+  } catch {
+    // Ignore
+  }
+}
+
 // --- Main component ------------------------------------------------------
 
 interface FocusTimerProps {
@@ -395,6 +469,10 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
   const [selectedMinutes, setSelectedMinutes] = useState<number>(DEFAULT_MINUTES);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(DEFAULT_MINUTES * 60);
   const [status, setStatus] = useState<TimerStatus>('idle');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [pendingSessions, setPendingSessions] = useState<PendingFocusSession[]>([]);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   const [history, setHistory] = useState<DailyHistory>({});
   const [historyLoaded, setHistoryLoaded] = useState<boolean>(false);
@@ -402,9 +480,10 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
 
   const endTimestampRef = useRef<number | null>(null);
   const remainingAtPauseRef = useRef<number>(DEFAULT_MINUTES * 60);
-  // Typed as number (browser setInterval return type) rather than
-  // NodeJS.Timeout, in case @types/node is also present in the project.
   const intervalRef = useRef<number | null>(null);
+  const isCompletingRef = useRef<boolean>(false);
+  const selectedTaskIdRef = useRef<string | null>(null);
+  selectedTaskIdRef.current = selectedTaskId;
 
   const notifyUpdate = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -412,12 +491,175 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
     }
   }, []);
 
-  // Load saved history once on mount: fast cache first, then server database reconcile
+  const taskTitleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const t of tasks) {
+      map.set(t.id, t.title);
+    }
+    return map;
+  }, [tasks]);
+
+  const clearTick = useCallback(() => {
+    if (intervalRef.current !== null) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  const persistHistory = useCallback((nextHistory: DailyHistory) => {
+    const ok = saveHistory(nextHistory);
+    setHistoryError(ok ? null : "Couldn't save history.");
+  }, []);
+
+  const recordSession = useCallback(
+    async (minutes: number, taskId?: string | null) => {
+      setHistoryError(null);
+      try {
+        await productivityService.logFocusSession(minutes, { taskId: taskId || undefined });
+        const sessions = await productivityService.getSessions();
+        const normalized: DailyHistory = {};
+        for (const s of sessions) {
+          const key = getLocalDateKey(new Date(s.createdAt));
+          if (!normalized[key]) normalized[key] = [];
+          normalized[key].push({
+            id: s.id,
+            minutes: s.minutes,
+            createdAt: s.createdAt,
+            taskId: s.taskId,
+          });
+        }
+        setHistory(normalized);
+        notifyUpdate();
+      } catch {
+        // Offline / network failure resilience
+        const nextPending: PendingFocusSession = {
+          id: `pending-${Date.now()}`,
+          minutes,
+          taskId: taskId || null,
+          createdAt: Date.now(),
+        };
+        const currentPending = loadPendingSessions();
+        const updatedPending = [...currentPending, nextPending];
+        savePendingSessions(updatedPending);
+        setPendingSessions(updatedPending);
+        setHistoryError(
+          'Session saved locally. Offline or server unreachable — click "Retry Sync" when connection is restored.',
+        );
+      }
+    },
+    [notifyUpdate],
+  );
+
+  const syncPendingSessions = useCallback(async () => {
+    const list = loadPendingSessions();
+    if (list.length === 0) return;
+    setIsSyncing(true);
+    const unSynced: PendingFocusSession[] = [];
+    for (const item of list) {
+      try {
+        await productivityService.logFocusSession(item.minutes, {
+          taskId: item.taskId || undefined,
+        });
+      } catch {
+        unSynced.push(item);
+      }
+    }
+    savePendingSessions(unSynced);
+    setPendingSessions(unSynced);
+    if (unSynced.length === 0) {
+      setHistoryError(null);
+    }
+    try {
+      const sessions = await productivityService.getSessions();
+      const normalized: DailyHistory = {};
+      for (const s of sessions) {
+        const key = getLocalDateKey(new Date(s.createdAt));
+        if (!normalized[key]) normalized[key] = [];
+        normalized[key].push({
+          id: s.id,
+          minutes: s.minutes,
+          createdAt: s.createdAt,
+          taskId: s.taskId,
+        });
+      }
+      setHistory(normalized);
+      notifyUpdate();
+    } catch {
+      // Ignore
+    }
+    setIsSyncing(false);
+  }, [notifyUpdate]);
+
+  const finishTimer = useCallback(
+    async (customMinutes?: number, customTaskId?: string | null) => {
+      if (isCompletingRef.current) return;
+      isCompletingRef.current = true;
+      clearTick();
+      saveActiveSession(null);
+      endTimestampRef.current = null;
+      setStatus('finished');
+      setRemainingSeconds(0);
+
+      const mins = customMinutes ?? selectedMinutes;
+      const tid = customTaskId !== undefined ? customTaskId : selectedTaskIdRef.current;
+
+      playCompletionSound();
+      notifyCompletion();
+
+      try {
+        await recordSession(mins, tid);
+        onSessionComplete?.(mins);
+      } finally {
+        isCompletingRef.current = false;
+        setStatus('idle');
+        setRemainingSeconds(selectedMinutes * 60);
+        remainingAtPauseRef.current = selectedMinutes * 60;
+      }
+    },
+    [clearTick, selectedMinutes, onSessionComplete, recordSession],
+  );
+
+  const tick = useCallback(() => {
+    if (endTimestampRef.current === null) return;
+    const msRemaining = endTimestampRef.current - Date.now();
+    const secondsRemaining = Math.ceil(msRemaining / 1000);
+
+    if (secondsRemaining <= 0) {
+      void finishTimer();
+      return;
+    }
+    setRemainingSeconds(secondsRemaining);
+  }, [finishTimer]);
+
   useEffect(() => {
+    if (status !== 'running') return;
+    intervalRef.current = window.setInterval(tick, 250) as unknown as number;
+    return () => {
+      clearTick();
+    };
+  }, [status, tick, clearTick]);
+
+  useEffect(() => {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      void Notification.requestPermission();
+    }
+  }, []);
+
+  // Restore and initialize on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    taskService
+      .getTasks()
+      .then((tList) => {
+        if (isMounted) setTasks(tList);
+      })
+      .catch(() => {});
+
+    setPendingSessions(loadPendingSessions());
     setHistory(loadHistory());
     setHistoryLoaded(true);
 
-    let isMounted = true;
     productivityService
       .getSessions()
       .then((sessions) => {
@@ -430,6 +672,7 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
             id: s.id,
             minutes: s.minutes,
             createdAt: s.createdAt,
+            taskId: s.taskId,
           });
         }
         setHistory(normalized);
@@ -438,40 +681,127 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
         console.warn('Failed to load server sessions:', err);
       });
 
+    // Session recovery: check if active timer existed before refresh
+    const saved = loadActiveSession();
+    if (saved) {
+      if (saved.taskId) {
+        setSelectedTaskId(saved.taskId);
+      }
+      if (typeof saved.selectedMinutes === 'number' && saved.selectedMinutes > 0) {
+        setSelectedMinutes(saved.selectedMinutes);
+      }
+
+      if (saved.status === 'running' && saved.endTimestamp) {
+        const remainingMs = saved.endTimestamp - Date.now();
+        if (remainingMs <= 0) {
+          // Timer finished while tab was closed/away
+          saveActiveSession(null);
+          void finishTimer(saved.selectedMinutes, saved.taskId);
+        } else {
+          // Timer is still running
+          const secLeft = Math.ceil(remainingMs / 1000);
+          setRemainingSeconds(secLeft);
+          endTimestampRef.current = saved.endTimestamp;
+          setStatus('running');
+        }
+      } else if (saved.status === 'paused' && typeof saved.remainingSeconds === 'number') {
+        setRemainingSeconds(saved.remainingSeconds);
+        remainingAtPauseRef.current = saved.remainingSeconds;
+        setStatus('paused');
+      }
+    }
+
     return () => {
       isMounted = false;
+      clearTick();
     };
-  }, []);
+  }, [clearTick, finishTimer]);
 
-  const persistHistory = useCallback((nextHistory: DailyHistory) => {
-    const ok = saveHistory(nextHistory);
-    setHistoryError(ok ? null : "Couldn't save history.");
-  }, []);
+  useEffect(() => {
+    if (status === 'idle') {
+      setRemainingSeconds(selectedMinutes * 60);
+      remainingAtPauseRef.current = selectedMinutes * 60;
+    }
+  }, [selectedMinutes, status]);
 
-  const recordSession = useCallback(
-    async (minutes: number) => {
-      setHistoryError(null);
-      try {
-        await productivityService.logFocusSession(minutes);
-        const sessions = await productivityService.getSessions();
-        const normalized: DailyHistory = {};
-        for (const s of sessions) {
-          const key = getLocalDateKey(new Date(s.createdAt));
-          if (!normalized[key]) normalized[key] = [];
-          normalized[key].push({
-            id: s.id,
-            minutes: s.minutes,
-            createdAt: s.createdAt,
-          });
-        }
-        setHistory(normalized);
-        notifyUpdate();
-      } catch {
-        setHistoryError('Failed to persist focus session to server database.');
-      }
-    },
-    [notifyUpdate],
-  );
+  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(event.target.value);
+    if (Number.isNaN(value)) return;
+    const clamped = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, value));
+    setSelectedMinutes(clamped);
+  };
+
+  const handleStart = () => {
+    if (status === 'running') return;
+    const startSeconds = status === 'paused' ? remainingAtPauseRef.current : selectedMinutes * 60;
+    const endTs = Date.now() + startSeconds * 1000;
+    endTimestampRef.current = endTs;
+    setRemainingSeconds(startSeconds);
+    setStatus('running');
+    saveActiveSession({
+      selectedMinutes,
+      status: 'running',
+      endTimestamp: endTs,
+      remainingSeconds: startSeconds,
+      taskId: selectedTaskId,
+      startTimestamp: Date.now(),
+    });
+  };
+
+  const handlePause = () => {
+    if (status !== 'running') return;
+    clearTick();
+    let remSec = remainingAtPauseRef.current;
+    if (endTimestampRef.current !== null) {
+      const msRemaining = endTimestampRef.current - Date.now();
+      remSec = Math.max(0, Math.ceil(msRemaining / 1000));
+      remainingAtPauseRef.current = remSec;
+      setRemainingSeconds(remSec);
+    }
+    endTimestampRef.current = null;
+    setStatus('paused');
+    saveActiveSession({
+      selectedMinutes,
+      status: 'paused',
+      endTimestamp: null,
+      remainingSeconds: remSec,
+      taskId: selectedTaskId,
+      startTimestamp: Date.now(),
+    });
+  };
+
+  const handleResume = () => {
+    if (status !== 'paused') return;
+    const endTs = Date.now() + remainingAtPauseRef.current * 1000;
+    endTimestampRef.current = endTs;
+    setStatus('running');
+    saveActiveSession({
+      selectedMinutes,
+      status: 'running',
+      endTimestamp: endTs,
+      remainingSeconds: remainingAtPauseRef.current,
+      taskId: selectedTaskId,
+      startTimestamp: Date.now(),
+    });
+  };
+
+  const handleStop = () => {
+    clearTick();
+    saveActiveSession(null);
+    endTimestampRef.current = null;
+    setStatus('idle');
+    setRemainingSeconds(selectedMinutes * 60);
+    remainingAtPauseRef.current = selectedMinutes * 60;
+  };
+
+  const handleReset = () => {
+    clearTick();
+    saveActiveSession(null);
+    endTimestampRef.current = null;
+    setStatus('idle');
+    setRemainingSeconds(selectedMinutes * 60);
+    remainingAtPauseRef.current = selectedMinutes * 60;
+  };
 
   const deleteSession = useCallback(
     async (dateKey: string, sessionId: string) => {
@@ -541,117 +871,6 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
     }
   }, [history, persistHistory, notifyUpdate]);
 
-  const clearTick = useCallback(() => {
-    if (intervalRef.current !== null) {
-      window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
-
-  const finishTimer = useCallback(async () => {
-    clearTick();
-    endTimestampRef.current = null;
-    setStatus('finished');
-    setRemainingSeconds(0);
-
-    playCompletionSound();
-    notifyCompletion();
-    await recordSession(selectedMinutes);
-    onSessionComplete?.(selectedMinutes);
-
-    setStatus('idle');
-    setRemainingSeconds(selectedMinutes * 60);
-    remainingAtPauseRef.current = selectedMinutes * 60;
-  }, [clearTick, selectedMinutes, onSessionComplete, recordSession]);
-
-  const tick = useCallback(() => {
-    if (endTimestampRef.current === null) return;
-    const msRemaining = endTimestampRef.current - Date.now();
-    const secondsRemaining = Math.ceil(msRemaining / 1000);
-
-    if (secondsRemaining <= 0) {
-      finishTimer();
-      return;
-    }
-    setRemainingSeconds(secondsRemaining);
-  }, [finishTimer]);
-
-  useEffect(() => {
-    if (status !== 'running') return;
-    intervalRef.current = window.setInterval(tick, 250) as unknown as number;
-    return () => {
-      clearTick();
-    };
-  }, [status, tick, clearTick]);
-
-  useEffect(() => {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      void Notification.requestPermission();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (status === 'idle') {
-      setRemainingSeconds(selectedMinutes * 60);
-      remainingAtPauseRef.current = selectedMinutes * 60;
-    }
-  }, [selectedMinutes, status]);
-
-  useEffect(() => {
-    return () => {
-      clearTick();
-    };
-  }, [clearTick]);
-
-  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.target.value);
-    if (Number.isNaN(value)) return;
-    const clamped = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, value));
-    setSelectedMinutes(clamped);
-  };
-
-  const handleStart = () => {
-    if (status === 'running') return;
-    const startSeconds = status === 'paused' ? remainingAtPauseRef.current : selectedMinutes * 60;
-    endTimestampRef.current = Date.now() + startSeconds * 1000;
-    setRemainingSeconds(startSeconds);
-    setStatus('running');
-  };
-
-  const handlePause = () => {
-    if (status !== 'running') return;
-    clearTick();
-    if (endTimestampRef.current !== null) {
-      const msRemaining = endTimestampRef.current - Date.now();
-      remainingAtPauseRef.current = Math.max(0, Math.ceil(msRemaining / 1000));
-      setRemainingSeconds(remainingAtPauseRef.current);
-    }
-    endTimestampRef.current = null;
-    setStatus('paused');
-  };
-
-  const handleResume = () => {
-    if (status !== 'paused') return;
-    endTimestampRef.current = Date.now() + remainingAtPauseRef.current * 1000;
-    setStatus('running');
-  };
-
-  const handleStop = () => {
-    clearTick();
-    endTimestampRef.current = null;
-    setStatus('idle');
-    setRemainingSeconds(selectedMinutes * 60);
-    remainingAtPauseRef.current = selectedMinutes * 60;
-  };
-
-  const handleReset = () => {
-    clearTick();
-    endTimestampRef.current = null;
-    setStatus('idle');
-    setRemainingSeconds(selectedMinutes * 60);
-    remainingAtPauseRef.current = selectedMinutes * 60;
-  };
-
   const isRunning = status === 'running';
   const isPaused = status === 'paused';
   const isIdle = status === 'idle';
@@ -668,11 +887,25 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
         <h1 className="mb-1 text-center text-xl font-semibold text-gray-800 dark:text-gray-100 sm:text-2xl">
           Focus Timer
         </h1>
-        <p className="mb-6 text-center text-xs font-medium text-blue-600 dark:text-blue-400">
+        <p className="mb-4 text-center text-xs font-medium text-blue-600 dark:text-blue-400">
           {todayTotal > 0 ? `${todayTotal} min focused today` : 'No focus time logged yet today'}
         </p>
 
-        <div className="mb-8 flex justify-center">
+        {pendingSessions.length > 0 && (
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <span>{pendingSessions.length} offline session(s) pending sync</span>
+            <button
+              type="button"
+              onClick={syncPendingSessions}
+              disabled={isSyncing}
+              className="rounded bg-amber-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+            >
+              {isSyncing ? 'Syncing…' : 'Retry Sync'}
+            </button>
+          </div>
+        )}
+
+        <div className="mb-6 flex justify-center">
           <span
             className="select-none font-mono text-6xl font-bold tabular-nums text-gray-900 dark:text-gray-50 sm:text-7xl"
             aria-live="polite"
@@ -681,6 +914,52 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
           </span>
         </div>
 
+        {/* Task Association Selector */}
+        <div className="mb-4 flex flex-col items-center gap-1.5 w-full">
+          <label
+            htmlFor="focus-task-select"
+            className="text-xs font-medium text-gray-600 dark:text-gray-300"
+          >
+            Associate Task
+          </label>
+          <select
+            id="focus-task-select"
+            value={selectedTaskId || ''}
+            onChange={(e) => {
+              const val = e.target.value || null;
+              setSelectedTaskId(val);
+              if (status === 'paused') {
+                saveActiveSession({
+                  selectedMinutes,
+                  status: 'paused',
+                  endTimestamp: null,
+                  remainingSeconds: remainingAtPauseRef.current,
+                  taskId: val,
+                  startTimestamp: Date.now(),
+                });
+              }
+            }}
+            disabled={isRunning}
+            className="w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-900 shadow-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+          >
+            <option value="">(None - general focus)</option>
+            {tasks.map((task) => (
+              <option key={task.id} value={task.id}>
+                {task.title}{' '}
+                {typeof task.loggedMinutes === 'number' && task.loggedMinutes > 0
+                  ? `(${task.loggedMinutes}m logged)`
+                  : ''}
+              </option>
+            ))}
+          </select>
+          {tasks.length === 0 && (
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">
+              No tasks available
+            </span>
+          )}
+        </div>
+
+        {/* Focus Duration Input */}
         <div className="mb-6 flex flex-col items-center gap-2">
           <label
             htmlFor="focus-duration"
@@ -818,7 +1097,14 @@ export default function FocusTimer({ onSessionComplete }: FocusTimerProps): Reac
                           key={session.id}
                           className="shadow-xs flex items-center justify-between rounded-md bg-white px-2.5 py-1.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-200"
                         >
-                          <span className="font-medium">{session.minutes} min Focus</span>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{session.minutes} min Focus</span>
+                            {session.taskId && (
+                              <span className="text-[10px] text-blue-600 dark:text-blue-400">
+                                📌 {taskTitleMap.get(session.taskId) || 'Linked Task'}
+                              </span>
+                            )}
+                          </div>
                           <button
                             type="button"
                             onClick={() => deleteSession(key, session.id)}

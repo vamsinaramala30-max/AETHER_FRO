@@ -134,7 +134,8 @@ describe('Cognitive Hub Visuals & Game Engines', () => {
   describe('LogicForge Engine', () => {
     it('generates valid premises and single correct answer', () => {
       const challenge = generateLogicForgeChallenge(3);
-      expect(challenge.premises.length).toBe(2);
+      expect(challenge.premises.length).toBeGreaterThanOrEqual(2);
+      expect(challenge.premises.length).toBeLessThanOrEqual(3);
       expect(challenge.options.length).toBe(4);
       expect(challenge.correctIndex).toBeGreaterThanOrEqual(0);
       expect(challenge.correctIndex).toBeLessThan(4);

@@ -2,6 +2,7 @@ import { tasksApi } from '../../api/tasks.api';
 
 export interface Task {
   id: string;
+  projectId?: string;
   title: string;
   description: string;
   status: 'todo' | 'in_progress' | 'review' | 'done';
@@ -9,6 +10,7 @@ export interface Task {
   dueDate?: string;
   tags: string[];
   createdAt?: string;
+  loggedMinutes?: number;
 }
 
 export interface TaskFiltersState {
@@ -66,6 +68,7 @@ export const taskService = {
     const raw = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
     return raw.map((item: any) => ({
       id: item.id,
+      projectId: item.projectId,
       title: item.title || 'Untitled Task',
       description: item.description || '',
       status: mapStatusFromApi(item.status),
@@ -73,11 +76,13 @@ export const taskService = {
       dueDate: item.dueDate ? new Date(item.dueDate).toISOString().split('T')[0] : undefined,
       tags: Array.isArray(item.labels) ? item.labels : ['general'],
       createdAt: item.createdAt || new Date().toISOString(),
+      loggedMinutes: typeof item.loggedMinutes === 'number' ? item.loggedMinutes : 0,
     }));
   },
 
   async createTask(task: Omit<Task, 'id'>): Promise<Task> {
     const res = await tasksApi.create({
+      projectId: task.projectId,
       title: task.title,
       description: task.description,
       status: mapStatusToApi(task.status),
@@ -88,6 +93,7 @@ export const taskService = {
     const item: any = res.data || res;
     return {
       id: item.id,
+      projectId: item.projectId || task.projectId,
       title: item.title || task.title,
       description: item.description || task.description || '',
       status: mapStatusFromApi(item.status || task.status),
@@ -110,6 +116,7 @@ export const taskService = {
     const item: any = res.data || res;
     return {
       id: item.id || id,
+      projectId: item.projectId || updates.projectId,
       title: item.title || updates.title || 'Updated Task',
       description: item.description || updates.description || '',
       status: mapStatusFromApi(item.status || updates.status),

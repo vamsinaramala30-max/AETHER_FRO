@@ -34,6 +34,7 @@ interface Block {
   groupId: string | null; // links a 1-4-7 revision chain together
   completed: boolean;
   taskId?: string | null;
+  taskTitle?: string | null;
   calendarEventId?: string | null;
 }
 
@@ -55,6 +56,7 @@ interface BlockOpts {
   groupId?: string | null;
   completed?: boolean;
   taskId?: string | null;
+  taskTitle?: string | null;
   calendarEventId?: string | null;
 }
 
@@ -162,8 +164,20 @@ const GlobalStyle: React.FC = () => (
     }
     .aether-content { position: relative; z-index: 1; }
 
-    @media (max-width: 720px) {
-      .aether-week-grid { grid-template-columns: repeat(7, minmax(76px,1fr)) !important; overflow-x: auto; }
+    @media (max-width: 640px) {
+      .aether-root { padding: 16px 12px 48px !important; }
+      .aether-desktop-dials { display: none !important; }
+      .aether-mobile-dials { display: block !important; }
+      .task-actions { opacity: 1 !important; }
+      .aether-planner-main { flex-direction: column !important; gap: 16px !important; }
+      .aether-timeline, .aether-right-rail { min-width: 0 !important; width: 100% !important; flex: 1 1 100% !important; }
+      .aether-right-rail { position: static !important; }
+      .aether-gauges { flex-direction: column !important; gap: 12px !important; padding: 14px 14px !important; }
+      .aether-gauges > div { min-width: 0 !important; width: 100% !important; }
+    }
+    @media (min-width: 641px) {
+      .aether-desktop-dials { display: grid !important; }
+      .aether-mobile-dials { display: none !important; }
     }
   `}</style>
 );
@@ -222,6 +236,9 @@ const mk = (start: number, duration: number, label: string, opts: BlockOpts = {}
   revision: opts.revision || null,
   groupId: opts.groupId || null,
   completed: opts.completed || false,
+  taskId: opts.taskId || null,
+  taskTitle: opts.taskTitle || null,
+  calendarEventId: opts.calendarEventId || null,
 });
 
 function getDay(daysData: DaysData, key: string): DayData {
@@ -390,14 +407,17 @@ function Gauge({ label, actual, target, color, icon: Icon }: {
 interface FormState {
   label: string; subject: string; start: string; duration: number;
   priority: Priority; energy: Energy; bucket: Bucket; kind: Kind; enableRevision: boolean;
+  taskId: string | null; taskTitle: string | null;
 }
 const blankForm = (): FormState => ({
   label: "", subject: "", start: "18:00", duration: 45,
   priority: "P2", energy: "medium", bucket: "study", kind: "flexible", enableRevision: false,
+  taskId: null, taskTitle: null,
 });
 const formFromBlock = (b: Block): FormState => ({
   label: b.label, subject: b.subject || "", start: decToTimeInput(b.start), duration: b.duration,
   priority: b.priority || "P2", energy: b.energy || "medium", bucket: b.bucket, kind: b.kind, enableRevision: false,
+  taskId: b.taskId || null, taskTitle: b.taskTitle || null,
 });
 
 function TaskForm({ initial, isEdit, onSubmit, onClose }: {
@@ -405,6 +425,27 @@ function TaskForm({ initial, isEdit, onSubmit, onClose }: {
   onSubmit: (f: FormState) => void; onClose: () => void;
 }) {
   const [form, setForm] = useState<FormState>(initial);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingTasks(true);
+    taskService
+      .getTasks()
+      .then((res) => {
+        if (!isMounted) return;
+        if (Array.isArray(res)) setTasks(res);
+        setLoadingTasks(false);
+      })
+      .catch(() => {
+        if (isMounted) setLoadingTasks(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
 
   const submit = () => {
@@ -429,8 +470,45 @@ function TaskForm({ initial, isEdit, onSubmit, onClose }: {
         <div style={{ fontSize: 13, fontWeight: 600 }}>{isEdit ? "Edit task" : "Add to this day"}</div>
         <button onClick={onClose} className="icon-btn" style={{ background: "none", border: "none", color: COLORS.muted, borderRadius: 6, padding: 2 }}><X size={15} /></button>
       </div>
+
+      <div style={{ marginBottom: 10 }}>
+        {field("Associated Task", (
+          <select
+            style={inputStyle}
+            value={form.taskId || ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (!val) {
+                setForm(f => ({ ...f, taskId: null, taskTitle: null }));
+              } else {
+                const matched = tasks.find(t => t.id === val);
+                setForm(f => ({
+                  ...f,
+                  taskId: val,
+                  taskTitle: matched?.title || null,
+                  label: f.label.trim() ? f.label : (matched?.title || f.label),
+                }));
+              }
+            }}
+          >
+            <option value="">None (No linked task)</option>
+            {loadingTasks ? (
+              <option disabled>Loading tasks...</option>
+            ) : tasks.length === 0 ? (
+              <option disabled>No tasks found in project</option>
+            ) : (
+              tasks.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title} {t.status ? `(${t.status})` : ''}
+                </option>
+              ))
+            )}
+          </select>
+        ))}
+      </div>
+
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-        {field("Task", <input style={inputStyle} placeholder="e.g. Physics — Kinematics" value={form.label} onChange={e => set("label", e.target.value)} autoFocus />)}
+        {field("Task Title", <input style={inputStyle} placeholder="e.g. Physics — Kinematics" value={form.label} onChange={e => set("label", e.target.value)} autoFocus />)}
         {field("Subject", <input style={inputStyle} placeholder="optional" value={form.subject} onChange={e => set("subject", e.target.value)} />)}
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
@@ -511,8 +589,27 @@ const TaskRow: React.FC<TaskRowProps> = ({ b, missed, onToggle, onEdit, onDelete
             {fmtHM(b.start)} · {fmtDur(b.duration)}
           </div>
         </div>
-        {(b.priority || b.energy || b.revision || b.kind === "fixed") && (
+        {(b.priority || b.energy || b.revision || b.kind === "fixed" || b.taskId) && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6, alignItems: "center" }}>
+            {b.taskId && (
+              <span
+                className="mono"
+                style={{
+                  fontSize: 10.5,
+                  color: COLORS.study,
+                  border: `1px solid ${COLORS.study}55`,
+                  background: `${COLORS.study}18`,
+                  borderRadius: 999,
+                  padding: "2px 8px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                <Check size={10} strokeWidth={2.5} />
+                {b.taskTitle ? b.taskTitle : "Linked Task"}
+              </span>
+            )}
             {b.kind === "fixed" && (
               <span className="mono" style={{ fontSize: 10.5, color: COLORS.muted, border: `1px solid ${COLORS.line}`, borderRadius: 999, padding: "2px 8px" }}>Fixed</span>
             )}
@@ -523,11 +620,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ b, missed, onToggle, onEdit, onDelete
         )}
       </div>
       <div className="task-actions" style={{ display: "flex", gap: 2, flexShrink: 0 }}>
-        <button onClick={onEdit} aria-label="Edit task" className="icon-btn" style={{ background: "none", border: "none", color: COLORS.muted, borderRadius: 6, padding: 5 }}>
-          <Pencil size={13} />
+        <button onClick={onEdit} aria-label="Edit task" className="icon-btn" style={{ background: "none", border: "none", color: COLORS.muted, borderRadius: 6, padding: "7px 7px", minWidth: 32, minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Pencil size={14} />
         </button>
-        <button onClick={onDelete} aria-label="Delete task" className="icon-btn" style={{ background: "none", border: "none", color: COLORS.muted, borderRadius: 6, padding: 5 }}>
-          <Trash2 size={13} />
+        <button onClick={onDelete} aria-label="Delete task" className="icon-btn" style={{ background: "none", border: "none", color: COLORS.muted, borderRadius: 6, padding: "7px 7px", minWidth: 32, minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Trash2 size={14} />
         </button>
       </div>
     </div>
@@ -745,6 +842,8 @@ export default function AetherWeeklyPlanner() {
     const base: BlockOpts = {
       bucket: form.bucket, kind: form.kind, subject: form.subject || null,
       priority: form.priority, energy: form.energy,
+      taskId: form.taskId || null,
+      taskTitle: form.taskTitle || null,
     };
     if (form.bucket === "study" && form.enableRevision) {
       const groupId = nid();
@@ -772,6 +871,8 @@ export default function AetherWeeklyPlanner() {
         ...b, start: startDec, duration: form.duration, label: form.label,
         bucket: form.bucket, kind: form.kind, subject: form.subject || null,
         priority: form.priority, energy: form.energy,
+        taskId: form.taskId !== undefined ? form.taskId : b.taskId,
+        taskTitle: form.taskTitle !== undefined ? form.taskTitle : b.taskTitle,
       } : b).sort((a, b) => a.start - b.start),
     }));
   }, [updateDay]);
@@ -950,7 +1051,7 @@ export default function AetherWeeklyPlanner() {
         )}
 
         {/* WEEKLY 8-8-8 GAUGES */}
-        <div style={{
+        <div className="aether-gauges" style={{
           display: "flex", gap: 24, flexWrap: "wrap", background: COLORS.panel,
           border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: "18px 20px", marginBottom: 22,
           boxShadow: "0 2px 10px rgba(33,30,23,0.05)",
@@ -960,9 +1061,162 @@ export default function AetherWeeklyPlanner() {
           <Gauge label="Other" actual={weekTotals.other} target={56} color={COLORS.other} icon={Layers} />
         </div>
 
-        {/* DIAL STRIP */}
-        <div className="aether-scroll aether-week-grid" style={{
-          display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 10, marginBottom: 22, paddingBottom: 4,
+        {/* MOBILE VIEW DAY SELECTOR & ACTIVE DAY SPOTLIGHT (<= 640px) */}
+        <div className="aether-mobile-dials" style={{ marginBottom: 20 }}>
+          {/* Day Selector Pills */}
+          <div
+            className="aether-scroll"
+            role="tablist"
+            aria-label="Select day of week"
+            style={{
+              display: "flex",
+              gap: 6,
+              overflowX: "auto",
+              paddingBottom: 8,
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {weekDates.map((d, i) => {
+              const k = weekKeys[i];
+              const isSelected = k === selectedKey;
+              const isToday = k === todayKey();
+              return (
+                <button
+                  key={k}
+                  role="tab"
+                  aria-selected={isSelected}
+                  aria-label={`${DAY_NAMES[i]} ${d.getDate()}`}
+                  onClick={() => setSelectedKey(k)}
+                  style={{
+                    flex: "1 1 0",
+                    minWidth: 44,
+                    minHeight: 46,
+                    padding: "6px 4px",
+                    borderRadius: 10,
+                    border: `1.5px solid ${isSelected ? COLORS.study : COLORS.line}`,
+                    background: isSelected ? `${COLORS.study}18` : COLORS.panel,
+                    color: isSelected ? COLORS.study : COLORS.text,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                    transition: "all .15s ease",
+                  }}
+                >
+                  <span className="mono" style={{ fontSize: 10, fontWeight: 600, opacity: isSelected ? 1 : 0.7 }}>
+                    {DAY_NAMES[i]}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, marginTop: 1 }}>
+                    {d.getDate()}
+                  </span>
+                  {isToday && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: 3,
+                        width: 4,
+                        height: 4,
+                        borderRadius: "50%",
+                        background: isSelected ? COLORS.study : COLORS.muted,
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Day Spotlight Card with Dial & Quick Prev/Next Day Controls */}
+          <div
+            style={{
+              background: COLORS.panel,
+              border: `1px solid ${COLORS.line}`,
+              borderRadius: 14,
+              padding: "12px 14px",
+              marginTop: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              boxShadow: "0 1px 3px rgba(33,30,23,0.04)",
+            }}
+          >
+            <button
+              onClick={() => {
+                const idx = weekKeys.indexOf(selectedKey);
+                if (idx > 0) setSelectedKey(weekKeys[idx - 1]);
+                else goPrevWeek();
+              }}
+              aria-label="Previous day"
+              className="icon-btn"
+              style={{
+                background: COLORS.panel2,
+                border: `1px solid ${COLORS.line}`,
+                borderRadius: 8,
+                width: 38,
+                height: 38,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
+              <div style={{ flexShrink: 0 }}>
+                <Dial
+                  day={selectedDay}
+                  size={68}
+                  selected={true}
+                  isToday={selectedKey === todayKey()}
+                  label={new Date(selectedKey + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric" })}
+                  onClick={() => {}}
+                />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {selectedKey === todayKey() ? "Today" : new Date(selectedKey + "T00:00:00").toLocaleDateString(undefined, { weekday: "long" })}
+                </div>
+                <div className="mono" style={{ fontSize: 11, color: COLORS.muted, marginTop: 2 }}>
+                  {new Date(selectedKey + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </div>
+                <div className="mono" style={{ fontSize: 10.5, color: COLORS.study, marginTop: 4, fontWeight: 600 }}>
+                  {totals.study.toFixed(1)}h study · {totals.sleep.toFixed(1)}h sleep
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                const idx = weekKeys.indexOf(selectedKey);
+                if (idx < weekKeys.length - 1) setSelectedKey(weekKeys[idx + 1]);
+                else goNextWeek();
+              }}
+              aria-label="Next day"
+              className="icon-btn"
+              style={{
+                background: COLORS.panel2,
+                border: `1px solid ${COLORS.line}`,
+                borderRadius: 8,
+                width: 38,
+                height: 38,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* DESKTOP 7-DIAL STRIP (>= 641px) */}
+        <div className="aether-scroll aether-desktop-dials" style={{
+          gridTemplateColumns: "repeat(7, 1fr)", gap: 10, marginBottom: 22, paddingBottom: 4,
         }}>
           {weekDates.map((d, i) => {
             const k = weekKeys[i];
@@ -974,10 +1228,10 @@ export default function AetherWeeklyPlanner() {
         </div>
 
         {/* SELECTED DAY */}
-        <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-start" }}>
+        <div className="aether-planner-main" style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-start" }}>
 
           {/* Timeline */}
-          <div style={{ flex: "2 1 420px", minWidth: 320 }}>
+          <div className="aether-timeline" style={{ flex: "2 1 420px", minWidth: 320 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 10 }}>
               <div className="display" style={{ fontSize: 20, fontWeight: 600 }}>
                 {selectedKey === todayKey() ? "Today" : new Date(selectedKey + "T00:00:00").toLocaleDateString(undefined, { weekday: "long" })}
@@ -1055,7 +1309,7 @@ export default function AetherWeeklyPlanner() {
           </div>
 
           {/* Right rail */}
-          <div style={{ flex: "1 1 260px", minWidth: 260, position: "sticky", top: 20 }}>
+          <div className="aether-right-rail" style={{ flex: "1 1 260px", minWidth: 260, position: "sticky", top: 20 }}>
             <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16, marginBottom: 16, boxShadow: "0 2px 10px rgba(33,30,23,0.05)" }}>
               <div className="mono" style={{ fontSize: 11, color: COLORS.muted, letterSpacing: 1, marginBottom: 10 }}>WHAT SHOULD I DO NOW</div>
               {nextUp ? (

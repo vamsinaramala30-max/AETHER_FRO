@@ -17,6 +17,7 @@ import { streamingEngine } from './streaming-engine';
 import { responseEngine } from './response-engine';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
 import { useAIStore } from '../ai-store';
+import { apiClient, ApiError } from '../../api/client';
 
 let messageIdCounter = 0;
 function generateMessageId(): string {
@@ -196,39 +197,11 @@ export class AIEngine {
     }
 
     const { request } = orchestrationResult.data;
-    const endpoint = `${this.config.backend.baseUrl}${this.config.backend.chatPath}`;
 
     try {
-      let token =
-        localStorage.getItem('aether_auth_token') ||
-        localStorage.getItem('aether-auth-token') ||
-        localStorage.getItem('auth_token');
-
-      if (!token) {
-        try {
-          const store = localStorage.getItem('aether-auth-storage');
-          if (store) {
-            const parsed = JSON.parse(store);
-            if (parsed?.state?.token && typeof parsed.state.token === 'string') {
-              token = parsed.state.token;
-            }
-          }
-        } catch {
-          // Ignore storage parse error
-        }
-      }
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token && typeof token === 'string' && token.trim() !== '') {
-        headers['Authorization'] = `Bearer ${token.trim()}`;
-      }
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
+      const raw = await apiClient.post<any>(
+        this.config.backend.chatPath,
+        {
           message: userMessage,
           conversation_id: request.conversationId,
           conversationId: request.conversationId,
@@ -238,19 +211,12 @@ export class AIEngine {
           system_prompt: request.systemPrompt,
           rag_context: request.ragContext,
           stream: false,
-        }),
-        signal: AbortSignal.timeout(this.config.backend.timeoutMs),
-      });
+        },
+        {
+          timeout: this.config.backend.timeoutMs,
+        },
+      );
 
-      if (!res.ok) {
-        const error = responseEngine.normalizeGenerationResponse({}, context.conversationId);
-        if (!error.success) {
-          callbacks.onError?.(error.error);
-        }
-        return;
-      }
-
-      const raw = (await res.json()) as Record<string, unknown>;
       const normalized = responseEngine.normalizeGenerationResponse(raw, context.conversationId);
       if (!normalized.success) {
         callbacks.onError?.(normalized.error);
@@ -258,7 +224,20 @@ export class AIEngine {
       }
 
       callbacks.onComplete?.(normalized.data);
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        callbacks.onError?.({
+          code:
+            err.status === 401
+              ? 'UNAUTHORIZED'
+              : err.status === 403
+                ? 'FORBIDDEN'
+                : 'GENERATION_FAILED',
+          message: err.message || `LLM request failed with HTTP ${err.status}`,
+          timestamp: Date.now(),
+        });
+        return;
+      }
       callbacks.onError?.({
         code: 'SERVICE_UNAVAILABLE',
         message: 'Cannot reach the AETHER AI backend.',
@@ -272,10 +251,11 @@ export class AIEngine {
    */
   async checkHealth(): Promise<boolean> {
     try {
-      const res = await fetch(`${this.config.backend.baseUrl}${this.config.backend.healthPath}`, {
-        signal: AbortSignal.timeout(5_000),
+      await apiClient.get<any>(this.config.backend.healthPath, {
+        skipAuth: true,
+        timeout: 5_000,
       });
-      return res.ok;
+      return true;
     } catch {
       return false;
     }

@@ -102,7 +102,7 @@ export const ProjectsPage: React.FC = () => {
         category: p.category || 'General',
         status: p.status || 'ACTIVE',
         progress: p.progressPercentage ?? p.progress ?? 0,
-        membersCount: p.membersCount || 1,
+        membersCount: p.membersCount || (Array.isArray(p.members) ? p.members.length : 1),
         createdAt: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : undefined,
         updatedAt: new Date(p.updatedAt || Date.now()).toLocaleDateString(),
       }));

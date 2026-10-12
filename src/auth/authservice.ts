@@ -2,6 +2,7 @@ import { authApi, AuthApiResult, UserDTO } from '../api/auth.api';
 import { authConfig } from '../config/auth.config';
 import { normalizeUserProfile } from './userProfile';
 import { ApiError } from '../api/client';
+import { env } from '../config/environment';
 
 export interface AuthUser extends UserDTO {
   firstName?: string;
@@ -334,9 +335,13 @@ export const authService = {
   },
 
   signInWithGoogle(): void {
+    const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+    const fallbackBase = isProd
+      ? (typeof window !== 'undefined' ? window.location.origin : '')
+      : 'http://localhost:5001';
     const rawBaseUrl =
-      import.meta.env.VITE_API_BASE_URL?.replace(/\/api(\/v\d)?\/?$/, '') ||
-      'http://localhost:5001';
+      env.VITE_API_BASE_URL?.replace(/\/api(\/v\d)?\/?$/, '') ||
+      fallbackBase;
     window.location.href = `${rawBaseUrl}/api/auth/google`;
   },
 

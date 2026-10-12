@@ -85,10 +85,17 @@ export interface AIConfig {
 // Default Config — reads from Vite env variables (no hardcoded secrets)
 // ---------------------------------------------------------------------------
 
-const BACKEND_BASE_URL =
-  (typeof import.meta !== 'undefined' && (import.meta as unknown as Record<string, unknown>).env
+const isProd =
+  typeof import.meta !== 'undefined' &&
+  Boolean((import.meta as unknown as { env: Record<string, string> }).env?.PROD);
+
+const rawApiBaseUrl =
+  typeof import.meta !== 'undefined' && (import.meta as unknown as Record<string, unknown>).env
     ? ((import.meta as unknown as { env: Record<string, string> }).env['VITE_API_BASE_URL'] ?? '')
-    : '') || 'http://localhost:5001/api/v1';
+    : '';
+
+const BACKEND_BASE_URL =
+  rawApiBaseUrl || (isProd ? '/api/v1' : 'http://localhost:5001/api/v1');
 
 export const DEFAULT_AI_CONFIG: AIConfig = {
   backend: {
@@ -105,7 +112,7 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
     healthPath: '/ai/health',
   },
   streaming: {
-    firstChunkTimeoutMs: 15_000,
+    firstChunkTimeoutMs: 60_000,
     maxDurationMs: 300_000,
     maxRetries: 2,
     retryDelayMs: 1_000,

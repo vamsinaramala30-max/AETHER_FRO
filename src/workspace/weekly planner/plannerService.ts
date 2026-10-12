@@ -24,6 +24,8 @@ export interface Block {
   groupId: string | null;
   completed: boolean;
   taskId?: string | null;
+  taskTitle?: string | null;
+  taskStatus?: string | null;
   calendarEventId?: string | null;
 }
 

@@ -1,22 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from './taskservice';
 import { Plus, CheckSquare } from 'lucide-react';
+import { apiClient } from '../../api/client';
 
 interface TaskFormProps {
   onSubmit: (task: Omit<Task, 'id'>) => void;
+  defaultProjectId?: string;
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, defaultProjectId }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Task['priority']>('medium');
   const [dueDate, setDueDate] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(defaultProjectId || '');
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [projectError, setProjectError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadProjects = async () => {
+      setLoadingProjects(true);
+      try {
+        const res = await apiClient.get<any>('/projects');
+        const list = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.projects)
+              ? res.projects
+              : [];
+        if (isMounted) {
+          const mapped = list.map((p: any) => ({
+            id: p.id,
+            name: p.name || 'Untitled Project',
+          }));
+          setProjects(mapped);
+          if (!selectedProjectId && mapped.length > 0) {
+            setSelectedProjectId(defaultProjectId || mapped[0].id);
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setProjectError('Failed to load authorized projects.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingProjects(false);
+        }
+      }
+    };
+
+    if (isOpen) {
+      void loadProjects();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, defaultProjectId]);
 
   const handleFormSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (title.trim() === '') return;
+
+    if (!selectedProjectId || selectedProjectId.trim() === '') {
+      setProjectError('A project selection is required to create a task.');
+      return;
+    }
 
     const tags = tagInput
       .split(',')
@@ -24,6 +77,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
       .filter((t) => t.length > 0);
     const hasDueDate = typeof dueDate === 'string' && dueDate.trim() !== '';
     onSubmit({
+      projectId: selectedProjectId,
       title,
       description,
       status: 'todo',
@@ -61,6 +115,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
 
   return (
     <form
+      noValidate
       onSubmit={handleFormSubmit}
       className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
@@ -76,6 +131,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
         >
           Cancel
         </button>
+      </div>
+
+      <div>
+        <label htmlFor="task-project-select" className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Target Project <span className="text-rose-500">*</span>
+        </label>
+        <select
+          id="task-project-select"
+          aria-label="Target Project"
+          value={selectedProjectId}
+          onChange={(e) => {
+            setSelectedProjectId(e.target.value);
+            setProjectError(null);
+          }}
+          required
+          disabled={loadingProjects}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        >
+          {loadingProjects ? (
+            <option value="">Loading available projects...</option>
+          ) : projects.length === 0 ? (
+            <option value="">No projects available (create a project first)</option>
+          ) : (
+            <>
+              <option value="">-- Select Project --</option>
+              {projects.map((proj) => (
+                <option key={proj.id} value={proj.id}>
+                  {proj.name}
+                </option>
+              ))}
+            </>
+          )}
+        </select>
+        {projectError && (
+          <p className="mt-1 text-[11px] font-medium text-rose-500">{projectError}</p>
+        )}
       </div>
 
       <input

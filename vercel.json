@@ -28,6 +28,18 @@
   ],
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://aether-bac.onrender.com/api/:path*"
+    },
+    {
+      "source": "/ws/:path*",
+      "destination": "https://aether-bac.onrender.com/ws/:path*"
+    },
+    {
+      "source": "/health/:path*",
+      "destination": "https://aether-bac.onrender.com/health/:path*"
+    },
+    {
       "source": "/((?!api/|ws|health|manifest.webmanifest|registerSW.js|sw.js|assets/|icons/|favicon.svg).*)",
       "destination": "/index.html"
     }

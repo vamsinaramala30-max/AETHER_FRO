@@ -1,14 +1,15 @@
 import React from 'react';
 import { DocumentItem } from '../types';
-import { FileText, Trash2, ArrowRight } from 'lucide-react';
+import { FileText, Trash2, ArrowRight, Edit3 } from 'lucide-react';
 
 interface DocumentCardProps {
   doc: DocumentItem;
   onView: (doc: DocumentItem) => void;
+  onEdit?: (doc: DocumentItem) => void;
   onDelete: (id: string) => void;
 }
 
-export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onDelete }) => {
+export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onEdit, onDelete }) => {
   return (
     <div className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <div>
@@ -62,12 +63,29 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ doc, onView, onDelet
           <span className="font-medium text-slate-400">
             {new Date(doc.createdAt).toLocaleDateString()}
           </span>
-          <button
-            onClick={() => onView(doc)}
-            className="flex items-center gap-1 font-bold text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            View Document <ArrowRight className="h-3 w-3" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(doc);
+                }}
+                className="flex items-center gap-1 font-semibold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                <Edit3 className="h-3 w-3" />
+                <span>Edit</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onView(doc)}
+              className="flex items-center gap-1 font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+            >
+              <span>View</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

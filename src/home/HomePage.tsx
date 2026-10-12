@@ -30,16 +30,12 @@ import { taskService } from '@/projects/tasks/taskservice';
 import { recentFilesService } from '@/workspace/recent-files/recentfilesservices';
 import { favoritesService } from '@/workspace/favorites/favoritesservice';
 import { productivityService } from '@/workspace/productivity-hub/productivityservice';
+import { HomeGreetingHero } from './HomeGreetingHero';
+import { GreetingStats } from './getGreeting';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-}
 
 function formatFocusDuration(totalMinutes: number): string {
   if (!totalMinutes || totalMinutes <= 0) return '0m';
@@ -52,14 +48,6 @@ function formatFocusDuration(totalMinutes: number): string {
   } else {
     return `${mins}m`;
   }
-}
-
-function formatDate(): string {
-  return new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -481,24 +469,25 @@ export const HomePage: React.FC = () => {
     prodState.status === 'error' ||
     projectsState.status === 'error';
 
+  const greetingStats: GreetingStats = {
+    totalEvents: calendarState.data?.totalEvents ?? 0,
+    eventsToday: calendarState.data?.todaysEventsCount ?? 0,
+    upcomingEvents: calendarState.data?.upcomingEventsCount ?? 0,
+    pendingTasks: tasksState.data?.pending ?? 0,
+    completedTasks: tasksState.data?.completed ?? 0,
+    recentFiles: filesState.data ?? 0,
+    starredFavorites: favoritesState.data ?? 0,
+    aiConversations: chatsState.data?.count ?? 0,
+    activeProjects: projectsState.data?.length ?? 0,
+    focusMinutesToday: prodState.data?.focusMinutesToday ?? 0,
+    productivityEfficiency: prodState.data?.productivityScore ?? 0,
+  };
+
   return (
     <PageWrapper wide>
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-widest text-aether-muted">
-            {formatDate()}
-          </p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-aether-main sm:text-3xl">
-            {getGreeting()},{' '}
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              {displayName}.
-            </span>
-          </h1>
-          <p className="text-sm text-aether-muted">
-            Real-time workspace telemetry and performance counters.
-          </p>
-        </div>
+        <HomeGreetingHero displayName={displayName} stats={greetingStats} loading={loading} />
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"

@@ -6,6 +6,7 @@
 
 import type { PromptTemplate, PromptCategory, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
+import { apiClient } from '../../api/client';
 
 /**
  * PromptEngine coordinates prompt listing, selection, and building.
@@ -17,26 +18,16 @@ export class PromptEngine {
    * Fetch all available prompts from the AETHER backend.
    */
   async listPrompts(category?: PromptCategory): Promise<AIResult<PromptTemplate[]>> {
-    const url = category
-      ? `${this.config.backend.baseUrl}${this.config.backend.promptsPath}?category=${category}`
-      : `${this.config.backend.baseUrl}${this.config.backend.promptsPath}`;
+    const endpoint = category
+      ? `${this.config.backend.promptsPath}?category=${category}`
+      : this.config.backend.promptsPath;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to load prompts.',
-            timestamp: Date.now(),
-          },
-        };
-      }
-      const raw = (await res.json()) as unknown[];
+      const res = await apiClient.get<unknown>(endpoint, { timeout: 10_000 });
+      const raw = Array.isArray(res) ? res : ((res as any)?.data ?? []);
       return {
         success: true,
         data: raw
-          .filter((p): p is Record<string, unknown> => typeof p === 'object' && p !== null)
+          .filter((p: any): p is Record<string, unknown> => typeof p === 'object' && p !== null)
           .map(normalizePromptTemplate),
       };
     } catch {
@@ -55,16 +46,10 @@ export class PromptEngine {
    * Fetch a single prompt by ID.
    */
   async getPrompt(id: string): Promise<AIResult<PromptTemplate>> {
-    const url = `${this.config.backend.baseUrl}${this.config.backend.promptsPath}/${encodeURIComponent(id)}`;
+    const endpoint = `${this.config.backend.promptsPath}/${encodeURIComponent(id)}`;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        return {
-          success: false,
-          error: { code: 'INTERNAL_ERROR', message: 'Prompt not found.', timestamp: Date.now() },
-        };
-      }
-      const raw = (await res.json()) as Record<string, unknown>;
+      const res = await apiClient.get<unknown>(endpoint, { timeout: 10_000 });
+      const raw = (res as any)?.data ?? res;
       return { success: true, data: normalizePromptTemplate(raw) };
     } catch {
       return {

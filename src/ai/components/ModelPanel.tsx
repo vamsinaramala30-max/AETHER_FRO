@@ -29,10 +29,9 @@ interface ModelCardProps {
   model: AIModelInfo;
   isActive: boolean;
   onSelect: (model: AIModelInfo) => void;
-  onLoad: (id: string) => void;
 }
 
-const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) => (
+const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect }) => (
   <div
     className={`rounded-xl border p-3 transition-colors ${
       isActive
@@ -90,16 +89,6 @@ const ModelCard = memo<ModelCardProps>(({ model, isActive, onSelect, onLoad }) =
             Use
           </button>
         )}
-        {model.status === 'available' && model.runtime === 'local' && (
-          <button
-            type="button"
-            onClick={() => onLoad(model.id)}
-            aria-label={`Load model ${model.name}`}
-            className="rounded-lg px-2 py-1 text-[10px] font-medium text-aether-muted hover:bg-aether-hover focus:outline-none"
-          >
-            Load
-          </button>
-        )}
       </div>
     </div>
   </div>
@@ -111,7 +100,7 @@ ModelCard.displayName = 'ModelCard';
  * ModelPanel — Displays available models, active model, and status.
  */
 export const ModelPanel = memo(() => {
-  const { availableModels, activeModel, isLoading, setActiveModel, requestLoadModel, loadModels } =
+  const { availableModels, activeModel, isLoading, setActiveModel, loadModels } =
     useModel();
 
   return (
@@ -164,7 +153,6 @@ export const ModelPanel = memo(() => {
                 model={model}
                 isActive={activeModel?.id === model.id}
                 onSelect={setActiveModel}
-                onLoad={(id) => void requestLoadModel(id)}
               />
             </li>
           ))}

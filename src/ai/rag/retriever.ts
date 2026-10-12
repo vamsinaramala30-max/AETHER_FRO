@@ -7,6 +7,7 @@
 
 import type { RetrievalResult, RAGContext, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
+import { apiClient, ApiError } from '../../api/client';
 
 export interface RetrieverQuery {
   text: string;
@@ -18,55 +19,48 @@ export interface RetrieverQuery {
 }
 
 /**
- * Request retrieval from the AETHER backend.
+ * Request retrieval from the AETHER backend via authenticated apiClient.
  * Never invents retrieval results.
  */
 export async function retrieve(query: RetrieverQuery): Promise<AIResult<RAGContext>> {
-  const url = `${DEFAULT_AI_CONFIG.backend.baseUrl}${DEFAULT_AI_CONFIG.backend.knowledgePath}/retrieve`;
+  const endpoint = `${DEFAULT_AI_CONFIG.backend.knowledgePath}/retrieve`;
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const raw = await apiClient.post<{
+      results?: Array<Record<string, unknown>>;
+      total?: number;
+      rerank_applied?: boolean;
+      data?: {
+        documents?: Array<Record<string, unknown>>;
+        totalRetrieved?: number;
+      };
+    }>(
+      endpoint,
+      {
         query: query.text,
         conversation_id: query.conversationId,
         collection_ids: query.collectionIds,
         top_k: query.topK ?? DEFAULT_AI_CONFIG.rag.topK,
         min_score: query.minScore ?? DEFAULT_AI_CONFIG.rag.minScore,
         filters: query.filters,
-      }),
-      signal: AbortSignal.timeout(15_000),
-    });
+      },
+      {
+        timeout: 15_000,
+      },
+    );
 
-    if (!res.ok) {
-      return {
-        success: false,
-        error: {
-          code: 'RAG_FAILED',
-          message: `Retrieval failed with HTTP ${res.status}`,
-          timestamp: Date.now(),
-        },
-      };
-    }
-
-    const raw = (await res.json()) as {
-      results?: Array<Record<string, unknown>>;
-      total?: number;
-      rerank_applied?: boolean;
-    };
-
-    const results: RetrievalResult[] = (raw.results ?? []).flatMap((r) => {
+    const rawResults = raw.results ?? (raw.data as any)?.documents ?? [];
+    const results: RetrievalResult[] = (rawResults ?? []).flatMap((r: any) => {
       if (typeof r !== 'object' || r === null) return [];
       return [
         {
           chunk: {
-            id: typeof r['chunk_id'] === 'string' ? r['chunk_id'] : '',
-            documentId: typeof r['document_id'] === 'string' ? r['document_id'] : '',
-            content: typeof r['content'] === 'string' ? r['content'] : '',
-            index: typeof r['chunk_index'] === 'number' ? r['chunk_index'] : 0,
+            id: typeof r['chunk_id'] === 'string' ? r['chunk_id'] : (typeof r['id'] === 'string' ? r['id'] : ''),
+            documentId: typeof r['document_id'] === 'string' ? r['document_id'] : (typeof r['documentId'] === 'string' ? r['documentId'] : ''),
+            content: typeof r['content'] === 'string' ? r['content'] : (typeof r['text'] === 'string' ? r['text'] : ''),
+            index: typeof r['chunk_index'] === 'number' ? r['chunk_index'] : (typeof r['chunkIndex'] === 'number' ? r['chunkIndex'] : 0),
           },
           score: typeof r['score'] === 'number' ? r['score'] : 0,
-          documentName: typeof r['document_name'] === 'string' ? r['document_name'] : 'Unknown',
+          documentName: typeof r['document_name'] === 'string' ? r['document_name'] : (typeof r['title'] === 'string' ? r['title'] : 'Unknown'),
         },
       ];
     });
@@ -76,17 +70,27 @@ export async function retrieve(query: RetrieverQuery): Promise<AIResult<RAGConte
       data: {
         query: query.text,
         results,
-        totalRetrieved: raw.total ?? results.length,
+        totalRetrieved: raw.total ?? (raw.data as any)?.totalRetrieved ?? results.length,
         retrievedAt: Date.now(),
         rerankApplied: raw.rerank_applied ?? false,
       },
     };
-  } catch {
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      return {
+        success: false,
+        error: {
+          code: err.status === 401 ? 'UNAUTHORIZED' : (err.status === 403 ? 'FORBIDDEN' : 'RAG_FAILED'),
+          message: err.message || `Retrieval failed with HTTP ${err.status}`,
+          timestamp: Date.now(),
+        },
+      };
+    }
     return {
       success: false,
       error: {
         code: 'RAG_FAILED',
-        message: 'Cannot connect to the AETHER retrieval backend.',
+        message: err instanceof Error ? err.message : 'Cannot connect to the AETHER retrieval backend.',
         timestamp: Date.now(),
       },
     };

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DocumentItem } from '../types';
 import { documentsService } from './documentservice';
 import { DocumentCard } from './documentcard';
 import { DocumentViewer } from './documentviewer';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { FileText, FolderPlus, Plus, Search, Paperclip, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { FileText, FolderPlus, Plus, Search, Paperclip, X, AlertCircle, RefreshCw, Upload } from 'lucide-react';
 import { AttachFileModal, StorageFile } from '@/shared/AttachFileModal';
 import { onActivityUpdate } from '@/shared/activityEvents';
 import { useNotificationStore } from '@/state/notificationStore';
@@ -25,6 +25,7 @@ export const DocumentsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<DocumentCategory>('All Documents');
   const [search, setSearch] = useState('');
   const [viewingDoc, setViewingDoc] = useState<DocumentItem | null>(null);
+  const [editDirectly, setEditDirectly] = useState<boolean>(false);
 
   // New Document modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -121,6 +122,36 @@ export const DocumentsPage: React.FC = () => {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsSubmitting(true);
+      await documentsService.uploadDocument(
+        file,
+        [],
+        selectedCategory === 'All Documents' ? 'Project Documents' : selectedCategory,
+      );
+      await fetchDocs();
+      useNotificationStore.getState().addNotification({
+        title: 'File Uploaded',
+        description: `"${file.name}" uploaded to Knowledge and synced to Workspace Files.`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      useNotificationStore.getState().addNotification({
+        title: 'Upload Failed',
+        description: err?.message || 'Failed to upload file to Knowledge.',
+        type: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleDelete = (id: string) => {
     void (async () => {
       if (
@@ -164,13 +195,29 @@ export const DocumentsPage: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:bg-emerald-500"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Create Document</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isSubmitting}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 disabled:opacity-50"
+          >
+            <Upload className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Upload File</span>
+          </button>
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:bg-emerald-500"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Create Document</span>
+          </button>
+        </div>
       </div>
 
       {/* Category Filter Tabs INSIDE Documents Page */}
@@ -222,7 +269,15 @@ export const DocumentsPage: React.FC = () => {
       {/* Document View / Grid */}
       <div className="mt-6">
         {viewingDoc ? (
-          <DocumentViewer doc={viewingDoc} onClose={() => setViewingDoc(null)} />
+          <DocumentViewer
+            doc={viewingDoc}
+            initialEditMode={editDirectly}
+            onClose={() => {
+              setViewingDoc(null);
+              setEditDirectly(false);
+              void fetchDocs();
+            }}
+          />
         ) : loading ? (
           <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white text-xs font-semibold text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-emerald-400">
             <span className="animate-pulse">Loading document vault...</span>
@@ -247,7 +302,19 @@ export const DocumentsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredDocs.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} onView={setViewingDoc} onDelete={handleDelete} />
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                onView={(d) => {
+                  setEditDirectly(false);
+                  setViewingDoc(d);
+                }}
+                onEdit={(d) => {
+                  setEditDirectly(true);
+                  setViewingDoc(d);
+                }}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

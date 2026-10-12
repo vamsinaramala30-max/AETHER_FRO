@@ -7,6 +7,7 @@
 
 import type { AIModelInfo, GenerationRequest, GenerationResponse, AIResult } from '../ai-types';
 import { DEFAULT_AI_CONFIG } from '../ai-config';
+import { apiClient, ApiError } from '../../api/client';
 
 /**
  * Represents the runtime capability of an LLM endpoint.
@@ -55,73 +56,75 @@ export class LLMEngine {
   private readonly config = DEFAULT_AI_CONFIG;
 
   /**
-   * Request generation from the AETHER backend LLM runtime.
+   * Request generation from the AETHER backend LLM runtime via authenticated apiClient.
    */
   async requestGeneration(request: GenerationRequest): Promise<AIResult<GenerationResponse>> {
     const endpoint = request.stream
-      ? `${this.config.backend.baseUrl}${this.config.backend.streamPath}`
-      : `${this.config.backend.baseUrl}${this.config.backend.chatPath}`;
+      ? this.config.backend.streamPath
+      : this.config.backend.chatPath;
 
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const raw = await apiClient.post<any>(
+        endpoint,
+        {
           conversation_id: request.conversationId,
+          conversationId: request.conversationId,
           messages: request.messages,
+          message: request.messages[request.messages.length - 1]?.content,
           model_id: request.modelId,
+          modelId: request.modelId,
           system_prompt: request.systemPrompt,
           max_tokens: request.maxTokens,
           temperature: request.temperature,
           stream: request.stream ?? false,
-        }),
-        signal: request.signal ?? AbortSignal.timeout(this.config.backend.timeoutMs),
-      });
+        },
+        {
+          signal: request.signal,
+          timeout: this.config.backend.timeoutMs,
+        },
+      );
 
-      if (!res.ok) {
-        return {
-          success: false,
-          error: {
-            code: res.status === 503 ? 'SERVICE_UNAVAILABLE' : 'GENERATION_FAILED',
-            message: `LLM request failed with HTTP ${res.status}`,
-            timestamp: Date.now(),
-          },
-        };
-      }
-
-      const raw = (await res.json()) as {
-        id?: string;
-        content?: string;
-        finish_reason?: string;
-        model?: string;
-        usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-      };
-
+      const data = raw?.data ?? raw;
       return {
         success: true,
         data: {
-          messageId: raw.id ?? `msg_${Date.now()}`,
-          conversationId: request.conversationId,
-          content: raw.content ?? '',
+          messageId: data.id ?? data.messageId ?? `msg_${Date.now()}`,
+          conversationId: data.conversationId ?? request.conversationId,
+          content: data.content ?? data.message?.content ?? '',
           role: 'assistant',
-          finishReason: raw.finish_reason as GenerationResponse['finishReason'],
-          modelId: raw.model ?? request.modelId,
+          finishReason: (data.finish_reason ?? data.finishReason ?? 'stop') as GenerationResponse['finishReason'],
+          modelId: data.model ?? data.modelId ?? request.modelId,
           generatedAt: Date.now(),
-          usage: raw.usage
+          usage: data.usage
             ? {
-                promptTokens: raw.usage.prompt_tokens ?? 0,
-                completionTokens: raw.usage.completion_tokens ?? 0,
-                totalTokens: raw.usage.total_tokens ?? 0,
+                promptTokens: data.usage.prompt_tokens ?? data.usage.promptTokens ?? 0,
+                completionTokens: data.usage.completion_tokens ?? data.usage.completionTokens ?? 0,
+                totalTokens: data.usage.total_tokens ?? data.usage.totalTokens ?? 0,
               }
             : undefined,
         },
       };
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        return {
+          success: false,
+          error: {
+            code:
+              err.status === 401
+                ? 'UNAUTHORIZED'
+                : err.status === 503
+                  ? 'SERVICE_UNAVAILABLE'
+                  : 'GENERATION_FAILED',
+            message: err.message || `LLM request failed with HTTP ${err.status}`,
+            timestamp: Date.now(),
+          },
+        };
+      }
       return {
         success: false,
         error: {
           code: 'SERVICE_UNAVAILABLE',
-          message: 'Cannot reach the AETHER LLM backend.',
+          message: err instanceof Error ? err.message : 'Cannot reach the AETHER LLM backend.',
           timestamp: Date.now(),
         },
       };
