@@ -46,9 +46,13 @@ export const documentsService = {
 
   async createDocument(data: {
     title: string;
-    category: string;
+    category?: string;
     content?: string;
     tags?: string[];
+    fileKey?: string;
+    fileSize?: number;
+    mimeType?: string;
+    originalName?: string;
     attachedFileIds?: string[];
   }): Promise<DocumentItem> {
     const res = await apiClient.post<any>('/knowledge/documents', {
@@ -56,12 +60,15 @@ export const documentsService = {
       description: data.content || '',
       category: data.category || 'Reports',
       tags: data.tags || [],
-      fileKey: '',
-      fileSize: 0,
-      mimeType: 'application/json',
-      originalName: data.title,
+      fileKey: data.fileKey || '',
+      fileSize: data.fileSize || 0,
+      mimeType: data.mimeType || 'application/json',
+      originalName: data.originalName || data.title,
       metadata: {
         attachedFileIds: data.attachedFileIds || [],
+        fileSize: data.fileSize || 0,
+        mimeType: data.mimeType || 'application/json',
+        originalName: data.originalName || data.title,
       },
     });
     const d = res.data || res;
@@ -69,13 +76,13 @@ export const documentsService = {
     return {
       id: d.id,
       name: d.title || data.title,
-      size: 0,
-      mimeType: 'application/json',
-      url: '',
-      category: d.category || data.category,
-      content: d.description || data.content,
+      size: data.fileSize || d.metadata?.fileSize || 0,
+      mimeType: data.mimeType || d.metadata?.mimeType || 'application/json',
+      url: data.fileKey || d.fileKey || '',
+      category: d.category || data.category || 'Reports',
+      content: d.description || data.content || '',
       tags: d.tags || data.tags || [],
-      attachedFileIds: data.attachedFileIds || [],
+      attachedFileIds: data.attachedFileIds || d.metadata?.attachedFileIds || [],
       createdAt: d.createdAt || new Date().toISOString(),
       updatedAt: d.updatedAt || new Date().toISOString(),
       userId: d.ownerId || 'user',
@@ -84,7 +91,7 @@ export const documentsService = {
     };
   },
 
-  async uploadDocument(file: File, tags: string[]): Promise<DocumentItem> {
+  async uploadDocument(file: File, tags: string[] = [], category = 'Project Documents'): Promise<DocumentItem> {
     if (!file || file.size === 0) {
       throw new Error('Cannot upload an empty file.');
     }
@@ -95,11 +102,16 @@ export const documentsService = {
     });
     const uploadData = uploadRes.data || uploadRes;
     const fileId = uploadData.id;
+    const storagePath = uploadData.storagePath || uploadData.path || fileId;
 
     return this.createDocument({
       title: file.name,
-      category: 'Project Documents',
+      category,
       tags,
+      fileKey: storagePath,
+      fileSize: uploadData.size || file.size,
+      mimeType: uploadData.mimeType || file.type || 'application/octet-stream',
+      originalName: file.name,
       attachedFileIds: fileId ? [fileId] : [],
     });
   },

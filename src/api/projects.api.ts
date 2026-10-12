@@ -17,11 +17,21 @@ export interface CreateProjectPayload {
 }
 
 export const projectsApi = {
-  getAll: (workspaceId: string, config?: RequestConfig): Promise<ProjectDTO[]> =>
-    apiClient.get<ProjectDTO[]>(ENDPOINTS.PROJECTS.BASE, {
-      ...config,
-      params: { workspaceId, ...config?.params },
-    }),
+  getAll: (workspaceId?: string, config?: RequestConfig): Promise<ProjectDTO[]> =>
+    apiClient
+      .get<any>(ENDPOINTS.PROJECTS.BASE, {
+        ...config,
+        params: { ...(workspaceId ? { workspaceId } : {}), ...config?.params },
+      })
+      .then((res: any) =>
+        Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.projects)
+              ? res.projects
+              : [],
+      ),
 
   getById: (id: string, config?: RequestConfig): Promise<ProjectDTO> =>
     apiClient.get<ProjectDTO>(ENDPOINTS.PROJECTS.BY_ID(id), config),

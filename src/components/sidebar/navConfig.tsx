@@ -186,7 +186,7 @@ export const navigationGroups: NavGroup[] = [
           { label: 'Overview', href: '/app/projects' },
           { label: 'Tasks', href: '/app/projects/tasks' },
           { label: 'Goals', href: '/app/projects/goals' },
-          { label: 'Files', href: '/app/projects/files' },
+          { label: 'File Manager', href: '/app/projects/files' },
         ],
       },
       {

@@ -1,30 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { Users, Plus, Search, UserCheck, Trash2 } from 'lucide-react';
+import { Users, Plus, Search, UserCheck, Trash2, Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/app/providers/authprovider';
+import { workspaceService } from '@/services/workspaceService';
+import { WorkspaceMemberDTO } from '@/api/workspace.api';
+import { useWorkspaceStore } from '@/state/workspaceStore';
+import { useRealtimeEvent } from '@/hooks/useSocket';
 
 export interface Member {
   id: string;
+  userId: string;
   name: string;
   email: string;
-  role: 'Owner' | 'Admin' | 'Member';
+  role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
   status: 'active' | 'pending';
   initials: string;
   color: string;
 }
 
 const ROLE_BADGES: Record<string, string> = {
-  Owner:
+  OWNER:
     'text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20',
-  Admin:
+  ADMIN:
     'text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20',
-  Member:
+  MEMBER:
     'text-slate-700 bg-slate-100 border-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:border-slate-700',
+  VIEWER:
+    'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/40 dark:border-gray-700',
 };
 
-const STORAGE_KEY = 'aether_workspace_invited_members';
-
-const getInitials = (name?: string, email?: string): string => {
+const getInitials = (name?: string | null, email?: string | null): string => {
   if (name && name.trim()) {
     const parts = name.trim().split(' ');
     if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
@@ -36,93 +41,157 @@ const getInitials = (name?: string, email?: string): string => {
   return 'US';
 };
 
+const COLORS = [
+  'from-indigo-600 to-purple-600',
+  'from-blue-600 to-cyan-600',
+  'from-emerald-600 to-teal-600',
+  'from-amber-600 to-orange-600',
+  'from-rose-600 to-pink-600',
+];
+
 export const MembersPage: React.FC = () => {
   const { user } = useAuth();
-  const [invitedMembers, setInvitedMembers] = useState<Member[]>([]);
+  const { currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const [search, setSearch] = useState('');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'Admin' | 'Member'>('Member');
+  const [newRole, setNewRole] = useState<'ADMIN' | 'MEMBER' | 'VIEWER'>('MEMBER');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Build currentUser member entry dynamically from useAuth() session
-  const currentUserMember: Member = {
-    id: user?.id || 'usr_current',
-    name:
-      user?.name ||
-      (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Active User'),
-    email: user?.email || 'user@aether.os',
-    role: 'Owner',
-    status: 'active',
-    initials: getInitials(
-      user?.name ||
-        (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : undefined),
-      user?.email,
-    ),
-    color: 'from-indigo-600 to-purple-600',
-  };
+  const activeWorkspaceId = currentWorkspace?.id || user?.workspaceId || '';
+
+  const mapDtoToMember = useCallback(
+    (dto: WorkspaceMemberDTO, index: number): Member => {
+      const u = dto.user || ({} as any);
+      return {
+        id: dto.id,
+        userId: dto.userId || u.id,
+        name: u.fullName || u.email?.split('@')[0] || 'Workspace Member',
+        email: u.email || '',
+        role: dto.role,
+        status: 'active',
+        initials: getInitials(u.fullName, u.email),
+        color: COLORS[index % COLORS.length],
+      };
+    },
+    [],
+  );
+
+  const loadMembers = useCallback(async () => {
+    if (!activeWorkspaceId) {
+      try {
+        const wsList = await workspaceService.getWorkspaces();
+        if (wsList && wsList.length > 0) {
+          setCurrentWorkspace({
+            id: wsList[0].id,
+            name: wsList[0].name,
+            slug: wsList[0].slug,
+            membersCount: wsList[0].members?.length || 1,
+          });
+          return;
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to resolve workspace.');
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await workspaceService.getMembers(activeWorkspaceId);
+      setMembers(data.map((m, idx) => mapDtoToMember(m, idx)));
+    } catch (err: any) {
+      console.error('Failed to load workspace members:', err);
+      setError(err?.message || 'Could not load members from server.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeWorkspaceId, mapDtoToMember, setCurrentWorkspace]);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) setInvitedMembers(parsed);
-      }
-    } catch {
-      setInvitedMembers([]);
-    }
-  }, []);
+    loadMembers();
+  }, [loadMembers]);
 
-  const allMembers = [currentUserMember, ...invitedMembers];
+  // Real-time synchronization
+  useRealtimeEvent('workspace:member_added', () => {
+    loadMembers();
+  });
+  useRealtimeEvent('workspace:member_updated', () => {
+    loadMembers();
+  });
+  useRealtimeEvent('workspace:member_removed', () => {
+    loadMembers();
+  });
+  useRealtimeEvent('workspace:member_mutated', () => {
+    loadMembers();
+  });
 
-  const filteredMembers = allMembers.filter(
+  const currentUserMembership = members.find((m) => m.userId === user?.id);
+  const isCurrentUserAdminOrOwner =
+    currentUserMembership?.role === 'OWNER' || currentUserMembership?.role === 'ADMIN';
+
+  const filteredMembers = members.filter(
     (m) =>
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.email.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleInvite = (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
+    if (!newEmail.trim() || !activeWorkspaceId) return;
 
-    const emailName = newEmail.split('@')[0];
-    const initials = emailName.substring(0, 2).toUpperCase();
-
-    const newMember: Member = {
-      id: `mem_${Date.now()}`,
-      name: emailName,
-      email: newEmail.trim(),
-      role: newRole,
-      status: 'pending',
-      initials,
-      color: 'from-blue-600 to-cyan-600',
-    };
-
-    const updated = [...invitedMembers, newMember];
-    setInvitedMembers(updated);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // Ignore storage error
+      setIsSubmitting(true);
+      setActionError(null);
+      await workspaceService.addMember(activeWorkspaceId, {
+        email: newEmail.trim(),
+        role: newRole,
+      });
+      setNewEmail('');
+      setIsInviteOpen(false);
+      await loadMembers();
+    } catch (err: any) {
+      const msg = err?.response?.data?.error?.message || err?.message || 'Failed to add member.';
+      setActionError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setNewEmail('');
-    setIsInviteOpen(false);
   };
 
-  const handleRemoveMember = (id: string) => {
-    const updated = invitedMembers.filter((m) => m.id !== id);
-    setInvitedMembers(updated);
+  const handleRoleChange = async (memberUserId: string, newRoleVal: string) => {
+    if (!activeWorkspaceId) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // Ignore storage error
+      setActionError(null);
+      await workspaceService.updateMemberRole(activeWorkspaceId, memberUserId, newRoleVal);
+      await loadMembers();
+    } catch (err: any) {
+      const msg = err?.response?.data?.error?.message || err?.message || 'Failed to update role.';
+      setActionError(msg);
+    }
+  };
+
+  const handleRemoveMember = async (memberUserId: string) => {
+    if (!activeWorkspaceId) return;
+    try {
+      setActionError(null);
+      await workspaceService.removeMember(activeWorkspaceId, memberUserId);
+      await loadMembers();
+    } catch (err: any) {
+      const msg = err?.response?.data?.error?.message || err?.message || 'Failed to remove member.';
+      setActionError(msg);
     }
   };
 
   return (
     <PageWrapper wide>
-      {/* Header — Direct page header without full Workspace banner or sub-tabs */}
+      {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
           <Users className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" />
@@ -136,15 +205,27 @@ export const MembersPage: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsInviteOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500"
-        >
-          <Plus className="h-4 w-4" />
-          Invite Member
-        </button>
+        {isCurrentUserAdminOrOwner && (
+          <button
+            type="button"
+            onClick={() => {
+              setActionError(null);
+              setIsInviteOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-500"
+          >
+            <Plus className="h-4 w-4" />
+            Invite Member
+          </button>
+        )}
       </div>
+
+      {actionError && (
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-400">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{actionError}</span>
+        </div>
+      )}
 
       {/* Main Members Area */}
       <div className="mt-6 space-y-4">
@@ -163,67 +244,85 @@ export const MembersPage: React.FC = () => {
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
             <UserCheck className="h-4 w-4 text-indigo-500" />
             <span>
-              {allMembers.length} active seat{allMembers.length === 1 ? '' : 's'}
+              {members.length} active seat{members.length === 1 ? '' : 's'}
             </span>
           </div>
         </div>
 
         {/* Members Table Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="divide-y divide-slate-200 dark:divide-slate-800">
-            {filteredMembers.length === 0 ? (
-              <div className="p-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                No members found matching "{search}"
-              </div>
-            ) : (
-              filteredMembers.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                >
-                  <div className="flex min-w-0 items-center gap-3.5">
-                    <div
-                      className={`h-10 w-10 rounded-full bg-gradient-to-tr ${m.color} flex shrink-0 items-center justify-center text-xs font-extrabold text-white shadow-sm`}
-                    >
-                      {m.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {m.name} {m.id === currentUserMember.id && '(You)'}
-                      </p>
-                      <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                        {m.email}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`rounded-full border px-3 py-1 text-[10px] font-bold ${ROLE_BADGES[m.role]}`}
-                    >
-                      {m.role}
-                    </span>
-                    {m.status === 'pending' && (
-                      <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400">
-                        Pending
-                      </span>
-                    )}
-
-                    {m.id !== currentUserMember.id && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMember(m.id)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
-                        title="Remove member"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center p-12 text-sm text-slate-500 dark:text-slate-400">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin text-indigo-500" />
+              Loading verified workspace members...
+            </div>
+          ) : error ? (
+            <div className="p-12 text-center text-sm text-red-500">{error}</div>
+          ) : (
+            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+              {filteredMembers.length === 0 ? (
+                <div className="p-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                  No members found matching "{search}"
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                filteredMembers.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  >
+                    <div className="flex min-w-0 items-center gap-3.5">
+                      <div
+                        className={`h-10 w-10 rounded-full bg-gradient-to-tr ${m.color} flex shrink-0 items-center justify-center text-xs font-extrabold text-white shadow-sm`}
+                      >
+                        {m.initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {m.name} {m.userId === user?.id && '(You)'}
+                        </p>
+                        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                          {m.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {isCurrentUserAdminOrOwner && m.userId !== user?.id && m.role !== 'OWNER' ? (
+                        <select
+                          value={m.role}
+                          onChange={(e) => handleRoleChange(m.userId, e.target.value)}
+                          className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        >
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="MEMBER">MEMBER</option>
+                          <option value="VIEWER">VIEWER</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`rounded-full border px-3 py-1 text-[10px] font-bold ${
+                            ROLE_BADGES[m.role] || ROLE_BADGES.MEMBER
+                          }`}
+                        >
+                          {m.role}
+                        </span>
+                      )}
+
+                      {isCurrentUserAdminOrOwner && m.userId !== user?.id && m.role !== 'OWNER' && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(m.userId)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                          title="Remove member"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -237,12 +336,22 @@ export const MembersPage: React.FC = () => {
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Invite Team Member
-            </h3>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Invite Team Member
+              </h3>
+            </div>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Send an invitation link to join your workspace.
+              Add a registered user to your workspace with specific role permissions.
             </p>
+
+            {actionError && (
+              <div className="mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-400">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{actionError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleInvite} className="mt-4 space-y-4">
               <div>
@@ -265,11 +374,14 @@ export const MembersPage: React.FC = () => {
                 </label>
                 <select
                   value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as 'Admin' | 'Member')}
+                  onChange={(e) =>
+                    setNewRole(e.target.value as 'ADMIN' | 'MEMBER' | 'VIEWER')
+                  }
                   className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
-                  <option value="Member">Member</option>
-                  <option value="Admin">Admin</option>
+                  <option value="MEMBER">Member (Standard Access)</option>
+                  <option value="ADMIN">Admin (Team & Workspace Management)</option>
+                  <option value="VIEWER">Viewer (Read-only Access)</option>
                 </select>
               </div>
 
@@ -277,15 +389,18 @@ export const MembersPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsInviteOpen(false)}
+                  disabled={isSubmitting}
                   className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition-colors hover:bg-indigo-500"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition-colors hover:bg-indigo-500 disabled:opacity-50"
                 >
-                  Send Invite
+                  {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Add to Workspace
                 </button>
               </div>
             </form>

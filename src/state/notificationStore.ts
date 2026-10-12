@@ -18,13 +18,17 @@ export interface Notification {
   time: string;
   read: boolean;
   createdAt: string;
+  link?: string;
+  metadata?: Record<string, any>;
 }
 
-interface NotificationInput {
+export interface NotificationInput {
   title: string;
   description?: string;
   message?: string;
   type?: Notification['type'];
+  link?: string;
+  metadata?: Record<string, any>;
 }
 
 interface NotificationState {
@@ -77,6 +81,8 @@ const loadInitialNotifications = (): Notification[] => {
   return DEFAULT_NOTIFICATIONS;
 };
 
+import { socketClient } from '../lib/socketClient';
+
 const saveNotifications = (notifications: Notification[]) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
@@ -114,6 +120,8 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
             : 'Just now',
           read: Boolean(item.isRead ?? item.read),
           createdAt: item.createdAt || new Date().toISOString(),
+          link: item.link || item.url || item.metadata?.link || item.metadata?.url || undefined,
+          metadata: item.metadata || undefined,
         }));
         saveNotifications(mapped);
         set({
@@ -136,6 +144,8 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
         time: 'Just now',
         read: false,
         createdAt: new Date().toISOString(),
+        link: notif.link || notif.metadata?.link || undefined,
+        metadata: notif.metadata || undefined,
       };
       const updated = [newNotif, ...state.notifications];
       saveNotifications(updated);
@@ -207,3 +217,36 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     });
   },
 }));
+
+// Setup automatic realtime listener for notifications
+if (typeof window !== 'undefined') {
+  const handleIncomingNotification = (notifData: any) => {
+    if (!notifData) return;
+    const store = useNotificationStore.getState();
+    const existing = store.notifications.find((n) => n.id === notifData.id);
+    if (existing) return;
+
+    const newNotif: Notification = {
+      id: notifData.id || `notif_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      type: (notifData.type?.toLowerCase() as Notification['type']) || 'system',
+      title: notifData.title || 'Notification',
+      description: notifData.message || notifData.description || '',
+      time: 'Just now',
+      read: false,
+      createdAt: notifData.createdAt || new Date().toISOString(),
+      link: notifData.link || notifData.url || notifData.metadata?.link || notifData.metadata?.url || undefined,
+      metadata: notifData.metadata || undefined,
+    };
+
+    const updated = [newNotif, ...store.notifications];
+    saveNotifications(updated);
+    useNotificationStore.setState({
+      notifications: updated,
+      unreadCount: updated.filter((n) => !n.read).length,
+    });
+  };
+
+  socketClient.on('notification:new', handleIncomingNotification);
+  socketClient.on('notification:created', handleIncomingNotification);
+}
+

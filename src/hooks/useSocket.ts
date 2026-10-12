@@ -1,50 +1,85 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { socketClient, SocketEventHandler } from '../lib/socketClient';
 
 interface UseSocketOptions {
-  url: string;
+  url?: string;
+  workspaceId?: string;
   onOpen?: () => void;
   onClose?: () => void;
-  onError?: (event: Event) => void;
-  onMessage?: (event: MessageEvent) => void;
+  onError?: (event: any) => void;
+  onMessage?: (event: any) => void;
 }
 
-export const useSocket = ({ url, onOpen, onClose, onError, onMessage }: UseSocketOptions) => {
-  const socketRef = useRef<WebSocket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+export const useSocket = (options?: UseSocketOptions) => {
+  const [isConnected, setIsConnected] = useState<boolean>(socketClient.isConnected());
 
   useEffect(() => {
-    const ws = new WebSocket(url);
+    const raw = socketClient.connect();
 
-    ws.onopen = () => {
+    const handleConnect = () => {
       setIsConnected(true);
-      onOpen?.();
+      options?.onOpen?.();
+      if (options?.workspaceId) {
+        socketClient.joinWorkspace(options.workspaceId);
+      }
     };
 
-    ws.onclose = () => {
+    const handleDisconnect = () => {
       setIsConnected(false);
-      onClose?.();
+      options?.onClose?.();
     };
 
-    ws.onerror = (e) => {
-      onError?.(e);
+    const handleError = (err: any) => {
+      options?.onError?.(err);
     };
 
-    ws.onmessage = (e) => {
-      onMessage?.(e);
-    };
-
-    socketRef.current = ws;
+    if (raw) {
+      if (raw.connected) {
+        setIsConnected(true);
+        if (options?.workspaceId) {
+          socketClient.joinWorkspace(options.workspaceId);
+        }
+      }
+      raw.on('connect', handleConnect);
+      raw.on('disconnect', handleDisconnect);
+      raw.on('connect_error', handleError);
+    }
 
     return () => {
-      ws.close();
+      if (raw) {
+        raw.off('connect', handleConnect);
+        raw.off('disconnect', handleDisconnect);
+        raw.off('connect_error', handleError);
+      }
     };
-  }, [url, onOpen, onClose, onError, onMessage]);
+  }, [options?.workspaceId]);
 
-  const sendMessage = useCallback((data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(data);
-    }
+  const sendMessage = useCallback((event: string, payload: any) => {
+    socketClient.emit(event, payload);
   }, []);
 
-  return { isConnected, sendMessage };
+  return { isConnected, sendMessage, socket: socketClient };
 };
+
+/**
+ * React hook to listen to a realtime socket event with automatic cleanup on unmount.
+ */
+export const useRealtimeEvent = (event: string, handler: SocketEventHandler) => {
+  const handlerRef = useRef<SocketEventHandler>(handler);
+  handlerRef.current = handler;
+
+  useEffect(() => {
+    socketClient.connect();
+
+    const listener: SocketEventHandler = (data) => {
+      handlerRef.current(data);
+    };
+
+    socketClient.on(event, listener);
+
+    return () => {
+      socketClient.off(event, listener);
+    };
+  }, [event]);
+};
+

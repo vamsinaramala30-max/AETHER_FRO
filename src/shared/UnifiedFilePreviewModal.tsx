@@ -8,30 +8,28 @@ import {
   Music,
   FileCode,
   Archive,
-  AlertTriangle,
-  Table,
   FileSpreadsheet,
   Eye,
   Code2,
   Edit3,
   Maximize2,
   Minimize2,
+  AlertTriangle,
 } from 'lucide-react';
 import { env } from '@/config/environment';
 import { apiClient } from '@/api/client';
 import { UnifiedFileEditor } from './UnifiedFileEditor';
+import {
+  getFileViewerType,
+  formatFileSize,
+  isEditableFile,
+  FileItemLike,
+} from './fileCapabilityDetector';
 
-export interface PreviewFileTarget {
-  id?: string;
+import { FilePreview } from './FilePreview';
+
+export interface PreviewFileTarget extends FileItemLike {
   fileId?: string;
-  filename?: string;
-  name?: string;
-  mimeType?: string;
-  size?: number;
-  url?: string;
-  downloadUrl?: string;
-  previewUrl?: string;
-  content?: string;
   attachedFileIds?: string[];
   projectId?: string;
   createdAt?: string;
@@ -55,11 +53,11 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
   const [textContent, setTextContent] = useState<string | null>(null);
   const [textLoading, setTextLoading] = useState<boolean>(false);
   const [textError, setTextError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'rendered' | 'raw'>('rendered');
+  const [markdownViewMode, setMarkdownViewMode] = useState<'rendered' | 'source'>('rendered');
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
-  // Handle ESC key to close
+  // Handle ESC key to close / exit fullscreen
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,6 +75,7 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
 
   const getAuthToken = useCallback((): string => {
     let token =
+      localStorage.getItem('aether_access_token') ||
       localStorage.getItem('aether-auth-token') ||
       localStorage.getItem('auth_token') ||
       localStorage.getItem('token');
@@ -89,7 +88,9 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
             token = parsed.state.token;
           }
         }
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     return token || '';
   }, []);
@@ -126,10 +127,11 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
             size: item.size || 0,
             projectId: item.projectId || propProjectId,
             createdAt: item.createdAt,
+            detectedMimeType: item.detectedMimeType,
+            extension: item.extension,
           });
         })
         .catch(() => {
-          // If metadata endpoint fails, construct minimal file target
           setResolvedFile({
             id: fileId,
             filename: 'File ' + fileId.slice(0, 8),
@@ -140,7 +142,6 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
         })
         .finally(() => setLoadingFile(false));
     } else {
-      // Target is an object
       const effectiveId =
         target.id ||
         target.fileId ||
@@ -151,7 +152,7 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
       setResolvedFile({
         ...target,
         id: effectiveId,
-        filename: target.filename || target.name || 'Untitled Document',
+        filename: target.filename || target.name || 'Untitled File',
         mimeType: target.mimeType || 'application/octet-stream',
         size: target.size || 0,
         projectId: target.projectId || propProjectId,
@@ -188,128 +189,11 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
     return `${base}/uploads/${effectiveId}/preview${qs ? `?${qs}` : ''}`;
   }, [effectiveId, effectiveProjectId, getApiBaseUrl, getAuthToken]);
 
-  const filename = resolvedFile?.filename || 'Untitled File';
-  const mimeType = (resolvedFile?.mimeType || '').toLowerCase();
+  const filename = resolvedFile?.filename || resolvedFile?.name || 'Untitled File';
+  const mimeType = resolvedFile?.mimeType || 'application/octet-stream';
+  const viewerType = useMemo(() => getFileViewerType(resolvedFile), [resolvedFile]);
 
-  const isImage = useMemo(() => {
-    return (
-      mimeType.startsWith('image/') ||
-      /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isPdf = useMemo(() => {
-    return mimeType === 'application/pdf' || /\.pdf$/i.test(filename);
-  }, [mimeType, filename]);
-
-  const isVideo = useMemo(() => {
-    return (
-      (mimeType.startsWith('video/') || /\.(mp4|webm|mov|ogg)$/i.test(filename)) &&
-      !/\.(avi|mkv|wmv|flv)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isUnsupportedVideo = useMemo(() => {
-    return (
-      mimeType.includes('msvideo') ||
-      mimeType.includes('matroska') ||
-      /\.(avi|mkv|wmv|flv)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isAudio = useMemo(() => {
-    return (
-      mimeType.startsWith('audio/') ||
-      /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isMarkdown = useMemo(() => {
-    return (
-      mimeType === 'text/markdown' ||
-      mimeType === 'text/x-markdown' ||
-      /\.(md|markdown)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isCsv = useMemo(() => {
-    return (
-      mimeType === 'text/csv' ||
-      mimeType === 'application/csv' ||
-      mimeType === 'text/tab-separated-values' ||
-      mimeType === 'text/tsv' ||
-      /\.(csv|tsv)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isTsv = useMemo(() => {
-    return (
-      mimeType === 'text/tab-separated-values' ||
-      mimeType === 'text/tsv' ||
-      /\.tsv$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isWordDoc = useMemo(() => {
-    return (
-      mimeType.includes('wordprocessingml') ||
-      mimeType.includes('msword') ||
-      /\.(docx|doc)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isSpreadsheetDoc = useMemo(() => {
-    return (
-      mimeType.includes('spreadsheetml') ||
-      mimeType.includes('ms-excel') ||
-      /\.(xlsx|xls)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isPresentationDoc = useMemo(() => {
-    return (
-      mimeType.includes('presentationml') ||
-      mimeType.includes('ms-powerpoint') ||
-      mimeType.includes('opendocument.presentation') ||
-      /\.(pptx|ppt|odp)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isArchive = useMemo(() => {
-    return (
-      mimeType.includes('zip') ||
-      mimeType.includes('compressed') ||
-      mimeType.includes('tar') ||
-      mimeType.includes('gzip') ||
-      /\.(zip|tar|gz|7z|rar)$/i.test(filename)
-    );
-  }, [mimeType, filename]);
-
-  const isTextOrCode = useMemo(() => {
-    return (
-      isMarkdown ||
-      isCsv ||
-      mimeType.startsWith('text/') ||
-      mimeType.includes('json') ||
-      mimeType.includes('javascript') ||
-      mimeType.includes('typescript') ||
-      mimeType.includes('xml') ||
-      mimeType.includes('yaml') ||
-      mimeType.includes('sql') ||
-      /\.(txt|json|js|ts|jsx|tsx|html|htm|css|py|sh|bash|yaml|yml|xml|log|env|sql|java|c|cpp|h|hpp|cs|go|rs|php|tsv|toml|ini|conf)$/i.test(filename)
-    );
-  }, [isMarkdown, isCsv, mimeType, filename]);
-
-  const canEdit = useMemo(() => {
-    return (
-      (isTextOrCode && !isSpreadsheetDoc) ||
-      isMarkdown ||
-      isWordDoc ||
-      (resolvedFile && typeof resolvedFile.content === 'string')
-    );
-  }, [isTextOrCode, isSpreadsheetDoc, isMarkdown, isWordDoc, resolvedFile]);
-
-  // Fetch text contents if text file, word doc, spreadsheet, or if resolvedFile has content
+  // Fetch text contents if file can be rendered as text/code/markdown/docx/spreadsheet/pptx/json
   useEffect(() => {
     if (!isOpen || !resolvedFile) return;
 
@@ -318,7 +202,17 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
       return;
     }
 
-    if ((isTextOrCode || isWordDoc || isSpreadsheetDoc || isPresentationDoc) && effectiveId) {
+    const needsTextFetch = [
+      'text',
+      'code',
+      'markdown',
+      'csv',
+      'spreadsheet',
+      'docx',
+      'pptx',
+    ].includes(viewerType);
+
+    if (needsTextFetch && effectiveId) {
       setTextLoading(true);
       setTextError(null);
       const token = getAuthToken();
@@ -328,7 +222,7 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
       fetch(previewUrl, { headers })
         .then(async (res) => {
           if (!res.ok) {
-            throw new Error(`Failed to load file content (HTTP ${res.status})`);
+            throw new Error(`Failed to read file content (HTTP ${res.status})`);
           }
           return res.text();
         })
@@ -338,63 +232,43 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
         })
         .finally(() => setTextLoading(false));
     }
-  }, [isOpen, resolvedFile, isTextOrCode, isWordDoc, isSpreadsheetDoc, isPresentationDoc, effectiveId, previewUrl, getAuthToken]);
+  }, [isOpen, resolvedFile, viewerType, effectiveId, previewUrl, getAuthToken]);
 
-  const formatSize = (bytes?: number) => {
-    if (!bytes || bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-  };
+  const canEdit = useMemo(() => isEditableFile(resolvedFile), [resolvedFile]);
 
   const getHeaderIcon = () => {
-    if (isImage) return <ImageIcon className="h-5 w-5 text-emerald-500" />;
-    if (isPdf) return <FileText className="h-5 w-5 text-rose-500" />;
-    if (isVideo) return <Video className="h-5 w-5 text-purple-500" />;
-    if (isAudio) return <Music className="h-5 w-5 text-amber-500" />;
-    if (isCsv || isTsv || isSpreadsheetDoc) return <FileSpreadsheet className="h-5 w-5 text-emerald-600" />;
-    if (isWordDoc) return <FileText className="h-5 w-5 text-blue-500" />;
-    if (isPresentationDoc) return <FileText className="h-5 w-5 text-amber-500" />;
-    if (isArchive) return <Archive className="h-5 w-5 text-slate-500" />;
-    if (isTextOrCode) return <FileCode className="h-5 w-5 text-indigo-500" />;
-    return <FileText className="h-5 w-5 text-slate-500" />;
+    switch (viewerType) {
+      case 'image':
+        return <ImageIcon className="h-5 w-5 text-emerald-500" />;
+      case 'pdf':
+        return <FileText className="h-5 w-5 text-rose-500" />;
+      case 'video':
+        return <Video className="h-5 w-5 text-purple-500" />;
+      case 'audio':
+        return <Music className="h-5 w-5 text-amber-500" />;
+      case 'csv':
+      case 'spreadsheet':
+        return <FileSpreadsheet className="h-5 w-5 text-emerald-600" />;
+      case 'docx':
+        return <FileText className="h-5 w-5 text-blue-500" />;
+      case 'pptx':
+        return <FileText className="h-5 w-5 text-amber-500" />;
+      case 'archive':
+        return <Archive className="h-5 w-5 text-slate-400" />;
+      case 'code':
+      case 'markdown':
+      case 'text':
+        return <FileCode className="h-5 w-5 text-indigo-500" />;
+      default:
+        return <FileText className="h-5 w-5 text-slate-500" />;
+    }
   };
 
-  // Safe simple CSV / TSV Parser
-  const parsedCsvRows = useMemo(() => {
-    if ((!isCsv && !isTsv) || !textContent) return [];
-    const lines = textContent.split(/\r?\n/).filter((l) => l.trim().length > 0);
-    const isTabDelimited = isTsv || (lines[0] && lines[0].includes('\t') && !lines[0].includes(','));
-    const delimiter = isTabDelimited ? '\t' : ',';
-    return lines.map((line) => {
-      if (isTabDelimited) {
-        return line.split('\t').map((v) => v.trim().replace(/^"|"$/g, ''));
-      }
-      const values: string[] = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
-          inQuotes = !inQuotes;
-        } else if (char === delimiter && !inQuotes) {
-          values.push(current.trim().replace(/^"|"$/g, ''));
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      values.push(current.trim().replace(/^"|"$/g, ''));
-      return values;
-    });
-  }, [isCsv, isTsv, textContent]);
-
-  // Safe simple Markdown renderer
-  const renderSimpleMarkdown = (text: string) => {
+  // Render markdown with typography
+  const renderMarkdownFormatted = (text: string) => {
     const lines = text.split(/\r?\n/);
     return (
-      <div className="space-y-2 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
+      <div className="space-y-2.5 text-xs leading-relaxed text-slate-800 dark:text-slate-200 font-sans max-w-3xl mx-auto p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-xl shadow-xs">
         {lines.map((line, idx) => {
           const trimmed = line.trim();
           if (trimmed.startsWith('### ')) {
@@ -406,14 +280,14 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
           }
           if (trimmed.startsWith('## ')) {
             return (
-              <h2 key={idx} className="pt-2 text-base font-bold text-slate-900 dark:text-white">
+              <h2 key={idx} className="pt-3 text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1">
                 {trimmed.replace(/^##\s+/, '')}
               </h2>
             );
           }
           if (trimmed.startsWith('# ')) {
             return (
-              <h1 key={idx} className="pt-2 text-lg font-extrabold text-slate-900 dark:text-white">
+              <h1 key={idx} className="pt-3 text-xl font-extrabold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">
                 {trimmed.replace(/^#\s+/, '')}
               </h1>
             );
@@ -425,11 +299,18 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
               </li>
             );
           }
+          if (trimmed.startsWith('> ')) {
+            return (
+              <blockquote key={idx} className="border-l-4 border-indigo-500 pl-3 italic text-slate-600 dark:text-slate-400 my-1">
+                {trimmed.replace(/^>\s+/, '')}
+              </blockquote>
+            );
+          }
           if (trimmed.startsWith('---')) {
-            return <hr key={idx} className="my-2 border-slate-200 dark:border-slate-800" />;
+            return <hr key={idx} className="my-3 border-slate-200 dark:border-slate-800" />;
           }
           if (trimmed === '') {
-            return <div key={idx} className="h-2" />;
+            return <div key={idx} className="h-1.5" />;
           }
           return (
             <p key={idx} className="text-slate-700 dark:text-slate-300">
@@ -445,21 +326,21 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
 
   return (
     <div
-      className={`animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm duration-200 ${
-        isFullscreen ? 'p-0' : 'p-4'
+      className={`animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md duration-200 ${
+        isFullscreen ? 'p-0' : 'p-3 sm:p-5'
       }`}
     >
       <div
         className={`flex flex-col overflow-hidden bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 transition-all ${
           isFullscreen
             ? 'h-full w-full rounded-none border-0'
-            : 'max-h-[90vh] w-full max-w-4xl rounded-2xl border border-slate-200'
+            : 'max-h-[92vh] w-full max-w-5xl rounded-2xl border border-slate-200'
         }`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 dark:border-slate-800">
+        {/* Universal Viewer Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-3 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 shadow-xs">
               {getHeaderIcon()}
             </div>
             <div className="min-w-0">
@@ -467,13 +348,13 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
                 {filename}
               </h3>
               <p className="text-[11px] font-semibold text-slate-400">
-                {formatSize(resolvedFile?.size)} {mimeType ? `• ${mimeType}` : ''}
+                {formatFileSize(resolvedFile?.size)} {mimeType ? `• ${mimeType}` : ''}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Edit Mode Toggle */}
+            {/* Edit Mode Toggle for supported types */}
             {canEdit && (
               <button
                 type="button"
@@ -485,34 +366,36 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
                 }`}
               >
                 <Edit3 className="h-3.5 w-3.5" />
-                <span>{isEditing ? 'View Mode' : isWordDoc ? 'Edit in AETHER' : 'Edit File'}</span>
+                <span>{isEditing ? 'View Mode' : 'Edit File'}</span>
               </button>
             )}
 
-            {/* View Mode Toggle for Markdown & CSV */}
-            {!isEditing && (isMarkdown || isCsv || isTsv) && (
-              <div className="mr-2 flex items-center rounded-xl border border-slate-200 p-0.5 dark:border-slate-700">
+            {/* Markdown Rendered vs Source Toggle */}
+            {!isEditing && viewerType === 'markdown' && (
+              <div className="flex items-center rounded-xl border border-slate-200 p-0.5 dark:border-slate-700 bg-white dark:bg-slate-900">
                 <button
-                  onClick={() => setViewMode('rendered')}
-                  className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all ${
-                    viewMode === 'rendered'
-                      ? 'bg-indigo-600 text-white shadow-sm'
+                  type="button"
+                  onClick={() => setMarkdownViewMode('rendered')}
+                  className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                    markdownViewMode === 'rendered'
+                      ? 'bg-indigo-600 text-white shadow-xs'
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
-                  {isCsv || isTsv ? <Table className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  <span>{isCsv || isTsv ? 'Table' : 'Formatted'}</span>
+                  <Eye className="h-3 w-3" />
+                  <span>Formatted</span>
                 </button>
                 <button
-                  onClick={() => setViewMode('raw')}
-                  className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all ${
-                    viewMode === 'raw'
-                      ? 'bg-indigo-600 text-white shadow-sm'
+                  type="button"
+                  onClick={() => setMarkdownViewMode('source')}
+                  className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                    markdownViewMode === 'source'
+                      ? 'bg-indigo-600 text-white shadow-xs'
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
                   <Code2 className="h-3 w-3" />
-                  <span>Raw</span>
+                  <span>Source</span>
                 </button>
               </div>
             )}
@@ -538,7 +421,9 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
 
+            {/* Close Button */}
             <button
+              type="button"
               onClick={onClose}
               className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Close (Esc)"
@@ -548,9 +433,9 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
           </div>
         </div>
 
-        {/* Content Viewer Body */}
+        {/* Universal Viewer Body */}
         {isEditing ? (
-          <div className="flex-1 p-4 overflow-hidden flex flex-col min-h-[480px]">
+          <div className="flex-1 p-4 overflow-hidden flex flex-col min-h-[500px]">
             <UnifiedFileEditor
               fileId={effectiveId}
               filename={filename}
@@ -569,270 +454,22 @@ export const UnifiedFilePreviewModal: React.FC<UnifiedFilePreviewModalProps> = (
             />
           </div>
         ) : (
-          <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center overflow-y-auto p-6">
-            {loadingFile ? (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                <span className="text-xs font-semibold text-slate-500">Resolving file registers...</span>
-              </div>
-            ) : !effectiveId && !resolvedFile?.content ? (
-              <div className="flex flex-col items-center py-12 text-center">
-                <FileText className="mb-3 h-10 w-10 text-slate-400" />
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">No file attached</h4>
-                <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-                  This document record has no physical attachment or text body to display.
-                </p>
-              </div>
-            ) : isImage ? (
-              <img
-                src={previewUrl}
-                alt={filename}
-                className="max-h-[550px] w-auto rounded-xl object-contain shadow-sm"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-            ) : isPdf ? (
-              <iframe
-                src={previewUrl}
-                title={filename}
-                className="h-[550px] w-full rounded-xl border border-slate-200 dark:border-slate-800"
-              />
-            ) : isVideo ? (
-              <video
-                controls
-                src={previewUrl}
-                className="max-h-[500px] w-full rounded-xl shadow-sm"
-              />
-            ) : isUnsupportedVideo ? (
-              <div className="flex flex-col items-center py-10 text-center">
-                <Video className="mb-3 h-10 w-10 text-purple-400" />
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Native Browser Playback Unsupported
-                </h4>
-                <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-                  This video container ({filename.split('.').pop()?.toUpperCase()}) cannot be decoded directly inside the browser. Download the file to view with your local video player.
-                </p>
-                {downloadUrl && (
-                  <a
-                    href={downloadUrl}
-                    download={filename}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>Download Video</span>
-                  </a>
-                )}
-              </div>
-            ) : isAudio ? (
-              <div className="w-full py-12 text-center">
-                <Music className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-                <audio controls src={previewUrl} className="mx-auto w-full max-w-md" />
-              </div>
-            ) : isCsv || isTsv ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Loading tabular records...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : viewMode === 'rendered' ? (
-                <div className="max-h-[500px] w-full overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                  <table className="w-full text-left text-xs">
-                    {parsedCsvRows.length > 0 && (
-                      <thead className="sticky top-0 bg-slate-100 font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                        <tr>
-                          {parsedCsvRows[0].map((header, hIdx) => (
-                            <th key={hIdx} className="border-b border-slate-200 px-3 py-2 dark:border-slate-700">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                    )}
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[11px]">
-                      {parsedCsvRows.slice(1).map((row, rIdx) => (
-                        <tr key={rIdx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                          {row.map((cell, cIdx) => (
-                            <td key={cIdx} className="px-3 py-1.5 text-slate-600 dark:text-slate-300">
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <pre className="scrollbar-thin max-h-[500px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                  {textContent}
-                </pre>
-              )
-            ) : isMarkdown ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Loading document content...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : viewMode === 'rendered' ? (
-                <div className="max-h-[500px] w-full overflow-auto rounded-xl bg-slate-50 p-6 dark:bg-slate-800/40">
-                  {renderSimpleMarkdown(textContent || '')}
-                </div>
-              ) : (
-                <pre className="scrollbar-thin max-h-[500px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                  {textContent}
-                </pre>
-              )
-            ) : isWordDoc ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Extracting Word document text...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : (
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-3.5 py-2 text-xs text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 shrink-0" />
-                      <span>Document text extracted via AETHER Parser. Click &quot;Edit in AETHER&quot; to modify and version.</span>
-                    </div>
-                  </div>
-                  <pre className="scrollbar-thin max-h-[460px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                    {textContent}
-                  </pre>
-                </div>
-              )
-            ) : isSpreadsheetDoc ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Extracting spreadsheet preview...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : (
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3.5 py-2 text-xs text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                    <div className="flex items-center gap-2">
-                      <FileSpreadsheet className="h-4 w-4 shrink-0" />
-                      <span>Spreadsheet data extracted for read-only preview. Direct binary spreadsheet editing is not supported.</span>
-                    </div>
-                    {downloadUrl && (
-                      <a
-                        href={downloadUrl}
-                        download={filename}
-                        className="font-semibold underline hover:text-emerald-900 dark:hover:text-emerald-200"
-                      >
-                        Download original
-                      </a>
-                    )}
-                  </div>
-                  <pre className="scrollbar-thin max-h-[460px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                    {textContent}
-                  </pre>
-                </div>
-              )
-            ) : isPresentationDoc ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Extracting presentation contents...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : (
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-amber-50 px-3.5 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 shrink-0" />
-                      <span>Presentation slides extracted for preview. Slide editing is not supported.</span>
-                    </div>
-                    {downloadUrl && (
-                      <a
-                        href={downloadUrl}
-                        download={filename}
-                        className="font-semibold underline hover:text-amber-900 dark:hover:text-amber-200"
-                      >
-                        Download original
-                      </a>
-                    )}
-                  </div>
-                  <pre className="scrollbar-thin max-h-[460px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                    {textContent}
-                  </pre>
-                </div>
-              )
-            ) : isArchive ? (
-              <div className="flex flex-col items-center py-10 text-center">
-                <Archive className="mb-3 h-10 w-10 text-slate-400" />
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Compressed Archive
-                </h4>
-                <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-                  Archive contents ({filename.split('.').pop()?.toUpperCase()}) cannot be extracted in browser preview. Download the archive to extract and view files locally.
-                </p>
-                {downloadUrl && (
-                  <a
-                    href={downloadUrl}
-                    download={filename}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>Download Archive</span>
-                  </a>
-                )}
-              </div>
-            ) : isTextOrCode ? (
-              textLoading ? (
-                <span className="animate-pulse text-xs font-semibold text-indigo-500">
-                  Reading file registers...
-                </span>
-              ) : textError ? (
-                <div className="flex flex-col items-center py-8 text-rose-500">
-                  <AlertTriangle className="mb-2 h-6 w-6" />
-                  <span className="text-xs font-semibold">{textError}</span>
-                </div>
-              ) : (
-                <pre className="scrollbar-thin max-h-[500px] w-full overflow-auto rounded-xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
-                  {textContent}
-                </pre>
-              )
-            ) : (
-              <div className="flex flex-col items-center py-10 text-center">
-                <AlertTriangle className="mb-3 h-10 w-10 text-amber-500" />
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Preview unavailable
-                </h4>
-                <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
-                  Preview is not natively available in browser for this file type. You can download the file to inspect it on your local device.
-                </p>
-                {downloadUrl && (
-                  <a
-                    href={downloadUrl}
-                    download={filename}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>Download File</span>
-                  </a>
-                )}
-              </div>
-            )}
+          <div className="flex min-h-[400px] flex-1 flex-col items-center justify-center overflow-auto p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950/20">
+            <FilePreview
+              viewerType={viewerType}
+              filename={filename}
+              mimeType={mimeType}
+              size={resolvedFile?.size}
+              url={previewUrl || resolvedFile?.url || ''}
+              downloadUrl={downloadUrl}
+              content={textContent || resolvedFile?.content || ''}
+              loading={loadingFile || textLoading}
+              error={textError}
+              isFullscreen={isFullscreen}
+              onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
+              markdownViewMode={markdownViewMode}
+              renderMarkdownFormatted={renderMarkdownFormatted}
+            />
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   X,
   Bell,
@@ -9,8 +10,68 @@ import {
   Info,
   Check,
   Trash2,
+  ArrowUpRight,
 } from 'lucide-react';
-import { useNotificationStore } from '@/state/notificationStore';
+import { useNotificationStore, Notification } from '@/state/notificationStore';
+
+export const sanitizeNotificationLink = (link?: string): string | null => {
+  if (!link || typeof link !== 'string') return null;
+  const trimmed = link.trim();
+  // Prevent dangerous URL protocols
+  if (/^(javascript|vbscript|data|file):/i.test(trimmed)) return null;
+  // Prevent protocol-relative URLs
+  if (trimmed.startsWith('//') || trimmed.startsWith('\\\\')) return null;
+
+  // Handle absolute URLs matching current origin
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed);
+      if (typeof window !== 'undefined' && url.origin === window.location.origin) {
+        return normalizeRoute(url.pathname + url.search + url.hash);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Reject non-relative destinations
+  if (!trimmed.startsWith('/')) {
+    return null;
+  }
+
+  return normalizeRoute(trimmed);
+};
+
+const normalizeRoute = (raw: string): string => {
+  const [path, search] = raw.split('?');
+  const query = search ? `?${search}` : '';
+
+  // Task route normalization
+  const taskMatch = path.match(/^\/app\/tasks(?:\/([a-zA-Z0-9_-]+))?$/);
+  if (taskMatch) {
+    const taskId = taskMatch[1];
+    return taskId ? `/app/projects/tasks?taskId=${taskId}` : '/app/projects/tasks';
+  }
+
+  // Project route normalization
+  const projectMatch = path.match(/^\/app\/projects\/([a-zA-Z0-9_-]+)$/);
+  if (projectMatch && projectMatch[1] !== 'tasks' && projectMatch[1] !== 'files' && projectMatch[1] !== 'calendar') {
+    return `/app/projects?projectId=${projectMatch[1]}`;
+  }
+
+  // Weekly Planner normalization
+  if (path === '/app/workspace/planner' || path === '/app/weekly-planner' || path === '/app/workspace/weekly-planner') {
+    return `/app/workspace/weeklyplanner${query}`;
+  }
+
+  // Calendar normalization
+  if (path === '/app/calendar') {
+    return `/app/workspace/calendar${query}`;
+  }
+
+  return raw;
+};
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   ai: <MessageSquare className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />,
@@ -29,6 +90,7 @@ interface NotificationCenterProps {
 }
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
+  const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
 
   const notifications = useNotificationStore((state) => state.notifications);
@@ -50,6 +112,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
 
   const dismiss = (id: string) => {
     dismissNotification(id);
+  };
+
+  const handleNotificationClick = (n: Notification) => {
+    if (!n.read) {
+      markRead(n.id);
+    }
+    const safeDest = sanitizeNotificationLink(n.link);
+    if (safeDest) {
+      navigate(safeDest);
+      onClose();
+    }
   };
 
   useEffect(() => {
@@ -128,18 +201,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                     {unread.map((n) => (
                       <div
                         key={n.id}
-                        className="group flex items-start gap-3 bg-indigo-50/40 px-4 py-3 transition-colors hover:bg-indigo-50/80 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40"
+                        onClick={() => handleNotificationClick(n)}
+                        className="group flex cursor-pointer items-start gap-3 bg-indigo-50/40 px-4 py-3 transition-colors hover:bg-indigo-50/80 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40"
                       >
                         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm dark:bg-slate-800">
                           {TYPE_ICON[n.type] || <Info className="h-3.5 w-3.5 text-slate-400" />}
                         </div>
-                        <div
-                          className="min-w-0 flex-1 cursor-pointer"
-                          onClick={() => markRead(n.id)}
-                        >
-                          <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">
-                            {n.title}
-                          </p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">
+                              {n.title}
+                            </p>
+                            {n.link && <ArrowUpRight className="h-3 w-3 shrink-0 text-slate-400 opacity-60" />}
+                          </div>
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {n.description}
                           </p>
@@ -148,7 +222,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                         <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                           <button
                             type="button"
-                            onClick={() => markRead(n.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markRead(n.id);
+                            }}
                             title="Mark read"
                             className="rounded p-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
                           >
@@ -156,7 +233,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                           </button>
                           <button
                             type="button"
-                            onClick={() => dismiss(n.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dismiss(n.id);
+                            }}
                             title="Dismiss"
                             className="rounded p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                           >
@@ -176,15 +256,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                     {read.map((n) => (
                       <div
                         key={n.id}
-                        className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                        onClick={() => handleNotificationClick(n)}
+                        className="group flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                       >
                         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
                           {TYPE_ICON[n.type] || <Info className="h-3.5 w-3.5 text-slate-400" />}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            {n.title}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              {n.title}
+                            </p>
+                            {n.link && <ArrowUpRight className="h-3 w-3 shrink-0 text-slate-400 opacity-60" />}
+                          </div>
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400 dark:text-slate-500">
                             {n.description}
                           </p>
@@ -192,7 +276,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                         </div>
                         <button
                           type="button"
-                          onClick={() => dismiss(n.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dismiss(n.id);
+                          }}
                           title="Dismiss"
                           className="rounded p-1 text-slate-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100 dark:hover:text-red-400"
                         >
