@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../app/providers/authprovider';
+import { AetherSymbol } from '@/components/branding/AetherLogo';
 
 export interface NavItem {
   label: string;
@@ -69,10 +70,11 @@ export const PublicNavbar: React.FC = () => {
         <div className="flex items-center gap-8">
           <Link
             to="/"
-            className="rounded-md px-2 py-1 text-lg font-semibold tracking-wider text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12]"
+            className="flex items-center gap-2.5 rounded-md px-1 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             aria-label="Aether Homepage"
           >
-            AETHER
+            <AetherSymbol size={28} />
+            <span className="text-lg font-bold tracking-wider text-zinc-100">AETHER</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -94,10 +96,10 @@ export const PublicNavbar: React.FC = () => {
           {isAuthenticated ? (
             <>
               <Link
-                to="/app"
+                to="/welcome"
                 className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12]"
               >
-                Dashboard
+                Workspace
               </Link>
               <button
                 type="button"
@@ -190,13 +192,13 @@ export const PublicNavbar: React.FC = () => {
           {isAuthenticated ? (
             <>
               <Link
-                to="/app"
+                to="/welcome"
                 onClick={() => {
                   setIsOpen(false);
                 }}
                 className="w-full rounded-md bg-indigo-600 py-2 text-center text-base font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
-                Dashboard
+                Workspace
               </Link>
               <button
                 type="button"

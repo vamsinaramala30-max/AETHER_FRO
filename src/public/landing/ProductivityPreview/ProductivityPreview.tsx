@@ -114,7 +114,7 @@ export const ProductivityPreview: React.FC = () => {
 
                     <p className="light:text-zinc-600 text-[11px] leading-5 text-zinc-400 dark:text-zinc-400">
                       Architecture isolates productivity logic from external telemetry layers to
-                      guarantee performance and predictable workspace behavior.
+                      support responsive performance and predictable workspace behavior.
                     </p>
                   </div>
                 </div>

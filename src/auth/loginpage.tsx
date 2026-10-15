@@ -5,6 +5,7 @@ import { authService } from './authservice';
 import { AuthLayout } from './authlayout';
 import { Eye, EyeOff } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
+import { setLastSession, isValidDestination } from '@/your-aether/useLastSession';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -39,8 +40,20 @@ export const LoginPage: React.FC = () => {
       if (error) {
         setErrorMessage(error.message);
       } else {
-        const fromPath = (location.state as { from?: string } | null)?.from || '/app';
-        navigate(fromPath, { replace: true });
+        // Every authenticated user must be redirected to /welcome after login.
+        // If the user had an intended destination, persist it as the last session path
+        // so Card 3 ("Continue Last Session") can restore it immediately.
+        const fromPath = (location.state as { from?: string } | null)?.from;
+        if (fromPath && isValidDestination(fromPath)) {
+          try {
+            const cachedUser = localStorage.getItem('aether_auth_user');
+            const uid = cachedUser ? (JSON.parse(cachedUser)?.id || 'anonymous') : 'anonymous';
+            setLastSession(uid, fromPath);
+          } catch {
+            // ignore localStorage errors
+          }
+        }
+        navigate('/welcome', { replace: true });
       }
     } catch {
       setErrorMessage('An unexpected authorization breakdown occurred.');

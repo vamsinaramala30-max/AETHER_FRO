@@ -20,7 +20,7 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string, refreshToken?: string) => void;
   setUser: (user: User) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
@@ -36,12 +36,15 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      setAuth: (user, token) => {
+      setAuth: (user, token, refreshToken?: string) => {
         set({ user, token, isAuthenticated: true, error: null, isLoading: false });
         try {
           localStorage.setItem('aether_access_token', token);
           localStorage.setItem('aether-auth-token', token);
           localStorage.setItem('auth_token', token);
+          if (refreshToken) {
+            localStorage.setItem('aether_refresh_token', refreshToken);
+          }
           void useNotificationStore.getState().fetchNotifications();
         } catch {
           // Ignore storage error

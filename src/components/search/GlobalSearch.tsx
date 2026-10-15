@@ -609,6 +609,7 @@ const QUICK_LINKS: { label: string; href: string; icon: React.ReactNode }[] = [
 import { apiClient } from '../../api/client';
 import { chatService } from '../../services/chatService';
 import { storageService } from '../../services/storageService';
+import { useAIStore } from '../../ai/ai-store';
 
 // ─── Route Normalization Helper ──────────────────────────────────────────────
 
@@ -749,7 +750,10 @@ async function performSearch(query: string, signal?: AbortSignal): Promise<Searc
     // Optional chat session matches
     let chatResults: SearchResult[] = [];
     try {
-      const sessions = chatService.getSessions();
+      const storeSessions = useAIStore.getState().conversations;
+      const sessions = Array.isArray(storeSessions) && storeSessions.length > 0
+        ? storeSessions
+        : chatService.getSessions();
       if (Array.isArray(sessions)) {
         chatResults = sessions
           .filter((c: any) => (c.title || '').toLowerCase().includes(q.toLowerCase()))

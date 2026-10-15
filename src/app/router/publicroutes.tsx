@@ -19,9 +19,37 @@ import {
   Login,
   Signup,
   Statuses,
+  Complaint,
 } from '../../public/pages/Index';
 
 import { AuthSuccessPage } from '../../auth/AuthSuccessPage';
+import { useAuth } from '../providers/authprovider';
+import { Navigate } from 'react-router-dom';
+
+const RootLandingRoute: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div
+        className="bg-background text-foreground flex min-h-screen items-center justify-center"
+        aria-busy="true"
+        aria-label="Verifying session"
+      >
+        <div className="flex flex-col items-center space-y-4">
+          <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+          <span className="text-sm font-medium tracking-wide opacity-75">Verifying session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/welcome" replace />;
+  }
+
+  return <Home />;
+};
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -32,7 +60,7 @@ export const publicRoutes: RouteObject[] = [
     path: '/',
     element: <PublicLayout />,
     children: [
-      { index: true, element: <Home /> },
+      { index: true, element: <RootLandingRoute /> },
       { path: 'about', element: <About /> },
       { path: 'features', element: <Features /> },
       { path: 'ai', element: <AI /> },
@@ -43,6 +71,8 @@ export const publicRoutes: RouteObject[] = [
       { path: 'contact', element: <Contact /> },
       { path: 'docs', element: <Docs /> },
       { path: 'help', element: <Help /> },
+      { path: 'complaint', element: <Complaint /> },
+      { path: 'report-problem', element: <Complaint /> },
       { path: 'states', element: <Statuses /> },
       {
         path: 'login',

@@ -34,6 +34,13 @@ export const navigationGroups: NavGroup[] = [
         icon: React.createElement(Home, { className: 'h-4 w-4' }),
         href: '/app',
       },
+      {
+        id: 'your-aether',
+        label: 'YOUR AETHER',
+        badge: 'NEW',
+        icon: React.createElement(Sparkles, { className: 'h-4 w-4 text-purple-400' }),
+        href: '/app/your-aether',
+      },
     ],
   },
 

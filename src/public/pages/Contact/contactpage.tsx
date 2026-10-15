@@ -165,8 +165,19 @@ export const ContactPage: React.FC = () => {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              Have a product inquiry, technical requirement, enterprise integration need, or
-              feedback? Our specialized team is ready to connect.
+              Have a product inquiry, technical question, or general feedback? Send us a message below
+              or email directly at <a href="mailto:vkgroups127@gmail.com" className="text-indigo-400 underline hover:text-indigo-300">vkgroups127@gmail.com</a>.
+            </p>
+          </div>
+
+          {/* Direct link to Formal Complaint System */}
+          <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-center backdrop-blur-md">
+            <p className="text-xs text-rose-300 sm:text-sm">
+              <span className="font-semibold text-white">Need to report a problem or misleading claim?</span>{' '}
+              Visit our dedicated{' '}
+              <a href="/complaint" className="font-semibold text-cyan-300 underline hover:text-cyan-200">
+                Formal User Complaint & Resolution System →
+              </a>
             </p>
           </div>
 

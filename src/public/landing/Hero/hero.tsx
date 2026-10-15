@@ -5,21 +5,17 @@ import { ProductPreview } from './ProductPreview';
 import {
   ArrowRight,
   Sparkles,
-  CheckCircle2,
-  LayoutDashboard,
-  Bot,
-  Clock,
-  ShieldCheck,
-  ChevronRight,
+  Calendar,
+  Brain,
+  FolderKanban,
 } from 'lucide-react';
 
 export const Hero: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
-  const userName = user?.name || (user?.email ? user.email.split('@')[0] : null) || 'Architect';
+  const { isAuthenticated } = useAuth();
 
   return (
     <section
-      className="light:border-zinc-200/60 relative overflow-hidden border-b border-zinc-800/40 bg-transparent pb-12 pt-6 dark:border-zinc-800/40 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-16"
+      className="relative overflow-hidden border-b border-zinc-800/40 bg-transparent pb-12 pt-6 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-16"
       aria-labelledby="hero-heading"
     >
       {/* Background Gradient Mesh & Ambient Spotlights */}
@@ -32,120 +28,62 @@ export const Hero: React.FC = () => {
         <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-12 lg:gap-8">
           {/* Left Column: Copy & Actions */}
           <div className="flex flex-col items-start space-y-4 text-left sm:space-y-6 lg:col-span-7">
-            {/* Enterprise Announcement Badge */}
-            {isAuthenticated ? (
-              <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400 backdrop-blur-md">
-                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-400" />
-                <span className="truncate">Active Session • Ready to Launch</span>
-              </div>
-            ) : (
-              <Link
-                to="/signup"
-                className="light:border-zinc-300/80 light:bg-white/80 light:text-zinc-700 group inline-flex max-w-full items-center gap-1.5 rounded-full border border-zinc-800/80 bg-zinc-900/80 px-3.5 py-1.5 text-xs font-medium text-zinc-300 shadow-sm backdrop-blur-md transition-all hover:border-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/80 dark:text-zinc-300 sm:gap-2"
-              >
-                <span className="light:text-indigo-600 flex shrink-0 items-center gap-1 font-semibold text-indigo-400 dark:text-indigo-400">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  AETHER 2.0
-                </span>
-                <span className="text-zinc-500">|</span>
-                <span className="light:group-hover:text-zinc-900 truncate transition-colors group-hover:text-zinc-100 dark:group-hover:text-zinc-100">
-                  Cognitive OS & Local Intelligence
-                </span>
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-zinc-500 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            )}
+            {/* Announcement Badge */}
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-medium text-indigo-300 backdrop-blur-md">
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-indigo-400" />
+              <span className="truncate">AI-Powered Personal Workspace • Free during beta</span>
+            </div>
 
-            {/* High-Impact Headline */}
+            {/* High-Impact Headline (Single h1 for the page) */}
             <h1
               id="hero-heading"
-              className="light:text-zinc-900 text-2xl font-bold leading-[1.15] tracking-tight text-zinc-100 dark:text-zinc-100 sm:text-4xl md:text-5xl lg:text-6xl"
+              className="text-2xl font-bold leading-[1.15] tracking-tight text-zinc-100 sm:text-4xl md:text-5xl lg:text-6xl"
             >
-              {isAuthenticated ? (
-                <>
-                  Welcome back,{' '}
-                  <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text capitalize text-transparent">
-                    {userName}
-                  </span>
-                  .
-                </>
-              ) : (
-                <>
-                  A unified layer for personal{' '}
-                  <span className="light:from-indigo-600 light:via-purple-600 light:to-cyan-600 bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent dark:from-indigo-400 dark:via-purple-300 dark:to-cyan-400">
-                    intelligence, structure, and focus.
-                  </span>
-                </>
-              )}
+              Your AI workspace that plans your day and{' '}
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">
+                sharpens how you think.
+              </span>
             </h1>
 
-            {/* Subheadline Description */}
-            <p className="light:text-zinc-600 max-w-xl text-xs leading-relaxed text-zinc-400 dark:text-zinc-400 sm:text-base lg:text-lg">
-              {isAuthenticated
-                ? 'Your cognitive memory graph and local vector indexes are active. Access your workspace, review recent sprint tasks, or interact with AI assistant.'
-                : 'Aether orchestrates tasks, durable knowledge, cognitive memory support, and custom contextual automation. Engineered for maximum speed and zero cloud data leaks.'}
+            {/* One-Sentence Subheading */}
+            <p className="max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base lg:text-lg">
+              Plan your day, manage projects and get smart reminders. AETHER&apos;s AI learns how you
+              work and helps you think through real problems.
             </p>
 
             {/* Actions Segment */}
             <div className="w-full pt-1 sm:pt-2">
-              {isAuthenticated ? (
-                <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-                  <Link
-                    to="/app"
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12]"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Open Workspace
-                  </Link>
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <Link
+                  to={isAuthenticated ? '/welcome' : '/signup'}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12]"
+                >
+                  Get started free
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
 
-                  <Link
-                    to="/app/chat"
-                    className="light:border-zinc-300 light:bg-white/90 light:text-zinc-800 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/90 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300"
-                  >
-                    <Bot className="h-4 w-4 text-indigo-400" />
-                    AI Assistant
-                  </Link>
-
-                  <Link
-                    to="/app"
-                    className="light:text-zinc-600 inline-flex min-h-[44px] items-center justify-center gap-2 py-2 text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-200 dark:text-zinc-400 sm:px-3 sm:py-3.5"
-                  >
-                    <Clock className="h-4 w-4" />
-                    Continue Last Session
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-                  <Link
-                    to="/signup"
-                    className="light:bg-indigo-600 light:text-white light:hover:bg-indigo-500 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-100 px-6 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-indigo-600/20 transition-all hover:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
-                  >
-                    Get Started Free
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-
-                  <Link
-                    to="/login"
-                    className="light:border-zinc-300 light:bg-white/90 light:text-zinc-800 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/90 px-6 py-3.5 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300"
-                  >
-                    Sign in
-                  </Link>
-                </div>
-              )}
+                <a
+                  href="#how-it-works"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/90 px-6 py-3.5 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:ring-offset-2 focus:ring-offset-[#0B0D12]"
+                >
+                  See how it works
+                </a>
+              </div>
             </div>
 
-            {/* Trust Indicators below CTAs */}
-            <div className="light:border-zinc-200/80 light:text-zinc-600 flex w-full max-w-xl flex-wrap items-center gap-x-4 gap-y-2 border-t border-zinc-900/80 pt-3 text-xs text-zinc-400 dark:border-zinc-900/80 dark:text-zinc-400 sm:gap-x-6 sm:pt-4">
+            {/* Product Pillar Badges */}
+            <div className="flex w-full max-w-xl flex-wrap items-center gap-x-5 gap-y-2 border-t border-zinc-800/80 pt-4 text-xs text-zinc-400 sm:pt-5">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 sm:h-4 sm:w-4" />
-                Local-first Security
+                <Calendar className="h-3.5 w-3.5 text-indigo-400 sm:h-4 sm:w-4" aria-hidden="true" />
+                Smart Planner & Reminders
               </span>
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-indigo-400 sm:h-4 sm:w-4" />
-                Zero Data Mining
+                <FolderKanban className="h-3.5 w-3.5 text-cyan-400 sm:h-4 sm:w-4" aria-hidden="true" />
+                Projects & Tasks
               </span>
               <span className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400 sm:h-4 sm:w-4" />
-                Instant Setup
+                <Brain className="h-3.5 w-3.5 text-purple-400 sm:h-4 sm:w-4" aria-hidden="true" />
+                Cognitive Hub Practice
               </span>
             </div>
           </div>

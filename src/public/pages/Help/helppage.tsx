@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PublicPageLayout } from '../../components/publicpagelayout';
 import { Link } from 'react-router-dom';
+import { HelpCircle, ShieldAlert, Sparkles } from 'lucide-react';
 
 interface FAQItem {
   question: string;
@@ -13,87 +14,87 @@ const FAQS: FAQItem[] = [
     category: 'Getting Started',
     question: 'What is AETHER and how do I get started?',
     answer:
-      'AETHER is an AI-first workspace platform combining intelligence, tasks, documents, and automation. You can get started by signing up for an account, creating your workspace, and inviting team members.',
+      'AETHER is a personal AI workspace platform combining daily planning, project tracking, knowledge documents, and cognitive problem-solving practice. You can get started by creating a free account at /signup and selecting your workspace experience on the /welcome page.',
   },
   {
     category: 'Getting Started',
     question: 'Is there a desktop app or mobile version?',
     answer:
-      'AETHER is fully accessible through modern web browsers across desktop and mobile devices. Dedicated mobile apps and electron desktop clients are scheduled for upcoming release phases.',
+      'AETHER is fully accessible through modern desktop and mobile web browsers. Native desktop and mobile applications are planned roadmap milestones.',
+  },
+  {
+    category: 'Pricing & Plans',
+    question: 'How much does AETHER cost?',
+    answer:
+      'AETHER is currently completely free during our Public Beta / self-hosted open workspace preview. No credit card, subscription fees, or automated renewal charges are required.',
   },
   {
     category: 'Account & Login',
-    question: 'How do I reset my account password?',
+    question: 'How do I change my account credentials?',
     answer:
-      'Click on "Sign In", select "Forgot password?", enter your registered email address, and follow the password reset link delivered to your inbox.',
+      'You can update your display name, bio, and account information directly inside your authenticated workspace under Settings → Profile. If you lose access to your account credentials, contact our support team at vkgroups127@gmail.com.',
   },
   {
     category: 'Account & Login',
-    question: 'Can I enable Two-Factor Authentication (2FA)?',
+    question: 'Is Two-Factor Authentication (2FA) supported?',
     answer:
-      'Yes, 2FA can be configured in Account Settings under Security using any standard TOTP authenticator application.',
+      'Two-Factor Authentication (TOTP / 2FA) is currently on our architectural roadmap for a future release and is not yet available in the beta application.',
   },
   {
     category: 'AI Assistant',
-    question: 'How does the AI assistant maintain context?',
+    question: 'Are AI assistant responses always accurate?',
     answer:
-      'The AI assistant queries workspace relational documents, memory snippets, and recent conversation turns to build a relevant prompt context for every query.',
+      'No. AI assistant responses are generated algorithmically using large language models and can occasionally contain factual errors, omissions, or hallucinations. Always independently verify critical information, code, and decisions.',
   },
   {
     category: 'AI Assistant',
-    question: 'Are my conversations used to train public LLM models?',
+    question: 'Are my private documents used to train public AI models?',
     answer:
-      'No. AETHER operates under strict tenant data privacy boundaries. Private workspace conversations are never transmitted to train public third-party models.',
+      'No. AETHER operates under strict tenant data isolation boundaries. Your private workspace conversations, notes, and documents are never used to train public third-party foundation models.',
   },
   {
-    category: 'Projects',
-    question: 'How do project task milestones work?',
+    category: 'Projects & Tasks',
+    question: 'How do project boards and milestones work?',
     answer:
-      'Projects group related tasks, documents, and AI prompt threads together. You can assign milestones, set dependencies, and track completion progress in real-time.',
+      'Projects group related tasks, deadlines, milestones, and status tags together. You can update priorities, move tasks between workflow columns, and monitor completion progress in real-time.',
   },
   {
-    category: 'Knowledge',
+    category: 'Knowledge Base',
     question: 'What file formats can I upload for AI search?',
     answer:
-      'AETHER supports PDF, Markdown (.md), Plain Text (.txt), CSV, JSON, and common source code files up to 50MB per file.',
+      'AETHER supports PDF, Markdown (.md), Plain Text (.txt), CSV, and common source code files up to 50MB per file with semantic vector indexing powered by PostgreSQL pgvector.',
   },
   {
-    category: 'Workspace',
-    question: 'How do workspace roles and permissions work?',
+    category: 'Workspace & Tools',
+    question: 'What quick productivity tools are included?',
     answer:
-      'Workspace Owners and Admins can configure granular access roles (Admin, Member, Guest) to control who can edit workspace documents, run automations, or change settings.',
-  },
-  {
-    category: 'Automation',
-    question: 'How do scheduled automated workflows execute?',
-    answer:
-      'Automations run on secure background queues. They can trigger on webhook events, time-based cron schedules, or workspace state changes.',
+      'AETHER includes a Daily Smart Planner, a Pomodoro Focus Timer, a Weekly Overview Planner, an interactive Cognitive Hub with logic exercises, and a customizable Web Resource Directory.',
   },
   {
     category: 'Privacy & Security',
-    question: 'How is data encrypted in transit and at rest?',
+    question: 'How is data encrypted and secured?',
     answer:
-      'All traffic is protected with TLS 1.3 encryption in transit. Data at rest in PostgreSQL databases is protected with hardware-managed volume encryption.',
+      'All traffic is protected with TLS 1.3 encryption in transit. Passwords are cryptographically salted and hashed before database persistence, and all queries enforce workspace tenant scoping.',
   },
   {
-    category: 'Troubleshooting',
-    question: 'What should I do if a search query returns no results?',
+    category: 'Troubleshooting & Complaints',
+    question: 'How do I report a broken feature or inaccurate claim?',
     answer:
-      'Check that the relevant document has completed vector indexing in Knowledge Base. You can click "Re-index workspace" under Knowledge Settings.',
+      'If you encounter a feature that does not work as advertised or notice any misleading representation, you can formally log it in our resolution queue via our User Complaint System at /complaint or email vkgroups127@gmail.com.',
   },
 ];
 
 const CATEGORIES = [
   'All',
   'Getting Started',
+  'Pricing & Plans',
   'Account & Login',
   'AI Assistant',
-  'Projects',
-  'Knowledge',
-  'Workspace',
-  'Automation',
+  'Projects & Tasks',
+  'Knowledge Base',
+  'Workspace & Tools',
   'Privacy & Security',
-  'Troubleshooting',
+  'Troubleshooting & Complaints',
 ];
 
 export const HelpPage: React.FC = () => {
@@ -117,26 +118,27 @@ export const HelpPage: React.FC = () => {
 
   return (
     <PublicPageLayout>
-      <div className="relative py-16 sm:py-24">
+      <div className="relative py-16 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-400">
-              Support & Knowledge Base
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-400">
+              <HelpCircle className="h-3.5 w-3.5" />
+              Accurate Knowledge & FAQ
             </span>
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              How can we help you today?
+              Help Center & FAQs
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400">
-              Search our help center for instant answers to common questions, platform guides, and
-              troubleshooting steps.
+              Clear, verified answers about how AETHER works, current beta capabilities, privacy
+              protections, and troubleshooting steps.
             </p>
 
             {/* Interactive Search Bar */}
             <div className="relative mx-auto mt-8 max-w-2xl">
               <input
                 type="text"
-                placeholder="Search help topics (e.g. password, vector search, encryption)..."
+                placeholder="Search help topics (e.g. planner, vector search, privacy, pricing)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 pl-12 text-sm text-white placeholder-zinc-500 shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -229,19 +231,26 @@ export const HelpPage: React.FC = () => {
             )}
           </div>
 
-          {/* Contact Support Banner */}
+          {/* Contact Support & Complaint Banner */}
           <div className="mt-16 rounded-3xl border border-indigo-500/20 bg-indigo-500/10 p-8 text-center sm:p-12">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">Still have questions?</h2>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">Still Have Questions or Issues?</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-zinc-300">
-              Can&apos;t find what you&apos;re looking for? Reach out directly to our dedicated
-              support and technical engineering team.
+              Reach out directly to our engineering team or submit a formal report if any feature
+              does not work as described.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/contact"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition-transform hover:-translate-y-0.5"
               >
-                Contact Support Team →
+                Contact Support Team
+              </Link>
+              <Link
+                to="/complaint"
+                className="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-6 py-3 text-sm font-semibold text-rose-300 transition-colors hover:bg-rose-500/20"
+              >
+                <ShieldAlert className="h-4 w-4" />
+                Report Problem / Complaint
               </Link>
             </div>
           </div>

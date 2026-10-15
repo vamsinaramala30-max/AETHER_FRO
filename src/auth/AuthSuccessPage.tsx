@@ -39,10 +39,10 @@ export const AuthSuccessPage: React.FC = () => {
         if (authError) {
           setError(authError.message || 'Failed to authenticate session using Google credentials.');
         } else {
-          setStatusText('Authentication successful! Redirecting to workspace...');
+          setStatusText('Authentication successful! Redirecting...');
           setTimeout(() => {
             if (isSubscribed) {
-              navigate('/app', { replace: true });
+              navigate('/welcome', { replace: true });
             }
           }, 600);
         }
