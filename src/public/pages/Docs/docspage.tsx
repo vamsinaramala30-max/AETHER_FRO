@@ -22,13 +22,15 @@ const DOCS_DATA: DocSection[] = [
       'Learn how to set up your workspace, configure AI agents, and connect data streams.',
     content: [
       'AETHER is designed around unified cognitive spaces called Workspaces.',
-      'To begin, create an organization workspace or join an invitation link from your admin.',
-      'Configure environment secrets securely in Workspace Settings under API Credentials.',
-      'Install optional IDE extensions and CLI tools to sync context automatically.',
+      'To begin, create a free account or sign in with Google.',
+      'From the Welcome hub, select your preferred workspace interface: Classic AETHER OS or the modular YOUR AETHER launcher.',
+      'Plan your daily agenda in the Smart Planner, organize tasks under Projects, or train problem-solving in Cognitive Hub.',
     ],
-    codeSnippet: `$ npm install -g @aether/cli
-$ aether auth login --token your_jwt_token
-$ aether workspace init`,
+    codeSnippet: `// AETHER Workspace Quickstart
+1. Open the application and sign in or create an account
+2. Select your workspace experience on the /welcome page
+3. Upload reference documents in Knowledge Base to enable AI context
+4. Organize your day using the Smart Planner and Focus Timer`,
   },
   {
     id: 'aether-overview',
@@ -285,14 +287,22 @@ export const DocsPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="mt-12 flex items-center justify-between border-t border-white/10 pt-6">
-                  <p className="text-xs text-zinc-500">Need further technical assistance?</p>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300"
-                  >
-                    Contact Developer Support →
-                  </Link>
+                <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+                  <p className="text-xs text-zinc-500">Need technical help or notice a documentation error?</p>
+                  <div className="flex items-center gap-4">
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300"
+                    >
+                      Contact Developer Support →
+                    </Link>
+                    <Link
+                      to="/complaint"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-400 hover:text-rose-300"
+                    >
+                      Report Discrepancy →
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

@@ -3,9 +3,12 @@ import { RouteObject, Outlet, Navigate } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/applayout';
 import { ProtectedGuard } from '@/guards/ProtectedGuard';
+import { YourAetherModulePage } from '@/your-aether/YourAetherLayout';
+import { WelcomeChoicePage } from '@/auth/WelcomeChoicePage';
 
 // ── Home ─────────────────────────────────────────────────────────────────────
 import { HomePage } from '@/home/HomePage';
+import { YourAetherPage } from '@/your-aether/YourAetherPage';
 
 // ── AI ───────────────────────────────────────────────────────────────────────
 import { AIModulePage } from '@/ai/AIModulePage';
@@ -91,6 +94,96 @@ const ProtectedLayoutWrapper: React.FC = () => (
 // Route Definitions
 // ─────────────────────────────────────────────────────────────────────────────
 export const protectedRoutes: RouteObject[] = [
+  // ── WELCOME / CHOICE PAGE (Standalone Full-Screen, shown after login) ─────────
+  {
+    path: '/welcome',
+    element: (
+      <ProtectedGuard>
+        <Suspense fallback={<PageSpinner />}>
+          <WelcomeChoicePage />
+        </Suspense>
+      </ProtectedGuard>
+    ),
+  },
+
+  // ── YOUR AETHER (Standalone Full-Screen Experience) ─────────────────────────
+  {
+    path: 'app/your-aether',
+    element: (
+      <ProtectedGuard>
+        <Suspense fallback={<PageSpinner />}>
+          <YourAetherPage />
+        </Suspense>
+      </ProtectedGuard>
+    ),
+  },
+  {
+    path: 'your-aether',
+    element: <Navigate to="/app/your-aether" replace />,
+  },
+
+  // ── YOUR AETHER MODULE ROUTES (back-bar, no sidebar) ────────────────────────
+  // Each module opened from YOUR AETHER launcher has a sticky back button.
+  {
+    path: 'ya',
+    element: (
+      <ProtectedGuard>
+        <Suspense fallback={<PageSpinner />}>
+          <YourAetherModulePage>
+            <Outlet />
+          </YourAetherModulePage>
+        </Suspense>
+      </ProtectedGuard>
+    ),
+    children: [
+      // Dashboard
+      { path: 'dashboard', element: <HomePage /> },
+      // AI Module
+      { path: 'ai', element: <AIModulePage /> },
+      { path: 'ai/assistant', element: <AssistantPage /> },
+      { path: 'ai/memory', element: <MemoryPage /> },
+      { path: 'ai/prompts', element: <PromptLibraryPage /> },
+      { path: 'ai/models', element: <ModelsPage /> },
+      { path: 'ai/agents', element: <AgentsPage /> },
+      // Projects
+      { path: 'projects', element: <ProjectsPage /> },
+      { path: 'projects/tasks', element: <TasksPage /> },
+      { path: 'projects/goals', element: <GoalsPage /> },
+      { path: 'projects/files', element: <FilesPage /> },
+      // Knowledge
+      { path: 'knowledge', element: <KnowledgePage /> },
+      { path: 'knowledge/documents', element: <DocumentsPage /> },
+      { path: 'knowledge/notes', element: <NotesPage /> },
+      { path: 'knowledge/base', element: <KnowledgeBasePage /> },
+      { path: 'knowledge/search', element: <SearchPage /> },
+      // Workspace
+      { path: 'workspace', element: <WorkspacePage /> },
+      { path: 'workspace/calendar', element: <CalendarPage /> },
+      { path: 'workspace/focustimer', element: <FocusTimer /> },
+      { path: 'workspace/webdirectory', element: <WebDirectory /> },
+      { path: 'workspace/weeklyplanner', element: <WeeklyPlanner /> },
+      { path: 'workspace/productivity-hub', element: <ProductivityHubPage /> },
+      // Quick Tools
+      { path: 'quick-tools', element: <QuickToolsPage /> },
+      // Cognitive Hub
+      { path: 'cognitive-hub', element: <CognitiveHubPage /> },
+      { path: 'cognitive-hub/daily', element: <CognitiveHubDailyPage /> },
+      { path: 'cognitive-hub/dashboard', element: <CognitiveHubDashboardPage /> },
+      { path: 'cognitive-hub/:gameId', element: <CognitiveHubGamePage /> },
+      // Automation
+      { path: 'automation', element: <AutomationPage /> },
+      { path: 'automation/logs', element: <AutomationLogsPage /> },
+      // Settings
+      { path: 'settings/profile', element: <ProfilePage /> },
+      { path: 'settings/appearance', element: <AppearancePage /> },
+      { path: 'settings/notifications', element: <NotificationsPage /> },
+      { path: 'settings/security', element: <SecurityPage /> },
+      { path: 'settings/preferences', element: <PreferencesPage /> },
+      { path: 'settings/billing', element: <BillingPage /> },
+    ],
+  },
+
+  // ── Classic AETHER OS (Sidebar Layout) ──────────────────────────────────────
   {
     path: 'app',
     element: <ProtectedLayoutWrapper />,

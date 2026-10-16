@@ -12,3 +12,5 @@ export { HelpPage as Help } from './Help/helppage';
 export { LoginPage as Login } from '../../auth/loginpage';
 export { SignupPage as Signup } from '../../auth/signinpage';
 export { StatusShowcasePage as Statuses } from './StatusShowcasePage';
+export { ComplaintPage as Complaint } from './Complaint/complaintpage';
+

@@ -1,6 +1,5 @@
-// frontend/src/auth/SignupPage.tsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from './authservice';
 import { AuthLayout } from './authlayout';
 import { Eye, EyeOff } from 'lucide-react';
@@ -55,6 +54,7 @@ const FloatingBackground: React.FC = () => (
 );
 
 export const SignupPage: React.FC = () => {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -110,14 +110,8 @@ export const SignupPage: React.FC = () => {
       if (error) {
         setErrorMessage(error.message);
       } else if (user) {
-        setSuccessMessage(
-          'Account framework registered. Please check your inbox for configuration verification links.',
-        );
-        setFirstName('');
-        setLastName('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
+        // Redirect new registrations directly to the welcome/choice page
+        navigate('/welcome', { replace: true });
       }
     } catch {
       setErrorMessage('Account instantiation process threw an internal framework fault.');

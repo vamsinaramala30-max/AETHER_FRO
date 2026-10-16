@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { SidebarTooltip } from './SidebarTooltip';
+import { AetherSymbol } from '@/components/branding/AetherLogo';
 
 interface SidebarHeaderProps {
   collapsed: boolean;
@@ -29,26 +30,26 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           onClick={onMobileClose}
           className="hover:bg-aether-hover/60 group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
         >
-          <Sparkles className="h-6 w-6 shrink-0 text-indigo-600 dark:text-indigo-400" />
+          <AetherSymbol size={28} className="shrink-0 transition-transform group-hover:scale-105" />
 
           <div className="min-w-0 flex-1">
-            <span className="block truncate text-base font-semibold tracking-tight text-aether-main">
-              Aether OS
+            <span className="block truncate text-base font-bold tracking-tight text-aether-main">
+              Aether
             </span>
-            <span className="block truncate text-xs font-medium text-aether-muted">
+            <span className="block truncate text-[10px] font-semibold uppercase tracking-wider text-cyan-400">
               AI Operating System
             </span>
           </div>
         </Link>
       ) : (
         /* Collapsed Logo */
-        <SidebarTooltip content="Aether OS — AI Operating System">
+        <SidebarTooltip content="Aether — AI Operating System">
           <Link
             to="/app"
-            className="flex items-center justify-center transition-transform hover:scale-105"
+            className="flex items-center justify-center transition-transform hover:scale-110"
             onClick={onMobileClose}
           >
-            <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+            <AetherSymbol size={28} />
           </Link>
         </SidebarTooltip>
       )}

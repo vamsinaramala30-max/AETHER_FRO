@@ -24,7 +24,7 @@ export const CTA: React.FC = () => {
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           {isAuthenticated ? (
             <Link
-              to="/app"
+              to="/welcome"
               className="flex min-h-[44px] w-full items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-center font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0B0D12] sm:w-auto"
             >
               Go to Dashboard

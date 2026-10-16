@@ -1,35 +1,29 @@
 import React, { useState } from 'react';
 import {
-  Bot,
-  Brain,
+  Calendar,
   CheckSquare,
-  Network,
-  BarChart3,
+  Brain,
   Sparkles,
-  ArrowUpRight,
   Send,
-  Zap,
+  Clock,
   CheckCircle2,
-  ShieldCheck,
   Cpu,
 } from 'lucide-react';
 
 export const ProductPreview: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'ai' | 'tasks' | 'memory' | 'graph' | 'analytics'>(
-    'ai',
-  );
+  const [activeTab, setActiveTab] = useState<'planner' | 'tasks' | 'cognitive'>('planner');
   const [chatMessage, setChatMessage] = useState('');
   const [chatLogs, setChatLogs] = useState([
     {
       sender: 'user',
-      text: 'Analyze memory nodes and summarize key priorities for Q3 architectural roadmap.',
-      time: '10:42 AM',
+      text: 'What are my top priorities for today and what should I practice in the cognitive hub?',
+      time: '9:30 AM',
     },
     {
       sender: 'ai',
-      text: 'Found 14 relevant cognitive memory nodes. Key priority: Implement zero-copy local context vector indexing and finalize multi-agent task dispatching.',
-      time: '10:42 AM',
-      tags: ['Context Sync', 'Vector Memory', 'Local Model'],
+      text: 'You have 3 focus tasks scheduled in your planner today. In the cognitive hub, a practice problem has been created around resolving client sync bottlenecks.',
+      time: '9:30 AM',
+      tags: ['Daily Planner', 'Smart Reminders', 'Cognitive Hub'],
     },
   ]);
 
@@ -41,9 +35,9 @@ export const ProductPreview: React.FC = () => {
       { sender: 'user', text: chatMessage, time: 'Just now' },
       {
         sender: 'ai',
-        text: `Synthesizing task context for "${chatMessage}"... Context synchronized with local memory engine.`,
+        text: `Updated your planner for "${chatMessage}". Reminders configured for your next focus session.`,
         time: 'Just now',
-        tags: ['Realtime AI'],
+        tags: ['Planner Update'],
       },
     ]);
     setChatMessage('');
@@ -54,33 +48,33 @@ export const ProductPreview: React.FC = () => {
       {/* Glow Ambient Layer behind Preview */}
       <div className="pointer-events-none absolute -inset-1 animate-pulse rounded-2xl bg-gradient-to-r from-indigo-500/20 via-cyan-500/20 to-purple-500/20 opacity-70 blur-xl" />
 
-      {/* Floating Card 1: Top Right Metrics (Desktop / Tablet) */}
+      {/* Floating Card 1: Top Right Planner Notice (Desktop / Tablet) */}
       <div className="absolute -right-2 -top-4 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
-        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-1.5 text-emerald-400">
-          <Zap className="h-4 w-4" />
+        <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-1.5 text-indigo-400">
+          <Clock className="h-4 w-4" />
         </div>
         <div>
           <div className="flex items-center gap-1.5 font-semibold text-zinc-100">
-            Local Engine Active
+            Daily Planner Ready
             <span className="h-2 w-2 animate-ping rounded-full bg-emerald-400" />
           </div>
-          <p className="text-[11px] text-zinc-400">12ms Latency • Zero Cloud Leak</p>
+          <p className="text-[11px] text-zinc-400">Adaptive schedule & reminders</p>
         </div>
       </div>
 
-      {/* Floating Card 2: Bottom Left Memory Status (Desktop / Tablet) */}
+      {/* Floating Card 2: Bottom Left Cognitive Status (Desktop / Tablet) */}
       <div className="absolute -bottom-4 -left-2 z-20 hidden items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-xs text-zinc-200 shadow-xl backdrop-blur-md sm:flex">
-        <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-1.5 text-indigo-400">
+        <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-1.5 text-purple-400">
           <Brain className="h-4 w-4" />
         </div>
         <div>
-          <div className="font-semibold text-zinc-100">Cognitive Memory Sync</div>
-          <p className="text-[11px] text-zinc-400">1,284 Nodes • 99.4% Recall</p>
+          <div className="font-semibold text-zinc-100">Cognitive Hub</div>
+          <p className="text-[11px] text-zinc-400">Real-task problem exercises</p>
         </div>
       </div>
 
       {/* Main Glass Container */}
-      <div className="light:border-zinc-200/80 light:bg-white/85 relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/85 shadow-2xl backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/85">
+      <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/85 shadow-2xl backdrop-blur-xl">
         {/* Window Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/60 bg-zinc-900/40 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -91,14 +85,13 @@ export const ProductPreview: React.FC = () => {
             </div>
             <span className="flex items-center gap-1.5 truncate font-mono text-[11px] font-medium text-zinc-400 sm:text-xs">
               <Cpu className="h-3.5 w-3.5 shrink-0 text-indigo-400" />
-              <span className="truncate">aether://workspace/v2.4</span>
+              <span className="truncate">aether://workspace</span>
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-1.5 text-xs text-zinc-400">
             <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-300 sm:text-[11px]">
-              <ShieldCheck className="h-3 w-3 shrink-0" />{' '}
-              <span className="xs:inline hidden">Enterprise Tier</span>
-              <span className="xs:hidden">Enterprise</span>
+              <Sparkles className="h-3 w-3 shrink-0" />
+              Personal Workspace
             </span>
           </div>
         </div>
@@ -107,15 +100,15 @@ export const ProductPreview: React.FC = () => {
         <div className="scrollbar-none flex items-center justify-start gap-1 overflow-x-auto border-b border-zinc-800/60 bg-zinc-950/60 px-2 py-2 text-xs sm:px-3">
           <button
             type="button"
-            onClick={() => setActiveTab('ai')}
+            onClick={() => setActiveTab('planner')}
             className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
-              activeTab === 'ai'
+              activeTab === 'planner'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
             }`}
           >
-            <Bot className="h-3.5 w-3.5" />
-            AI Assistant
+            <Calendar className="h-3.5 w-3.5" />
+            Smart Planner
           </button>
           <button
             type="button"
@@ -127,49 +120,25 @@ export const ProductPreview: React.FC = () => {
             }`}
           >
             <CheckSquare className="h-3.5 w-3.5" />
-            Tasks
+            Tasks & Projects
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('memory')}
+            onClick={() => setActiveTab('cognitive')}
             className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
-              activeTab === 'memory'
+              activeTab === 'cognitive'
                 ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
                 : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
             }`}
           >
             <Brain className="h-3.5 w-3.5" />
-            Memory Node
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('graph')}
-            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
-              activeTab === 'graph'
-                ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
-                : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
-            }`}
-          >
-            <Network className="h-3.5 w-3.5" />
-            Knowledge Graph
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('analytics')}
-            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
-              activeTab === 'analytics'
-                ? 'border border-indigo-500/30 bg-indigo-600/20 text-indigo-300'
-                : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
-            }`}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            Analytics
+            Cognitive Hub
           </button>
         </div>
 
         {/* Dynamic Tab Body */}
         <div className="max-h-[360px] min-h-[300px] overflow-y-auto p-3.5 font-sans text-sm sm:p-5">
-          {activeTab === 'ai' && (
+          {activeTab === 'planner' && (
             <div className="flex h-full flex-col justify-between space-y-4">
               <div className="space-y-3.5">
                 {chatLogs.map((msg, idx) => (
@@ -218,12 +187,13 @@ export const ProductPreview: React.FC = () => {
                   type="text"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder="Ask AETHER AI or request context search..."
+                  placeholder="Plan your next task or set a reminder..."
+                  aria-label="Ask AETHER planner or set a reminder"
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 px-3.5 py-2.5 pr-10 text-xs text-zinc-100 placeholder-zinc-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                 />
                 <button
                   type="submit"
-                  aria-label="Send message"
+                  aria-label="Send planner request"
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-indigo-400 transition-colors hover:bg-indigo-500/10 hover:text-indigo-300"
                 >
                   <Send className="h-3.5 w-3.5" />
@@ -235,29 +205,35 @@ export const ProductPreview: React.FC = () => {
           {activeTab === 'tasks' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-zinc-800/60 pb-2 text-xs text-zinc-400">
-                <span className="font-semibold text-zinc-200">Active Sprint Tasks</span>
+                <span className="font-semibold text-zinc-200">Today's Focus Tasks</span>
                 <span className="flex items-center gap-1 text-[11px] text-emerald-400">
-                  <CheckCircle2 className="h-3 w-3" /> 4 of 6 completed
+                  <CheckCircle2 className="h-3 w-3" /> 2 of 4 done
                 </span>
               </div>
               <div className="space-y-2">
                 {[
                   {
-                    title: 'Refactor Vector Database Indexer',
-                    tag: 'Core Infra',
+                    title: 'Finalize quarterly project milestones',
+                    tag: 'Project Planning',
                     status: 'Done',
                     badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
                   },
                   {
-                    title: 'Implement Local LLM Context Window Caching',
-                    tag: 'AI Engine',
+                    title: 'Review weekly calendar and set smart reminders',
+                    tag: 'Planner',
+                    status: 'Done',
+                    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                  },
+                  {
+                    title: 'Prepare task breakdown for feature roadmap',
+                    tag: 'Workspace',
                     status: 'In Progress',
                     badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
                   },
                   {
-                    title: 'Sync Knowledge Graph Node Relations',
-                    tag: 'Memory',
-                    status: 'Pending',
+                    title: 'Complete cognitive hub problem-solving session',
+                    tag: 'Practice',
+                    status: 'Scheduled',
                     badge: 'bg-zinc-800 text-zinc-400 border-zinc-700',
                   },
                 ].map((task, i) => (
@@ -295,89 +271,31 @@ export const ProductPreview: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'memory' && (
+          {activeTab === 'cognitive' && (
             <div className="space-y-3">
-              <div className="flex items-start gap-2.5 rounded-xl border border-indigo-800/40 bg-indigo-950/30 p-3 text-xs text-indigo-200">
-                <Brain className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
+              <div className="flex items-start gap-2.5 rounded-xl border border-purple-800/40 bg-purple-950/30 p-3 text-xs text-purple-200">
+                <Brain className="mt-0.5 h-4 w-4 shrink-0 text-purple-400" />
                 <div>
-                  <div className="font-medium text-indigo-100">Cognitive Memory Engine</div>
-                  <p className="mt-0.5 text-[11px] text-indigo-300/80">
-                    Aether automatically extracts semantic relationships, developer decisions, and
-                    durable facts locally.
+                  <div className="font-medium text-purple-100">Task-Based Problem Solving</div>
+                  <p className="mt-0.5 text-[11px] text-purple-300/80">
+                    AETHER turns real obstacles from your projects into structured scenarios to
+                    practice decision-making and build clear reasoning habits.
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="space-y-2 text-xs">
                 <div className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-3">
-                  <div className="text-[11px] text-zinc-400">Indexed Entities</div>
-                  <div className="mt-1 text-lg font-semibold text-zinc-100">14,290</div>
-                  <div className="mt-0.5 flex items-center gap-1 text-[10px] text-emerald-400">
-                    <ArrowUpRight className="h-3 w-3" /> +142 today
+                  <div className="font-semibold text-zinc-100">Scenario Practice: Priority Conflict</div>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+                    Two critical project deliverables overlap on Thursday. Evaluate trade-offs and
+                    restructure timeline dependencies to maintain focus.
+                  </p>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-300 border border-indigo-500/20">
+                      Active Challenge
+                    </span>
+                    <span className="text-[10px] text-zinc-500">Derived from: Feature Roadmap</span>
                   </div>
-                </div>
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-3">
-                  <div className="text-[11px] text-zinc-400">Context Precision</div>
-                  <div className="mt-1 text-lg font-semibold text-zinc-100">99.8%</div>
-                  <div className="mt-0.5 text-[10px] text-indigo-400">
-                    Zero hallucination filter
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'graph' && (
-            <div className="flex flex-col items-center justify-center space-y-3 rounded-xl border border-zinc-800/60 bg-zinc-900/30 p-6 text-center">
-              <div className="relative flex h-20 w-20 items-center justify-center">
-                <div className="absolute inset-0 animate-spin rounded-full border-2 border-dashed border-indigo-500/40" />
-                <Network className="h-9 w-9 text-indigo-400" />
-                <span className="absolute right-2 top-1 h-2.5 w-2.5 animate-ping rounded-full bg-cyan-400" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-zinc-200">
-                  Interactive Knowledge Topology
-                </div>
-                <p className="mt-1 max-w-xs text-[11px] text-zinc-400">
-                  Bi-directional node linking connects projects, tasks, code bases, and notes into
-                  an active neural graph.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'analytics' && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-2.5 text-center">
-                  <div className="text-[10px] text-zinc-400">Tokens Processed</div>
-                  <div className="mt-1 text-sm font-bold text-zinc-100">2.4M</div>
-                </div>
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-2.5 text-center">
-                  <div className="text-[10px] text-zinc-400">Time Saved</div>
-                  <div className="mt-1 text-sm font-bold text-emerald-400">18.4 hrs</div>
-                </div>
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-2.5 text-center">
-                  <div className="text-[10px] text-zinc-400">Local Security</div>
-                  <div className="mt-1 text-sm font-bold text-cyan-400">100%</div>
-                </div>
-              </div>
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
-                <div className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-300">
-                  <span>Weekly Productivity Velocity</span>
-                  <span className="text-[11px] text-emerald-400">+24% vs last week</span>
-                </div>
-                <div className="flex h-16 items-end gap-1.5 pt-2">
-                  {[35, 50, 42, 68, 80, 95, 88].map((val, i) => (
-                    <div
-                      key={i}
-                      className="group relative flex-1 rounded-t bg-zinc-800 transition-all hover:bg-indigo-600"
-                      style={{ height: `${val}%` }}
-                    >
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded border border-zinc-700 bg-zinc-950 px-1.5 py-0.5 text-[9px] text-zinc-200 opacity-0 group-hover:opacity-100">
-                        {val}%
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
@@ -388,9 +306,9 @@ export const ProductPreview: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-1.5 border-t border-zinc-800/60 bg-zinc-950/80 px-3.5 py-2 text-[11px] text-zinc-400">
           <span className="flex items-center gap-1.5 truncate">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-            Local Vector Engine: Connected
+            AI Workspace Sync: Active
           </span>
-          <span className="font-mono text-zinc-400">SOC2 Type II • AES-256</span>
+          <span className="text-zinc-500">Personal & Private</span>
         </div>
       </div>
     </div>

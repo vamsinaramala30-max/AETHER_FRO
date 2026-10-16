@@ -8,6 +8,8 @@ import { normalizeUserProfile } from '@/auth/userProfile';
 import { Sidebar } from '../../components/sidebar/Sidebar';
 import { AppFooter } from '../../components/navigation/AppFooter';
 import { aiService } from '../../services/aiService';
+import { AetherSymbol } from '@/components/branding/AetherLogo';
+import { useSessionTracker } from '@/your-aether/useLastSession';
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded modals/components
@@ -192,6 +194,16 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           )}
         </button>
 
+        {/* Switch to YOUR AETHER experience */}
+        <Link
+          to="/app/your-aether"
+          title="Switch to YOUR AETHER experience"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 px-2.5 py-1.5 text-xs font-semibold text-purple-300 transition-all hover:border-purple-400/50 hover:bg-purple-500/20 hover:text-white"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+          <span>YOUR AETHER</span>
+        </Link>
+
         {/* User Profile */}
         <Link
           to="/app/settings/profile"
@@ -223,14 +235,11 @@ const TopHeader: React.FC<TopHeaderProps> = ({
 }) => {
   return (
     <header className="flex shrink-0 items-center justify-between border-b border-aether-border bg-aether-surface px-4 py-3 md:hidden">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500">
-          <Sparkles className="h-3.5 w-3.5 text-white" />
-        </div>
-
-        <span className="text-base font-extrabold text-aether-main">Aether OS</span>
-      </div>
+      {/* Concept 1 Official Logo */}
+      <Link to="/app" className="flex items-center gap-2.5">
+        <AetherSymbol size={26} />
+        <span className="text-base font-bold text-aether-main">Aether</span>
+      </Link>
 
       {/* Mobile controls */}
       <div className="flex items-center gap-1">
@@ -361,6 +370,9 @@ export const AppLayout: React.FC<React.PropsWithChildren> = () => {
   const [weatherOpen, setWeatherOpen] = useState(false);
 
   const location = useLocation();
+
+  // Track current page for "Continue Last Session" in YOUR AETHER
+  useSessionTracker();
 
   // -------------------------------------------------------------------------
   // Automatically close mobile sidebar when route changes

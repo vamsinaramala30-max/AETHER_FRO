@@ -44,6 +44,13 @@ export const AppFooter: React.FC = () => {
           >
             Contact
           </Link>
+          <span className="text-aether-muted/40 select-none">·</span>
+          <Link
+            to="/complaint"
+            className="rounded px-1 py-0.5 transition-colors hover:text-rose-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-500"
+          >
+            Report an Issue
+          </Link>
         </nav>
 
         {/* Copyright */}

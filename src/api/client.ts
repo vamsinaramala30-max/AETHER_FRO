@@ -305,9 +305,14 @@ class HttpClient {
       }, timeout);
 
       try {
+        const validSignal =
+          typeof AbortSignal !== 'undefined' && fetchOptions.signal instanceof AbortSignal
+            ? fetchOptions.signal
+            : controller.signal;
+
         let response = await fetch(url, {
           ...fetchOptions,
-          signal: fetchOptions.signal || controller.signal,
+          signal: validSignal,
         });
 
         clearTimeout(timeoutId);

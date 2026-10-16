@@ -158,7 +158,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 
   markAsRead: (id) => {
     try {
-      void apiClient.patch(`/notifications/${id}/read`);
+      void apiClient.patch(`/notifications/${id}/read`).catch(() => {});
     } catch {
       // Ignore
     }
@@ -174,7 +174,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 
   markAllAsRead: () => {
     try {
-      void apiClient.patch('/notifications/read-all');
+      void apiClient.patch('/notifications/read-all').catch(() => {});
     } catch {
       // Ignore
     }
@@ -190,7 +190,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 
   dismissNotification: (id) => {
     try {
-      void apiClient.delete(`/notifications/${id}`);
+      void apiClient.delete(`/notifications/${id}`).catch(() => {});
     } catch {
       // Ignore
     }
@@ -206,7 +206,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 
   clearAll: () => {
     try {
-      void apiClient.delete('/notifications/clear-all');
+      void apiClient.delete('/notifications/clear-all').catch(() => {});
     } catch {
       // Ignore
     }

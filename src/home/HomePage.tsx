@@ -437,6 +437,12 @@ export const HomePage: React.FC = () => {
       color: 'text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20',
     },
     {
+      label: 'YOUR AETHER',
+      icon: <Sparkles className="h-4 w-4" />,
+      href: '/app/your-aether',
+      color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 shadow-sm shadow-cyan-500/10',
+    },
+    {
       label: 'Favorites',
       icon: <Star className="h-4 w-4" />,
       href: '/app/workspace/favorites',

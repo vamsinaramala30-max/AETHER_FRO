@@ -29,7 +29,7 @@ export const GuestGuard: React.FC<GuestGuardProps> = ({
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   return <>{children}</>;

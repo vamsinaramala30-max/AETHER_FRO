@@ -50,7 +50,7 @@ const SECURITY_ITEMS: SecurityItem[] = [
     category: 'Database Security',
     status: 'IMPLEMENTED',
     details:
-      'Every query executed by the database layer strictly enforces `workspaceId` relational scoping to guarantee absolute tenant isolation.',
+      'Every query executed by the database layer strictly enforces `workspaceId` relational scoping to isolate tenant data.',
   },
   {
     title: 'Secure Environment Secret Storage',
@@ -180,12 +180,18 @@ export const SecurityPage: React.FC = () => {
               Our engineering team responds promptly to technical security inquiries and
               vulnerability disclosures.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/contact"
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-3 text-sm font-semibold text-white shadow-lg"
               >
                 Contact Security Team →
+              </Link>
+              <Link
+                to="/complaint"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Report Security / Privacy Concern
               </Link>
             </div>
           </div>

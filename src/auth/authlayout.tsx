@@ -1,4 +1,5 @@
 import React from 'react';
+import { AetherSymbol } from '@/components/branding/AetherLogo';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -10,9 +11,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
   return (
     <div className="min-h-screen bg-slate-950 px-6 pb-10 pt-24 text-slate-100 selection:bg-cyan-500/30 lg:px-8">
       <div className="mx-auto flex w-full max-w-md flex-col items-center">
-        {/* Logo */}
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/10">
-          <span className="select-none text-xl font-bold tracking-wider text-white">Æ</span>
+        {/* Concept 1 Official Logo */}
+        <div className="flex items-center justify-center">
+          <AetherSymbol size={48} />
         </div>
 
         {/* Heading */}

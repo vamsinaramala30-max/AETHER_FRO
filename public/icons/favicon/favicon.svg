@@ -1,109 +1,121 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Background Radial Gradient -->
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#0a1128" />
-      <stop offset="100%" stop-color="#030611" />
+    <linearGradient id="fav-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060B14" />
+      <stop offset="100%" stop-color="#020408" />
+    </linearGradient>
+
+    <filter id="fav-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <linearGradient id="fav-ribbon-left" x1="20%" y1="90%" x2="65%" y2="15%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="45%" stop-color="#00B0FF" />
+      <stop offset="85%" stop-color="#2979FF" />
+      <stop offset="100%" stop-color="#3D5AFE" />
+    </linearGradient>
+
+    <linearGradient id="fav-ribbon-right" x1="50%" y1="20%" x2="95%" y2="90%">
+      <stop offset="0%" stop-color="#3D5AFE" />
+      <stop offset="40%" stop-color="#651FFF" />
+      <stop offset="75%" stop-color="#7C4DFF" />
+      <stop offset="100%" stop-color="#B388FF" />
+    </linearGradient>
+
+    <linearGradient id="fav-ribbon-highlight" x1="30%" y1="10%" x2="80%" y2="60%">
+      <stop offset="0%" stop-color="#E0F7FA" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#80D8FF" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#651FFF" stop-opacity="0" />
+    </linearGradient>
+
+    <linearGradient id="fav-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.2" />
+      <stop offset="40%" stop-color="#00E5FF" stop-opacity="0.9" />
+      <stop offset="70%" stop-color="#80D8FF" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#B388FF" stop-opacity="0.3" />
+    </linearGradient>
+
+    <radialGradient id="fav-sphere-grad" cx="38%" cy="34%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="25%" stop-color="#84FFFF" />
+      <stop offset="65%" stop-color="#00E5FF" />
+      <stop offset="90%" stop-color="#0091EA" />
+      <stop offset="100%" stop-color="#01579B" />
     </radialGradient>
-
-    <!-- Letter A Gradient -->
-    <linearGradient id="aGrad" x1="20%" y1="10%" x2="80%" y2="90%">
-      <stop offset="0%" stop-color="#00d2ff" />
-      <stop offset="45%" stop-color="#3a7bd5" />
-      <stop offset="100%" stop-color="#8a23f1" />
-    </linearGradient>
-
-    <!-- Swoosh Trail Gradient -->
-    <linearGradient id="swooshGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.2" />
-      <stop offset="40%" stop-color="#2a9df4" stop-opacity="0.8" />
-      <stop offset="80%" stop-color="#00d2ff" stop-opacity="1" />
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
-    </linearGradient>
-
-    <!-- Star Glow / Sparkle Gradient -->
-    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="50%" stop-color="#00d2ff" stop-opacity="0.8" />
-      <stop offset="100%" stop-color="#00d2ff" stop-opacity="0" />
-    </radialGradient>
-
-    <!-- Shadow Overlay Gradient for A Depth -->
-    <linearGradient id="shadowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.35" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-    </linearGradient>
   </defs>
 
-  <!-- Dark Circular Background -->
-  <circle cx="256" cy="256" r="232" fill="url(#bgGrad)" />
+  <!-- Background rounded canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#fav-bg)" />
+  <rect x="4" y="4" width="504" height="504" rx="108" fill="none" stroke="#00E5FF" stroke-width="4" stroke-opacity="0.25" />
 
-  <!-- Letter 'A' Base Structure -->
-  <g id="letter-A">
-    <!-- Main Styled 'A' Path -->
-    <path d="
-      M 256,110 
-      C 268,110 276,118 283,132 
-      L 388,348 
-      C 394,360 392,374 380,374 
-      L 342,374 
-      C 334,374 327,369 322,358 
-      L 298,308 
-      L 214,308 
-      L 190,358 
-      C 185,369 178,374 170,374 
-      L 132,374 
-      C 120,374 118,360 124,348 
-      L 229,132 
-      C 236,118 244,110 256,110 Z
-      M 256,192 
-      L 230,254 
-      L 282,254 
-      Z
-    " fill="url(#aGrad)" />
+  <!-- Core emblem scale and position -->
+  <g transform="translate(256, 256) scale(2.6) translate(-80, -80)">
+    <!-- Ambient glow behind A -->
+    <circle cx="80" cy="80" r="50" fill="#00E5FF" opacity="0.12" filter="url(#fav-glow)" />
+    <circle cx="95" cy="90" r="42" fill="#7C4DFF" opacity="0.14" filter="url(#fav-glow)" />
 
-    <!-- Right Leg Depth Shadow Overlay -->
-    <path d="
-      M 256,110 
-      L 388,348 
-      C 394,360 392,374 380,374 
-      L 342,374 
-      C 334,374 327,369 322,358 
-      L 282,254 
-      Z
-    " fill="url(#shadowGrad)" opacity="0.4" />
+    <!-- Ribbon A - Right Leg -->
+    <path
+      d="M80 24 C94 24, 108 42, 116 58 L136 102 C141 113, 137 122, 126 122 L106 122 C99 122, 94 116, 91 108 L83 86 C81 81, 79 81, 77 86 L80 24 Z"
+      fill="url(#fav-ribbon-right)"
+    />
+
+    <!-- Ribbon A - Left Leg & Apex -->
+    <path
+      d="M80 22 C72 22, 64 28, 59 38 L22 106 C17 116, 22 122, 33 122 L54 122 C62 122, 67 116, 71 108 L80 84 C82 78, 86 78, 88 84 L93 96 C97 86, 99 74, 98 62 C96 46, 90 22, 80 22 Z"
+      fill="url(#fav-ribbon-left)"
+    />
+
+    <!-- Highlight -->
+    <path
+      d="M80 24 C74 24, 67 29, 63 37 L32 100 C35 94, 38 88, 41 82 L68 33 C72 26, 76 24, 80 24 Z"
+      fill="url(#fav-ribbon-highlight)"
+      opacity="0.85"
+    />
+
+    <!-- Inner hollow -->
+    <path
+      d="M80 48 C75 56, 70 68, 66 78 L94 78 C90 68, 85 56, 80 48 Z"
+      fill="#060B14"
+      opacity="0.8"
+    />
+
+    <!-- Floating Cyan Sphere (The Core) -->
+    <circle cx="80" cy="74" r="14" fill="#00E5FF" opacity="0.3" filter="url(#fav-glow)" />
+    <circle cx="80" cy="74" r="11" fill="url(#fav-sphere-grad)" />
+    <ellipse cx="76.5" cy="70.5" rx="3.5" ry="2.2" fill="#FFFFFF" opacity="0.9" transform="rotate(-20 76.5 70.5)" />
+
+    <!-- Orbital ring -->
+    <ellipse
+      cx="80"
+      cy="77"
+      rx="58"
+      ry="15"
+      stroke="url(#fav-ring-grad)"
+      stroke-width="2.6"
+      fill="none"
+      transform="rotate(-24 80 77)"
+    />
+    <ellipse
+      cx="80"
+      cy="77"
+      rx="58"
+      ry="15"
+      stroke="#00E5FF"
+      stroke-width="3"
+      fill="none"
+      transform="rotate(-24 80 77)"
+      stroke-dasharray="140 180"
+      stroke-dashoffset="170"
+    />
+
+    <!-- Satellite orb -->
+    <g transform="translate(131, 57)">
+      <circle cx="0" cy="0" r="6" fill="#00E5FF" opacity="0.4" />
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" />
+      <circle cx="0" cy="0" r="2.8" fill="#00E5FF" />
+    </g>
   </g>
-
-  <!-- Orbital Swoosh Arc -->
-  <path d="
-    M 115,348 
-    C 85,320 90,260 140,285 
-    C 200,315 280,300 370,240 
-    C 410,213 428,175 390,132 
-    C 385,126 388,120 395,123 
-    C 445,145 440,220 360,265 
-    C 270,316 180,335 125,298 
-    C 100,281 98,330 115,348 Z
-  " fill="url(#swooshGrad)" />
-
-  <!-- Sparkle Star Background Glow -->
-  <circle cx="366" cy="132" r="28" fill="url(#starGlow)" opacity="0.8" />
-
-  <!-- 4-Point Star -->
-  <path d="
-    M 366,102 
-    Q 366,132 396,132 
-    Q 366,132 366,162 
-    Q 366,132 336,132 
-    Q 366,132 366,102 Z
-  " fill="#ffffff" />
-
-  <!-- Inner Sparkle Highlight -->
-  <path d="
-    M 366,118 
-    Q 366,132 380,132 
-    Q 366,132 366,146 
-    Q 366,132 352,132 
-    Q 366,132 366,118 Z
-  " fill="#e0f7ff" />
 </svg>
