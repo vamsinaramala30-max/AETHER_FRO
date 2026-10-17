@@ -40,7 +40,15 @@ export const LoginPage: React.FC = () => {
     try {
       const { error } = await authService.signIn(email, password);
       if (error) {
-        setErrorMessage(error.message);
+        if (
+          error.message.includes('Authentication is required') ||
+          error.message.includes('INVALID_CREDENTIALS') ||
+          error.message.includes('Invalid email or password')
+        ) {
+          setErrorMessage('Invalid email or password credentials. Please check your credentials and try again.');
+        } else {
+          setErrorMessage(error.message);
+        }
       } else {
         // Every authenticated user must be redirected to /welcome after login.
         // If the user had an intended destination, persist it as the last session path

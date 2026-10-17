@@ -316,10 +316,18 @@ class HttpClient {
     config: RequestConfig,
     isRetryAfterRefresh: boolean,
   ): Promise<T> {
+    const isPublicAuthEndpoint =
+      endpoint.includes('/auth/login') ||
+      endpoint.includes('/auth/register') ||
+      endpoint.includes('/auth/google') ||
+      endpoint.endsWith('login') ||
+      endpoint.endsWith('register');
+
     let currentConfig: RequestConfig = {
       timeout: this.defaultTimeout,
       retries: 0,
       retryDelay: 1000,
+      skipAuth: config.skipAuth ?? isPublicAuthEndpoint,
       ...config,
       headers: {
         'Content-Type': 'application/json',
@@ -327,6 +335,11 @@ class HttpClient {
         ...config.headers,
       },
     };
+
+    if (isPublicAuthEndpoint && currentConfig.headers) {
+      delete (currentConfig.headers as Record<string, string>)[authConfig.tokenHeader];
+      delete (currentConfig.headers as Record<string, string>)['Authorization'];
+    }
 
     if (currentConfig.body instanceof FormData) {
       const headers = { ...(currentConfig.headers as Record<string, string>) };
@@ -440,6 +453,18 @@ class HttpClient {
               serverCode = body.errorCode;
             }
 
+            // User-friendly normalization for authentication failures on login
+            if (response.status === 401 && (endpoint.includes('/auth/login') || endpoint.endsWith('login'))) {
+              if (
+                !serverMessage ||
+                serverMessage.includes('Authentication is required') ||
+                serverCode === 'INVALID_CREDENTIALS' ||
+                serverCode === 'AUTHENTICATION_ERROR'
+              ) {
+                serverMessage = 'Invalid email or password credentials.';
+              }
+            }
+
             errorData = {
               message: serverMessage || errorData.message,
               code: serverCode,
@@ -456,9 +481,15 @@ class HttpClient {
           }
 
           // Safe diagnostic logging (sanitized, no secrets)
-          console.error(
-            `[API Error] Endpoint: ${endpoint} | Method: ${fetchOptions.method || 'GET'} | Status: ${response.status} | Request ID: ${correlationId || 'N/A'} | Code: ${errorData.code || 'UNKNOWN'} | Message: ${errorData.message}`,
-          );
+          if (response.status === 401 && (endpoint.includes('/auth/login') || endpoint.endsWith('login'))) {
+            console.warn(
+              `[Auth] Login rejected (HTTP 401): ${errorData.message}`,
+            );
+          } else {
+            console.error(
+              `[API Error] Endpoint: ${endpoint} | Method: ${fetchOptions.method || 'GET'} | Status: ${response.status} | Request ID: ${correlationId || 'N/A'} | Code: ${errorData.code || 'UNKNOWN'} | Message: ${errorData.message}`,
+            );
+          }
 
           throw new ApiError(errorData);
         }
