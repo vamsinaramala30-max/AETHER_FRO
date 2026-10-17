@@ -23,6 +23,7 @@ import {
 } from '../../public/pages/Index';
 
 import { AuthSuccessPage } from '../../auth/AuthSuccessPage';
+import { AdminLoginPage } from '../../admin/AdminLoginPage';
 import { useAuth } from '../providers/authprovider';
 import { Navigate } from 'react-router-dom';
 
@@ -55,6 +56,10 @@ export const publicRoutes: RouteObject[] = [
   {
     path: '/auth/success',
     element: <AuthSuccessPage />,
+  },
+  {
+    path: '/admin/login',
+    element: <AdminLoginPage />,
   },
   {
     path: '/',

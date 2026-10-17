@@ -12,15 +12,30 @@ export const AuthSuccessPage: React.FC = () => {
   const [statusText, setStatusText] = useState('Finalizing Google Authentication...');
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const paramError = searchParams.get('error');
+    // Parse hash fragment first (RFC 6749 compliant for SPAs, never sent to server), fallback to searchParams if needed
+    const rawHash = typeof window !== 'undefined' && window.location.hash ? window.location.hash : '';
+    const hashString = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
+    const hashParams = new URLSearchParams(hashString);
+
+    const token = hashParams.get('token') || searchParams.get('token');
+    const refreshToken = hashParams.get('refreshToken') || searchParams.get('refreshToken');
+    const paramError = hashParams.get('error') || searchParams.get('error');
+
+    // Immediately clean up sensitive tokens from the browser URL bar and history state
+    if (typeof window !== 'undefined' && window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
 
     if (paramError) {
-      setError(
-        paramError === 'google_not_configured'
-          ? 'Google OAuth is not configured on the backend server. Please contact your system administrator.'
-          : 'Google OAuth authentication failed or was cancelled.',
-      );
+      if (paramError === 'google_not_configured') {
+        setError(
+          'Google OAuth is not configured on the backend server. Please contact your system administrator.',
+        );
+      } else if (paramError === 'oauth_cancelled') {
+        setError('Google sign in was cancelled.');
+      } else {
+        setError('Google OAuth authentication failed. Please try again.');
+      }
       return;
     }
 
@@ -33,7 +48,10 @@ export const AuthSuccessPage: React.FC = () => {
 
     const processToken = async () => {
       try {
-        const { error: authError } = await authService.handleGoogleCallbackToken(token);
+        const { error: authError } = await authService.handleGoogleCallbackToken(
+          token,
+          refreshToken || undefined,
+        );
         if (!isSubscribed) return;
 
         if (authError) {

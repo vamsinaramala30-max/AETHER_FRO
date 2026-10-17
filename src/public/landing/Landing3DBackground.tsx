@@ -2,6 +2,20 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
+// Suppress deprecated Three.js Clock warning emitted by @react-three/fiber internal root store
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Clock: This module has been deprecated. Please use THREE.Timer instead.')
+    ) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 // Capability & Preferences Detection
 function getDeviceTier() {
   if (typeof window === 'undefined') return 'desktop';
@@ -39,10 +53,12 @@ const FloatingPolyhedron: React.FC<PolyhedronProps> = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const initialY = position[1];
+  const elapsedRef = useRef(0);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!meshRef.current) return;
-    const time = state.clock.getElapsedTime();
+    elapsedRef.current += delta;
+    const time = elapsedRef.current;
     meshRef.current.rotation.x += rotationSpeed[0] * delta;
     meshRef.current.rotation.y += rotationSpeed[1] * delta;
     meshRef.current.rotation.z += rotationSpeed[2] * delta;
@@ -66,28 +82,28 @@ const FloatingPolyhedron: React.FC<PolyhedronProps> = ({
     }
   }, [type, scale]);
 
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color,
+        wireframe,
+        transparent: true,
+        opacity: wireframe ? 0.35 : 0.55,
+        roughness: 0.15,
+        metalness: 0.65,
+      }),
+    [color, wireframe],
+  );
+
   useEffect(() => {
     return () => {
       geometry.dispose();
+      material.dispose();
     };
-  }, [geometry]);
+  }, [geometry, material]);
 
   return (
-    <mesh ref={meshRef} position={position} geometry={geometry}>
-      <meshPhysicalMaterial
-        color={color}
-        wireframe={wireframe}
-        transparent
-        opacity={wireframe ? 0.35 : 0.45}
-        roughness={0.1}
-        metalness={0.8}
-        clearcoat={0.9}
-        clearcoatRoughness={0.1}
-        transmission={wireframe ? 0 : 0.6}
-        ior={1.3}
-        thickness={0.5}
-      />
-    </mesh>
+    <mesh ref={meshRef} position={position} geometry={geometry} material={material} />
   );
 };
 
@@ -165,11 +181,12 @@ const ParticleField: React.FC<ParticleFieldProps> = ({ count, isLightMode }) => 
 // ----------------------------------------------------
 const CyberGrid: React.FC<{ isLightMode: boolean }> = ({ isLightMode }) => {
   const gridRef = useRef<THREE.GridHelper>(null);
+  const elapsedRef = useRef(0);
 
-  useFrame((state) => {
+  useFrame((_, delta) => {
     if (!gridRef.current) return;
-    const time = state.clock.getElapsedTime();
-    gridRef.current.position.z = (time * 0.5) % 2;
+    elapsedRef.current += delta;
+    gridRef.current.position.z = (elapsedRef.current * 0.5) % 2;
   });
 
   return (
@@ -247,17 +264,22 @@ const CSSFallbackBackground: React.FC<{ isLightMode: boolean }> = ({ isLightMode
 // ----------------------------------------------------
 export const Landing3DBackground: React.FC = () => {
   const [hasWebGL, setHasWebGL] = useState<boolean>(true);
+  const [isContextLost, setIsContextLost] = useState<boolean>(false);
   const [deviceTier, setDeviceTier] = useState<string>('desktop');
   const [isLightMode, setIsLightMode] = useState<boolean>(false);
   const [isTabActive, setIsTabActive] = useState<boolean>(true);
   const mouse = useRef({ x: 0, y: 0 });
   const scrollPosY = useRef(0);
+  const cleanupContextListenersRef = useRef<(() => void) | null>(null);
 
   // 1. WebGL Support Test & Device Capabilities
   useEffect(() => {
     try {
       const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const gl =
+        canvas.getContext('webgl2') ||
+        canvas.getContext('webgl') ||
+        canvas.getContext('experimental-webgl');
       if (!gl) {
         setHasWebGL(false);
       }
@@ -330,8 +352,18 @@ export const Landing3DBackground: React.FC = () => {
     };
   }, [deviceTier]);
 
-  // If WebGL is unavailable or reduced motion is preferred, use CSS Fallback
-  if (!hasWebGL || deviceTier === 'reduced-motion') {
+  // Cleanup WebGL context event listeners on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupContextListenersRef.current) {
+        cleanupContextListenersRef.current();
+        cleanupContextListenersRef.current = null;
+      }
+    };
+  }, []);
+
+  // If WebGL is unavailable, reduced motion is preferred, or context is lost, use CSS Fallback
+  if (!hasWebGL || deviceTier === 'reduced-motion' || isContextLost) {
     return <CSSFallbackBackground isLightMode={isLightMode} />;
   }
 
@@ -375,20 +407,37 @@ export const Landing3DBackground: React.FC = () => {
         }`}
       />
 
-      {/* Three.js Canvas Container */}
-      {isTabActive && (
-        <Canvas
-          camera={{ position: [0, 0, 15], fov: 60 }}
-          gl={{
-            antialias: deviceTier === 'desktop',
-            alpha: true,
-            powerPreference: 'high-performance',
-          }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(0x000000, 0);
-          }}
-          className="h-full w-full"
-        >
+      {/* Three.js Canvas Container with stable lifecycle and context listeners */}
+      <Canvas
+        frameloop={isTabActive ? 'always' : 'never'}
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 0, 15], fov: 60 }}
+        gl={{
+          antialias: deviceTier === 'desktop',
+          alpha: true,
+          powerPreference: 'default',
+        }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0);
+          const canvasEl = gl.domElement;
+          const handleContextLost = (e: Event) => {
+            e.preventDefault();
+            console.warn('[AETHER-3D] WebGLRenderer context lost gracefully; switching to CSS fallback.');
+            setIsContextLost(true);
+          };
+          const handleContextRestored = () => {
+            console.info('[AETHER-3D] WebGLRenderer context restored.');
+            setIsContextLost(false);
+          };
+          canvasEl.addEventListener('webglcontextlost', handleContextLost);
+          canvasEl.addEventListener('webglcontextrestored', handleContextRestored);
+          cleanupContextListenersRef.current = () => {
+            canvasEl.removeEventListener('webglcontextlost', handleContextLost);
+            canvasEl.removeEventListener('webglcontextrestored', handleContextRestored);
+          };
+        }}
+        className="h-full w-full"
+      >
           <ambientLight intensity={isLightMode ? 0.9 : 0.5} />
           <pointLight position={[10, 10, 10]} intensity={isLightMode ? 1.5 : 2} color={color1} />
           <pointLight
@@ -481,7 +530,6 @@ export const Landing3DBackground: React.FC = () => {
             </>
           )}
         </Canvas>
-      )}
     </div>
   );
 };

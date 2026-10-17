@@ -3,6 +3,8 @@ import { RouteObject, Outlet, Navigate } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/applayout';
 import { ProtectedGuard } from '@/guards/ProtectedGuard';
+import { AdminGuard } from '@/guards/AdminGuard';
+import { AdminDashboardPage } from '@/admin/AdminDashboardPage';
 import { YourAetherModulePage } from '@/your-aether/YourAetherLayout';
 import { WelcomeChoicePage } from '@/auth/WelcomeChoicePage';
 
@@ -94,6 +96,28 @@ const ProtectedLayoutWrapper: React.FC = () => (
 // Route Definitions
 // ─────────────────────────────────────────────────────────────────────────────
 export const protectedRoutes: RouteObject[] = [
+  // ── AETHER PRIVATE ADMIN PORTAL ───────────────────────────────────────────
+  {
+    path: '/admin',
+    element: (
+      <AdminGuard>
+        <Suspense fallback={<PageSpinner />}>
+          <AdminDashboardPage />
+        </Suspense>
+      </AdminGuard>
+    ),
+  },
+  {
+    path: '/admin/dashboard',
+    element: (
+      <AdminGuard>
+        <Suspense fallback={<PageSpinner />}>
+          <AdminDashboardPage />
+        </Suspense>
+      </AdminGuard>
+    ),
+  },
+
   // ── WELCOME / CHOICE PAGE (Standalone Full-Screen, shown after login) ─────────
   {
     path: '/welcome',

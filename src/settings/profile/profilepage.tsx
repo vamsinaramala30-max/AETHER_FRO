@@ -107,6 +107,9 @@ export const ProfilePage: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{displayName}</h3>
+              <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                {(profile as any)?.role || (user as any)?.role || 'USER'}
+              </span>
               {profile.isEmailVerified && (
                 <span title="Verified Account">
                   <ShieldCheck className="h-4 w-4 text-emerald-500" />

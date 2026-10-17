@@ -134,8 +134,8 @@ export const MembersPage: React.FC = () => {
   });
 
   const currentUserMembership = members.find((m) => m.userId === user?.id);
-  const isCurrentUserAdminOrOwner =
-    currentUserMembership?.role === 'OWNER' || currentUserMembership?.role === 'ADMIN';
+  const isCurrentUserOwner =
+    currentUserMembership?.role === 'OWNER' || (user as any)?.role === 'OWNER';
 
   const filteredMembers = members.filter(
     (m) =>
@@ -205,7 +205,7 @@ export const MembersPage: React.FC = () => {
           </div>
         </div>
 
-        {isCurrentUserAdminOrOwner && (
+        {isCurrentUserOwner && (
           <button
             type="button"
             onClick={() => {
@@ -287,7 +287,7 @@ export const MembersPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      {isCurrentUserAdminOrOwner && m.userId !== user?.id && m.role !== 'OWNER' ? (
+                      {isCurrentUserOwner && m.userId !== user?.id && m.role !== 'OWNER' ? (
                         <select
                           value={m.role}
                           onChange={(e) => handleRoleChange(m.userId, e.target.value)}
@@ -307,7 +307,7 @@ export const MembersPage: React.FC = () => {
                         </span>
                       )}
 
-                      {isCurrentUserAdminOrOwner && m.userId !== user?.id && m.role !== 'OWNER' && (
+                      {isCurrentUserOwner && m.userId !== user?.id && m.role !== 'OWNER' && (
                         <button
                           type="button"
                           onClick={() => handleRemoveMember(m.userId)}

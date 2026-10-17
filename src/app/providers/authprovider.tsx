@@ -92,9 +92,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     };
 
+    const handleTokenRefreshed = () => {
+      if (!isMounted) return;
+      void refreshSession();
+    };
+
     if (typeof window !== 'undefined') {
       window.addEventListener('aether-profile-updated', handleProfileUpdated);
       window.addEventListener('aether-auth-expired', handleAuthExpired);
+      window.addEventListener('aether-token-refreshed', handleTokenRefreshed);
     }
 
     const initializeAuth = async () => {
@@ -121,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (typeof window !== 'undefined') {
         window.removeEventListener('aether-profile-updated', handleProfileUpdated);
         window.removeEventListener('aether-auth-expired', handleAuthExpired);
+        window.removeEventListener('aether-token-refreshed', handleTokenRefreshed);
       }
       subscription.unsubscribe();
     };

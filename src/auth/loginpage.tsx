@@ -21,8 +21,10 @@ export const LoginPage: React.FC = () => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'google_not_configured') {
       setErrorMessage('Google OAuth is not configured on the backend server.');
+    } else if (errorParam === 'oauth_cancelled') {
+      setErrorMessage('Google sign in was cancelled.');
     } else if (errorParam === 'oauth_failed') {
-      setErrorMessage('Google OAuth sign in failed or was cancelled.');
+      setErrorMessage('Google OAuth sign in failed. Please try again.');
     } else if (errorParam) {
       setErrorMessage('Google OAuth process encountered an error.');
     }
@@ -38,7 +40,15 @@ export const LoginPage: React.FC = () => {
     try {
       const { error } = await authService.signIn(email, password);
       if (error) {
-        setErrorMessage(error.message);
+        if (
+          error.message.includes('Authentication is required') ||
+          error.message.includes('INVALID_CREDENTIALS') ||
+          error.message.includes('Invalid email or password')
+        ) {
+          setErrorMessage('Invalid email or password credentials. Please check your credentials and try again.');
+        } else {
+          setErrorMessage(error.message);
+        }
       } else {
         // Every authenticated user must be redirected to /welcome after login.
         // If the user had an intended destination, persist it as the last session path
