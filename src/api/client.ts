@@ -144,7 +144,17 @@ export interface ApiErrorPayload {
 
 export function sanitizeErrorMessage(rawMessage: string, status: number): string {
   if (!rawMessage || typeof rawMessage !== 'string') {
-    return `Request failed with status ${status}`;
+    return status === 0
+      ? 'Unable to connect to the AETHER backend server. Please verify the backend service is running and accessible.'
+      : `Request failed with status ${status}`;
+  }
+
+  // Handle connection refused or network failure messages explicitly
+  if (
+    status === 0 ||
+    /failed to fetch|net::err_connection_refused|network\s*error|econnrefused/i.test(rawMessage)
+  ) {
+    return 'Unable to connect to the AETHER backend server. Please verify the backend service is running and accessible.';
   }
 
   const isSensitive =
@@ -166,6 +176,7 @@ export function sanitizeErrorMessage(rawMessage: string, status: number): string
   if (status === 409) return 'A resource conflict occurred. Please refresh and try again.';
   if (status === 429) return 'Too many requests. Please slow down and try again later.';
   if (status >= 500) return 'The server encountered an error processing your request. Please try again.';
+  if (status === 0) return 'Unable to connect to the AETHER backend server. Please verify the backend service is running and accessible.';
   return `An error occurred while processing the request (${status}).`;
 }
 
@@ -268,7 +279,7 @@ class HttpClient {
     try {
       url = new URL(fullUrlString);
     } catch {
-      url = new URL(fullUrlString, window.location.origin);
+      url = new URL(fullUrlString, typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5001');
     }
 
     // In production, ensure no calls ever accidentally route to localhost or development ports
@@ -280,19 +291,10 @@ class HttpClient {
         url.port === '5001' ||
         url.port === '5002'
       ) {
-        url.hostname = window.location.hostname;
-        url.port = window.location.port;
-        url.protocol = window.location.protocol;
+        url.hostname = 'aether-bac.onrender.com';
+        url.port = '';
+        url.protocol = 'https:';
       }
-    } else if (
-      typeof window !== 'undefined' &&
-      window.location &&
-      window.location.hostname &&
-      window.location.hostname !== 'localhost' &&
-      window.location.hostname !== '127.0.0.1' &&
-      (url.hostname === 'localhost' || url.hostname === '127.0.0.1')
-    ) {
-      url.hostname = window.location.hostname;
     }
 
     if (params) {

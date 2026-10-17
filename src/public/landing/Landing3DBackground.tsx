@@ -2,6 +2,20 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
+// Suppress deprecated Three.js Clock warning emitted by @react-three/fiber internal root store
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Clock: This module has been deprecated. Please use THREE.Timer instead.')
+    ) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 // Capability & Preferences Detection
 function getDeviceTier() {
   if (typeof window === 'undefined') return 'desktop';
@@ -68,23 +82,28 @@ const FloatingPolyhedron: React.FC<PolyhedronProps> = ({
     }
   }, [type, scale]);
 
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color,
+        wireframe,
+        transparent: true,
+        opacity: wireframe ? 0.35 : 0.55,
+        roughness: 0.15,
+        metalness: 0.65,
+      }),
+    [color, wireframe],
+  );
+
   useEffect(() => {
     return () => {
       geometry.dispose();
+      material.dispose();
     };
-  }, [geometry]);
+  }, [geometry, material]);
 
   return (
-    <mesh ref={meshRef} position={position} geometry={geometry}>
-      <meshStandardMaterial
-        color={color}
-        wireframe={wireframe}
-        transparent
-        opacity={wireframe ? 0.35 : 0.55}
-        roughness={0.15}
-        metalness={0.65}
-      />
-    </mesh>
+    <mesh ref={meshRef} position={position} geometry={geometry} material={material} />
   );
 };
 
@@ -245,22 +264,24 @@ const CSSFallbackBackground: React.FC<{ isLightMode: boolean }> = ({ isLightMode
 // ----------------------------------------------------
 export const Landing3DBackground: React.FC = () => {
   const [hasWebGL, setHasWebGL] = useState<boolean>(true);
+  const [isContextLost, setIsContextLost] = useState<boolean>(false);
   const [deviceTier, setDeviceTier] = useState<string>('desktop');
   const [isLightMode, setIsLightMode] = useState<boolean>(false);
   const [isTabActive, setIsTabActive] = useState<boolean>(true);
   const mouse = useRef({ x: 0, y: 0 });
   const scrollPosY = useRef(0);
+  const cleanupContextListenersRef = useRef<(() => void) | null>(null);
 
   // 1. WebGL Support Test & Device Capabilities
   useEffect(() => {
     try {
       const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const gl =
+        canvas.getContext('webgl2') ||
+        canvas.getContext('webgl') ||
+        canvas.getContext('experimental-webgl');
       if (!gl) {
         setHasWebGL(false);
-      } else {
-        const loseContext = (gl as WebGLRenderingContext).getExtension('WEBGL_lose_context');
-        loseContext?.loseContext();
       }
     } catch {
       setHasWebGL(false);
@@ -331,8 +352,18 @@ export const Landing3DBackground: React.FC = () => {
     };
   }, [deviceTier]);
 
-  // If WebGL is unavailable or reduced motion is preferred, use CSS Fallback
-  if (!hasWebGL || deviceTier === 'reduced-motion') {
+  // Cleanup WebGL context event listeners on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupContextListenersRef.current) {
+        cleanupContextListenersRef.current();
+        cleanupContextListenersRef.current = null;
+      }
+    };
+  }, []);
+
+  // If WebGL is unavailable, reduced motion is preferred, or context is lost, use CSS Fallback
+  if (!hasWebGL || deviceTier === 'reduced-motion' || isContextLost) {
     return <CSSFallbackBackground isLightMode={isLightMode} />;
   }
 
@@ -391,13 +422,19 @@ export const Landing3DBackground: React.FC = () => {
           const canvasEl = gl.domElement;
           const handleContextLost = (e: Event) => {
             e.preventDefault();
-            console.warn('[AETHER-3D] WebGLRenderer context lost gracefully.');
+            console.warn('[AETHER-3D] WebGLRenderer context lost gracefully; switching to CSS fallback.');
+            setIsContextLost(true);
           };
           const handleContextRestored = () => {
             console.info('[AETHER-3D] WebGLRenderer context restored.');
+            setIsContextLost(false);
           };
           canvasEl.addEventListener('webglcontextlost', handleContextLost);
           canvasEl.addEventListener('webglcontextrestored', handleContextRestored);
+          cleanupContextListenersRef.current = () => {
+            canvasEl.removeEventListener('webglcontextlost', handleContextLost);
+            canvasEl.removeEventListener('webglcontextrestored', handleContextRestored);
+          };
         }}
         className="h-full w-full"
       >

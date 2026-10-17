@@ -33,10 +33,12 @@ const USER_CACHE_KEY = 'aether_auth_user';
 
 function notifyListeners(event: AuthChangeEvent, session: AuthSession | null) {
   const sameSession =
-    currentSession?.accessToken === session?.accessToken &&
-    currentSession?.refreshToken === session?.refreshToken &&
-    currentSession?.user?.id === session?.user?.id &&
-    currentSession?.user?.email === session?.user?.email;
+    currentSession !== null &&
+    session !== null &&
+    currentSession.accessToken === session.accessToken &&
+    currentSession.refreshToken === session.refreshToken &&
+    currentSession.user?.id === session.user?.id &&
+    currentSession.user?.email === session.user?.email;
 
   if (sameSession && event !== 'TOKEN_REFRESHED') {
     return;
@@ -51,6 +53,12 @@ function notifyListeners(event: AuthChangeEvent, session: AuthSession | null) {
       console.error('[AuthService] Error in listener callback:', err);
     }
   });
+}
+
+export function _resetSessionState(): void {
+  currentSession = null;
+  initializationPromise = null;
+  clearStoredTokens();
 }
 
 function getStoredToken(key: string): string | null {
@@ -297,7 +305,15 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
     return await refreshSessionUsingRefreshToken(refreshToken);
   }
 
-  console.warn('[AUTH_DIAG] SESSION_INVALID - No valid tokens found');
+  // Clean anonymous visitor state - absence of session is expected for new visitors, not a failure
+  if (!accessToken && !refreshToken) {
+    console.info('[AUTH_DIAG] AUTH_ANONYMOUS - No stored session credentials (visitor is anonymous).');
+    clearStoredTokens();
+    currentSession = null;
+    return { session: null, error: null };
+  }
+
+  console.warn('[AUTH_DIAG] SESSION_INVALID - Credentials expired, revoked, or invalid. Clearing tokens.');
   clearStoredTokens();
   currentSession = null;
   return { session: null, error: null };
@@ -305,6 +321,10 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
 
 export const authService = {
   async initialize(): Promise<{ session: AuthSession | null; error: Error | null }> {
+    if (currentSession && !isTokenExpired(currentSession.accessToken)) {
+      return { session: currentSession, error: null };
+    }
+
     if (!initializationPromise) {
       initializationPromise = resolveSession().finally(() => {
         initializationPromise = null;
@@ -411,7 +431,10 @@ export const authService = {
   },
 
   async getCurrentSession(): Promise<{ session: AuthSession | null; error: Error | null }> {
-    return await resolveSession();
+    if (currentSession && !isTokenExpired(currentSession.accessToken)) {
+      return { session: currentSession, error: null };
+    }
+    return this.initialize();
   },
 
   subscribeToAuthChanges(callback: AuthChangeListener) {
@@ -423,6 +446,12 @@ export const authService = {
         e.key === authConfig.refreshTokenKey ||
         e.key === USER_CACHE_KEY
       ) {
+        if (!e.newValue && e.key === authConfig.tokenKey) {
+          currentSession = null;
+          notifyListeners('SIGNED_OUT', null);
+          return;
+        }
+
         resolveSession().then(({ session }) => {
           if (session) {
             notifyListeners('SIGNED_IN', session);
