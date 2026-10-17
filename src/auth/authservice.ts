@@ -3,6 +3,7 @@ import { authConfig } from '../config/auth.config';
 import { normalizeUserProfile } from './userProfile';
 import { ApiError, getOrStartRefresh, purgeAllStoredAuth, resetAuthExpiredFlag } from '../api/client';
 import { env } from '../config/environment';
+import { registerAuthInitPromise } from './authCoordinator';
 
 export interface AuthUser extends UserDTO {
   firstName?: string;
@@ -31,6 +32,15 @@ let initializationPromise: Promise<{ session: AuthSession | null; error: Error |
 
 const USER_CACHE_KEY = 'aether_auth_user';
 
+const isDebugAuth = import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === 'true';
+function debugAuth(level: 'info' | 'warn' | 'error', message: string, ...args: unknown[]) {
+  if (isDebugAuth) {
+    if (level === 'error') console.error(`[AUTH_DIAG] ${message}`, ...args);
+    else if (level === 'warn') console.warn(`[AUTH_DIAG] ${message}`, ...args);
+    else console.info(`[AUTH_DIAG] ${message}`, ...args);
+  }
+}
+
 function notifyListeners(event: AuthChangeEvent, session: AuthSession | null) {
   const sameSession =
     currentSession !== null &&
@@ -58,6 +68,7 @@ function notifyListeners(event: AuthChangeEvent, session: AuthSession | null) {
 export function _resetSessionState(): void {
   currentSession = null;
   initializationPromise = null;
+  registerAuthInitPromise(null);
   clearStoredTokens();
 }
 
@@ -191,7 +202,7 @@ async function buildUserFromResponse(response: AuthApiResult | UserDTO): Promise
 async function refreshSessionUsingRefreshToken(
   refreshToken: string,
 ): Promise<{ session: AuthSession | null; error: Error | null }> {
-  console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED (authservice)');
+  debugAuth('warn', 'TOKEN_REFRESH_STARTED (authservice)');
   try {
     const refreshResult = await getOrStartRefresh();
     if (!refreshResult.accessToken || refreshResult.isAuthError) {
@@ -208,7 +219,7 @@ async function refreshSessionUsingRefreshToken(
     const session = createSession(user, refreshResult.accessToken, activeRefreshToken);
     currentSession = session;
     notifyListeners('TOKEN_REFRESHED', session);
-    console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS (authservice)');
+    debugAuth('warn', 'TOKEN_REFRESH_SUCCESS (authservice)');
     return { session, error: null };
   } catch (error: unknown) {
     const isAuthError =
@@ -220,16 +231,18 @@ async function refreshSessionUsingRefreshToken(
 
     // If it's a temporary network/server error and the existing access token is still valid, retain session
     if (!isAuthError && currentAccessToken && !isTokenExpired(currentAccessToken) && cachedUser) {
-      console.warn(
-        '[AUTH_DIAG] Temporary refresh failure; active access token remains valid.',
+      debugAuth(
+        'warn',
+        'Temporary refresh failure; active access token remains valid.',
       );
       const session = createSession(cachedUser, currentAccessToken, refreshToken);
       currentSession = session;
       return { session, error: null };
     }
 
-    console.error(
-      '[AUTH_DIAG] TOKEN_REFRESH_FAILED - Session expired or invalid. Clearing tokens (authservice)',
+    debugAuth(
+      'error',
+      'TOKEN_REFRESH_FAILED - Session expired or invalid. Clearing tokens (authservice)',
     );
     clearStoredTokens();
     currentSession = null;
@@ -242,7 +255,7 @@ async function refreshSessionUsingRefreshToken(
 }
 
 async function resolveSession(): Promise<{ session: AuthSession | null; error: Error | null }> {
-  console.warn('[AUTH_DIAG] AUTH_INIT - Resolving session...');
+  debugAuth('info', 'AUTH_INIT - Resolving session...');
   const accessToken = getStoredAccessToken();
   const refreshToken = getStoredRefreshToken();
   const cachedUser = getStoredUser();
@@ -253,7 +266,7 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
       setStoredTokens({ accessToken, refreshToken: refreshToken || undefined }, user);
       const session = createSession(user, accessToken, refreshToken ?? undefined);
       currentSession = session;
-      console.warn('[AUTH_DIAG] AUTH_RESTORED - Session active with valid access token');
+      debugAuth('info', 'AUTH_RESTORED - Session active with valid access token');
       return { session, error: null };
     } catch (error: unknown) {
       const isAuthError =
@@ -265,13 +278,14 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
           error.code === 'USER_NOT_FOUND');
 
       if (isAuthError) {
-        console.warn(
-          '[AUTH_DIAG] Access token rejected by server (REVOKED_TOKEN/401). Attempting session refresh...',
+        debugAuth(
+          'warn',
+          'Access token rejected by server (REVOKED_TOKEN/401). Attempting session refresh...',
         );
         if (refreshToken) {
           return await refreshSessionUsingRefreshToken(refreshToken);
         }
-        console.warn('[AUTH_DIAG] SESSION_INVALID - Token revoked and no refresh token available');
+        debugAuth('warn', 'SESSION_INVALID - Token revoked and no refresh token available');
         clearStoredTokens();
         currentSession = null;
         notifyListeners('TOKEN_EXPIRED', null);
@@ -282,8 +296,9 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
       }
 
       if (cachedUser) {
-        console.warn(
-          '[AUTH_DIAG] NETWORK_ERROR/API_5XX on getCurrentUser - Restoring session from cached profile',
+        debugAuth(
+          'warn',
+          'NETWORK_ERROR/API_5XX on getCurrentUser - Restoring session from cached profile',
         );
         const session = createSession(cachedUser, accessToken, refreshToken ?? undefined);
         currentSession = session;
@@ -307,13 +322,13 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
 
   // Clean anonymous visitor state - absence of session is expected for new visitors, not a failure
   if (!accessToken && !refreshToken) {
-    console.info('[AUTH_DIAG] AUTH_ANONYMOUS - No stored session credentials (visitor is anonymous).');
+    debugAuth('info', 'AUTH_ANONYMOUS - No stored session credentials (visitor is anonymous).');
     clearStoredTokens();
     currentSession = null;
     return { session: null, error: null };
   }
 
-  console.warn('[AUTH_DIAG] SESSION_INVALID - Credentials expired, revoked, or invalid. Clearing tokens.');
+  debugAuth('warn', 'SESSION_INVALID - Credentials expired, revoked, or invalid. Clearing tokens.');
   clearStoredTokens();
   currentSession = null;
   return { session: null, error: null };
@@ -328,7 +343,9 @@ export const authService = {
     if (!initializationPromise) {
       initializationPromise = resolveSession().finally(() => {
         initializationPromise = null;
+        registerAuthInitPromise(null);
       });
+      registerAuthInitPromise(initializationPromise);
     }
 
     return initializationPromise;

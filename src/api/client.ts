@@ -1,9 +1,19 @@
 import { authConfig } from '../config/auth.config';
 import { env } from '../config/environment';
+import { waitForAuthInit } from '../auth/authCoordinator';
 
 // ---- Token refresh state (module-level singleton) ----
 let _refreshPromise: Promise<{ accessToken: string | null; isAuthError: boolean }> | null = null;
 let _authExpiredDispatched = false;
+
+const isDebugAuth = import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === 'true';
+function debugAuth(level: 'info' | 'warn' | 'error', message: string, ...args: unknown[]) {
+  if (isDebugAuth) {
+    if (level === 'error') console.error(`[AUTH_DIAG] ${message}`, ...args);
+    else if (level === 'warn') console.warn(`[AUTH_DIAG] ${message}`, ...args);
+    else console.info(`[AUTH_DIAG] ${message}`, ...args);
+  }
+}
 
 export function resetAuthExpiredFlag(): void {
   _authExpiredDispatched = false;
@@ -32,11 +42,11 @@ async function _performTokenRefresh(): Promise<{
   accessToken: string | null;
   isAuthError: boolean;
 }> {
-  console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED');
+  debugAuth('warn', 'TOKEN_REFRESH_STARTED');
   try {
     const refreshToken = localStorage.getItem(authConfig.refreshTokenKey);
     if (!refreshToken) {
-      console.warn('[AUTH_DIAG] TOKEN_REFRESH_FAILED - No refresh token in storage');
+      debugAuth('warn', 'TOKEN_REFRESH_FAILED - No refresh token in storage');
       return { accessToken: null, isAuthError: true };
     }
 
@@ -50,15 +60,17 @@ async function _performTokenRefresh(): Promise<{
     });
 
     if (res.status === 400 || res.status === 401 || res.status === 403 || res.status === 422) {
-      console.error(
-        `[AUTH_DIAG] TOKEN_REFRESH_FAILED - Refresh token invalid/revoked/malformed (HTTP ${res.status})`,
+      debugAuth(
+        'error',
+        `TOKEN_REFRESH_FAILED - Refresh token invalid/revoked/malformed (HTTP ${res.status})`,
       );
       return { accessToken: null, isAuthError: true };
     }
 
     if (!res.ok) {
-      console.warn(
-        `[AUTH_DIAG] API_5XX - Refresh endpoint returned temporary error (HTTP ${res.status})`,
+      debugAuth(
+        'warn',
+        `API_5XX - Refresh endpoint returned temporary error (HTTP ${res.status})`,
       );
       return { accessToken: null, isAuthError: false };
     }
@@ -68,13 +80,14 @@ async function _performTokenRefresh(): Promise<{
     const accessToken: string | undefined = tokens?.accessToken ?? body?.accessToken;
 
     if (typeof accessToken !== 'string' || !accessToken) {
-      console.error(
-        '[AUTH_DIAG] TOKEN_REFRESH_FAILED - Invalid payload structure from refresh response',
+      debugAuth(
+        'error',
+        'TOKEN_REFRESH_FAILED - Invalid payload structure from refresh response',
       );
       return { accessToken: null, isAuthError: true };
     }
 
-    console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS');
+    debugAuth('warn', 'TOKEN_REFRESH_SUCCESS');
     localStorage.setItem(authConfig.tokenKey, accessToken);
     localStorage.setItem('aether-auth-token', accessToken);
     localStorage.setItem('auth_token', accessToken);
@@ -106,8 +119,9 @@ async function _performTokenRefresh(): Promise<{
 
     return { accessToken, isAuthError: false };
   } catch (err) {
-    console.warn(
-      '[AUTH_DIAG] NETWORK_ERROR - Refresh token request network failure:',
+    debugAuth(
+      'warn',
+      'NETWORK_ERROR - Refresh token request network failure:',
       err instanceof Error ? err.message : err,
     );
     return { accessToken: null, isAuthError: false };
@@ -219,6 +233,8 @@ class HttpClient {
       if (config.skipAuth) {
         return config;
       }
+
+      await waitForAuthInit();
 
       try {
         let token =
@@ -388,8 +404,9 @@ class HttpClient {
         // ---- 401 Auto-Refresh Logic ----
         const isAuthEndpoint = endpoint.includes('/auth/') || endpoint.includes('auth/');
         if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth && !isAuthEndpoint) {
-          console.warn(
-            `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
+          debugAuth(
+            'warn',
+            `API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
           );
           const refreshResult = await getOrStartRefresh();
           if (refreshResult.accessToken) {
@@ -406,14 +423,15 @@ class HttpClient {
             if (!_authExpiredDispatched) {
               _authExpiredDispatched = true;
               console.error(
-                '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+                '[Auth] Session expired or invalid. Redirecting to sign in...',
               );
               purgeAllStoredAuth();
               window.dispatchEvent(new CustomEvent('aether-auth-expired'));
             }
           } else {
-            console.warn(
-              '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
+            debugAuth(
+              'warn',
+              'NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
             );
           }
         }
@@ -584,8 +602,9 @@ class HttpClient {
     // 401 Auto-Refresh Logic
     const isAuthEndpoint = endpoint.includes('/auth/') || endpoint.includes('auth/');
     if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth && !isAuthEndpoint) {
-      console.warn(
-        `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
+      debugAuth(
+        'warn',
+        `API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
       );
       const refreshResult = await getOrStartRefresh();
       if (refreshResult.accessToken) {
@@ -597,14 +616,15 @@ class HttpClient {
         if (!_authExpiredDispatched) {
           _authExpiredDispatched = true;
           console.error(
-            '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+            '[Auth] Session expired or invalid. Redirecting to sign in...',
           );
           purgeAllStoredAuth();
           window.dispatchEvent(new CustomEvent('aether-auth-expired'));
         }
       } else {
-        console.warn(
-          '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
+        debugAuth(
+          'warn',
+          'NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
         );
       }
     }
