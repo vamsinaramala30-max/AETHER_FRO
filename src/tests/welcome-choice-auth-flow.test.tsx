@@ -379,6 +379,34 @@ describe('AETHER Welcome / Choice Page UI & Authentication Integration', () => {
       expect(await screen.findByTestId('welcome-landed', {}, { timeout: 2500 })).toBeDefined();
     });
 
+    it('Google OAuth callback via AuthSuccessPage extracts token securely from URL hash fragment (AUDIT-HIGH-01)', async () => {
+      vi.spyOn(authService, 'handleGoogleCallbackToken').mockResolvedValueOnce({
+        user: { id: 'usr-google-hash', email: 'vamsi@aether.ai', firstName: 'Vamsi' } as any,
+        error: null,
+      });
+
+      window.location.hash = '#token=valid-hash-jwt-token&refreshToken=valid-hash-refresh-token';
+
+      render(
+        <MemoryRouter initialEntries={['/auth/success']}>
+          <Routes>
+            <Route path="/auth/success" element={<AuthSuccessPage />} />
+            <Route
+              path="/welcome"
+              element={<div data-testid="welcome-landed-hash">Welcome Choice Page Hash</div>}
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(await screen.findByTestId('welcome-landed-hash', {}, { timeout: 2500 })).toBeDefined();
+      expect(authService.handleGoogleCallbackToken).toHaveBeenCalledWith(
+        'valid-hash-jwt-token',
+        'valid-hash-refresh-token',
+      );
+      window.location.hash = '';
+    });
+
     it('clicking "Continue Last Session" restores launcher destination when user previously used launcher', async () => {
       localStorage.setItem(
         'aether_last_session_usr-vamsi-1',

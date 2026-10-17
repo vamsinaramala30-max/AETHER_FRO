@@ -39,10 +39,12 @@ const FloatingPolyhedron: React.FC<PolyhedronProps> = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const initialY = position[1];
+  const elapsedRef = useRef(0);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!meshRef.current) return;
-    const time = state.clock.getElapsedTime();
+    elapsedRef.current += delta;
+    const time = elapsedRef.current;
     meshRef.current.rotation.x += rotationSpeed[0] * delta;
     meshRef.current.rotation.y += rotationSpeed[1] * delta;
     meshRef.current.rotation.z += rotationSpeed[2] * delta;
@@ -74,18 +76,13 @@ const FloatingPolyhedron: React.FC<PolyhedronProps> = ({
 
   return (
     <mesh ref={meshRef} position={position} geometry={geometry}>
-      <meshPhysicalMaterial
+      <meshStandardMaterial
         color={color}
         wireframe={wireframe}
         transparent
-        opacity={wireframe ? 0.35 : 0.45}
-        roughness={0.1}
-        metalness={0.8}
-        clearcoat={0.9}
-        clearcoatRoughness={0.1}
-        transmission={wireframe ? 0 : 0.6}
-        ior={1.3}
-        thickness={0.5}
+        opacity={wireframe ? 0.35 : 0.55}
+        roughness={0.15}
+        metalness={0.65}
       />
     </mesh>
   );
@@ -165,11 +162,12 @@ const ParticleField: React.FC<ParticleFieldProps> = ({ count, isLightMode }) => 
 // ----------------------------------------------------
 const CyberGrid: React.FC<{ isLightMode: boolean }> = ({ isLightMode }) => {
   const gridRef = useRef<THREE.GridHelper>(null);
+  const elapsedRef = useRef(0);
 
-  useFrame((state) => {
+  useFrame((_, delta) => {
     if (!gridRef.current) return;
-    const time = state.clock.getElapsedTime();
-    gridRef.current.position.z = (time * 0.5) % 2;
+    elapsedRef.current += delta;
+    gridRef.current.position.z = (elapsedRef.current * 0.5) % 2;
   });
 
   return (
@@ -260,6 +258,9 @@ export const Landing3DBackground: React.FC = () => {
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       if (!gl) {
         setHasWebGL(false);
+      } else {
+        const loseContext = (gl as WebGLRenderingContext).getExtension('WEBGL_lose_context');
+        loseContext?.loseContext();
       }
     } catch {
       setHasWebGL(false);
@@ -375,20 +376,31 @@ export const Landing3DBackground: React.FC = () => {
         }`}
       />
 
-      {/* Three.js Canvas Container */}
-      {isTabActive && (
-        <Canvas
-          camera={{ position: [0, 0, 15], fov: 60 }}
-          gl={{
-            antialias: deviceTier === 'desktop',
-            alpha: true,
-            powerPreference: 'high-performance',
-          }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(0x000000, 0);
-          }}
-          className="h-full w-full"
-        >
+      {/* Three.js Canvas Container with stable lifecycle and context listeners */}
+      <Canvas
+        frameloop={isTabActive ? 'always' : 'never'}
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 0, 15], fov: 60 }}
+        gl={{
+          antialias: deviceTier === 'desktop',
+          alpha: true,
+          powerPreference: 'default',
+        }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0);
+          const canvasEl = gl.domElement;
+          const handleContextLost = (e: Event) => {
+            e.preventDefault();
+            console.warn('[AETHER-3D] WebGLRenderer context lost gracefully.');
+          };
+          const handleContextRestored = () => {
+            console.info('[AETHER-3D] WebGLRenderer context restored.');
+          };
+          canvasEl.addEventListener('webglcontextlost', handleContextLost);
+          canvasEl.addEventListener('webglcontextrestored', handleContextRestored);
+        }}
+        className="h-full w-full"
+      >
           <ambientLight intensity={isLightMode ? 0.9 : 0.5} />
           <pointLight position={[10, 10, 10]} intensity={isLightMode ? 1.5 : 2} color={color1} />
           <pointLight
@@ -481,7 +493,6 @@ export const Landing3DBackground: React.FC = () => {
             </>
           )}
         </Canvas>
-      )}
     </div>
   );
 };

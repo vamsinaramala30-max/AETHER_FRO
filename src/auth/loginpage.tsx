@@ -21,8 +21,10 @@ export const LoginPage: React.FC = () => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'google_not_configured') {
       setErrorMessage('Google OAuth is not configured on the backend server.');
+    } else if (errorParam === 'oauth_cancelled') {
+      setErrorMessage('Google sign in was cancelled.');
     } else if (errorParam === 'oauth_failed') {
-      setErrorMessage('Google OAuth sign in failed or was cancelled.');
+      setErrorMessage('Google OAuth sign in failed. Please try again.');
     } else if (errorParam) {
       setErrorMessage('Google OAuth process encountered an error.');
     }

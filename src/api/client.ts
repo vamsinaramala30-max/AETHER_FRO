@@ -3,6 +3,30 @@ import { env } from '../config/environment';
 
 // ---- Token refresh state (module-level singleton) ----
 let _refreshPromise: Promise<{ accessToken: string | null; isAuthError: boolean }> | null = null;
+let _authExpiredDispatched = false;
+
+export function resetAuthExpiredFlag(): void {
+  _authExpiredDispatched = false;
+}
+
+export function purgeAllStoredAuth(): void {
+  const keysToRemove = [
+    authConfig.tokenKey,
+    authConfig.refreshTokenKey,
+    'aether_auth_user',
+    'aether-auth-token',
+    'auth_token',
+    'aether_token',
+    'aether-auth-storage',
+  ];
+  for (const key of keysToRemove) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 async function _performTokenRefresh(): Promise<{
   accessToken: string | null;
@@ -52,9 +76,34 @@ async function _performTokenRefresh(): Promise<{
 
     console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS');
     localStorage.setItem(authConfig.tokenKey, accessToken);
+    localStorage.setItem('aether-auth-token', accessToken);
+    localStorage.setItem('auth_token', accessToken);
     if (tokens?.refreshToken) {
       localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
     }
+
+    // Keep Zustand store state in sync if present
+    try {
+      const zustandStore = localStorage.getItem('aether-auth-storage');
+      if (zustandStore) {
+        const parsed = JSON.parse(zustandStore);
+        if (parsed?.state) {
+          parsed.state.token = accessToken;
+          parsed.state.isAuthenticated = true;
+          localStorage.setItem('aether-auth-storage', JSON.stringify(parsed));
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    _authExpiredDispatched = false;
+    window.dispatchEvent(
+      new CustomEvent('aether-token-refreshed', {
+        detail: { accessToken, refreshToken: tokens?.refreshToken },
+      }),
+    );
+
     return { accessToken, isAuthError: false };
   } catch (err) {
     console.warn(
@@ -66,7 +115,7 @@ async function _performTokenRefresh(): Promise<{
 }
 
 /** Returns an in-flight refresh promise or starts a new one (singleton pattern). */
-function getOrStartRefresh(): Promise<{ accessToken: string | null; isAuthError: boolean }> {
+export function getOrStartRefresh(): Promise<{ accessToken: string | null; isAuthError: boolean }> {
   if (!_refreshPromise) {
     _refreshPromise = _performTokenRefresh().finally(() => {
       _refreshPromise = null;
@@ -322,25 +371,31 @@ class HttpClient {
         }
 
         // ---- 401 Auto-Refresh Logic ----
-        if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
+        const isAuthEndpoint = endpoint.includes('/auth/') || endpoint.includes('auth/');
+        if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth && !isAuthEndpoint) {
           console.warn(
             `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
           );
           const refreshResult = await getOrStartRefresh();
           if (refreshResult.accessToken) {
-            // Retry the original request exactly once with the fresh token
-            return this._requestWithAutoRefresh<T>(endpoint, config, true);
-          } else if (refreshResult.isAuthError) {
-            // Genuine authentication failure: refresh token is invalid or revoked
-            console.error(
-              '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+            // Strip previous Authorization header so the fresh token from storage is applied
+            const retryHeaders = { ...(config.headers as Record<string, string>) };
+            delete retryHeaders[authConfig.tokenHeader];
+            delete retryHeaders['Authorization'];
+            return this._requestWithAutoRefresh<T>(
+              endpoint,
+              { ...config, headers: retryHeaders },
+              true,
             );
-            localStorage.removeItem(authConfig.tokenKey);
-            localStorage.removeItem(authConfig.refreshTokenKey);
-            localStorage.removeItem('aether_auth_user');
-            localStorage.removeItem('aether-auth-token');
-            localStorage.removeItem('auth_token');
-            window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+          } else if (refreshResult.isAuthError) {
+            if (!_authExpiredDispatched) {
+              _authExpiredDispatched = true;
+              console.error(
+                '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+              );
+              purgeAllStoredAuth();
+              window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+            }
           } else {
             console.warn(
               '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
@@ -494,23 +549,26 @@ class HttpClient {
     }
 
     // 401 Auto-Refresh Logic
-    if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth) {
+    const isAuthEndpoint = endpoint.includes('/auth/') || endpoint.includes('auth/');
+    if (response.status === 401 && !isRetryAfterRefresh && !config.skipAuth && !isAuthEndpoint) {
       console.warn(
         `[AUTH_DIAG] API_401 encountered on endpoint: ${endpoint}. Attempting automatic session refresh...`,
       );
       const refreshResult = await getOrStartRefresh();
       if (refreshResult.accessToken) {
-        return this._fetchWithAuthInternal(endpoint, config, true);
+        const retryHeaders = { ...(config.headers as Record<string, string>) };
+        delete retryHeaders[authConfig.tokenHeader];
+        delete retryHeaders['Authorization'];
+        return this._fetchWithAuthInternal(endpoint, { ...config, headers: retryHeaders }, true);
       } else if (refreshResult.isAuthError) {
-        console.error(
-          '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
-        );
-        localStorage.removeItem(authConfig.tokenKey);
-        localStorage.removeItem(authConfig.refreshTokenKey);
-        localStorage.removeItem('aether_auth_user');
-        localStorage.removeItem('aether-auth-token');
-        localStorage.removeItem('auth_token');
-        window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+        if (!_authExpiredDispatched) {
+          _authExpiredDispatched = true;
+          console.error(
+            '[AUTH_DIAG] SESSION_INVALID - Genuine auth failure. Triggering session expiration...',
+          );
+          purgeAllStoredAuth();
+          window.dispatchEvent(new CustomEvent('aether-auth-expired'));
+        }
       } else {
         console.warn(
           '[AUTH_DIAG] NETWORK_ERROR/API_5XX during refresh - Unable to refresh session.',
@@ -640,4 +698,3 @@ class HttpClient {
 }
 
 export const apiClient = new HttpClient();
-export { getOrStartRefresh };

@@ -83,4 +83,20 @@ export const ENDPOINTS = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     MARK_ALL_READ: '/notifications/read-all',
   },
+  ADMIN: {
+    LOGIN: '/admin/login',
+    MFA_VERIFY: '/admin/mfa/verify',
+    LOGOUT: '/admin/logout',
+    OVERVIEW: '/admin/overview',
+    USERS: '/admin/users',
+    USER_ROLE: (id: string) => `/admin/users/${id}/role`,
+    USER_STATUS: (id: string) => `/admin/users/${id}/status`,
+    REVOKE_SESSIONS: (id: string) => `/admin/users/${id}/revoke-sessions`,
+    EXPORT_USER: (id: string) => `/admin/users/${id}/export`,
+    AUDIT_LOGS: '/admin/audit-logs',
+    DATABASE_STATUS: '/admin/database/status',
+    TRIGGER_BACKUP: '/admin/database/backup',
+    SYSTEM_METRICS: '/admin/system-metrics',
+  },
 } as const;
+

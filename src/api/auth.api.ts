@@ -103,8 +103,19 @@ export const authApi = {
     return normalizeAuthResponse(res);
   },
 
-  logout: (config?: RequestConfig): Promise<void> =>
-    apiClient.post<void>(ENDPOINTS.AUTH.LOGOUT, {}, config),
+  logout: (config?: RequestConfig): Promise<void> => {
+    let refreshToken: string | undefined;
+    try {
+      refreshToken = localStorage.getItem('aether_refresh_token') || undefined;
+    } catch {
+      /* ignore */
+    }
+    return apiClient.post<void>(
+      ENDPOINTS.AUTH.LOGOUT,
+      { refreshToken },
+      { ...config, skipAuth: true },
+    );
+  },
 
   refreshToken: async (refreshToken: string, config?: RequestConfig): Promise<AuthApiResult> => {
     const res = await apiClient.post<any>(

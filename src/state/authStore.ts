@@ -64,6 +64,8 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem('aether_auth_user');
           localStorage.removeItem('aether-auth-token');
           localStorage.removeItem('auth_token');
+          localStorage.removeItem('aether_token');
+          localStorage.removeItem('aether-auth-storage');
           localStorage.removeItem('aether_notifications');
           localStorage.removeItem('focus-timer-history');
           localStorage.removeItem('aether_focus_history_v2');

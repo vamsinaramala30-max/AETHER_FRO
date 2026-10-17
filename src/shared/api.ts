@@ -43,15 +43,27 @@ apiClient.interceptors.request.use(
   },
 );
 
-// Response interceptor for error handling
+import { getOrStartRefresh } from '../api/client';
+
+// Response interceptor for error handling & transparent auto-refresh
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      const originalRequest = error.config;
-      // Skip auto-logout for auth endpoints themselves to avoid infinite loops
-      if (originalRequest?.url?.includes('/auth/')) {
-        return Promise.reject(error);
+      const originalRequest = error.config as (typeof error.config & { _retry?: boolean });
+      // Skip auto-refresh for auth endpoints or if already retried
+      if (originalRequest && !originalRequest.url?.includes('/auth/') && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          const refreshResult = await getOrStartRefresh();
+          if (refreshResult.accessToken) {
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers.Authorization = `Bearer ${refreshResult.accessToken}`;
+            return apiClient(originalRequest);
+          }
+        } catch {
+          // Allow error to propagate if refresh fails
+        }
       }
     }
     const err = error instanceof Error ? error : new Error(String(error));

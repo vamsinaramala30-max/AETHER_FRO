@@ -1,7 +1,7 @@
 import { authApi, AuthApiResult, UserDTO } from '../api/auth.api';
 import { authConfig } from '../config/auth.config';
 import { normalizeUserProfile } from './userProfile';
-import { ApiError } from '../api/client';
+import { ApiError, getOrStartRefresh, purgeAllStoredAuth, resetAuthExpiredFlag } from '../api/client';
 import { env } from '../config/environment';
 
 export interface AuthUser extends UserDTO {
@@ -85,21 +85,31 @@ function setStoredTokens(
   user?: AuthUser,
 ): void {
   try {
+    resetAuthExpiredFlag();
     localStorage.setItem(authConfig.tokenKey, tokens.accessToken);
     // Keep backward-compatible keys in sync
     localStorage.setItem('aether-auth-token', tokens.accessToken);
     localStorage.setItem('auth_token', tokens.accessToken);
     if (tokens.refreshToken) {
       localStorage.setItem(authConfig.refreshTokenKey, tokens.refreshToken);
-    } else {
-      try {
-        localStorage.removeItem(authConfig.refreshTokenKey);
-      } catch {
-        /* ignore */
-      }
     }
     if (user) {
       localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+    }
+    // Keep Zustand store state in sync if present
+    try {
+      const zustandStore = localStorage.getItem('aether-auth-storage');
+      if (zustandStore) {
+        const parsed = JSON.parse(zustandStore);
+        if (parsed?.state) {
+          parsed.state.token = tokens.accessToken;
+          parsed.state.isAuthenticated = true;
+          if (user) parsed.state.user = user;
+          localStorage.setItem('aether-auth-storage', JSON.stringify(parsed));
+        }
+      }
+    } catch {
+      /* ignore */
     }
   } catch (err) {
     console.error('[AuthService] Error storing tokens:', err);
@@ -107,21 +117,7 @@ function setStoredTokens(
 }
 
 function clearStoredTokens(): void {
-  const keysToRemove = [
-    authConfig.tokenKey,
-    authConfig.refreshTokenKey,
-    USER_CACHE_KEY,
-    'aether-auth-token',
-    'auth_token',
-    'aether_token',
-  ];
-  for (const key of keysToRemove) {
-    try {
-      localStorage.removeItem(key);
-    } catch {
-      /* ignore */
-    }
-  }
+  purgeAllStoredAuth();
 }
 
 function isTokenExpired(token: string): boolean {
@@ -189,15 +185,19 @@ async function refreshSessionUsingRefreshToken(
 ): Promise<{ session: AuthSession | null; error: Error | null }> {
   console.warn('[AUTH_DIAG] TOKEN_REFRESH_STARTED (authservice)');
   try {
-    const result = await authApi.refreshToken(refreshToken, { skipAuth: true });
-    if (!result.tokens?.accessToken) {
+    const refreshResult = await getOrStartRefresh();
+    if (!refreshResult.accessToken || refreshResult.isAuthError) {
       throw new Error('Refresh operation did not return a valid access token');
     }
 
-    const user = await buildUserFromResponse(result.user ? result : await authApi.getCurrentUser());
-    setStoredTokens(result.tokens, user);
+    const user = await buildUserFromResponse(await authApi.getCurrentUser());
+    const activeRefreshToken = getStoredRefreshToken() || refreshToken;
+    setStoredTokens(
+      { accessToken: refreshResult.accessToken, refreshToken: activeRefreshToken },
+      user,
+    );
 
-    const session = createSession(user, result.tokens.accessToken, result.tokens.refreshToken);
+    const session = createSession(user, refreshResult.accessToken, activeRefreshToken);
     currentSession = session;
     notifyListeners('TOKEN_REFRESHED', session);
     console.warn('[AUTH_DIAG] TOKEN_REFRESH_SUCCESS (authservice)');
@@ -248,6 +248,31 @@ async function resolveSession(): Promise<{ session: AuthSession | null; error: E
       console.warn('[AUTH_DIAG] AUTH_RESTORED - Session active with valid access token');
       return { session, error: null };
     } catch (error: unknown) {
+      const isAuthError =
+        error instanceof ApiError &&
+        (error.status === 401 ||
+          error.status === 403 ||
+          error.code === 'REVOKED_TOKEN' ||
+          error.code === 'UNAUTHORIZED' ||
+          error.code === 'USER_NOT_FOUND');
+
+      if (isAuthError) {
+        console.warn(
+          '[AUTH_DIAG] Access token rejected by server (REVOKED_TOKEN/401). Attempting session refresh...',
+        );
+        if (refreshToken) {
+          return await refreshSessionUsingRefreshToken(refreshToken);
+        }
+        console.warn('[AUTH_DIAG] SESSION_INVALID - Token revoked and no refresh token available');
+        clearStoredTokens();
+        currentSession = null;
+        notifyListeners('TOKEN_EXPIRED', null);
+        return {
+          session: null,
+          error: error instanceof Error ? error : new Error('Session invalidated'),
+        };
+      }
+
       if (cachedUser) {
         console.warn(
           '[AUTH_DIAG] NETWORK_ERROR/API_5XX on getCurrentUser - Restoring session from cached profile',
@@ -345,12 +370,12 @@ export const authService = {
     window.location.href = `${rawBaseUrl}/api/auth/google`;
   },
 
-  async handleGoogleCallbackToken(token: string): Promise<AuthResponse> {
+  async handleGoogleCallbackToken(token: string, refreshToken?: string): Promise<AuthResponse> {
     try {
-      setStoredTokens({ accessToken: token });
+      setStoredTokens({ accessToken: token, refreshToken: refreshToken || undefined });
       const user = await buildUserFromResponse(await authApi.getCurrentUser());
-      setStoredTokens({ accessToken: token }, user);
-      const session = createSession(user, token);
+      setStoredTokens({ accessToken: token, refreshToken: refreshToken || undefined }, user);
+      const session = createSession(user, token, refreshToken || undefined);
       notifyListeners('SIGNED_IN', session);
       return { user, error: null };
     } catch (error: unknown) {
