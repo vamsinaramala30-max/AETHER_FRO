@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NotificationPreferencesData, notificationService } from './notificationservice';
-import { Bell, ShieldAlert, Cpu, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Bell, ShieldAlert, Cpu, CheckCircle2, RefreshCw, Smartphone } from 'lucide-react';
+import { pushManager } from '@/lib/pushManager';
 
 interface NotificationPreferencesProps {
   initialData: NotificationPreferencesData;
@@ -12,6 +13,16 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
   const [prefs, setPrefs] = useState<NotificationPreferencesData>(initialData);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [pushStatus, setPushStatus] = useState<{ isSupported: boolean; isSubscribed: boolean; permission: NotificationPermission }>({
+    isSupported: true,
+    isSubscribed: false,
+    permission: 'default',
+  });
+  const [isSubscribingPush, setIsSubscribingPush] = useState(false);
+
+  useEffect(() => {
+    pushManager.getStatus().then(setPushStatus).catch(() => {});
+  }, []);
 
   const handleToggle = (key: keyof NotificationPreferencesData) => {
     const updated = { ...prefs, [key]: !prefs[key] };
@@ -32,6 +43,26 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       .finally(() => {
         setIsSaving(false);
       });
+  };
+
+  const handleEnablePush = async () => {
+    setIsSubscribingPush(true);
+    try {
+      const ok = await pushManager.subscribe();
+      if (ok) {
+        const updated = { ...prefs, pushNotifications: true, browserNotifications: true };
+        setPrefs(updated);
+        await notificationService.updatePreferences(updated);
+        const status = await pushManager.getStatus();
+        setPushStatus(status);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error('[NotificationPreferences] Failed to subscribe to push:', err);
+    } finally {
+      setIsSubscribingPush(false);
+    }
   };
 
   const renderToggleRow = (
@@ -101,6 +132,47 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
             'Browser Notifications',
             'Display desktop notification banners when tab is active.',
           )}
+          <div className="flex items-center justify-between border-b border-slate-100 py-3 last:border-b-0 dark:border-slate-800/60">
+            <div className="pr-4">
+              <div className="flex items-center gap-1.5">
+                <Smartphone className="h-3.5 w-3.5 text-indigo-500" />
+                <h5 className="text-xs font-bold text-slate-900 dark:text-white">Web Push Notifications</h5>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Receive background push notifications even when the browser tab is closed.
+              </p>
+              {pushStatus.isSupported && (
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-[10px] text-slate-400">
+                    Status: {pushStatus.isSubscribed ? 'Subscribed on this device' : pushStatus.permission === 'denied' ? 'Permission Blocked' : 'Not subscribed'}
+                  </span>
+                  {!pushStatus.isSubscribed && pushStatus.permission !== 'denied' && (
+                    <button
+                      type="button"
+                      disabled={isSubscribingPush}
+                      onClick={handleEnablePush}
+                      className="rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                    >
+                      {isSubscribingPush ? 'Registering...' : 'Enable on this device'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => handleToggle('pushNotifications')}
+              className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                prefs.pushNotifications ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  prefs.pushNotifications ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
