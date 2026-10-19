@@ -185,6 +185,25 @@
   box-shadow: 0 0 6px #38bdf8;
 }
 
+.ya-notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #6366f1;
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(5, 8, 20, 0.9);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+
 .ya-user-btn {
   display: flex;
   align-items: center;
@@ -269,6 +288,27 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.ya-dropdown-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ya-header-action-btn {
+  font-size: 0.6875rem;
+  background: none;
+  border: none;
+  color: #818cf8;
+  cursor: pointer;
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.ya-header-action-btn:hover {
+  color: #c7d2fe;
+}
+
 .ya-badge-count {
   font-size: 0.6875rem;
   background: rgba(56, 189, 248, 0.15);
@@ -276,11 +316,19 @@
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .ya-dropdown-list {
-  max-height: 240px;
+  max-height: 280px;
   overflow-y: auto;
+}
+
+.ya-dropdown-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #64748b;
 }
 
 .ya-dropdown-item {
@@ -288,7 +336,22 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: background 0.15s;
 }
+
+.ya-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ya-dropdown-item--unread {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.ya-dropdown-item--unread:hover {
+  background: rgba(99, 102, 241, 0.14);
+}
+
 .ya-dropdown-item:last-child {
   border-bottom: none;
 }
@@ -956,6 +1019,91 @@
 .ya-feature-banner:hover .ya-feature-banner-btn {
   background: rgba(56, 189, 248, 0.25);
   transform: translateX(2px);
+}
+
+/* ── Database & Workspace Search Results ─────────────────────────────────── */
+.ya-db-section {
+  margin-bottom: 2rem;
+}
+
+.ya-db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 0.875rem;
+}
+
+.ya-db-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.ya-db-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 12px rgba(99, 102, 241, 0.15);
+}
+
+.ya-db-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.ya-type-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.ya-type-badge--note { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+.ya-type-badge--task { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+.ya-type-badge--project { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+.ya-type-badge--file { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3); }
+.ya-type-badge--calendar { background: rgba(236, 72, 153, 0.15); color: #f472b6; border-color: rgba(236, 72, 153, 0.3); }
+.ya-type-badge--workspace { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border-color: rgba(14, 165, 233, 0.3); }
+.ya-type-badge--automation { background: rgba(249, 115, 22, 0.15); color: #fb923c; border-color: rgba(249, 115, 22, 0.3); }
+
+.ya-db-card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.25rem;
+}
+
+.ya-db-card-snippet {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.ya-db-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #818cf8;
+  margin-top: 0.5rem;
 }
 
 /* ── Empty Search State ──────────────────────────────────────────────────── */

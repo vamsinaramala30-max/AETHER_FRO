@@ -55,12 +55,15 @@ import {
   CreditCard,
   Activity,
   ClipboardList,
+  Loader2,
 } from 'lucide-react';
 
 import { useAuth } from '@/app/providers/authprovider';
 import { normalizeUserProfile } from '@/auth/userProfile';
 import { AetherSymbol } from '@/components/branding/AetherLogo';
 import { useLastSession, useSessionTracker } from '@/your-aether/useLastSession';
+import { apiClient } from '@/api/client';
+import { useNotificationStore } from '@/state/notificationStore';
 import './your-aether.css';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,6 +87,16 @@ interface CompactCardData {
   href: string;
   icon: React.ReactNode;
   iconBg: string;
+}
+
+interface BackendSearchResult {
+  id: string;
+  type: string;
+  title: string;
+  snippet: string;
+  score: number;
+  href?: string;
+  metadata?: Record<string, unknown>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -499,6 +512,18 @@ export const YourAetherPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Real Notifications Store
+  const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead } =
+    useNotificationStore();
+
+  useEffect(() => {
+    void fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Backend Search State
+  const [backendResults, setBackendResults] = useState<BackendSearchResult[]>([]);
+  const [isSearchingBackend, setIsSearchingBackend] = useState(false);
+
   // Dropdown states
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -543,6 +568,39 @@ export const YourAetherPage: React.FC = () => {
 
   const query = searchQuery.trim().toLowerCase();
 
+  // Debounced backend global search
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed || trimmed.length < 2) {
+      setBackendResults([]);
+      setIsSearchingBackend(false);
+      return;
+    }
+
+    setIsSearchingBackend(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await apiClient.get<any>(`/search?q=${encodeURIComponent(trimmed)}&limit=10`);
+        const payload = res?.data || res;
+        const items: BackendSearchResult[] = Array.isArray(payload?.results)
+          ? payload.results
+          : Array.isArray(payload?.data?.results)
+            ? payload.data.results
+            : Array.isArray(payload)
+              ? payload
+              : [];
+        setBackendResults(items);
+      } catch (err) {
+        console.warn('[YourAether] Backend search query failed:', err);
+        setBackendResults([]);
+      } finally {
+        setIsSearchingBackend(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const filterItems = <T extends { name: string; description: string }>(items: T[]): T[] => {
     if (!query) return items;
     return items.filter(
@@ -564,14 +622,6 @@ export const YourAetherPage: React.FC = () => {
     filteredCognitiveTools.length +
     filteredMoreModules.length +
     filteredSettingsModules.length;
-
-  // Search result matches from all modules (for search-only flat view)
-  const searchResults = useMemo(() => {
-    if (!query) return [];
-    return allModules.filter(
-      (a) => a.name.toLowerCase().includes(query) || a.description.toLowerCase().includes(query),
-    );
-  }, [query, allModules]);
 
   return (
     <div className="ya-page">
@@ -635,36 +685,71 @@ export const YourAetherPage: React.FC = () => {
               title="Notifications"
             >
               <Bell className="h-4 w-4" />
-              <span className="ya-notif-dot" />
+              {unreadCount > 0 ? (
+                <span className="ya-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              ) : (
+                <span className="ya-notif-dot" />
+              )}
             </button>
 
             {showNotifications && (
               <div className="ya-dropdown ya-dropdown--notifications" role="dialog" aria-label="Notifications">
                 <div className="ya-dropdown-header">
-                  <span>Notifications</span>
-                  <Link
-                    to="/ya/settings/notifications"
-                    className="ya-badge-count"
-                    onClick={() => setShowNotifications(false)}
-                  >
-                    View all
-                  </Link>
+                  <span>Notifications {unreadCount > 0 ? `(${unreadCount})` : ''}</span>
+                  <div className="ya-dropdown-header-actions">
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => markAllAsRead()}
+                        className="ya-header-action-btn"
+                        title="Mark all notifications as read"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                    <Link
+                      to="/ya/settings/notifications"
+                      className="ya-badge-count"
+                      onClick={() => setShowNotifications(false)}
+                    >
+                      View all
+                    </Link>
+                  </div>
                 </div>
                 <div className="ya-dropdown-list">
-                  <div className="ya-dropdown-item">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                    <div>
-                      <p className="ya-item-title">Welcome to YOUR AETHER</p>
-                      <p className="ya-item-time">Concept 1 "The Core" experience activated</p>
+                  {notifications.length === 0 ? (
+                    <div className="ya-dropdown-empty">
+                      <p>No notifications yet</p>
                     </div>
-                  </div>
-                  <div className="ya-dropdown-item">
-                    <Sparkles className="h-4 w-4 text-purple-400 shrink-0" />
-                    <div>
-                      <p className="ya-item-title">AI Assistant ready</p>
-                      <p className="ya-item-time">Chat, generate prompts, and automate workflows</p>
-                    </div>
-                  </div>
+                  ) : (
+                    notifications.slice(0, 6).map((item) => (
+                      <div
+                        key={item.id}
+                        className={`ya-dropdown-item ${!item.read ? 'ya-dropdown-item--unread' : ''}`}
+                        onClick={() => {
+                          if (!item.read) markAsRead(item.id);
+                          if (item.link) {
+                            setShowNotifications(false);
+                            navigate(item.link);
+                          }
+                        }}
+                      >
+                        {item.type === 'ai' ? (
+                          <Sparkles className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                        ) : item.type === 'project' || item.type === 'calendar' ? (
+                          <Calendar className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                        ) : item.type === 'automation' ? (
+                          <Zap className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="ya-item-title truncate">{item.title}</p>
+                          <p className="ya-item-time">{item.description || item.time}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
                 <Link
                   to="/ya/settings/notifications"
@@ -809,8 +894,17 @@ export const YourAetherPage: React.FC = () => {
         {searchQuery && (
           <div className="ya-search-status" role="status" aria-live="polite">
             <span>
-              Found <strong>{totalResults}</strong> {totalResults === 1 ? 'module' : 'modules'} matching &ldquo;{searchQuery}&rdquo;
+              Found <strong>{totalResults}</strong> {totalResults === 1 ? 'module' : 'modules'}
+              {backendResults.length > 0 && (
+                <> and <strong>{backendResults.length}</strong> workspace {backendResults.length === 1 ? 'record' : 'records'}</>
+              )}{' '}
+              matching &ldquo;{searchQuery}&rdquo;
             </span>
+            {isSearchingBackend && (
+              <span className="ya-db-status">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching workspace database...
+              </span>
+            )}
             <button
               type="button"
               onClick={() => setSearchQuery('')}
@@ -819,6 +913,41 @@ export const YourAetherPage: React.FC = () => {
               Clear filter
             </button>
           </div>
+        )}
+
+        {/* ── Section: Workspace & Database Search Results ───────────────── */}
+        {searchQuery && backendResults.length > 0 && (
+          <section className="ya-section ya-db-section" aria-label="Workspace Search Results">
+            <div className="ya-section-header">
+              <div className="ya-section-icon ya-section-icon--blue">
+                <Search className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="ya-section-title">Workspace Records</h2>
+                <p className="ya-section-subtitle">
+                  Live database results matching &ldquo;{searchQuery}&rdquo;
+                </p>
+              </div>
+            </div>
+            <div className="ya-db-grid">
+              {backendResults.map((item) => (
+                <Link
+                  key={`${item.type}-${item.id}`}
+                  to={item.href || `/ya/knowledge/search`}
+                  className="ya-db-card"
+                >
+                  <div className="ya-db-card-header">
+                    <span className={`ya-type-badge ya-type-badge--${item.type.toLowerCase()}`}>
+                      {item.type}
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
+                  </div>
+                  <h4 className="ya-db-card-title">{item.title}</h4>
+                  {item.snippet && <p className="ya-db-card-snippet">{item.snippet}</p>}
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* ── Section 1: Main Apps ────────────────────────────────────── */}
@@ -984,12 +1113,12 @@ export const YourAetherPage: React.FC = () => {
           </section>
         )}
 
-        {/* Empty state when search produces no items */}
-        {searchQuery && totalResults === 0 && (
+        {/* Empty state when search produces no items in modules or database */}
+        {searchQuery && totalResults === 0 && backendResults.length === 0 && !isSearchingBackend && (
           <div className="ya-empty-state" role="status">
             <Search className="h-8 w-8 text-slate-500 mb-2" aria-hidden="true" />
-            <h3>No modules found</h3>
-            <p>No tools matched &ldquo;{searchQuery}&rdquo;. Try another search term.</p>
+            <h3>No results found</h3>
+            <p>No modules or workspace records matched &ldquo;{searchQuery}&rdquo;. Try another search term.</p>
             <button
               type="button"
               onClick={() => setSearchQuery('')}

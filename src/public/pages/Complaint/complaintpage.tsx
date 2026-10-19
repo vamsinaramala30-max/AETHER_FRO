@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PublicPageLayout } from '../../components/publicpagelayout';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ShieldAlert, ArrowRight, HelpCircle, FileText } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ShieldAlert, ArrowRight, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/app/providers/authprovider';
 
 export type ComplaintCategory =
@@ -154,10 +154,12 @@ export const ComplaintPage: React.FC = () => {
     const complaintUrl = `${apiBase.replace(/\/+$/, '')}/complaint`;
 
     try {
+      const idempotencyKey = `cmp:${formData.email.trim().toLowerCase()}:${Date.now().toString(36)}`;
       const response = await fetch(complaintUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-idempotency-key': idempotencyKey,
         },
         body: JSON.stringify({
           fullName: formData.fullName.trim(),
